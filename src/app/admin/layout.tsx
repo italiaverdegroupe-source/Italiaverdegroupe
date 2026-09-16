@@ -18,6 +18,7 @@ const NAV = [
   { href: '/admin/orders', label: 'Orders' },
   { href: '/admin/shipments', label: 'Shipments' },
   { href: '/admin/finance', label: 'Finance' },
+  { href: '/admin/reports', label: 'Reports' },
   { href: '/admin/settings', label: 'Settings' },
 ];
 

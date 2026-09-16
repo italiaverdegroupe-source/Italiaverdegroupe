@@ -268,3 +268,31 @@ nobody answers is worse than none.
 
 If the database is unreachable the compiled defaults are used rather than
 throwing: a settings outage must not take the public site down with it.
+
+## Phase 2g — reports
+
+One query per question a manager actually asks, from the brief's own list:
+
+| Question | Answer |
+| --- | --- |
+| Which trees make money? | units, revenue, landed cost, profit, margin per reference |
+| Which channel generates revenue? | lead → quote → order → **money**, per source |
+| Who buys, and who returns? | revenue per customer, repeat flagged |
+| Where is the money? | revenue per emirate |
+| Who converts? | quotations, accepted, conversion rate, value won |
+| What is stuck? | stock held over 90 days, with what it cost |
+| What is coming? | inbound shipments, and whether the permit still covers them |
+| How much cash is tied up? | landed cost of everything not yet sold |
+
+Figures come from the snapshots stored on each document — the price quoted, the
+landed cost at the time — so a report of last quarter still reads as last
+quarter rather than being re-derived from today's numbers.
+
+Deliberately tables rather than charts: "which trees make money" needs a margin
+to one decimal, not a doughnut. The worked example in the test is the point —
+the ancient olive sells for AED 38,000, costs AED 35,054 landed, and returns
+**7.8%**. That is a number to act on.
+
+```bash
+# figures are checked against independently computed SQL, not eyeballed
+```
