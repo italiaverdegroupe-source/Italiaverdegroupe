@@ -1,121 +1,148 @@
+import map from '@/data/map.json';
+
 /**
- * Italy → UAE sourcing route.
+ * The Italy → UAE sourcing route, drawn on real geography.
  *
- * Deliberately inline SVG + CSS only: no map library, no Lottie, no canvas.
- * The whole thing is a few KB of markup, ships zero JavaScript, and never
- * blocks the hero copy from painting. Motion is disabled for anyone who
- * asked their OS for reduced motion.
+ * Coastlines come from Natural Earth (via world-atlas), projected to Mercator
+ * at build time and baked into `map.json` — 23 KB of path data, no map library,
+ * no tiles, no API key, and nothing to fetch at runtime. Motion is pure CSS and
+ * stops entirely for anyone who asked their OS for reduced motion.
  */
-export default function RouteMap({ className = '' }: { className?: string }) {
+const P = map.points;
+const ORIGINS = [
+  { key: 'lombardia', label: 'Lombardia', at: P.lombardia },
+  { key: 'toscana', label: 'Toscana', at: P.toscana },
+  { key: 'puglia', label: 'Puglia', at: P.puglia },
+  { key: 'sicilia', label: 'Sicilia', at: P.sicilia },
+] as const;
+
+// One sweeping arc from the middle of the growing regions to the Gulf.
+const START = P.toscana;
+const END = P.dubai;
+const ARC = `M ${START[0]} ${START[1]} Q ${(START[0] + END[0]) / 2} ${Math.min(START[1], END[1]) - 150} ${END[0]} ${END[1]}`;
+
+export default function RouteMap() {
   return (
-    <div className={`route ${className}`} aria-hidden="true">
-      <svg viewBox="0 0 820 360" role="presentation" focusable="false">
+    <figure className="map">
+      <svg viewBox={`0 0 ${map.width} ${map.height}`} role="img"
+           aria-label="Sourcing route from nurseries in Lombardia, Toscana, Puglia and Sicilia to the United Arab Emirates">
         <defs>
-          <linearGradient id="arc" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#D4B87C" />
-            <stop offset="55%" stopColor="#B08D4F" />
-            <stop offset="100%" stopColor="#7C9B6F" />
+          <linearGradient id="routeGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#4B7340" />
+            <stop offset="50%" stopColor="#B08D4F" />
+            <stop offset="100%" stopColor="#C8823C" />
           </linearGradient>
-          <radialGradient id="glow">
-            <stop offset="0%" stopColor="#D4B87C" stopOpacity=".55" />
-            <stop offset="100%" stopColor="#D4B87C" stopOpacity="0" />
+          <radialGradient id="pinGlow">
+            <stop offset="0%" stopColor="#B08D4F" stopOpacity=".5" />
+            <stop offset="100%" stopColor="#B08D4F" stopOpacity="0" />
           </radialGradient>
         </defs>
 
-        {/* graticule — a hint of globe, not a map that pretends to be accurate */}
-        <g className="grat" stroke="currentColor" fill="none" strokeWidth="1">
-          {[70, 130, 190, 250, 310].map((y) => (
-            <path key={y} d={`M 20 ${y} Q 410 ${y - 34} 800 ${y}`} />
-          ))}
-          {[120, 260, 400, 540, 680].map((x) => (
-            <path key={x} d={`M ${x} 26 Q ${x + (410 - x) * 0.13} 180 ${x} 334`} />
-          ))}
+        <rect className="sea" width={map.width} height={map.height} />
+        <path className="land" d={map.land} />
+        <path className="italy" d={map.italy} />
+        <path className="uae" d={map.uae} />
+
+        <path className="route" d={ARC} />
+
+        {/* a specimen travelling the route */}
+        <g className="cargo">
+          <animateMotion dur="7s" repeatCount="indefinite" path={ARC}
+                         calcMode="spline" keyPoints="0;1" keyTimes="0;1"
+                         keySplines="0.42 0 0.25 1" />
+          <circle r="20" fill="url(#pinGlow)" />
+          <g transform="translate(-9,-9) scale(0.75)">
+            <path className="cargo-tree"
+                  d="M12 23V14M12 15c0-5.2 3.6-9.4 8.2-9.4.5 4.6-2.8 9.4-8.2 9.4Zm0 4.6c-4 0-7-3.3-7-7.3 3.5.4 7 3.4 7 7.3Z" />
+          </g>
         </g>
 
-        {/* the flight path */}
-        <path id="arcpath" className="arc" d="M 168 214 Q 410 44 664 172"
-              fill="none" stroke="url(#arc)" strokeWidth="2.5" strokeLinecap="round" />
+        {ORIGINS.map((o, i) => (
+          <g key={o.key} className="origin" style={{ animationDelay: `${0.3 + i * 0.18}s` }}
+             transform={`translate(${o.at[0]} ${o.at[1]})`}>
+            <circle className="ring" r="7" />
+            <circle className="dot" r="3.4" />
+            <text className="lbl" x="11" y="4">{o.label}</text>
+          </g>
+        ))}
 
-        {/* travelling marker */}
-        <g className="pip">
-          <animateMotion dur="5.5s" repeatCount="indefinite" keyPoints="0;1"
-                         keyTimes="0;1" calcMode="spline" keySplines="0.45 0 0.2 1"
-                         path="M 168 214 Q 410 44 664 172" />
-          <circle r="16" fill="url(#glow)" />
-          <circle r="4.5" fill="#FBF9F4" />
+        <g className="dest" transform={`translate(${P.dubai[0]} ${P.dubai[1]})`}>
+          <circle className="halo" r="11" />
+          <circle className="dot dest-dot" r="5" />
+          <text className="lbl dest-lbl" x="0" y="-20" textAnchor="middle">UNITED ARAB EMIRATES</text>
+          <text className="sub" x="0" y="-6" textAnchor="middle">all seven emirates</text>
         </g>
 
-        {/* origin — Italy */}
-        <g className="node origin" transform="translate(168 214)">
-          <circle className="halo" r="9" />
-          <circle r="5.5" />
-          <text x="0" y="34" textAnchor="middle" className="label">ITALIA</text>
-          <text x="0" y="52" textAnchor="middle" className="sub">Toscana · Puglia · Sicilia</text>
-        </g>
-
-        {/* destination — UAE */}
-        <g className="node dest" transform="translate(664 172)">
-          <circle className="halo" r="9" />
-          <circle r="5.5" />
-          <text x="0" y="34" textAnchor="middle" className="label">UNITED ARAB EMIRATES</text>
-          <text x="0" y="52" textAnchor="middle" className="sub">All seven emirates</text>
-        </g>
+        <text className="flag" x={P.toscana[0] - 6} y={P.toscana[1] - 64}>ITALY</text>
       </svg>
 
       <style>{`
-        .route { width: 100%; color: rgb(255 255 255 / .16); }
-        .route svg { width: 100%; height: auto; overflow: visible; }
+        .map { margin: 0; width: 100%; }
+        .map svg { width: 100%; height: auto; display: block; }
 
-        .grat path { stroke-dasharray: 2 7; opacity: .75; }
+        .sea   { fill: #EFEADF; }
+        .land  { fill: #DCD2BC; stroke: #CFC2A6; stroke-width: 1; }
+        .italy { fill: #3C6033; stroke: #2E4A28; stroke-width: 1.2; }
+        .uae   { fill: #B8873C; stroke: #96773B; stroke-width: 1.2; }
 
-        .arc {
-          stroke-dasharray: 700;
-          stroke-dashoffset: 700;
-          animation: draw 2.6s cubic-bezier(.45,0,.2,1) .35s forwards;
+        .route {
+          fill: none; stroke: url(#routeGrad); stroke-width: 3.2;
+          stroke-linecap: round; stroke-dasharray: 10 9;
+          stroke-dashoffset: 1600;
+          animation: trace 3s cubic-bezier(.4,0,.2,1) .4s forwards;
         }
-        @keyframes draw { to { stroke-dashoffset: 0; } }
+        @keyframes trace { to { stroke-dashoffset: 0; } }
 
-        .pip { opacity: 0; animation: fade .6s ease 2.6s forwards; }
-        @keyframes fade { to { opacity: 1; } }
+        .cargo { opacity: 0; animation: appear .5s ease 2.4s forwards; }
+        .cargo-tree { fill: none; stroke: #2E4A28; stroke-width: 2.1;
+                      stroke-linecap: round; stroke-linejoin: round; }
 
-        .node circle { fill: #FBF9F4; }
-        .node .halo {
-          fill: none; stroke: #D4B87C; stroke-width: 1.5;
+        .origin, .dest { opacity: 0; animation: appear .5s ease forwards; }
+        .dest { animation-delay: 3.1s; }
+
+        .dot  { fill: #2E4A28; }
+        .ring { fill: none; stroke: #3C6033; stroke-width: 1.6; opacity: .55; }
+        .dest-dot { fill: #8A5A1E; }
+        .halo {
+          fill: none; stroke: #B8873C; stroke-width: 2;
           transform-origin: center; transform-box: fill-box;
-          animation: pulse 3s ease-in-out infinite;
+          animation: pulse 2.6s ease-in-out 3.3s infinite;
         }
-        .dest .halo { animation-delay: 1.5s; }
         @keyframes pulse {
-          0%, 100% { opacity: .9; transform: scale(1); }
-          50%      { opacity: .25; transform: scale(1.75); }
+          0%,100% { opacity: .9; transform: scale(1); }
+          55%     { opacity: 0;  transform: scale(2.3); }
         }
+        @keyframes appear { to { opacity: 1; } }
 
-        .node { opacity: 0; animation: fade .7s ease forwards; }
-        .origin { animation-delay: .2s; }
-        .dest   { animation-delay: 2.5s; }
-
-        .label {
+        .lbl {
           font-family: var(--font-inter), system-ui, sans-serif;
-          font-size: 11px; font-weight: 600; letter-spacing: .14em;
-          fill: #FBF9F4;
+          font-size: 15px; font-weight: 600; fill: #24361F; letter-spacing: .02em;
         }
+        .dest-lbl { font-size: 15px; letter-spacing: .13em; fill: #6B4715; }
         .sub {
           font-family: var(--font-inter), system-ui, sans-serif;
-          font-size: 10px; letter-spacing: .04em; fill: rgb(251 249 244 / .6);
+          font-size: 13px; fill: #7A6440;
+        }
+        .flag {
+          font-family: var(--font-fraunces), serif;
+          font-size: 34px; fill: #2E4A28; letter-spacing: .16em; opacity: .28;
         }
 
-        @media (max-width: 640px) {
-          .label { font-size: 13px; }
-          .sub   { font-size: 12px; }
+        @media (max-width: 720px) {
+          .lbl { font-size: 24px; }
+          .dest-lbl { font-size: 22px; }
+          .sub { font-size: 20px; }
+          .flag { font-size: 46px; }
+          .route { stroke-width: 5; }
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .arc  { stroke-dashoffset: 0; animation: none; }
-          .node, .pip { opacity: 1; animation: none; }
+          .route { stroke-dashoffset: 0; animation: none; }
+          .origin, .dest { opacity: 1; animation: none; }
           .halo { animation: none; opacity: .5; }
-          .pip  { display: none; }
+          .cargo { display: none; }
         }
       `}</style>
-    </div>
+    </figure>
   );
 }

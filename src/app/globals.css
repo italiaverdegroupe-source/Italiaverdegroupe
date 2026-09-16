@@ -21,11 +21,17 @@
   --brass-500: #B08D4F;
   --brass-300: #D4B87C;
 
+  /* warmth, so the page is not green-on-green from top to bottom */
+  --terra-700: #8A4A2B;
+  --terra-500: #C8823C;
+  --terra-200: #F0D9C2;
+
   --ink:      #191A16;
   --ink-soft: #4A4C43;
   --ink-mute: #7A7C70;
 
-  --bg:        var(--sand-50);
+  --bg:        #FFFFFF;
+  --bg-warm:   var(--sand-50);
   --bg-raised: #FFFFFF;
   --fg:        var(--ink);
   --fg-soft:   var(--ink-soft);
@@ -125,6 +131,12 @@ img, svg { max-width: 100%; display: block; }
 .cols-4 { grid-template-columns: repeat(auto-fill, minmax(216px, 1fr)); }
 
 .rule { height: 1px; background: var(--line); border: 0; margin: 0; }
+
+/* full-bleed photography band */
+.bleed { position: relative; isolation: isolate; overflow: clip; }
+.bleed > img,
+.bleed picture img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+.bleed::after { content: ''; position: absolute; inset: 0; z-index: -1; }
 
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; overflow: hidden;

@@ -5,11 +5,13 @@ import ProductCard from '@/components/ProductCard';
 import { site } from '@/lib/site';
 import { getAllProducts, getShowcaseProducts, getFamilies } from '@/lib/products';
 
+const HERO_IMG = '/products/VG-OL-002-olive-tree-cloud-style.jpg';
+const BAND_IMG = '/products/VG-OL-007-olive-tree-ancient.jpg';
+
 export default function HomePage() {
   const families = getFamilies();
   const all = getAllProducts();
   const showcase = getShowcaseProducts();
-  // one representative from each family, then fill up to eight
   const featured = [
     ...families.map((f) => showcase.find((p) => p.family === f.name)!).filter(Boolean),
     ...showcase.filter((p) => p.family === 'Olive Trees').slice(1, 3),
@@ -17,95 +19,86 @@ export default function HomePage() {
 
   return (
     <>
-      {/* ---------------- hero ---------------- */}
+      {/* ───────────── hero: the trees do the talking ───────────── */}
       <section className="hero">
+        <Image src={HERO_IMG} alt="" fill priority sizes="100vw" className="hero-bg" />
+        <div className="hero-veil" />
         <div className="wrap hero-in">
-          <div className="hero-copy">
-            <p className="eyebrow hero-eyebrow">Italy → United Arab Emirates</p>
-            <h1>
-              Italian trees.<br />
-              Delivered across<br />
-              the Emirates.
-            </h1>
-            <p className="hero-lede">
-              We import specimen olive trees, palms and architectural plants direct from
-              nurseries in {site.sourcingRegions.slice(0, 3).join(', ')} — for landscaping
-              contractors, developers, hotels and private estates throughout the UAE.
-            </p>
-            <div className="hero-cta">
-              <Link href="/catalog" className="btn btn-primary">Browse the catalogue</Link>
-              <Link href="/quote" className="btn btn-light">Request a quote</Link>
-            </div>
-          </div>
-
-          <div className="hero-map">
-            <RouteMap />
-          </div>
-        </div>
-
-        <div className="wrap">
-          <ul className="trust">
-            <li><strong>{all.length}</strong><span>specimens catalogued</span></li>
-            <li><strong>{site.leadTimeWeeks.min}–{site.leadTimeWeeks.max} wks</strong><span>typical lead time</span></li>
-            <li><strong>7</strong><span>emirates covered</span></li>
-            <li><strong>Direct</strong><span>from Italian nurseries</span></li>
-          </ul>
-        </div>
-      </section>
-
-      {/* ---------------- what we do ---------------- */}
-      <section className="section">
-        <div className="wrap">
-          <p className="eyebrow">What we do</p>
-          <h2>Sourcing, import and delivery — handled end to end.</h2>
-          <p className="lede">
-            Trees are living stock, not freight. Every consignment is selected at the
-            nursery, documented for import, acclimatised on arrival and delivered to site
-            with the right equipment.
+          <p className="hero-kicker">Italy&nbsp;&nbsp;→&nbsp;&nbsp;United Arab Emirates</p>
+          <h1>
+            Ancient Italian olives.<br />
+            Planted in the Emirates.
+          </h1>
+          <p className="hero-lede">
+            Specimen olive trees, palms and architectural plants selected at nurseries in
+            {' '}{site.sourcingRegions.join(', ')} — supplied to landscaping contractors,
+            developers, hotels and private estates across the UAE.
           </p>
-
-          <div className="grid cols-2 pillars">
-            {[
-              ['Direct nursery sourcing',
-               `Selected in person from growers across ${site.sourcingRegions.join(', ')} — not resold from a middleman.`],
-              ['Import & documentation',
-               'Phytosanitary certification, import permits and customs clearance handled as part of the supply.'],
-              ['Acclimatisation',
-               'Stock is held and conditioned on arrival before it goes to site, so trees establish rather than struggle.'],
-              ['Delivery & planting',
-               'Supply only, supply and delivery, or full supply, delivery and planting — including crane and offloading.'],
-            ].map(([t, d]) => (
-              <article key={t} className="pillar">
-                <h3>{t}</h3>
-                <p>{d}</p>
-              </article>
-            ))}
+          <div className="hero-cta">
+            <Link href="/catalog" className="btn btn-primary btn-lg">Browse {all.length} specimens</Link>
+            <Link href="/quote" className="btn btn-light btn-lg">Request a quote</Link>
           </div>
+        </div>
+
+        <ul className="trust">
+          <li><strong>{all.length}</strong><span>specimens catalogued</span></li>
+          <li><strong>4</strong><span>Italian growing regions</span></li>
+          <li><strong>7</strong><span>emirates covered</span></li>
+          <li><strong>{site.leadTimeWeeks.min}–{site.leadTimeWeeks.max}</strong><span>weeks lead time</span></li>
+        </ul>
+      </section>
+
+      {/* ───────────── the route, on real geography ───────────── */}
+      <section className="section route-sec">
+        <div className="wrap">
+          <div className="route-head">
+            <div>
+              <p className="eyebrow">Where they come from</p>
+              <h2>From four Italian regions to every emirate.</h2>
+            </div>
+            <p className="route-note">
+              We buy at the nursery, not from a middleman. Each consignment is inspected,
+              documented for import, and acclimatised here before it ever reaches a site.
+            </p>
+          </div>
+          <RouteMap />
+          <ol className="journey">
+            {[
+              ['Selected', 'At the grower, tree by tree, against your specification.'],
+              ['Documented', 'Phytosanitary certification, import permits, customs.'],
+              ['Acclimatised', 'Conditioned on arrival so it establishes, not struggles.'],
+              ['Planted', 'Delivered with crane and offloading, planted if you want it.'],
+            ].map(([t, d], i) => (
+              <li key={t}>
+                <span className="j-num">{String(i + 1).padStart(2, '0')}</span>
+                <strong>{t}</strong>
+                <span className="j-d">{d}</span>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
-      {/* ---------------- collections ---------------- */}
-      <section className="section band">
+      {/* ───────────── collections ───────────── */}
+      <section className="section warm">
         <div className="wrap">
           <div className="head-row">
             <div>
               <p className="eyebrow">The catalogue</p>
-              <h2>Collections</h2>
+              <h2>Six collections</h2>
             </div>
-            <Link href="/catalog" className="btn btn-ghost">View all {all.length} specimens</Link>
+            <Link href="/catalog" className="btn btn-ghost">View all {all.length}</Link>
           </div>
-
-          <div className="grid cols-3 coll">
-            {families.map((f) => (
-              <Link key={f.slug} href={`/collections/${f.slug}`} className="coll-card">
-                <div className="coll-img">
-                  <Image src={`/products/${f.cover}`} alt="" width={1388} height={861}
-                         sizes="(max-width: 640px) 100vw, 380px" />
-                </div>
-                <div className="coll-body">
+          <div className="coll-grid">
+            {families.map((f, i) => (
+              <Link key={f.slug} href={`/collections/${f.slug}`}
+                    className={`coll ${i === 0 ? 'coll-lead' : ''}`}>
+                <Image src={`/products/${f.cover}`} alt="" fill
+                       sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 33vw" />
+                <div className="coll-scrim" />
+                <div className="coll-txt">
                   <h3>{f.name}</h3>
-                  <p className="coll-count">{f.count} specimens</p>
-                  <p className="coll-blurb">{f.blurb}</p>
+                  <p>{f.count} specimens</p>
                 </div>
               </Link>
             ))}
@@ -113,7 +106,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---------------- featured ---------------- */}
+      {/* ───────────── featured stock ───────────── */}
       <section className="section">
         <div className="wrap">
           <div className="head-row">
@@ -124,21 +117,33 @@ export default function HomePage() {
             <Link href="/catalog" className="btn btn-ghost">See everything</Link>
           </div>
           <div className="grid cols-4">
-            {featured.map((p, i) => <ProductCard key={p.reference} p={p} priority={i < 4} />)}
+            {featured.map((p) => <ProductCard key={p.reference} p={p} />)}
           </div>
         </div>
       </section>
 
-      {/* ---------------- who we supply ---------------- */}
-      <section className="section band">
+      {/* ───────────── photographic band ───────────── */}
+      <section className="band-photo">
+        <Image src={BAND_IMG} alt="" fill sizes="100vw" />
+        <div className="band-veil" />
+        <div className="wrap band-in">
+          <blockquote>
+            A three-metre olive tree is not a checkout purchase.
+          </blockquote>
+          <p>
+            Two trees of the same nominal height differ completely in trunk girth, canopy
+            and character — and so in price. Add freight, season, quantity and site access,
+            and a fixed online price would be a fiction. So we quote.
+          </p>
+          <Link href="/quote" className="btn btn-light btn-lg">Start an enquiry</Link>
+        </div>
+      </section>
+
+      {/* ───────────── who we supply ───────────── */}
+      <section className="section warm">
         <div className="wrap">
           <p className="eyebrow">Who we supply</p>
-          <h2>Built for projects, not shopping baskets.</h2>
-          <p className="lede">
-            Every enquiry becomes a quotation — priced to your species, size, quantity,
-            site and delivery window. There is no checkout, because a 3-metre olive tree
-            is not a checkout purchase.
-          </p>
+          <h2>Built for projects.</h2>
           <ul className="segments">
             {site.projectTypes.map((s) => <li key={s}>{s}</li>)}
           </ul>
@@ -149,7 +154,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---------------- coverage ---------------- */}
+      {/* ───────────── coverage ───────────── */}
       <section className="section">
         <div className="wrap">
           <p className="eyebrow">Coverage</p>
@@ -162,115 +167,133 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---------------- closing cta ---------------- */}
-      <section className="closing">
-        <div className="wrap closing-in">
-          <div>
-            <h2>Tell us what the project needs.</h2>
-            <p className="lede closing-lede">
-              Send the species, sizes, quantities and the site — we will come back with
-              availability, lead time and a priced quotation.
-            </p>
-          </div>
-          <Link href="/quote" className="btn btn-light closing-btn">Request a quote</Link>
-        </div>
-      </section>
-
       <style>{`
-        .hero {
+        /* ── hero ── */
+        .hero { position: relative; isolation: isolate; color: #FBF9F4; padding-block: clamp(96px, 16vw, 190px) 0; }
+        .hero .hero-bg { object-fit: cover; z-index: -2; }
+        .hero-veil {
+          position: absolute; inset: 0; z-index: -1;
           background:
-            radial-gradient(1100px 520px at 82% 8%, rgba(176,141,79,.14), transparent 62%),
-            linear-gradient(170deg, var(--olive-900) 0%, var(--olive-950) 100%);
-          color: #FBF9F4;
-          padding-block: clamp(48px, 7vw, 88px) 0;
+            linear-gradient(100deg, rgba(14,20,12,.90) 0%, rgba(14,20,12,.72) 42%, rgba(14,20,12,.28) 72%, rgba(14,20,12,.42) 100%),
+            linear-gradient(to top, rgba(14,20,12,.88) 0%, transparent 46%);
         }
-        .hero-in {
-          display: grid; gap: clamp(32px, 5vw, 56px);
-          grid-template-columns: 1fr;
-          align-items: center;
+        .hero-in { position: relative; z-index: 2; }
+        .hero h1 { color: #FFFDF8; margin-bottom: 1.1rem; max-width: 15ch; }
+        .hero-kicker {
+          font-size: .74rem; font-weight: 600; letter-spacing: .22em;
+          text-transform: uppercase; color: var(--brass-300); margin-bottom: 1.4rem;
         }
-        .hero h1 { color: #FBF9F4; margin-bottom: 1.1rem; }
-        .hero-eyebrow { color: var(--brass-300); }
         .hero-lede {
-          font-size: clamp(1.02rem, 1.5vw, 1.18rem);
-          color: rgb(251 249 244 / .78); max-width: 54ch; margin-bottom: 2rem;
+          font-size: clamp(1.02rem, 1.5vw, 1.2rem); line-height: 1.65;
+          color: rgb(251 249 244 / .88); max-width: 56ch; margin-bottom: 2.2rem;
+          text-shadow: 0 1px 12px rgb(14 20 12 / .5);
         }
         .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
-        .hero-map { min-width: 0; }
+        .btn-lg { padding: 1em 2em; font-size: 1rem; }
 
         .trust {
-          display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-          gap: 20px; list-style: none; margin: clamp(40px, 6vw, 72px) 0 0; padding: 28px 0;
-          border-top: 1px solid rgb(251 249 244 / .14);
+          position: relative; z-index: 2;
+          display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: 4px; list-style: none; margin: clamp(64px, 10vw, 128px) 0 0; padding: 0;
+          background: rgb(14 20 12 / .55); backdrop-filter: blur(10px);
+          border-top: 1px solid rgb(212 184 124 / .3);
         }
-        .trust li { display: grid; gap: 2px; }
+        .trust li { display: grid; gap: 2px; padding: 22px clamp(16px, 3vw, 32px); }
         .trust strong {
-          font-family: var(--font-fraunces), serif; font-size: 1.6rem;
-          font-weight: 500; color: var(--brass-300);
+          font-family: var(--font-fraunces), serif; font-size: clamp(1.6rem, 3vw, 2.1rem);
+          font-weight: 500; color: var(--brass-300); line-height: 1;
         }
-        .trust span { font-size: .8rem; color: rgb(251 249 244 / .6); letter-spacing: .02em; }
+        .trust span { font-size: .8rem; color: rgb(251 249 244 / .72); }
 
-        .band { background: var(--sand-100); }
+        /* ── sections ── */
+        .warm { background: var(--sand-100); }
+
+        .route-sec { background: var(--sand-50); }
+        .route-head {
+          display: grid; gap: 20px; align-items: end; margin-bottom: 40px;
+        }
+        .route-head h2 { margin-bottom: 0; }
+        .route-note { color: var(--fg-soft); max-width: 46ch; margin: 0; font-size: .95rem; }
+
+        .journey {
+          display: grid; gap: 28px; list-style: none; margin: 48px 0 0; padding: 0;
+          grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+          counter-reset: j;
+        }
+        .journey li { display: grid; gap: .3rem; padding-top: 18px; border-top: 2px solid var(--olive-700); }
+        .j-num { font-size: .72rem; font-weight: 600; letter-spacing: .14em; color: var(--brass-600); }
+        .journey strong { font-family: var(--font-fraunces), serif; font-size: 1.15rem; font-weight: 500; }
+        .j-d { font-size: .9rem; color: var(--fg-soft); }
 
         .head-row {
           display: flex; flex-wrap: wrap; gap: 20px;
-          align-items: flex-end; justify-content: space-between; margin-bottom: 40px;
+          align-items: flex-end; justify-content: space-between; margin-bottom: 36px;
         }
         .head-row h2 { margin-bottom: 0; }
 
-        .pillars { margin-top: 48px; }
-        .pillar { padding-top: 22px; border-top: 2px solid var(--olive-700); }
-        .pillar h3 { font-size: 1.15rem; margin-bottom: .45rem; }
-        .pillar p { color: var(--fg-soft); font-size: .93rem; margin: 0; }
+        /* ── collections as photography ── */
+        .coll-grid {
+          display: grid; gap: 14px;
+          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        }
+        .coll {
+          position: relative; isolation: isolate; display: block;
+          min-height: 260px; border-radius: var(--radius-lg); overflow: clip;
+          text-decoration: none; color: #FBF9F4;
+          transition: transform .25s ease, box-shadow .25s ease;
+        }
+        .coll img { object-fit: cover; z-index: -2; transition: transform .6s cubic-bezier(.2,0,.2,1); }
+        .coll:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .coll:hover img { transform: scale(1.06); }
+        .coll-scrim {
+          position: absolute; inset: 0; z-index: 1;
+          background: linear-gradient(to top, rgb(10 15 9 / .94) 0%, rgb(10 15 9 / .72) 34%, rgb(10 15 9 / .22) 68%, rgb(10 15 9 / .10) 100%);
+        }
+        .coll-txt { position: absolute; z-index: 2; inset: auto 0 0 0; padding: 22px; }
+        .coll-txt h3 { color: #FFFDF8; margin: 0 0 .15rem; font-size: 1.35rem;
+          text-shadow: 0 1px 10px rgb(10 15 9 / .7); }
+        .coll-txt p {
+          margin: 0; font-size: .72rem; letter-spacing: .13em;
+          text-transform: uppercase; color: var(--brass-300);
+        }
+        .coll-lead { grid-column: span 2; min-height: 340px; }
+        @media (max-width: 700px) { .coll-lead { grid-column: span 1; min-height: 260px; } }
 
-        .coll-card {
-          display: block; text-decoration: none; color: inherit;
-          background: var(--bg-raised); border: 1px solid var(--line);
-          border-radius: var(--radius-lg); overflow: hidden;
-          transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+        /* ── photographic band ── */
+        .band-photo {
+          position: relative; isolation: isolate; color: #FBF9F4;
+          padding-block: clamp(72px, 11vw, 132px);
         }
-        .coll-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: var(--olive-400); }
-        .coll-img { aspect-ratio: 16 / 10; overflow: hidden; background: var(--sand-200); }
-        .coll-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s cubic-bezier(.2,0,.2,1); }
-        .coll-card:hover .coll-img img { transform: scale(1.05); }
-        .coll-body { padding: 20px; }
-        .coll-body h3 { margin-bottom: .1rem; }
-        .coll-count {
-          font-size: .7rem; letter-spacing: .12em; text-transform: uppercase;
-          color: var(--brass-600); margin-bottom: .6rem;
+        .band-photo img { object-fit: cover; z-index: -2; }
+        .band-veil {
+          position: absolute; inset: 0; z-index: -1;
+          background: linear-gradient(95deg, rgba(14,20,12,.92) 0%, rgba(14,20,12,.74) 50%, rgba(14,20,12,.34) 100%);
         }
-        .coll-blurb { font-size: .9rem; color: var(--fg-soft); margin: 0; }
+        .band-in { position: relative; z-index: 2; max-width: 62ch; }
+        .band-in blockquote {
+          margin: 0 0 1.1rem; font-family: var(--font-fraunces), serif;
+          font-size: clamp(1.6rem, 3.4vw, 2.6rem); line-height: 1.15;
+          font-weight: 500; color: #FFFDF8; letter-spacing: -.015em;
+        }
+        .band-in p { color: rgb(251 249 244 / .82); margin-bottom: 1.9rem; }
 
-        .segments {
-          display: flex; flex-wrap: wrap; gap: 10px;
-          list-style: none; margin: 32px 0; padding: 0;
-        }
+        /* ── misc ── */
+        .segments { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; margin: 28px 0; padding: 0; }
         .segments li {
           padding: .5em 1em; font-size: .88rem;
-          background: var(--bg-raised); border: 1px solid var(--line); border-radius: 999px;
+          background: #fff; border: 1px solid var(--line); border-radius: 999px;
         }
         .cta-row { display: flex; flex-wrap: wrap; gap: 12px; }
-
-        .emirates { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+        .emirates { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
         .em {
           padding: .65em 1.15em; font-size: .92rem; text-decoration: none;
-          border: 1px solid var(--line); border-radius: var(--radius);
-          background: var(--bg-raised);
+          border: 1px solid var(--line); border-radius: var(--radius); background: #fff;
           transition: border-color .16s ease, color .16s ease;
         }
-        .em:hover { border-color: var(--olive-700); color: var(--olive-700); }
+        .em:hover { border-color: var(--terra-500); color: var(--terra-700); }
 
-        .closing { background: var(--olive-900); color: #FBF9F4; padding-block: clamp(56px, 7vw, 88px); }
-        .closing h2 { color: #FBF9F4; }
-        .closing-lede { color: rgb(251 249 244 / .75); margin-bottom: 0; }
-        .closing-in {
-          display: flex; flex-wrap: wrap; gap: 28px;
-          align-items: center; justify-content: space-between;
-        }
-        .closing-btn { flex-shrink: 0; }
-
-        @media (min-width: 960px) {
-          .hero-in { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); }
+        @media (min-width: 900px) {
+          .route-head { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
         }
       `}</style>
     </>
