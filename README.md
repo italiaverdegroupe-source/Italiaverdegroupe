@@ -74,3 +74,40 @@ src/app/admin/*               login, overview, leads list, lead detail
 node scripts/hash-password.mjs 'the password'
 # then INSERT the hash into users — never let the plaintext near the database
 ```
+
+## Phase 2b — inventory
+
+The decision this part exists to get right: **trees are not one kind of stock.**
+
+| | `stock_items` | `stock_batches` |
+| --- | --- | --- |
+| What | one unique specimen | a lot of interchangeable plants |
+| Quantity | always 1 | a number |
+| Price | its own | per unit |
+| Example | a 300-year-old olive | 500 identical 2 m ficus |
+
+Modelling both as "product + quantity" is the mistake that forces a rebuild the
+first time a six-figure specimen is sold, so they are separate tables over a
+shared catalogue reference, with one `inventory_movements` ledger explaining
+every change to either.
+
+### Sellable is narrower than in stock
+
+A tree can be physically present and still not sellable. `SELLABLE_ITEM_SQL`
+requires all of:
+
+- status is `available`
+- health is not `critical` or `dead`
+- any acclimatisation period has passed — Italian stock needs weeks to adjust
+  to the Gulf before it can be promised to anyone
+- it sits in a location flagged `sellable` — a supplier's yard in Puglia and a
+  container at sea are both "in stock" and neither can be sold from
+
+The specimen page states which of these is blocking rather than leaving someone
+to work it out.
+
+### Trees grow
+
+Height and girth are rows in `specimen_measurements` with a date, not fixed
+columns on the product. A tree measured at 4.0 m in March is not 4.0 m in
+October, and a quotation is priced against the measurement of the day.
