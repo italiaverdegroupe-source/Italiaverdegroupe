@@ -33,6 +33,17 @@ function canonicalHost(): string | null {
   }
 }
 
+/**
+ * Hosts that must be answered as themselves, never redirected.
+ *
+ * Railway runs its deploy healthcheck from healthcheck.railway.app and treats
+ * anything that is not a 2xx as a failure. Redirecting it would have failed
+ * every future deployment after the canonical redirect was switched on —
+ * found in the platform's own documentation before flipping the switch rather
+ * than afterwards, which is the only cheap time to find it.
+ */
+const PASS_THROUGH = new Set(['healthcheck.railway.app']);
+
 export function middleware(req: NextRequest) {
   const canonical = canonicalHost();
 
@@ -46,7 +57,7 @@ export function middleware(req: NextRequest) {
   // x-forwarded-host is what the platform's proxy sets; host is the fallback.
   const seen = (req.headers.get('x-forwarded-host') ?? req.headers.get('host') ?? '')
     .split(',')[0].trim().toLowerCase();
-  if (!seen || seen === canonical) return NextResponse.next();
+  if (!seen || seen === canonical || PASS_THROUGH.has(seen)) return NextResponse.next();
 
   if (process.env.CANONICAL_REDIRECT === '1') {
     const url = req.nextUrl.clone();
