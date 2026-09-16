@@ -23,6 +23,7 @@ const NAV = [
   { href: '/admin/reports', label: 'Reports' },
   { href: '/admin/content', label: 'Content' },
   { href: '/admin/settings', label: 'Settings' },
+  { href: '/admin/users', label: 'Accounts' },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -51,7 +52,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             ))}
           </nav>
           <div className="adm-me">
-            <span>{user.name}</span>
+            <Link href="/admin/account" className="adm-who">{user.name}</Link>
             <form action="/api/admin/logout" method="post">
               <button type="submit" className="adm-out">Sign out</button>
             </form>

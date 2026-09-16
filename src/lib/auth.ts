@@ -79,6 +79,18 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   return { id: Number(row.id), email: row.email, name: row.name, role: row.role };
 }
 
+/**
+ * The SHA-256 of the caller's own session token.
+ *
+ * Changing a password destroys every other session belonging to that account.
+ * This is how the one doing the changing is spared — improving your own
+ * password should not sign you out of the screen you are standing on.
+ */
+export async function currentTokenHash(): Promise<string | null> {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  return token ? hashToken(token) : null;
+}
+
 export async function destroySession(): Promise<void> {
   const jar = await cookies();
   const token = jar.get(SESSION_COOKIE)?.value;
