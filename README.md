@@ -53,7 +53,12 @@ db/migrations/001_admin.sql   users, sessions, settings, audit_log,
                               login_attempts, lead_notes, lead work columns
 src/lib/auth.ts               scrypt passwords, hashed session tokens,
                               per-email lockout, audit helper, origin check
-src/app/admin/*               login, overview, leads list, lead detail
+src/lib/users.ts              operator accounts, password policy, the rule
+                              that there is always one active owner
+src/app/(site)/*              the public marketing site, its own root layout
+src/app/(console)/*           the operations console, its own root layout —
+                              two audiences, two shells, so the console never
+                              inherits the site's header, footer or metadata
 ```
 
 ### Security notes
