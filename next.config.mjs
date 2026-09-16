@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  // Lets src/app/global-not-found.tsx own the whole document for a URL that
+  // matches no route group. Without it, a root not-found.tsx is wrapped in a
+  // bare <html><body> that it cannot reach, so the served page ends up with
+  // two of each and no lang attribute on the one the browser keeps.
+  experimental: { globalNotFound: true },
   poweredByHeader: false,
   compress: true,
   images: {
