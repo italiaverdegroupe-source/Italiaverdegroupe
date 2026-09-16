@@ -148,6 +148,20 @@ export async function saveLead(input: LeadInput): Promise<{ reference: string; p
        input.requiredDate ?? null, input.message ?? null, input.source ?? null,
        input.userAgent ?? null, input.consent],
     );
+    // After the insert, never inside it: the enquiry is the thing that must
+    // survive, and an alert that cannot be raised must not lose it.
+    const { fire } = await import('@/lib/alerts');
+    await fire('lead.created', {
+      name: input.name, company: input.company ?? '', emirate: input.emirate ?? '',
+      source: input.source ?? 'direct', reference,
+    }, {
+      subject: reference,
+      title: `New enquiry from ${input.name}${input.company ? ` — ${input.company}` : ''}`,
+      body: [input.emirate, input.projectType, input.message].filter(Boolean).join(' · ')
+            || 'No further detail given.',
+      entity: 'lead', entityId: reference, href: `/admin/leads/${reference}`,
+    });
+
     return { reference, persisted: true };
   }
 

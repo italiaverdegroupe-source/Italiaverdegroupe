@@ -236,6 +236,31 @@ export async function acceptQuote(code: string, version: number, user: { id: num
        reservedSpecimens.length ? `Reserved ${reservedSpecimens.join(', ')}` : null]);
 
     await client.query('COMMIT');
+
+    // Raised after the commit, and in its own try: the acceptance is done and
+    // the customer has been told. Nothing about notifying ourselves may turn
+    // that into an error, let alone reach the ROLLBACK below.
+    try {
+      const { fire } = await import('@/lib/alerts');
+      const total = (await client.query<{ net: string }>(
+        `SELECT COALESCE(sum(unit_price * quantity * (1 - discount_pct/100)), 0)::text AS net
+           FROM quote_items WHERE quote_id = $1`, [q.id])).rows[0]?.net ?? '0';
+      const customer = q.customer_company || q.customer_name;
+      await fire('quote.accepted', {
+        code, customer,
+        total: `AED ${new Intl.NumberFormat('en-AE', { maximumFractionDigits: 0 }).format(Number(total))}`,
+      }, {
+        subject: `${code}:v${version}`,
+        title: `${customer} accepted quotation ${code}`,
+        body: reservedSpecimens.length
+          ? `Reserved ${reservedSpecimens.join(', ')}. Raise the order and confirm to the customer today.`
+          : 'Raise the order and confirm to the customer today.',
+        entity: 'quote', entityId: code, href: `/admin/quotes/${code}`,
+      });
+    } catch (err) {
+      console.error('[alerts] quote.accepted:', err);
+    }
+
     return { reservedSpecimens };
   } catch (e) {
     await client.query('ROLLBACK');

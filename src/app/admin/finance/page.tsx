@@ -5,6 +5,7 @@ import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { ageing, getOrder, getOrderItems, orderTotals, nextCode } from '@/lib/orders';
 import { getSettings } from '@/lib/settings';
+import { fire } from '@/lib/alerts';
 import { fmtDate } from '@/components/admin/bits';
 
 export const dynamic = 'force-dynamic';
@@ -96,6 +97,21 @@ async function recordPayment(formData: FormData) {
 
   await audit({ user, action: 'payment.recorded', entity: 'invoice', entityId: invoiceCode,
                 after: { amount } });
+
+  // Cash landing is the one event that closes the loop, and the one the owner
+  // most wants to see. The reference makes the alert unique per payment, so a
+  // second payment on the same invoice is its own news.
+  await fire('payment.received', {
+    amount: `AED ${new Intl.NumberFormat('en-AE', { maximumFractionDigits: 0 }).format(amount)}`,
+    invoice: invoiceCode,
+    customer: String(formData.get('reference') ?? '').trim() || invoiceCode,
+    method: String(formData.get('method') ?? 'bank_transfer'),
+  }, {
+    subject: `${invoiceCode}:${Date.now()}`,
+    title: `Payment received against ${invoiceCode}`,
+    body: `AED ${new Intl.NumberFormat('en-AE').format(amount)} recorded by ${user.name}.`,
+    entity: 'invoice', entityId: invoiceCode, href: '/admin/finance',
+  });
   revalidatePath('/admin/finance');
 }
 

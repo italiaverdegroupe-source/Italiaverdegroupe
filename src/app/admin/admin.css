@@ -116,3 +116,11 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 .adm-pad { padding: 20px; }
 .adm-note { padding: 14px 0; border-bottom: 1px solid #F0EDE4; }
 .adm-note-meta { font-size: .74rem; color: #8A8D7D; margin-bottom: 4px; }
+
+/* alerts */
+.adm-badge {
+  display: inline-block; margin-inline-start: 6px; min-width: 1.35em;
+  padding: 0 .4em; font-size: .68rem; line-height: 1.5em; text-align: center;
+  background: #A68849; color: #fff; border-radius: 999px; vertical-align: middle;
+}
+.adm-badge[data-urgent='true'] { background: #9B3A2B; }

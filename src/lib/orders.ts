@@ -142,6 +142,28 @@ export async function orderFromQuote(
       [q.id, user.id, user.email, `Became order ${code}`]);
 
     await client.query('COMMIT');
+
+    // After the commit and in its own try, for the same reason as acceptance:
+    // the order exists, and failing to announce it must not undo it.
+    try {
+      const { fire } = await import('@/lib/alerts');
+      const total = (await client.query<{ net: string }>(
+        `SELECT COALESCE(sum(unit_price * quantity * (1 - discount_pct/100)), 0)::text AS net
+           FROM order_items WHERE order_id = $1`, [order.id])).rows[0]?.net ?? '0';
+      const customer = q.customer_company || q.customer_name;
+      await fire('order.confirmed', {
+        code: order.code as string, customer,
+        total: `AED ${new Intl.NumberFormat('en-AE', { maximumFractionDigits: 0 }).format(Number(total))}`,
+      }, {
+        subject: order.code as string,
+        title: `Order ${order.code} confirmed for ${customer}`,
+        body: `Converted from quotation ${q.code}. Fulfilment, invoicing and delivery planning start here.`,
+        entity: 'order', entityId: order.code as string, href: `/admin/orders/${order.code}`,
+      });
+    } catch (err) {
+      console.error('[alerts] order.confirmed:', err);
+    }
+
     return { code: order.code as string, id: order.id as string };
   } catch (e) {
     await client.query('ROLLBACK'); throw e;

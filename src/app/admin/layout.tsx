@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getSessionUser } from '@/lib/auth';
+import { countOpen } from '@/lib/alerts';
 import './admin.css';
 
 export const metadata: Metadata = {
@@ -18,12 +19,18 @@ const NAV = [
   { href: '/admin/orders', label: 'Orders' },
   { href: '/admin/shipments', label: 'Shipments' },
   { href: '/admin/finance', label: 'Finance' },
+  { href: '/admin/alerts', label: 'Alerts' },
   { href: '/admin/reports', label: 'Reports' },
   { href: '/admin/settings', label: 'Settings' },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await getSessionUser();
+  // The count rides in the navigation because an alert nobody sees is not an
+  // alert. If the table is not there yet, show nothing rather than a 500.
+  const badge = user
+    ? await countOpen(user).catch(() => ({ open: 0, urgent: 0 }))
+    : { open: 0, urgent: 0 };
 
   return (
     <div className="adm">
@@ -33,7 +40,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             Verde Garden <span>Operations</span>
           </Link>
           <nav>
-            {NAV.map((n) => <Link key={n.href} href={n.href}>{n.label}</Link>)}
+            {NAV.map((n) => (
+              <Link key={n.href} href={n.href}>
+                {n.label}
+                {n.href === '/admin/alerts' && badge.open > 0 && (
+                  <span className="adm-badge" data-urgent={badge.urgent > 0}>{badge.open}</span>
+                )}
+              </Link>
+            ))}
           </nav>
           <div className="adm-me">
             <span>{user.name}</span>
