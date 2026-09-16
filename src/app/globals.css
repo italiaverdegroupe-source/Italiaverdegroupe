@@ -1,55 +1,64 @@
-/* ---------------------------------------------------------------
-   Verde Garden — design tokens
-   Premium Mediterranean: deep olive, travertine sand, brass.
-   Not "garden centre green".
-   --------------------------------------------------------------- */
+/* ═══════════════════════════════════════════════════════════════
+   Verde Garden — design system
+   Editorial Mediterranean: ink, travertine, olive, terracotta, brass.
+   ═══════════════════════════════════════════════════════════════ */
 :root {
-  --olive-950: #131A12;
-  --olive-900: #1B2719;
-  --olive-800: #24361F;
-  --olive-700: #33512C;
-  --olive-600: #456B3B;
-  --olive-400: #7C9B6F;
-  --olive-200: #BDCCB3;
+  /* ── ink ── */
+  --ink-900: #14150F;
+  --ink-800: #1F2118;
+  --ink-600: #4C4F41;
+  --ink-400: #74776A;
+  --ink-300: #9A9C90;
 
-  --sand-50:  #FBF9F4;
-  --sand-100: #F4EFE4;
-  --sand-200: #E7DECB;
-  --sand-300: #D5C7AC;
+  /* ── olive ── */
+  --olive-950: #101509;
+  --olive-900: #17200F;
+  --olive-800: #1F2C15;
+  --olive-700: #2E4420;
+  --olive-600: #3F5C2D;
+  --olive-500: #557640;
+  --olive-300: #A7BA93;
+  --olive-100: #DCE5D0;
 
-  --brass-600: #96773B;
-  --brass-500: #B08D4F;
-  --brass-300: #D4B87C;
+  /* ── travertine ── */
+  --sand-50:  #FCFAF5;
+  --sand-100: #F6F1E6;
+  --sand-200: #EDE5D4;
+  --sand-300: #DFD3BB;
+  --sand-400: #C9B999;
 
-  /* warmth, so the page is not green-on-green from top to bottom */
-  --terra-700: #8A4A2B;
-  --terra-500: #C8823C;
-  --terra-200: #F0D9C2;
+  /* ── terracotta + brass ── */
+  --terra-700: #8C462A;
+  --terra-500: #BE6B3E;
+  --terra-300: #E4B695;
+  --brass-700: #7E6430;
+  --brass-500: #A68849;
+  --brass-300: #D2B37C;
+  --brass-100: #EFE2C6;
 
-  --ink:      #191A16;
-  --ink-soft: #4A4C43;
-  --ink-mute: #7A7C70;
-
+  /* ── roles ── */
   --bg:        #FFFFFF;
   --bg-warm:   var(--sand-50);
-  --bg-raised: #FFFFFF;
-  --fg:        var(--ink);
-  --fg-soft:   var(--ink-soft);
-  --fg-mute:   var(--ink-mute);
-  --line:      var(--sand-200);
+  --bg-panel:  var(--sand-100);
+  --fg:        var(--ink-900);
+  --fg-soft:   var(--ink-600);
+  --fg-mute:   var(--ink-400);
+  --line:      var(--sand-300);
+  --line-soft: var(--sand-200);
   --accent:    var(--olive-700);
-  --accent-fg: #FFFFFF;
 
-  --radius: 4px;
-  --radius-lg: 8px;
-  --maxw: 1240px;
-  --gutter: 24px;
+  --radius: 3px;
+  --radius-lg: 6px;
+  --maxw: 1280px;
+  --gutter: clamp(20px, 4vw, 48px);
 
-  --shadow-sm: 0 1px 2px rgb(25 26 22 / .05), 0 1px 3px rgb(25 26 22 / .06);
-  --shadow-md: 0 4px 12px rgb(25 26 22 / .07), 0 12px 32px rgb(25 26 22 / .06);
+  --shadow-lift: 0 1px 1px rgb(20 21 15 / .04), 0 8px 24px -8px rgb(20 21 15 / .14);
+  --shadow-deep: 0 2px 4px rgb(20 21 15 / .05), 0 24px 56px -20px rgb(20 21 15 / .26);
 
   --font-display: var(--font-fraunces), 'Iowan Old Style', Georgia, serif;
   --font-sans: var(--font-inter), system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --ease: cubic-bezier(.22, 1, .36, 1);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -62,81 +71,129 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-sans);
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: 17px;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
 }
 
+/* ── type scale ────────────────────────────────────────────── */
 h1, h2, h3, h4 {
   font-family: var(--font-display);
-  font-weight: 500;
-  line-height: 1.1;
-  letter-spacing: -0.015em;
-  margin: 0 0 .5em;
+  font-weight: 450;
+  line-height: 1.04;
+  letter-spacing: -0.028em;
+  margin: 0 0 .4em;
   text-wrap: balance;
+  font-variation-settings: 'SOFT' 12, 'WONK' 1;
 }
-h1 { font-size: clamp(2.25rem, 5.2vw, 4.25rem); }
-h2 { font-size: clamp(1.75rem, 3.6vw, 2.75rem); }
-h3 { font-size: clamp(1.15rem, 2vw, 1.5rem); }
-p  { margin: 0 0 1rem; text-wrap: pretty; }
-a  { color: inherit; }
+h1 { font-size: clamp(2.7rem, 6.4vw, 5.6rem); }
+h2 { font-size: clamp(2rem, 4.2vw, 3.4rem); }
+h3 { font-size: clamp(1.2rem, 2.1vw, 1.6rem); letter-spacing: -.018em; }
 
+p { margin: 0 0 1.1rem; text-wrap: pretty; }
+a { color: inherit; }
 img, svg { max-width: 100%; display: block; }
 
-:focus-visible {
-  outline: 2px solid var(--brass-500);
-  outline-offset: 3px;
-  border-radius: 2px;
+/* editorial lead paragraph — serif, generous */
+.lede {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.15rem, 1.9vw, 1.5rem);
+  line-height: 1.45;
+  letter-spacing: -.012em;
+  color: var(--ink-600);
+  max-width: 34ch;
 }
 
-/* ---------- layout ---------- */
-.wrap { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gutter); }
-.section { padding-block: clamp(56px, 8vw, 112px); }
-.stack > * + * { margin-top: 1rem; }
-
+/* letterspaced index label */
 .eyebrow {
-  font-size: .75rem;
-  font-weight: 600;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--brass-600);
-  margin-bottom: 1rem;
+  display: inline-flex; align-items: center; gap: .8em;
+  font-size: .7rem; font-weight: 600;
+  letter-spacing: .2em; text-transform: uppercase;
+  color: var(--terra-700);
+  margin: 0 0 1.4rem;
+}
+.eyebrow::before {
+  content: ''; width: 34px; height: 1px; background: currentColor; opacity: .55;
 }
 
-.lede { font-size: clamp(1.05rem, 1.6vw, 1.25rem); color: var(--fg-soft); max-width: 62ch; }
+:focus-visible { outline: 2px solid var(--terra-500); outline-offset: 3px; border-radius: 2px; }
 
-/* ---------- buttons ---------- */
+/* ── layout ────────────────────────────────────────────────── */
+.wrap { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gutter); }
+.section { padding-block: clamp(72px, 11vw, 150px); }
+.section-tight { padding-block: clamp(52px, 7vw, 92px); }
+
+.grid { display: grid; gap: clamp(18px, 2.4vw, 32px); }
+.cols-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.cols-3 { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.cols-4 { grid-template-columns: repeat(auto-fill, minmax(238px, 1fr)); }
+
+.rule { height: 1px; background: var(--line-soft); border: 0; margin: 0; }
+
+/* ── buttons ───────────────────────────────────────────────── */
 .btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: .55em;
-  padding: .85em 1.6em;
-  font: inherit; font-size: .95rem; font-weight: 500;
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center; gap: .6em;
+  padding: .95em 1.9em;
+  font: inherit; font-size: .92rem; font-weight: 500; letter-spacing: .015em;
   border: 1px solid transparent; border-radius: var(--radius);
-  cursor: pointer; text-decoration: none;
-  transition: background .18s ease, color .18s ease, border-color .18s ease, transform .18s ease;
+  cursor: pointer; text-decoration: none; overflow: hidden;
+  transition: background .25s var(--ease), color .25s var(--ease),
+              border-color .25s var(--ease), transform .25s var(--ease);
 }
 .btn:active { transform: translateY(1px); }
+.btn-lg { padding: 1.1em 2.4em; font-size: 1rem; }
+
 .btn-primary { background: var(--olive-700); color: #fff; }
-.btn-primary:hover { background: var(--olive-800); }
+.btn-primary:hover { background: var(--olive-900); }
+
 .btn-ghost { background: transparent; color: var(--fg); border-color: var(--line); }
-.btn-ghost:hover { border-color: var(--olive-700); color: var(--olive-700); }
-.btn-light { background: rgb(255 255 255 / .1); color: #fff; border-color: rgb(255 255 255 / .35); backdrop-filter: blur(6px); }
-.btn-light:hover { background: rgb(255 255 255 / .18); }
+.btn-ghost:hover { border-color: var(--olive-700); color: var(--olive-700); background: var(--sand-50); }
 
-/* ---------- utility ---------- */
-.grid { display: grid; gap: clamp(16px, 2.2vw, 28px); }
-.cols-2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-.cols-3 { grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); }
-.cols-4 { grid-template-columns: repeat(auto-fill, minmax(216px, 1fr)); }
+.btn-light {
+  background: rgb(255 255 255 / .08); color: #fff;
+  border-color: rgb(255 255 255 / .42); backdrop-filter: blur(8px);
+}
+.btn-light:hover { background: #fff; color: var(--olive-900); border-color: #fff; }
 
-.rule { height: 1px; background: var(--line); border: 0; margin: 0; }
+/* text link with a drawn underline */
+.tlink {
+  display: inline-flex; align-items: center; gap: .5em;
+  font-size: .92rem; font-weight: 500; text-decoration: none;
+  padding-bottom: 2px; background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px; background-repeat: no-repeat; background-position: 0 100%;
+  transition: background-size .35s var(--ease);
+}
+.tlink:hover { background-size: 100% 1px; }
 
-/* full-bleed photography band */
-.bleed { position: relative; isolation: isolate; overflow: clip; }
-.bleed > img,
-.bleed picture img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
-.bleed::after { content: ''; position: absolute; inset: 0; z-index: -1; }
+/* ── paper grain, applied once on body ─────────────────────── */
+.grain::after {
+  content: ''; position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+  opacity: .028; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── reveal on scroll, no JavaScript ─────────────────────────
+   Movement only. Nothing here may hide content: a scroll-linked
+   opacity fade leaves everything below the fold invisible to
+   full-page capture, print, and any client that resolves the
+   timeline differently. Motion is the bonus, legibility is not. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+    @keyframes rise {
+      from { transform: translateY(22px); }
+      to   { transform: none; }
+    }
+  }
+}
 
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; overflow: hidden;

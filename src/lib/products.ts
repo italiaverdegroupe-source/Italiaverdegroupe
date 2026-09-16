@@ -56,6 +56,17 @@ export function getProduct(slug: string): Product | undefined {
   return products.find((p) => p.slug === slug);
 }
 
+/**
+ * Resolve a hero/band image from its catalogue reference rather than typing the
+ * filename out. A wrong reference now fails the build instead of shipping a
+ * broken <img> nobody notices until it is live.
+ */
+export function imageFor(reference: string): string {
+  const p = products.find((x) => x.reference === reference);
+  if (!p) throw new Error(`imageFor: no product with reference "${reference}"`);
+  return `/products/${p.image}`;
+}
+
 export function getFamilies(): Family[] {
   const seen = new Map<string, Product[]>();
   for (const p of products) {

@@ -47,7 +47,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${fraunces.variable} ${inter.variable}`}>
-      <body>
+      <body className="grain">
         <a href="#main" className="visually-hidden">Skip to content</a>
         <Header />
         <main id="main">{children}</main>
