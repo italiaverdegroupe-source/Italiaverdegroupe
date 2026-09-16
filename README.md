@@ -111,3 +111,51 @@ to work it out.
 Height and girth are rows in `specimen_measurements` with a date, not fixed
 columns on the product. A tree measured at 4.0 m in March is not 4.0 m in
 October, and a quotation is priced against the measurement of the day.
+
+## Phase 2c — procurement, shipping, landed cost
+
+### The decision this part exists to get right
+
+**Freight is not allocated by value.** A container is sold by the space it
+holds, so a large cheap olive consumes far more of the freight bill than a
+small expensive one. Each cost line therefore carries its own basis:
+
+| Cost | Spread by | Why |
+| --- | --- | --- |
+| freight, inland transport | **volume** | you pay for container space |
+| customs duty, insurance | **value** | assessed on declared value |
+| clearance, handling | **count** | charged per piece or movement |
+
+`tests/landed-cost.test.mjs` costs the same container both ways:
+
+```
+freight by VOLUME  ancient olive AED 8,763.50   →  margin at AED 9,500 =  7.8%
+freight by VALUE   ancient olive AED 6,827.37   →  margin at AED 9,500 = 28.1%
+```
+
+Twenty points of margin that do not exist. Every price set from the second
+number would be set too low.
+
+### The engine refuses to invent numbers
+
+- A basis with no denominator (freight by weight when nothing has a weight) is
+  reported and left visibly unallocated, not spread arbitrarily.
+- A missing exchange rate is flagged, never treated as 1:1.
+- A foreign-currency cost sitting at a rate of 1.00 is flagged — it is almost
+  always an unfilled field, and it understates landed cost by roughly the
+  exchange rate.
+
+Exchange rates are stored per line and used as stored. Recomputing an old
+shipment at today's rate would quietly rewrite margins already reported.
+
+### Compliance is a record, not an attachment
+
+MOCCAE import permits expire six months from issue, and an expired permit means
+a container of live trees sitting at the port accruing storage. Permits are
+first-class rows with an expiry, shipments reference one, and the shipment page
+says so plainly when it has lapsed.
+
+```bash
+node tests/landed-cost.test.mjs   # after: npx esbuild src/lib/landed-cost.ts \
+                                  #   --format=esm --outfile=.test-build/landed-cost.mjs
+```
