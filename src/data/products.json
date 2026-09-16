@@ -1,0 +1,1226 @@
+[
+  {
+    "reference": "VG-AG-001",
+    "name": "Agave Americana",
+    "family": "Agaves",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.0 - 1.5 m",
+      "Spread": "1.5 - 2.0 m",
+      "Category": "Agave"
+    },
+    "description": "Classic century plant with bold blue-green leaves. Dramatic architectural specimen for dry gardens.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 30,
+    "slug": "agave-americana",
+    "image": "VG-AG-001-agave-americana.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-AG-002",
+    "name": "Agave Americana Large",
+    "family": "Agaves",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.5 - 2.0 m",
+      "Spread": "2.0 - 2.5 m",
+      "Category": "Agave"
+    },
+    "description": "Large century plant with massive rosette. Impressive focal point for large landscapes.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 30,
+    "slug": "agave-americana-large",
+    "image": "VG-AG-002-agave-americana-large.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-AG-003",
+    "name": "Agave Americana Mature",
+    "family": "Agaves",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.8 - 2.5 m",
+      "Spread": "2.5 - 3.0 m",
+      "Category": "Agave"
+    },
+    "description": "Mature century plant with fully developed rosette. Ultimate specimen for desert gardens.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 31,
+    "slug": "agave-americana-mature",
+    "image": "VG-AG-003-agave-americana-mature.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-AG-004",
+    "name": "Agave Americana Marginata",
+    "family": "Agaves",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.0 - 1.5 m",
+      "Spread": "1.5 - 2.0 m",
+      "Category": "Agave"
+    },
+    "description": "Variegated century plant with cream-edged leaves. Striking color contrast for gardens.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 31,
+    "slug": "agave-americana-marginata",
+    "image": "VG-AG-004-agave-americana-marginata.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-AG-005",
+    "name": "Agave Marginata Large",
+    "family": "Agaves",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.2 - 1.8 m",
+      "Spread": "1.8 - 2.2 m",
+      "Category": "Agave"
+    },
+    "description": "Large variegated century plant with bold cream margins. Eye-catching specimen plant.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 32,
+    "slug": "agave-marginata-large",
+    "image": "VG-AG-005-agave-marginata-large.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-AG-006",
+    "name": "Agave Mediopicta",
+    "family": "Agaves",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "0.6 - 0.9 m",
+      "Spread": "1.0 - 1.3 m",
+      "Category": "Agave"
+    },
+    "description": "Stunning agave with cream central stripe. Compact size perfect for containers.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 32,
+    "slug": "agave-mediopicta",
+    "image": "VG-AG-006-agave-mediopicta.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-AG-007",
+    "name": "Agave Mediopicta Alba",
+    "family": "Agaves",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "0.5 - 0.8 m",
+      "Spread": "0.8 - 1.2 m",
+      "Category": "Agave"
+    },
+    "description": "Bright white-striped agave with striking contrast. Perfect for highlighting in gardens.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 33,
+    "slug": "agave-mediopicta-alba",
+    "image": "VG-AG-007-agave-mediopicta-alba.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-AG-008",
+    "name": "Agave Attenuata",
+    "family": "Agaves",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "0.8 - 1.2 m",
+      "Spread": "1.2 - 1.8 m",
+      "Category": "Agave"
+    },
+    "description": "Foxtail agave with soft spineless leaves. Elegant arching form, safe for family gardens.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 33,
+    "slug": "agave-attenuata",
+    "image": "VG-AG-008-agave-attenuata.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-AG-009",
+    "name": "Agave Attenuata Large",
+    "family": "Agaves",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.0 - 1.5 m",
+      "Spread": "1.5 - 2.0 m",
+      "Category": "Agave"
+    },
+    "description": "Large foxtail agave with mature rosette. Spectacular when in bloom with tall flower spike.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 34,
+    "slug": "agave-attenuata-large",
+    "image": "VG-AG-009-agave-attenuata-large.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-AG-010",
+    "name": "Agave Attenuata Variegata",
+    "family": "Agaves",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "0.8 - 1.2 m",
+      "Spread": "1.2 - 1.5 m",
+      "Category": "Agave"
+    },
+    "description": "Variegated foxtail agave with cream-striped leaves. Rare and highly desirable variety.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 34,
+    "slug": "agave-attenuata-variegata",
+    "image": "VG-AG-010-agave-attenuata-variegata.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-AG-011",
+    "name": "Agave Filifera",
+    "family": "Agaves",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "0.5 - 0.8 m",
+      "Spread": "0.8 - 1.0 m",
+      "Category": "Agave"
+    },
+    "description": "Thread-leaf agave with distinctive fibrous leaf edges. Compact and texturally interesting.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 35,
+    "slug": "agave-filifera",
+    "image": "VG-AG-011-agave-filifera.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-AG-012",
+    "name": "Agave Filifera Compact",
+    "family": "Agaves",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "0.4 - 0.6 m",
+      "Spread": "0.6 - 0.8 m",
+      "Category": "Agave"
+    },
+    "description": "Compact thread-leaf agave perfect for small spaces and rock gardens.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 35,
+    "slug": "agave-filifera-compact",
+    "image": "VG-AG-012-agave-filifera-compact.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-CA-001",
+    "name": "Columnar Cactus",
+    "family": "Cacti & Succulents",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.5 - 2.0 m",
+      "Pot Size": "60 L",
+      "Category": "Cactus"
+    },
+    "description": "Tall columnar cactus with ribbed stem and architectural presence. Perfect for modern gardens.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 37,
+    "slug": "columnar-cactus",
+    "image": "VG-CA-001-columnar-cactus.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-CA-002",
+    "name": "Columnar Cactus Tall",
+    "family": "Cacti & Succulents",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.0 - 3.0 m",
+      "Pot Size": "80 L",
+      "Category": "Cactus"
+    },
+    "description": "Impressive tall columnar cactus for vertical accent. Dramatic silhouette against walls.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 37,
+    "slug": "columnar-cactus-tall",
+    "image": "VG-CA-002-columnar-cactus-tall.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-CA-003",
+    "name": "Barrel Cactus",
+    "family": "Cacti & Succulents",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "0.8 - 1.2 m",
+      "Diameter": "0.6 - 0.9 m",
+      "Category": "Cactus"
+    },
+    "description": "Classic barrel cactus with golden spines and rounded form. Iconic desert plant.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 38,
+    "slug": "barrel-cactus",
+    "image": "VG-CA-003-barrel-cactus.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-CA-004",
+    "name": "Barrel Cactus Large",
+    "family": "Cacti & Succulents",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.0 - 1.5 m",
+      "Diameter": "0.8 - 1.2 m",
+      "Category": "Cactus"
+    },
+    "description": "Large barrel cactus with impressive size and golden spines. Majestic specimen plant.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 38,
+    "slug": "barrel-cactus-large",
+    "image": "VG-CA-004-barrel-cactus-large.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-CA-005",
+    "name": "Prickly Pear Cactus",
+    "family": "Cacti & Succulents",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.0 - 1.5 m",
+      "Spread": "1.5 - 2.0 m",
+      "Category": "Cactus"
+    },
+    "description": "Classic prickly pear with flat pads and yellow flowers. Edible fruit variety.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 39,
+    "slug": "prickly-pear-cactus",
+    "image": "VG-CA-005-prickly-pear-cactus.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-CA-006",
+    "name": "Prickly Pear Large",
+    "family": "Cacti & Succulents",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.5 - 2.0 m",
+      "Spread": "2.0 - 2.5 m",
+      "Category": "Cactus"
+    },
+    "description": "Large prickly pear with established structure. Produces abundant flowers and fruit.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 39,
+    "slug": "prickly-pear-large",
+    "image": "VG-CA-006-prickly-pear-large.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-CA-007",
+    "name": "Organ Pipe Cactus",
+    "family": "Cacti & Succulents",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.5 - 2.5 m",
+      "Pot Size": "80 L",
+      "Category": "Cactus"
+    },
+    "description": "Multi-stemmed organ pipe cactus with dramatic vertical form. Night-blooming flowers.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 40,
+    "slug": "organ-pipe-cactus",
+    "image": "VG-CA-007-organ-pipe-cactus.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-CA-008",
+    "name": "Organ Pipe Cactus Large",
+    "family": "Cacti & Succulents",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.5 - 3.5 m",
+      "Pot Size": "120 L",
+      "Category": "Cactus"
+    },
+    "description": "Large organ pipe cactus with multiple tall stems. Spectacular night-blooming specimen.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 40,
+    "slug": "organ-pipe-cactus-large",
+    "image": "VG-CA-008-organ-pipe-cactus-large.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-CA-009",
+    "name": "Golden Barrel Cactus",
+    "family": "Cacti & Succulents",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "0.6 - 0.9 m",
+      "Diameter": "0.5 - 0.7 m",
+      "Category": "Cactus"
+    },
+    "description": "Perfectly spherical golden barrel cactus with bright yellow spines. Desert garden essential.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 41,
+    "slug": "golden-barrel-cactus",
+    "image": "VG-CA-009-golden-barrel-cactus.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-CA-010",
+    "name": "Golden Barrel Large",
+    "family": "Cacti & Succulents",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "0.8 - 1.2 m",
+      "Diameter": "0.7 - 1.0 m",
+      "Category": "Cactus"
+    },
+    "description": "Large golden barrel cactus with impressive size. Stunning focal point for any garden.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 41,
+    "slug": "golden-barrel-large",
+    "image": "VG-CA-010-golden-barrel-large.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-CA-011",
+    "name": "Mixed Cactus Group",
+    "family": "Cacti & Succulents",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.0 - 2.0 m",
+      "Pot Size": "100 L",
+      "Category": "Cactus"
+    },
+    "description": "Curated group of complementary cactus varieties. Instant desert garden effect.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 42,
+    "slug": "mixed-cactus-group",
+    "image": "VG-CA-011-mixed-cactus-group.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-IN-001",
+    "name": "Rhapis Excelsa",
+    "family": "Indoor Plants",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "0.8 - 1.2 m",
+      "Pot Size": "30 L",
+      "Category": "Indoor Plant"
+    },
+    "description": "Lady palm with elegant fan-shaped leaves. Perfect for interior spaces and shaded areas.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 42,
+    "slug": "rhapis-excelsa",
+    "image": "VG-IN-001-rhapis-excelsa.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-OL-001",
+    "name": "Olive Tree Premium",
+    "family": "Olive Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.5 - 3.0 m",
+      "Pot Size": "120 L",
+      "Category": "Olive Tree"
+    },
+    "description": "Premium Italian olive tree with magnificent trunk character. Ideal for landscaping, villas, hotels, and commercial projects.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 6,
+    "slug": "olive-tree-premium",
+    "image": "VG-OL-001-olive-tree-premium.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-OL-002",
+    "name": "Olive Tree Cloud Style",
+    "family": "Olive Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.0 - 2.5 m",
+      "Pot Size": "100 L",
+      "Category": "Olive Tree"
+    },
+    "description": "Expertly pruned cloud-style olive tree with distinctive layered canopy. Perfect focal point for luxury gardens.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 6,
+    "slug": "olive-tree-cloud-style",
+    "image": "VG-OL-002-olive-tree-cloud-style.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-OL-003",
+    "name": "Olive Tree Multi-Stem",
+    "family": "Olive Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.8 - 2.2 m",
+      "Pot Size": "80 L",
+      "Category": "Olive Tree"
+    },
+    "description": "Elegant multi-stem olive tree with graceful branching structure. Suitable for contemporary landscape designs.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 6,
+    "slug": "olive-tree-multi-stem",
+    "image": "VG-OL-003-olive-tree-multi-stem.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-OL-004",
+    "name": "Olive Tree Specimen",
+    "family": "Olive Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "3.0 - 4.0 m",
+      "Pot Size": "150 L",
+      "Category": "Olive Tree"
+    },
+    "description": "Majestic specimen olive tree with ancient character trunk. Statement piece for grand entrances and courtyards.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 6,
+    "slug": "olive-tree-specimen",
+    "image": "VG-OL-004-olive-tree-specimen.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-OL-005",
+    "name": "Olive Tree Pom-Pom",
+    "family": "Olive Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.2 - 2.8 m",
+      "Pot Size": "100 L",
+      "Category": "Olive Tree"
+    },
+    "description": "Artistically pruned pom-pom style olive tree with spherical foliage clusters. Modern architectural appeal.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 7,
+    "slug": "olive-tree-pom-pom",
+    "image": "VG-OL-005-olive-tree-pom-pom.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-OL-006",
+    "name": "Olive Tree Bonsai Style",
+    "family": "Olive Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.5 - 2.0 m",
+      "Pot Size": "60 L",
+      "Category": "Olive Tree"
+    },
+    "description": "Bonsai-style olive tree with intricate trunk detail and compact canopy. Perfect for terraces and courtyards.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 7,
+    "slug": "olive-tree-bonsai-style",
+    "image": "VG-OL-006-olive-tree-bonsai-style.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-OL-007",
+    "name": "Olive Tree Ancient",
+    "family": "Olive Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "3.5 - 5.0 m",
+      "Pot Size": "200 L",
+      "Category": "Olive Tree"
+    },
+    "description": "Centuries-old olive tree with extraordinary trunk character and history. Ultimate luxury statement piece.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 8,
+    "slug": "olive-tree-ancient",
+    "image": "VG-OL-007-olive-tree-ancient.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-OL-008",
+    "name": "Olive Tree Standard",
+    "family": "Olive Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.0 - 2.5 m",
+      "Pot Size": "80 L",
+      "Category": "Olive Tree"
+    },
+    "description": "Classic standard olive tree with clean trunk and rounded canopy. Versatile choice for any landscape.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 8,
+    "slug": "olive-tree-standard",
+    "image": "VG-OL-008-olive-tree-standard.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-OL-009",
+    "name": "Olive Tree Tall Form",
+    "family": "Olive Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "3.0 - 4.0 m",
+      "Pot Size": "120 L",
+      "Category": "Olive Tree"
+    },
+    "description": "Tall-form olive tree with elegant upright growth habit. Ideal for creating vertical interest in gardens.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 9,
+    "slug": "olive-tree-tall-form",
+    "image": "VG-OL-009-olive-tree-tall-form.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-OL-010",
+    "name": "Olive Tree Weeping",
+    "family": "Olive Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.5 - 3.5 m",
+      "Pot Size": "100 L",
+      "Category": "Olive Tree"
+    },
+    "description": "Graceful weeping olive tree with cascading branches. Adds movement and elegance to any landscape.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 9,
+    "slug": "olive-tree-weeping",
+    "image": "VG-OL-010-olive-tree-weeping.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-OL-011",
+    "name": "Olive Tree Group Planting",
+    "family": "Olive Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.0 - 3.0 m",
+      "Pot Size": "150 L",
+      "Category": "Olive Tree"
+    },
+    "description": "Multiple olive trees planted together for instant grove effect. Perfect for creating Mediterranean atmosphere.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 10,
+    "slug": "olive-tree-group-planting",
+    "image": "VG-OL-011-olive-tree-group-planting.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-OL-012",
+    "name": "Olive Tree Dwarf",
+    "family": "Olive Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.2 - 1.8 m",
+      "Pot Size": "50 L",
+      "Category": "Olive Tree"
+    },
+    "description": "Compact dwarf olive tree ideal for smaller spaces, terraces, and container gardens.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 10,
+    "slug": "olive-tree-dwarf",
+    "image": "VG-OL-012-olive-tree-dwarf.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-OL-013",
+    "name": "Olive Tree Sculptural",
+    "family": "Olive Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.0 - 2.8 m",
+      "Pot Size": "100 L",
+      "Category": "Olive Tree"
+    },
+    "description": "Sculptural olive tree with artistic trunk formation. Living artwork for distinguished gardens.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 11,
+    "slug": "olive-tree-sculptural",
+    "image": "VG-OL-013-olive-tree-sculptural.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-OL-014",
+    "name": "Olive Tree Columnar",
+    "family": "Olive Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.5 - 3.5 m",
+      "Pot Size": "80 L",
+      "Category": "Olive Tree"
+    },
+    "description": "Columnar olive tree with narrow upright form. Perfect for screening and formal plantings.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 11,
+    "slug": "olive-tree-columnar",
+    "image": "VG-OL-014-olive-tree-columnar.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-OL-015",
+    "name": "Olive Tree Mature",
+    "family": "Olive Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "3.0 - 4.5 m",
+      "Pot Size": "180 L",
+      "Category": "Olive Tree"
+    },
+    "description": "Mature olive tree with full canopy development. Instant impact for large-scale landscaping.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 12,
+    "slug": "olive-tree-mature",
+    "image": "VG-OL-015-olive-tree-mature.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-OL-016",
+    "name": "Olive Tree Young",
+    "family": "Olive Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.0 - 1.5 m",
+      "Pot Size": "30 L",
+      "Category": "Olive Tree"
+    },
+    "description": "Young olive tree with excellent growth potential. Economical choice for budget-conscious projects.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 12,
+    "slug": "olive-tree-young",
+    "image": "VG-OL-016-olive-tree-young.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-PL-001",
+    "name": "Cycas Revoluta",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "0.8 - 1.2 m",
+      "Pot Size": "40 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Classic sago palm with stiff, dark green fronds. Excellent for containers and tropical-themed gardens.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 14,
+    "slug": "cycas-revoluta",
+    "image": "VG-PL-001-cycas-revoluta.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-PL-002",
+    "name": "Cycas Revoluta Large",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.2 - 1.8 m",
+      "Pot Size": "60 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Large specimen sago palm with impressive trunk and full frond crown. Statement piece for entrances.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 14,
+    "slug": "cycas-revoluta-large",
+    "image": "VG-PL-002-cycas-revoluta-large.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-PL-003",
+    "name": "Cycas Revoluta Specimen",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.5 - 2.0 m",
+      "Pot Size": "80 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Premium specimen sago palm with mature trunk and perfect symmetry. Luxury hotel and resort quality.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 15,
+    "slug": "cycas-revoluta-specimen",
+    "image": "VG-PL-003-cycas-revoluta-specimen.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-PL-004",
+    "name": "Cycas Revoluta Multi-Head",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.0 - 1.5 m",
+      "Pot Size": "70 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Multi-headed cycas with multiple crowns for dramatic effect. Unique architectural specimen.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 15,
+    "slug": "cycas-revoluta-multi-head",
+    "image": "VG-PL-004-cycas-revoluta-multi-head.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-PL-005",
+    "name": "Archontophoenix Alexandrae",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.0 - 3.0 m",
+      "Pot Size": "100 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Elegant king palm with smooth trunk and graceful arching fronds. Classic tropical beauty.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 16,
+    "slug": "archontophoenix-alexandrae",
+    "image": "VG-PL-005-archontophoenix-alexandrae.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-PL-006",
+    "name": "Archontophoenix Tall",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "3.0 - 4.5 m",
+      "Pot Size": "150 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Tall king palm with established crown. Instant tropical atmosphere for large spaces.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 16,
+    "slug": "archontophoenix-tall",
+    "image": "VG-PL-006-archontophoenix-tall.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-PL-007",
+    "name": "Archontophoenix Specimen",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "4.0 - 6.0 m",
+      "Pot Size": "200 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Majestic specimen king palm with full crown. Ultimate luxury for resorts and grand estates.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 17,
+    "slug": "archontophoenix-specimen",
+    "image": "VG-PL-007-archontophoenix-specimen.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-PL-008",
+    "name": "Archontophoenix Young",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.5 - 2.0 m",
+      "Pot Size": "60 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Young king palm with excellent growth potential. Economical choice for tropical landscaping.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 17,
+    "slug": "archontophoenix-young",
+    "image": "VG-PL-008-archontophoenix-young.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-PL-009",
+    "name": "Brahea Armata",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.5 - 2.5 m",
+      "Pot Size": "80 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Mexican blue fan palm with stunning silver-blue fronds. Drought tolerant and architectural.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 18,
+    "slug": "brahea-armata",
+    "image": "VG-PL-009-brahea-armata.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-PL-010",
+    "name": "Brahea Armata Large",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.5 - 3.5 m",
+      "Pot Size": "120 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Large blue fan palm with impressive trunk. Stunning silver foliage creates dramatic contrast.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 18,
+    "slug": "brahea-armata-large",
+    "image": "VG-PL-010-brahea-armata-large.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-PL-011",
+    "name": "Butia Capitata",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.0 - 3.0 m",
+      "Pot Size": "100 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Jelly palm with graceful arching blue-green fronds. Edible fruit and cold hardy.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 19,
+    "slug": "butia-capitata",
+    "image": "VG-PL-011-butia-capitata.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-PL-012",
+    "name": "Butia Capitata Specimen",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "3.0 - 4.0 m",
+      "Pot Size": "150 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Specimen jelly palm with full crown and established trunk. Beautiful year-round specimen.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 19,
+    "slug": "butia-capitata-specimen",
+    "image": "VG-PL-012-butia-capitata-specimen.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-PL-013",
+    "name": "Chamaerops Humilis",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.0 - 1.5 m",
+      "Pot Size": "50 L",
+      "Category": "Palm Tree"
+    },
+    "description": "European fan palm with multiple trunks and fan-shaped fronds. Extremely hardy and versatile.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 20,
+    "slug": "chamaerops-humilis",
+    "image": "VG-PL-013-chamaerops-humilis.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-PL-014",
+    "name": "Chamaerops Humilis Large",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.5 - 2.0 m",
+      "Pot Size": "70 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Large European fan palm with dense multi-trunk form. Perfect for Mediterranean gardens.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 20,
+    "slug": "chamaerops-humilis-large",
+    "image": "VG-PL-014-chamaerops-humilis-large.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-PL-015",
+    "name": "Chamaerops Excelsa",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.5 - 2.5 m",
+      "Pot Size": "80 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Tall Mediterranean fan palm with upright growth. Elegant architectural specimen.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 21,
+    "slug": "chamaerops-excelsa",
+    "image": "VG-PL-015-chamaerops-excelsa.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-PL-016",
+    "name": "Chamaerops Excelsa Specimen",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.5 - 3.5 m",
+      "Pot Size": "120 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Specimen tall fan palm with full crown. Classic Mediterranean elegance for any setting.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 21,
+    "slug": "chamaerops-excelsa-specimen",
+    "image": "VG-PL-016-chamaerops-excelsa-specimen.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-PL-017",
+    "name": "Phoenix Canariensis",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.0 - 3.0 m",
+      "Pot Size": "150 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Canary Island date palm with majestic trunk and full crown. Iconic tropical statement.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 22,
+    "slug": "phoenix-canariensis",
+    "image": "VG-PL-017-phoenix-canariensis.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-PL-018",
+    "name": "Phoenix Canariensis Large",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "3.0 - 4.5 m",
+      "Pot Size": "200 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Large Canary Island date palm with impressive trunk diameter. Resort-quality specimen.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 22,
+    "slug": "phoenix-canariensis-large",
+    "image": "VG-PL-018-phoenix-canariensis-large.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-PL-019",
+    "name": "Washingtonia Robusta",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.5 - 3.5 m",
+      "Pot Size": "120 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Mexican fan palm with slender trunk and dense crown. Fast growing and stately.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 23,
+    "slug": "washingtonia-robusta",
+    "image": "VG-PL-019-washingtonia-robusta.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-PL-020",
+    "name": "Washingtonia Robusta Tall",
+    "family": "Palms",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "4.0 - 6.0 m",
+      "Pot Size": "200 L",
+      "Category": "Palm Tree"
+    },
+    "description": "Tall Mexican fan palm with impressive height. Perfect for avenue planting and large spaces.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 23,
+    "slug": "washingtonia-robusta-tall",
+    "image": "VG-PL-020-washingtonia-robusta-tall.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-TR-001",
+    "name": "Ficus Microcarpa",
+    "family": "Ornamental Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.0 - 3.0 m",
+      "Pot Size": "100 L",
+      "Category": "Ornamental Tree"
+    },
+    "description": "Indian laurel fig with dense evergreen foliage and elegant form. Excellent for topiary.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 25,
+    "slug": "ficus-microcarpa",
+    "image": "VG-TR-001-ficus-microcarpa.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-TR-002",
+    "name": "Ficus Microcarpa Large",
+    "family": "Ornamental Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "3.0 - 4.5 m",
+      "Pot Size": "150 L",
+      "Category": "Ornamental Tree"
+    },
+    "description": "Large Indian laurel fig with established canopy. Perfect for screening and shade.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 25,
+    "slug": "ficus-microcarpa-large",
+    "image": "VG-TR-002-ficus-microcarpa-large.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-TR-003",
+    "name": "Ficus Microcarpa Standard",
+    "family": "Ornamental Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.5 - 3.5 m",
+      "Pot Size": "80 L",
+      "Category": "Ornamental Tree"
+    },
+    "description": "Standard form Indian laurel fig with clear trunk and rounded crown. Classic elegance.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 26,
+    "slug": "ficus-microcarpa-standard",
+    "image": "VG-TR-003-ficus-microcarpa-standard.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-TR-004",
+    "name": "Yucca Rostrata",
+    "family": "Ornamental Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.5 - 2.0 m",
+      "Pot Size": "60 L",
+      "Category": "Ornamental Tree"
+    },
+    "description": "Beaked yucca with stunning blue-green foliage and architectural form. Extremely drought tolerant.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 26,
+    "slug": "yucca-rostrata",
+    "image": "VG-TR-004-yucca-rostrata.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-TR-005",
+    "name": "Yucca Rostrata Large",
+    "family": "Ornamental Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.0 - 2.5 m",
+      "Pot Size": "80 L",
+      "Category": "Ornamental Tree"
+    },
+    "description": "Large beaked yucca with full head of blue foliage. Stunning architectural specimen.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 27,
+    "slug": "yucca-rostrata-large",
+    "image": "VG-TR-005-yucca-rostrata-large.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-TR-006",
+    "name": "Yucca Rostrata Specimen",
+    "family": "Ornamental Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "2.5 - 3.5 m",
+      "Pot Size": "100 L",
+      "Category": "Ornamental Tree"
+    },
+    "description": "Specimen beaked yucca with tall trunk and perfect symmetry. Ultimate modern landscape feature.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 27,
+    "slug": "yucca-rostrata-specimen",
+    "image": "VG-TR-006-yucca-rostrata-specimen.jpg",
+    "imageSize": "1377x861"
+  },
+  {
+    "reference": "VG-TR-007",
+    "name": "Yucca Rostrata Multi-Head",
+    "family": "Ornamental Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.8 - 2.5 m",
+      "Pot Size": "90 L",
+      "Category": "Ornamental Tree"
+    },
+    "description": "Multi-headed yucca with multiple crowns for dramatic effect. Unique sculptural specimen.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 28,
+    "slug": "yucca-rostrata-multi-head",
+    "image": "VG-TR-007-yucca-rostrata-multi-head.jpg",
+    "imageSize": "1388x861"
+  },
+  {
+    "reference": "VG-TR-008",
+    "name": "Yucca Rostrata Young",
+    "family": "Ornamental Trees",
+    "attributes": {
+      "Origin": "Italy",
+      "Height": "1.0 - 1.5 m",
+      "Pot Size": "40 L",
+      "Category": "Ornamental Tree"
+    },
+    "description": "Young beaked yucca with excellent growth potential. Economical choice for modern gardens.",
+    "availability": "On Request",
+    "price": "On Request",
+    "page": 28,
+    "slug": "yucca-rostrata-young",
+    "image": "VG-TR-008-yucca-rostrata-young.jpg",
+    "imageSize": "1377x861"
+  }
+]

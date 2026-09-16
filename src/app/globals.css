@@ -1,0 +1,132 @@
+/* ---------------------------------------------------------------
+   Verde Garden — design tokens
+   Premium Mediterranean: deep olive, travertine sand, brass.
+   Not "garden centre green".
+   --------------------------------------------------------------- */
+:root {
+  --olive-950: #131A12;
+  --olive-900: #1B2719;
+  --olive-800: #24361F;
+  --olive-700: #33512C;
+  --olive-600: #456B3B;
+  --olive-400: #7C9B6F;
+  --olive-200: #BDCCB3;
+
+  --sand-50:  #FBF9F4;
+  --sand-100: #F4EFE4;
+  --sand-200: #E7DECB;
+  --sand-300: #D5C7AC;
+
+  --brass-600: #96773B;
+  --brass-500: #B08D4F;
+  --brass-300: #D4B87C;
+
+  --ink:      #191A16;
+  --ink-soft: #4A4C43;
+  --ink-mute: #7A7C70;
+
+  --bg:        var(--sand-50);
+  --bg-raised: #FFFFFF;
+  --fg:        var(--ink);
+  --fg-soft:   var(--ink-soft);
+  --fg-mute:   var(--ink-mute);
+  --line:      var(--sand-200);
+  --accent:    var(--olive-700);
+  --accent-fg: #FFFFFF;
+
+  --radius: 4px;
+  --radius-lg: 8px;
+  --maxw: 1240px;
+  --gutter: 24px;
+
+  --shadow-sm: 0 1px 2px rgb(25 26 22 / .05), 0 1px 3px rgb(25 26 22 / .06);
+  --shadow-md: 0 4px 12px rgb(25 26 22 / .07), 0 12px 32px rgb(25 26 22 / .06);
+
+  --font-display: var(--font-fraunces), 'Iowan Old Style', Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin: 0 0 .5em;
+  text-wrap: balance;
+}
+h1 { font-size: clamp(2.25rem, 5.2vw, 4.25rem); }
+h2 { font-size: clamp(1.75rem, 3.6vw, 2.75rem); }
+h3 { font-size: clamp(1.15rem, 2vw, 1.5rem); }
+p  { margin: 0 0 1rem; text-wrap: pretty; }
+a  { color: inherit; }
+
+img, svg { max-width: 100%; display: block; }
+
+:focus-visible {
+  outline: 2px solid var(--brass-500);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ---------- layout ---------- */
+.wrap { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gutter); }
+.section { padding-block: clamp(56px, 8vw, 112px); }
+.stack > * + * { margin-top: 1rem; }
+
+.eyebrow {
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--brass-600);
+  margin-bottom: 1rem;
+}
+
+.lede { font-size: clamp(1.05rem, 1.6vw, 1.25rem); color: var(--fg-soft); max-width: 62ch; }
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .55em;
+  padding: .85em 1.6em;
+  font: inherit; font-size: .95rem; font-weight: 500;
+  border: 1px solid transparent; border-radius: var(--radius);
+  cursor: pointer; text-decoration: none;
+  transition: background .18s ease, color .18s ease, border-color .18s ease, transform .18s ease;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--olive-700); color: #fff; }
+.btn-primary:hover { background: var(--olive-800); }
+.btn-ghost { background: transparent; color: var(--fg); border-color: var(--line); }
+.btn-ghost:hover { border-color: var(--olive-700); color: var(--olive-700); }
+.btn-light { background: rgb(255 255 255 / .1); color: #fff; border-color: rgb(255 255 255 / .35); backdrop-filter: blur(6px); }
+.btn-light:hover { background: rgb(255 255 255 / .18); }
+
+/* ---------- utility ---------- */
+.grid { display: grid; gap: clamp(16px, 2.2vw, 28px); }
+.cols-2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.cols-3 { grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); }
+.cols-4 { grid-template-columns: repeat(auto-fill, minmax(216px, 1fr)); }
+
+.rule { height: 1px; background: var(--line); border: 0; margin: 0; }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
