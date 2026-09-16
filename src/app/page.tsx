@@ -3,15 +3,16 @@ import Image from 'next/image';
 import RouteMap from '@/components/RouteMap';
 import ProductCard from '@/components/ProductCard';
 import { site } from '@/lib/site';
-import { getAllProducts, getFamilies } from '@/lib/products';
+import { getAllProducts, getShowcaseProducts, getFamilies } from '@/lib/products';
 
 export default function HomePage() {
   const families = getFamilies();
   const all = getAllProducts();
+  const showcase = getShowcaseProducts();
   // one representative from each family, then fill up to eight
   const featured = [
-    ...families.map((f) => all.find((p) => p.family === f.name)!),
-    ...all.filter((p) => p.family === 'Olive Trees').slice(1, 3),
+    ...families.map((f) => showcase.find((p) => p.family === f.name)!).filter(Boolean),
+    ...showcase.filter((p) => p.family === 'Olive Trees').slice(1, 3),
   ].slice(0, 8);
 
   return (

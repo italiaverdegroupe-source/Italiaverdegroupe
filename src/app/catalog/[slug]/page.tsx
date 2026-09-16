@@ -66,6 +66,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             <Image src={`/products/${p.image}`} alt={p.name}
                    width={w || 1388} height={h || 861}
                    sizes="(max-width: 900px) 100vw, 620px" priority />
+            {!p.photoVerified && (
+              <figcaption className="img-note">
+                Catalogue photograph under review — it may not represent this specimen.
+                Current photographs are supplied with the quotation.
+              </figcaption>
+            )}
           </figure>
 
           <div className="det-body">
@@ -126,6 +132,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           border: 1px solid var(--line); background: var(--sand-100);
         }
         .det-img img { width: 100%; height: auto; }
+        .img-note {
+          padding: .7em 1em; font-size: .8rem; line-height: 1.5;
+          background: var(--sand-100); color: var(--fg-soft);
+          border-top: 1px solid var(--line);
+        }
         .det-ref {
           font-size: .72rem; letter-spacing: .13em; text-transform: uppercase;
           color: var(--brass-600); margin-bottom: 1.25rem;

@@ -10,11 +10,13 @@ export const site = {
   description:
     'We import premium trees and plants from Italian nurseries and supply landscaping companies, developers, hotels and private estates across the United Arab Emirates.',
 
-  // Contact — placeholders until the UAE trade licence is issued.
+  // Contact — deliberately empty. The UAE number and the mailbox both land
+  // with the domain, and until then no page should advertise a channel that
+  // nobody is answering. `fallbackContact()` below degrades safely.
   phone: '',
-  whatsapp: '+393517478254',
-  whatsappLabel: '+39 351 747 8254',
-  email: 'info@verdegarden.example',
+  whatsapp: '',
+  whatsappLabel: '',
+  email: '',
 
   // Commerce. VAT stays OFF until a TRN is issued — charging VAT without
   // registration is an offence, so quotes must not show a VAT line yet.
@@ -57,3 +59,14 @@ export const site = {
 } as const;
 
 export type Site = typeof site;
+
+/**
+ * What to tell someone when the enquiry form itself fails. Never names a
+ * channel that has not been configured yet — a dead number in an error
+ * message loses the lead twice over.
+ */
+export function fallbackContact(): string {
+  if (site.whatsappLabel) return `Please message us on WhatsApp ${site.whatsappLabel}.`;
+  if (site.email) return `Please email ${site.email}.`;
+  return 'Please try again in a moment.';
+}

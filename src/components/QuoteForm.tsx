@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { site } from '@/lib/site';
+import { site, fallbackContact } from '@/lib/site';
 
 type Props = {
   defaultType?: 'quote' | 'bulk' | 'sourcing';
@@ -41,7 +41,7 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
       if (!res.ok || !json.ok) { setError(json.error ?? 'Something went wrong.'); setState('error'); return; }
       setReference(json.reference); setState('done');
     } catch {
-      setError(`Network error. Please message us on WhatsApp ${site.whatsappLabel}.`);
+      setError(`Network error. ${fallbackContact()}`);
       setState('error');
     }
   }

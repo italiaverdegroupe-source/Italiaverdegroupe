@@ -16,6 +16,7 @@ export default function ProductCard({ p, priority = false }: { p: Product; prior
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
             priority={priority}
           />
+          {!p.photoVerified && <span className="card-flag">Photo under review</span>}
         </div>
         <div className="card-body">
           <h3 className="card-name">{p.name}</h3>
@@ -39,7 +40,12 @@ export default function ProductCard({ p, priority = false }: { p: Product; prior
         }
         .card:hover { border-color: var(--olive-400); box-shadow: var(--shadow-md); transform: translateY(-2px); }
         .card-link { display: block; text-decoration: none; color: inherit; height: 100%; }
-        .card-img { aspect-ratio: 4 / 3; overflow: hidden; background: var(--sand-100); }
+        .card-img { aspect-ratio: 4 / 3; overflow: hidden; background: var(--sand-100); position: relative; }
+        .card-flag {
+          position: absolute; left: 8px; bottom: 8px;
+          padding: .3em .6em; font-size: .68rem; letter-spacing: .04em;
+          background: rgb(25 26 22 / .78); color: #FBF9F4; border-radius: 3px;
+        }
         .card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s cubic-bezier(.2,0,.2,1); }
         .card:hover .card-img img { transform: scale(1.04); }
         .card-body { padding: 16px 18px 18px; }

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { saveLead } from '@/lib/db';
-import { site } from '@/lib/site';
+import { site, fallbackContact } from '@/lib/site';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -95,7 +95,7 @@ export async function POST(req: Request) {
   } catch (err) {
     console.error('[LEAD:FAILED]', err, JSON.stringify(d));
     return NextResponse.json(
-      { ok: false, error: `Could not record the enquiry. Please message us on WhatsApp ${site.whatsappLabel}.` },
+      { ok: false, error: `Could not record the enquiry. ${fallbackContact()}` },
       { status: 500 },
     );
   }

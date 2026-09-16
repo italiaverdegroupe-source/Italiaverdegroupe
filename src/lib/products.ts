@@ -11,6 +11,8 @@ export type Product = {
   price: string;
   image: string;
   imageSize: string;
+  /** false when the catalogue photo contradicts the specimen's own description */
+  photoVerified: boolean;
 };
 
 export type Family = {
@@ -45,6 +47,11 @@ export function getAllProducts(): Product[] {
   return products;
 }
 
+/** Stock safe to lead with — excludes specimens whose photo is still in doubt. */
+export function getShowcaseProducts(): Product[] {
+  return products.filter((p) => p.photoVerified);
+}
+
 export function getProduct(slug: string): Product | undefined {
   return products.find((p) => p.slug === slug);
 }
@@ -61,7 +68,7 @@ export function getFamilies(): Family[] {
     name,
     blurb: FAMILY_BLURB[name] ?? '',
     count: list.length,
-    cover: list[0].image,
+    cover: (list.find((p) => p.photoVerified) ?? list[0]).image,
   }));
 }
 
