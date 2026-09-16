@@ -13,13 +13,61 @@ import { Pool } from 'pg';
 let pool: Pool | null = null;
 let ready: Promise<void> | null = null;
 
+/**
+ * Whether to negotiate TLS for a connection string.
+ *
+ * Deciding this by searching the URL for the word "localhost" is wrong twice
+ * over: 127.0.0.1 is local but does not contain it, and a remote host called
+ * localhost.example.com does. Decide on the actual host, and let an explicit
+ * sslmode in the URL win.
+ */
+function sslFor(url: string): false | { rejectUnauthorized: boolean } {
+  let host = '';
+  let mode = '';
+  try {
+    const u = new URL(url);
+    host = u.hostname;
+    mode = u.searchParams.get('sslmode') ?? '';
+  } catch {
+    return { rejectUnauthorized: false };
+  }
+  if (mode === 'disable') return false;
+  if (mode) return { rejectUnauthorized: false };
+
+  const local =
+    host === 'localhost' || host === '::1' ||
+    /^127\./.test(host) ||
+    /^10\./.test(host) ||
+    /^192\.168\./.test(host) ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(host) ||
+    host.endsWith('.railway.internal');
+  return local ? false : { rejectUnauthorized: false };
+}
+
+/** Throws rather than returning null: admin pages cannot degrade to "no database". */
+export function requirePool(): Pool {
+  const p = getPool();
+  if (!p) throw new Error('DATABASE_URL is not configured.');
+  return p;
+}
+
+/** Parameterised query helper. Never interpolate values into SQL. */
+export async function query<T = Record<string, unknown>>(
+  sql: string, params: unknown[] = [],
+): Promise<T[]> {
+  const p = requirePool();
+  await ensureSchema(p);
+  const res = await p.query(sql, params as never[]);
+  return res.rows as T[];
+}
+
 function getPool(): Pool | null {
   const url = process.env.DATABASE_URL;
   if (!url) return null;
   if (!pool) {
     pool = new Pool({
       connectionString: url,
-      ssl: url.includes('localhost') ? undefined : { rejectUnauthorized: false },
+      ssl: sslFor(url),
       max: 5,
       idleTimeoutMillis: 30_000,
     });
