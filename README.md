@@ -159,3 +159,49 @@ says so plainly when it has lapsed.
 node tests/landed-cost.test.mjs   # after: npx esbuild src/lib/landed-cost.ts \
                                   #   --format=esm --outfile=.test-build/landed-cost.mjs
 ```
+
+## Phase 2d — quotations
+
+The business runs on quotations, not a checkout, so three things are enforced
+rather than left to discipline.
+
+### An issued quotation is never edited
+
+Repricing creates a **new version** and supersedes the old one. The customer is
+holding the document that was sent; editing it in place makes "what did we
+actually quote, and when" unanswerable. Specimen lines are deliberately not
+copied forward — one specimen belongs to one quotation, and the tree may be
+gone by the time v2 is written.
+
+### Every number is a snapshot
+
+Unit price, landed cost, VAT rate and *whether VAT applied at all* are stored on
+the quotation. Looking them up live would rewrite last quarter's documents the
+day a setting changes. A quotation issued before the company held a TRN must
+never acquire a VAT line later — charging VAT without registration is an
+offence, and rewriting history to look compliant is worse than the original gap.
+
+### Accepting reserves stock under a row lock
+
+`acceptQuote` takes `SELECT … FOR UPDATE` on each specimen before reading its
+status, inside one transaction. `tests/concurrency.test.mjs` runs two
+salespeople accepting two quotations for the same tree at the same instant:
+
+```
+with the lock     → one reserves it, the other is refused
+without the lock  → BOTH succeed, and the tree is sold twice
+```
+
+A unique partial index on `quote_items(stock_item_id)` stops the same specimen
+reaching two quotations in the first place.
+
+### Arabic PDFs
+
+The customer-facing sheet is a print stylesheet, not a server-generated PDF.
+Arabic needs bidirectional layout and letter shaping, which most server-side
+PDF libraries mangle; the browser already does it correctly, so print-to-PDF
+produces a better document with no dependency to keep patched.
+
+```bash
+node tests/concurrency.test.mjs
+```
