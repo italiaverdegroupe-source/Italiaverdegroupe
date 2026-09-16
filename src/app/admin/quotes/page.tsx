@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { listQuotes, nextQuoteCode, taxSnapshot, QUOTE_STATUSES, logQuoteEvent } from '@/lib/quotes';
-import { site } from '@/lib/site';
+import { getSettings } from '@/lib/settings';
 import { fmtDate } from '@/components/admin/bits';
 
 export const dynamic = 'force-dynamic';
@@ -27,7 +27,7 @@ async function createQuote(formData: FormData) {
   const name = String(formData.get('customer_name') ?? '').trim() || lead?.name;
   if (!name) throw new Error('A quotation needs a customer.');
 
-  const tax = taxSnapshot();
+  const tax = await taxSnapshot();
   const code = await nextQuoteCode();
   const rows = await query<{ id: string }>(
     `INSERT INTO quotes
@@ -44,7 +44,7 @@ async function createQuote(formData: FormData) {
      String(formData.get('emirate') ?? '').trim() || lead?.emirate || null,
      String(formData.get('project_name') ?? '').trim() || null,
      tax.vat_enabled, tax.vat_rate, tax.trn_at_issue,
-     String(site.quoteValidityDays),
+     String((await getSettings()).quoteValidityDays),
      String(formData.get('payment_terms') ?? '').trim() || null,
      String(formData.get('delivery_terms') ?? '').trim() || null,
      user.id]);
@@ -61,6 +61,7 @@ export default async function QuotesPage({ searchParams }: { searchParams: Promi
   if (!user) redirect('/admin/login');
   const sp = await searchParams;
 
+  const site = await getSettings();
   const rows = await listQuotes(QUOTE_STATUSES.includes(sp.status as never) ? sp.status : undefined);
 
   return (

@@ -242,3 +242,29 @@ rather than a migration.
 ```bash
 node tests/partial-delivery.test.mjs
 ```
+
+## Phase 2f — settings: the golden rule
+
+> *The system must be configurable by administrators and must not require
+> developer intervention for normal business operations.*
+
+`src/lib/site.ts` holds the **defaults**. `src/lib/settings.ts` reads the
+`settings` table on top of them, so what the site and every document actually
+use can change from `/admin/settings` with no deploy: company identity, contact
+channels, currency, quotation validity, TRN and VAT.
+
+Two rules the console enforces:
+
+- **VAT cannot be switched on without a TRN.** Charging VAT without a
+  registration number is an offence, so the combination is refused before it
+  can reach a customer document.
+- **Enabling VAT applies to the next document, never the last one.** Each
+  quotation and invoice stores the tax position it was issued under. Switching
+  VAT on today does not retroactively add a VAT line to a quotation sent last
+  month — and the test checks exactly that.
+
+Contact channels appear on the site only once configured. An advertised number
+nobody answers is worse than none.
+
+If the database is unreachable the compiled defaults are used rather than
+throwing: a settings outage must not take the public site down with it.

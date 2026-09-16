@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { STATUSES, StatusPill, fmtDate } from '@/components/admin/bits';
-import { site } from '@/lib/site';
+import { getSettings } from '@/lib/settings';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,6 +69,7 @@ export default async function LeadPage({ params }: { params: Promise<{ reference
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const { reference } = await params;
+  const site = await getSettings();
 
   const lead = (await query<Lead>('SELECT * FROM leads WHERE reference = $1', [reference]))[0];
   if (!lead) notFound();

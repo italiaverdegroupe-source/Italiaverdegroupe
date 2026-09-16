@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { saveLead } from '@/lib/db';
-import { site, fallbackContact } from '@/lib/site';
+import { getSettings, fallbackContactFrom } from '@/lib/settings';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -95,7 +95,7 @@ export async function POST(req: Request) {
   } catch (err) {
     console.error('[LEAD:FAILED]', err, JSON.stringify(d));
     return NextResponse.json(
-      { ok: false, error: `Could not record the enquiry. ${fallbackContact()}` },
+      { ok: false, error: `Could not record the enquiry. ${fallbackContactFrom(await getSettings())}` },
       { status: 500 },
     );
   }

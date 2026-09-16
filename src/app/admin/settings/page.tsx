@@ -1,0 +1,151 @@
+import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
+import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
+import { getSettings, saveSettings, EDITABLE, type EditableKey } from '@/lib/settings';
+import { query } from '@/lib/db';
+import { fmtDate } from '@/components/admin/bits';
+
+export const dynamic = 'force-dynamic';
+
+async function save(formData: FormData) {
+  'use server';
+  await assertSameOrigin();
+  const user = await getSessionUser();
+  if (!user) redirect('/admin/login');
+  // Company identity and the tax position are owner-level decisions.
+  if (user.role !== 'owner') throw new Error('Only the owner can change settings.');
+
+  const before = await getSettings();
+  const values: Partial<Record<EditableKey, unknown>> = {};
+  for (const key of Object.keys(EDITABLE) as EditableKey[]) {
+    values[key] = EDITABLE[key].type === 'boolean'
+      ? formData.get(key) === 'on'
+      : formData.get(key);
+  }
+
+  // Charging VAT without a registration number is an offence. Refuse the
+  // combination outright rather than letting it reach a customer document.
+  if (values.vatEnabled === true && !String(values.trn ?? '').trim()) {
+    throw new Error('Enter the TRN before switching VAT on — VAT cannot be charged without a registration number.');
+  }
+
+  await saveSettings(values, user.id);
+  const after = await getSettings();
+  await audit({
+    user, action: 'settings.updated', entity: 'setting',
+    before: { vatEnabled: before.vatEnabled, trn: before.trn, whatsapp: before.whatsapp },
+    after: { vatEnabled: after.vatEnabled, trn: after.trn, whatsapp: after.whatsapp },
+  });
+
+  // Public pages read these, so their caches have to go with them.
+  for (const path of ['/', '/quote', '/about', '/services', '/catalog', '/admin/settings']) {
+    revalidatePath(path);
+  }
+}
+
+export default async function SettingsPage() {
+  const user = await getSessionUser();
+  if (!user) redirect('/admin/login');
+
+  const s = await getSettings();
+  const history = await query<{ key: string; updated_at: string; email: string | null }>(
+    `SELECT st.key, st.updated_at, u.email::text AS email
+       FROM settings st LEFT JOIN users u ON u.id = st.updated_by
+      ORDER BY st.updated_at DESC LIMIT 12`);
+
+  const groups: [string, EditableKey[]][] = [
+    ['Company',  ['legalName', 'brandName', 'tagline', 'description', 'licenceNumber']],
+    ['Contact',  ['phone', 'whatsapp', 'whatsappLabel', 'email']],
+    ['Commerce', ['currency', 'quoteValidityDays', 'trn', 'vatEnabled', 'vatRate']],
+  ];
+
+  return (
+    <>
+      <h1>Settings</h1>
+      <p className="adm-sub">
+        These are the values the website and every document read at runtime.
+        Changing them here takes effect immediately — no deploy, no developer.
+      </p>
+
+      {user.role !== 'owner' && (
+        <p className="adm-err">You can see these, but only the owner can change them.</p>
+      )}
+
+      {!s.vatEnabled && (
+        <p className="adm-sub">
+          <b>VAT is off.</b> Quotations and invoices state “exclusive of VAT where
+          applicable” and charge nothing. When the TRN arrives, enter it and switch
+          VAT on — documents already issued keep the position they were issued with,
+          which is the point.
+        </p>
+      )}
+
+      <form action={save}>
+        {groups.map(([title, keys]) => (
+          <div key={title} className="adm-panel adm-pad" style={{ marginBottom: 20 }}>
+            <h2>{title}</h2>
+            <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))' }}>
+              {keys.map((key) => {
+                const f = EDITABLE[key];
+                const value = s[key] as unknown;
+                if (f.type === 'boolean') {
+                  return (
+                    <label key={key} className="adm-field"
+                           style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                      <input type="checkbox" name={key} defaultChecked={value === true}
+                             style={{ width: 16, height: 16 }} disabled={user.role !== 'owner'} />
+                      <span>{f.label}</span>
+                    </label>
+                  );
+                }
+                if (f.type === 'textarea') {
+                  return (
+                    <label key={key} className="adm-field" style={{ gridColumn: '1 / -1' }}>
+                      <span>{f.label}</span>
+                      <textarea name={key} rows={3} defaultValue={String(value ?? '')}
+                                disabled={user.role !== 'owner'} />
+                    </label>
+                  );
+                }
+                return (
+                  <label key={key} className="adm-field">
+                    <span>{f.label}</span>
+                    <input name={key}
+                           type={f.type === 'number' ? 'number' : 'text'}
+                           step={f.type === 'number' ? 'any' : undefined}
+                           defaultValue={String(value ?? '')}
+                           disabled={user.role !== 'owner'} />
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+
+        {user.role === 'owner' && (
+          <button className="adm-btn adm-save-settings" type="submit">Save settings</button>
+        )}
+      </form>
+
+      <h2 style={{ marginTop: 32 }}>Recently changed</h2>
+      <div className="adm-panel">
+        {history.length === 0 ? (
+          <p className="adm-empty">Nothing overridden yet — the defaults are in use.</p>
+        ) : (
+          <table className="adm-t">
+            <thead><tr><th>Setting</th><th>Changed</th><th>By</th></tr></thead>
+            <tbody>
+              {history.map((h) => (
+                <tr key={h.key}>
+                  <td>{EDITABLE[h.key as EditableKey]?.label ?? h.key}</td>
+                  <td className="num">{fmtDate(h.updated_at)}</td>
+                  <td>{h.email ?? '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </>
+  );
+}

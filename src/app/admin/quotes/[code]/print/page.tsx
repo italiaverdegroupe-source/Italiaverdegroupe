@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth';
 import { getQuote, getQuoteItems, totalsOf } from '@/lib/quotes';
-import { site } from '@/lib/site';
+import { getSettings } from '@/lib/settings';
 import { fmtDate } from '@/components/admin/bits';
 
 export const dynamic = 'force-dynamic';
@@ -24,6 +24,7 @@ export default async function PrintQuote({
   if (!(await getSessionUser())) redirect('/admin/login');
   const { code } = await params;
   const { v } = await searchParams;
+  const site = await getSettings();
 
   const q = await getQuote(code, v ? Number(v) : undefined);
   if (!q) notFound();

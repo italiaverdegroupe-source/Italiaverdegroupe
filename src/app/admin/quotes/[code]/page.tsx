@@ -9,7 +9,7 @@ import {
 } from '@/lib/quotes';
 import { listSpecimens } from '@/lib/inventory';
 import { getAllProducts } from '@/lib/products';
-import { site } from '@/lib/site';
+import { getSettings } from '@/lib/settings';
 import { fmtDate } from '@/components/admin/bits';
 
 export const dynamic = 'force-dynamic';
@@ -130,6 +130,7 @@ export default async function QuotePage({
   if (!user) redirect('/admin/login');
   const { code } = await params;
   const { v } = await searchParams;
+  const site = await getSettings();
 
   const q = await getQuote(code, v ? Number(v) : undefined);
   if (!q) notFound();

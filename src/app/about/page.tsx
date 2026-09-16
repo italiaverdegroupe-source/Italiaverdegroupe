@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { site } from '@/lib/site';
+import { getSettings } from '@/lib/settings';
 
 export const metadata: Metadata = {
   title: 'About',
@@ -9,7 +9,8 @@ export const metadata: Metadata = {
   alternates: { canonical: '/about' },
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const site = await getSettings();
   return (
     <div className="section">
       <div className="wrap prose">

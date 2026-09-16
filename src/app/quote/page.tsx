@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import QuoteForm from '@/components/QuoteForm';
-import { site } from '@/lib/site';
+import { getSettings } from '@/lib/settings';
 import { getAllProducts } from '@/lib/products';
 
 export const metadata: Metadata = {
@@ -13,6 +13,7 @@ type Search = { type?: string; ref?: string };
 
 export default async function QuotePage({ searchParams }: { searchParams: Promise<Search> }) {
   const sp = await searchParams;
+  const site = await getSettings();
   const type = sp.type === 'bulk' || sp.type === 'sourcing' ? sp.type : 'quote';
   const products = getAllProducts().map((p) => ({ reference: p.reference, name: p.name }));
 

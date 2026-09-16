@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { site } from '@/lib/site';
+import { getSettings } from '@/lib/settings';
 import { getFamilies } from '@/lib/products';
 
-export default function Footer() {
+export default async function Footer() {
+  const site = await getSettings();
   const families = getFamilies();
   return (
     <footer className="ftr">
@@ -36,6 +37,22 @@ export default function Footer() {
 
           <div>
             <h3 className="ftr-h">Enquiries</h3>
+            {/* Contact channels appear only once they are configured. An
+                advertised number nobody answers is worse than none. */}
+            {(site.whatsappLabel || site.phone || site.email) && (
+              <ul className="ftr-contact">
+                {site.whatsappLabel && (
+                  <li>
+                    <a href={`https://wa.me/${site.whatsapp.replace(/[^\d]/g, '')}`}
+                       target="_blank" rel="noopener noreferrer">
+                      WhatsApp {site.whatsappLabel}
+                    </a>
+                  </li>
+                )}
+                {site.phone && <li><a href={`tel:${site.phone}`}>{site.phone}</a></li>}
+                {site.email && <li><a href={`mailto:${site.email}`}>{site.email}</a></li>}
+              </ul>
+            )}
             <ul>
               <li><Link href="/quote">Request a quote</Link></li>
               <li><Link href="/quote?type=bulk">Bulk &amp; project pricing</Link></li>
@@ -77,6 +94,8 @@ export default function Footer() {
           text-transform: uppercase; color: var(--brass-300); margin-bottom: 1rem;
         }
         .ftr ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+        .ftr-contact { margin-bottom: 1.1rem !important; }
+        .ftr-contact a { color: var(--brass-300); }
         .ftr a { color: rgb(251 249 244 / .72); text-decoration: none; font-size: .9rem; }
         .ftr a:hover { color: #FBF9F4; text-decoration: underline; text-underline-offset: 3px; }
         .ftr-note { font-size: .875rem; line-height: 1.6; color: rgb(251 249 244 / .6); }

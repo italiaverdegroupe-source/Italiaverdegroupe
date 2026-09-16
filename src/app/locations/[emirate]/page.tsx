@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ProductCard from '@/components/ProductCard';
 import { locations, getLocation } from '@/lib/locations';
-import { site } from '@/lib/site';
+import { getSettings } from '@/lib/settings';
 import { getAllProducts } from '@/lib/products';
 
 export function generateStaticParams() {
@@ -23,6 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ emirate: 
 export default async function LocationPage({ params }: { params: Promise<{ emirate: string }> }) {
   const l = getLocation((await params).emirate);
   if (!l) notFound();
+  const site = await getSettings();
   const picks = getAllProducts().filter((p) => p.family === 'Olive Trees' || p.family === 'Palms').slice(0, 4);
 
   const jsonLd = {

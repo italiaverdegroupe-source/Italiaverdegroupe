@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { ageing, getOrder, getOrderItems, orderTotals, nextCode } from '@/lib/orders';
-import { site } from '@/lib/site';
+import { getSettings } from '@/lib/settings';
 import { fmtDate } from '@/components/admin/bits';
 
 export const dynamic = 'force-dynamic';
@@ -25,6 +25,7 @@ async function raiseInvoice(formData: FormData) {
   const items = await getOrderItems(o.id);
   const t = orderTotals(o, items);
 
+  const cfg = await getSettings();
   const kind = String(formData.get('kind') ?? 'tax_invoice');
   // An advance invoice bills the agreed percentage, not the whole order.
   const net = kind === 'advance' ? t.net * (Number(o.advance_pct) / 100) : t.net;
@@ -42,7 +43,7 @@ async function raiseInvoice(formData: FormData) {
              $9,$10,$11,$12,
              CASE WHEN $4 THEN 'not_submitted' ELSE 'not_applicable' END, $13)
      RETURNING id`,
-    [code, o.id, kind, o.vat_enabled, o.vat_rate, site.trn || null, o.lpo_number,
+    [code, o.id, kind, o.vat_enabled, o.vat_rate, cfg.trn || null, o.lpo_number,
      String(formData.get('terms_days') ?? '30'),
      Math.round(net * 100) / 100, vat, Math.round((net + vat) * 100) / 100, retention,
      String(formData.get('notes') ?? '').trim() || null]);
@@ -101,6 +102,7 @@ async function recordPayment(formData: FormData) {
 export default async function FinancePage() {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
+  const site = await getSettings();
 
   const [invoices, rows, totals] = await Promise.all([
     query<{ code: string; order_code: string | null; kind: string; status: string;

@@ -1,5 +1,5 @@
 import { requirePool, query } from '@/lib/db';
-import { site } from '@/lib/site';
+import { getSettings } from '@/lib/settings';
 
 export const QUOTE_STATUSES = [
   'draft', 'sent', 'viewed', 'negotiation', 'accepted', 'rejected', 'expired', 'superseded',
@@ -245,11 +245,17 @@ export async function acceptQuote(code: string, version: number, user: { id: num
   }
 }
 
-/** The tax position to stamp on a new quotation, taken once at creation. */
-export function taxSnapshot() {
+/**
+ * The tax position to stamp on a new quotation, read once at creation.
+ *
+ * Taken live so that enabling VAT in the console applies to the next
+ * quotation — and stored on the row so it never applies to the last one.
+ */
+export async function taxSnapshot() {
+  const s = await getSettings();
   return {
-    vat_enabled: site.vatEnabled,
-    vat_rate: site.vatEnabled ? site.vatRate : 0,
-    trn_at_issue: site.trn || null,
+    vat_enabled: s.vatEnabled,
+    vat_rate: s.vatEnabled ? s.vatRate : 0,
+    trn_at_issue: s.trn || null,
   };
 }

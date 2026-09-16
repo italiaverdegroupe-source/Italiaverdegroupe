@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import ProductCard from '@/components/ProductCard';
-import { site } from '@/lib/site';
+import { getSettings } from '@/lib/settings';
 import { getAllProducts, getProduct, familySlug } from '@/lib/products';
 
 export function generateStaticParams() {
@@ -25,6 +25,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const p = getProduct((await params).slug);
   if (!p) notFound();
+  const site = await getSettings();
 
   const [w, h] = p.imageSize.split('x').map(Number);
   const related = getAllProducts()

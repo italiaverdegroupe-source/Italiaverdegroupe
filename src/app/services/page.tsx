@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { site } from '@/lib/site';
+import { getSettings } from '@/lib/settings';
 
 export const metadata: Metadata = {
   title: 'Services — supply, import, delivery and planting',
@@ -18,7 +18,8 @@ const SERVICES = [
   ['Project supply', 'Phased consignments held to one specification across a development, so phase four matches phase one.'],
 ];
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const site = await getSettings();
   return (
     <div className="section">
       <div className="wrap">

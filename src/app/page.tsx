@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import RouteMap from '@/components/RouteMap';
 import ProductCard from '@/components/ProductCard';
-import { site } from '@/lib/site';
+import { getSettings } from '@/lib/settings';
 import { getAllProducts, getShowcaseProducts, getFamilies, imageFor } from '@/lib/products';
 
 const HERO_REF = 'VG-OL-002';
@@ -12,7 +12,8 @@ const HERO = imageFor(HERO_REF);
 const SPOT = imageFor(SPOT_REF);
 const BAND = imageFor(BAND_REF);
 
-export default function HomePage() {
+export default async function HomePage() {
+  const site = await getSettings();
   const families = getFamilies();
   const all = getAllProducts();
   const showcase = getShowcaseProducts();
