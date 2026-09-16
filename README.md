@@ -205,3 +205,40 @@ produces a better document with no dependency to keep patched.
 ```bash
 node tests/concurrency.test.mjs
 ```
+
+## Phase 2e — orders, deliveries, invoices, payments
+
+### Fulfilment is partial
+
+An order for 200 trees arrives in three containers over two months. Progress is
+tracked **per line** as a cumulative `delivered_qty`, and the order status is
+*derived* from the lines rather than set by hand — so "partially delivered"
+cannot drift out of step with the quantities. Delivering more than remains is
+refused outright; `tests/partial-delivery.test.mjs` checks the refusal leaves
+nothing half-applied.
+
+### UAE B2B payment reality
+
+Not edge cases here, so they are in the schema:
+
+- **LPO number** — a customer's accounts department pays against their own
+  purchase order number. Without it on the invoice, the invoice waits.
+- **Advance** — an advance invoice bills the agreed percentage, not the order.
+- **Retention** — 5–10% held for months after handover on landscaping work.
+  Counting it as collected on delivery overstates available cash.
+
+### Credit is the cash-flow risk
+
+Contractors pay late. `credit_limit_aed` sits on the customer and the finance
+page opens on outstanding, overdue, and 1–30 / 31–60 / 61–90 / 90+ buckets.
+
+### E-invoicing
+
+UAE e-invoicing is Peppol **PINT AE**: structured XML through an accredited
+provider, not a PDF. Invoices already carry `pint_id` and `pint_status`, and
+snapshot the TRN and VAT position at issue, so switching it on is a mapping
+rather than a migration.
+
+```bash
+node tests/partial-delivery.test.mjs
+```
