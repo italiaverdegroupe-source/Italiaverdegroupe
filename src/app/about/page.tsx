@@ -1,13 +1,24 @@
 import type { Metadata } from 'next';
+import { metadataFor } from '@/lib/content';
 import Link from 'next/link';
 import { getSettings } from '@/lib/settings';
 
-export const metadata: Metadata = {
+/**
+ * Revalidated on a timer as well as on demand.
+ *
+ * Editing in the console revalidates this page immediately, so a correction is
+ * live at once. The timer is for the other case: a deploy whose build could
+ * not reach the database bakes the compiled defaults, and without a window
+ * the FAQs and testimonials someone added last week would quietly vanish
+ * until the next edit. Five minutes means the page heals itself instead.
+ */
+export const revalidate = 300;
+
+export const generateMetadata = (): Promise<Metadata> => metadataFor('/about', {
   title: 'About',
   description:
     'Verde Garden Trading imports premium trees and plants from Italian nurseries and supplies landscaping contractors, developers, hotels and private estates across the UAE.',
-  alternates: { canonical: '/about' },
-};
+});
 
 export default async function AboutPage() {
   const site = await getSettings();

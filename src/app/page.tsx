@@ -1,8 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import RouteMap from '@/components/RouteMap';
 import ProductCard from '@/components/ProductCard';
 import { getSettings } from '@/lib/settings';
+import { getBlocks, fill, publishedFaqs, publishedTestimonials, getSeo } from '@/lib/content';
 import { getAllProducts, getShowcaseProducts, getFamilies, imageFor } from '@/lib/products';
 
 const HERO_REF = 'VG-OL-002';
@@ -12,8 +14,39 @@ const HERO = imageFor(HERO_REF);
 const SPOT = imageFor(SPOT_REF);
 const BAND = imageFor(BAND_REF);
 
+/**
+ * The homepage title is assembled from the live settings rather than pinned,
+ * so renaming the company in the console renames it in search too. A stored
+ * override wins over both.
+ */
+/**
+ * Revalidated on a timer as well as on demand.
+ *
+ * Editing in the console revalidates this page immediately, so a correction is
+ * live at once. The timer is for the other case: a deploy whose build could
+ * not reach the database bakes the compiled defaults, and without a window
+ * the FAQs and testimonials someone added last week would quietly vanish
+ * until the next edit. Five minutes means the page heals itself instead.
+ */
+export const revalidate = 300;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const [site, seo] = await Promise.all([getSettings(), getSeo('/')]);
+  const title = seo?.title ?? `${site.legalName} — ${site.tagline}`;
+  const description = seo?.description ?? site.description;
+  return {
+    title, description,
+    alternates: { canonical: '/' },
+    ...(seo?.noindex ? { robots: { index: false, follow: true } } : {}),
+    openGraph: { title, description },
+  };
+}
+
 export default async function HomePage() {
   const site = await getSettings();
+  const [c, faqs, voices] = await Promise.all([
+    getBlocks(), publishedFaqs(), publishedTestimonials(),
+  ]);
   const families = getFamilies();
   const all = getAllProducts();
   const showcase = getShowcaseProducts();
@@ -33,15 +66,17 @@ export default async function HomePage() {
         <div className="hero-veil" />
 
         <div className="wrap hero-in">
-          <p className="hero-kicker"><span>Italy</span><i /><span>United Arab Emirates</span></p>
-          <h1>Ancient Italian&nbsp;olives.<br /><em>Planted in the Emirates.</em></h1>
+          <p className="hero-kicker">
+            <span>{c['home.hero.kicker.from']}</span><i /><span>{c['home.hero.kicker.to']}</span>
+          </p>
+          <h1>{c['home.hero.title']}<br /><em>{c['home.hero.title.em']}</em></h1>
           <p className="hero-lede">
-            Specimen olive trees, palms and architectural plants — selected at the nursery in
-            {' '}{site.sourcingRegions.join(', ')}, imported, acclimatised, and delivered to
-            site across the UAE.
+            {fill(c['home.hero.lede'], { regions: site.sourcingRegions.join(', ') })}
           </p>
           <div className="hero-cta">
-            <Link href="/catalog" className="btn btn-light btn-lg">Browse {all.length} specimens</Link>
+            <Link href="/catalog" className="btn btn-light btn-lg">
+              {fill(c['home.hero.cta'], { n: all.length })}
+            </Link>
             <Link href="/quote" className="tlink hero-tlink">Request a quote</Link>
           </div>
         </div>
@@ -63,13 +98,10 @@ export default async function HomePage() {
         <div className="wrap">
           <header className="route-head reveal">
             <div>
-              <p className="eyebrow">Where they come from</p>
-              <h2>Four Italian regions.<br />Seven emirates.</h2>
+              <p className="eyebrow">{c['home.route.eyebrow']}</p>
+              <h2>{c['home.route.title']}<br />{c['home.route.title.two']}</h2>
             </div>
-            <p className="route-note">
-              We buy at the grower, not from a middleman. Every consignment is inspected,
-              documented for import, and acclimatised here before it reaches a site.
-            </p>
+            <p className="route-note">{c['home.route.note']}</p>
           </header>
 
           <div className="map-panel reveal">
@@ -168,14 +200,10 @@ export default async function HomePage() {
         <div className="band-media"><Image src={BAND} alt="" fill sizes="100vw" /></div>
         <div className="band-veil" />
         <div className="wrap band-in">
-          <p className="eyebrow band-eyebrow">Why we quote</p>
-          <blockquote>A three-metre olive tree is not a checkout purchase.</blockquote>
-          <p className="band-p">
-            Two trees of the same nominal height differ completely in trunk girth, canopy and
-            character — and so in price. Add freight, season, quantity and site access, and a
-            fixed online price would be a fiction.
-          </p>
-          <Link href="/quote" className="btn btn-light btn-lg">Start an enquiry</Link>
+          <p className="eyebrow band-eyebrow">{c['home.band.eyebrow']}</p>
+          <blockquote>{c['home.band.quote']}</blockquote>
+          <p className="band-p">{c['home.band.body']}</p>
+          <Link href="/quote" className="btn btn-light btn-lg">{c['home.band.cta']}</Link>
         </div>
       </section>
 
@@ -184,7 +212,7 @@ export default async function HomePage() {
         <div className="wrap two-col">
           <div className="reveal">
             <p className="eyebrow">Who we supply</p>
-            <h2>Built for projects.</h2>
+            <h2>{c['home.who.title']}</h2>
             <ul className="chips">
               {site.projectTypes.map((s) => <li key={s}>{s}</li>)}
             </ul>
@@ -195,7 +223,7 @@ export default async function HomePage() {
           </div>
           <div className="reveal">
             <p className="eyebrow">Coverage</p>
-            <h2>All seven emirates.</h2>
+            <h2>{c['home.coverage.title']}</h2>
             <ul className="em-list">
               {site.emirates.map((e, i) => (
                 <li key={e.slug}>
@@ -210,6 +238,75 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ═══════════ testimonials ═══════════
+          Rendered only when a real, consented testimonial exists. An empty
+          section with placeholder praise would be worse than no section. */}
+      {voices.length > 0 && (
+        <section className="section panel">
+          <div className="wrap">
+            <header className="head-row reveal">
+              <div>
+                <p className="eyebrow">Clients</p>
+                <h2>{c['testimonials.title']}</h2>
+              </div>
+            </header>
+            <div className="voices">
+              {voices.map((v) => (
+                <figure key={v.id} className="voice reveal">
+                  <blockquote>{v.body}</blockquote>
+                  <figcaption>
+                    <span className="voice-who">{v.author_name}</span>
+                    <span className="voice-org">
+                      {[v.author_role, v.company].filter(Boolean).join(', ')}
+                    </span>
+                    {(v.project || v.emirate) && (
+                      <span className="voice-proj">
+                        {[v.project, v.emirate].filter(Boolean).join(' · ')}
+                      </span>
+                    )}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ═══════════ questions ═══════════ */}
+      {faqs.length > 0 && (
+        <section className="section">
+          <div className="wrap">
+            <header className="head-row reveal">
+              <div>
+                <p className="eyebrow">Before you enquire</p>
+                <h2>{c['faq.title']}</h2>
+              </div>
+              <p className="route-note">{c['faq.intro']}</p>
+            </header>
+            <div className="faqs">
+              {faqs.map((f) => (
+                <details key={f.id} className="faq reveal">
+                  <summary>{f.question}</summary>
+                  <p>{f.answer}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+          {/* Structured data, so these can answer the question in the search
+              result itself rather than only on the page. */}
+          <script type="application/ld+json" suppressHydrationWarning
+            dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: faqs.map((f) => ({
+                '@type': 'Question',
+                name: f.question,
+                acceptedAnswer: { '@type': 'Answer', text: f.answer },
+              })),
+            }) }} />
+        </section>
+      )}
 
       <style>{`
         /* ── hero ── */
@@ -272,6 +369,46 @@ export default async function HomePage() {
           font-variant-numeric: tabular-nums; letter-spacing: -.03em;
         }
         .stats span { font-size: .78rem; letter-spacing: .05em; color: rgb(251 249 244 / .68); }
+
+        /* ── voices ── */
+        .voices {
+          display: grid; gap: 22px;
+          /* auto-FILL, not auto-fit: with one testimonial published, auto-fit
+             stretches that single card across the full width and it reads as
+             a mistake. Filling keeps the card its own size. */
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        }
+        .voice {
+          margin: 0; padding: 30px 28px; background: #fff;
+          border: 1px solid var(--rule); border-radius: 3px;
+          display: flex; flex-direction: column; gap: 18px;
+        }
+        .voice blockquote {
+          margin: 0; font-family: var(--font-display); font-size: 1.06rem;
+          line-height: 1.55; color: var(--fg);
+        }
+        .voice blockquote::before { content: '“'; }
+        .voice blockquote::after  { content: '”'; }
+        .voice figcaption { display: grid; gap: 2px; margin-top: auto; }
+        .voice-who  { font-weight: 600; font-size: .9rem; }
+        .voice-org  { font-size: .82rem; color: var(--fg-soft); }
+        .voice-proj { font-size: .76rem; color: var(--fg-soft); letter-spacing: .04em; }
+
+        /* ── faqs ── */
+        .faqs { display: grid; gap: 0; border-top: 1px solid var(--rule); }
+        .faq { border-bottom: 1px solid var(--rule); }
+        .faq summary {
+          cursor: pointer; padding: 20px 40px 20px 0; position: relative;
+          font-family: var(--font-display); font-size: 1.04rem; list-style: none;
+        }
+        .faq summary::-webkit-details-marker { display: none; }
+        .faq summary::after {
+          content: '+'; position: absolute; right: 8px; top: 50%;
+          transform: translateY(-50%); font-size: 1.3rem; color: var(--brass-600);
+          transition: transform .18s ease;
+        }
+        .faq[open] summary::after { content: '–'; }
+        .faq p { margin: 0 0 22px; max-width: 68ch; color: var(--fg-soft); }
 
         /* ── route ── */
         .route-sec { background: var(--bg-warm); }

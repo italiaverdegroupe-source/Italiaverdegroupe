@@ -1,13 +1,25 @@
 import type { Metadata } from 'next';
+import { metadataFor } from '@/lib/content';
 import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
 import { getAllProducts, getFamilies, familySlug, sizeBand, SIZE_BANDS, heightMidpoint } from '@/lib/products';
 
-export const metadata: Metadata = {
+/**
+ * Revalidated on a timer as well as on demand.
+ *
+ * Editing in the console revalidates this page immediately, so a correction is
+ * live at once. The timer is for the other case: a deploy whose build could
+ * not reach the database bakes the compiled defaults, and without a window
+ * the FAQs and testimonials someone added last week would quietly vanish
+ * until the next edit. Five minutes means the page heals itself instead.
+ */
+export const revalidate = 300;
+
+export const generateMetadata = (): Promise<Metadata> => metadataFor('/catalog', {
   title: 'Catalogue — Italian trees & plants for the UAE',
   description:
     'Browse specimen olive trees, palms, agaves, cacti and ornamental trees imported from Italy and supplied across the United Arab Emirates. All prices on request.',
-};
+});
 
 type Search = { family?: string; size?: string; sort?: string };
 

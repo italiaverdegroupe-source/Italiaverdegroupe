@@ -1,13 +1,24 @@
 import type { Metadata } from 'next';
+import { metadataFor } from '@/lib/content';
 import Link from 'next/link';
 import { getSettings } from '@/lib/settings';
 
-export const metadata: Metadata = {
+/**
+ * Revalidated on a timer as well as on demand.
+ *
+ * Editing in the console revalidates this page immediately, so a correction is
+ * live at once. The timer is for the other case: a deploy whose build could
+ * not reach the database bakes the compiled defaults, and without a window
+ * the FAQs and testimonials someone added last week would quietly vanish
+ * until the next edit. Five minutes means the page heals itself instead.
+ */
+export const revalidate = 300;
+
+export const generateMetadata = (): Promise<Metadata> => metadataFor('/services', {
   title: 'Services — supply, import, delivery and planting',
   description:
     'Tree supply from Italian nurseries, import and phytosanitary documentation, acclimatisation, delivery with crane offloading, and planting across the UAE.',
-  alternates: { canonical: '/services' },
-};
+});
 
 const SERVICES = [
   ['Nursery sourcing', 'Selection at the grower across Toscana, Puglia, Sicilia and Lombardia — by specification, not from a stock list.'],
