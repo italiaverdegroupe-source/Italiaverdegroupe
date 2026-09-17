@@ -1,8 +1,10 @@
 import type { MetadataRoute } from 'next';
-import { publishedPosts } from '@/lib/content';
+import { publishedPosts, contentLastModified } from '@/lib/content';
 import { getAllProducts, getFamilies } from '@/lib/products';
 import { locations } from '@/lib/locations';
 import { LOCALES, LOCALE_TAG, DEFAULT_LOCALE, localePath } from '@/lib/i18n';
+import { LEGAL_UPDATED } from '@/lib/legal/types';
+import { CATALOGUE } from '@/lib/catalogue-version';
 
 const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://verdegarden.example';
 
@@ -34,7 +36,27 @@ function entry(path: string, rest: Omit<MetadataRoute.Sitemap[number], 'url' | '
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
+  /**
+   * WHAT `lastModified` IS FOR, and what it was doing instead.
+   *
+   * Every entry here used to carry `new Date()`. That tells a crawler all
+   * ninety-five pages changed today — and again tomorrow, and the day after.
+   * Google's own documentation says it ignores lastmod values it judges
+   * unreliable, so the field was not merely useless: it was teaching a
+   * crawler to disregard the one signal that says which pages are worth
+   * re-fetching, on a site whose catalogue genuinely does change.
+   *
+   * Each kind of page now carries a date somebody can point at:
+   *   · editable pages — when the copy or the settings behind them changed
+   *   · the catalogue — when products.json changed
+   *   · the legal pages — the date printed on them
+   *   · an article — the day it was published
+   */
+  const catalogue = new Date(CATALOGUE.updated);
+  const legal = new Date(LEGAL_UPDATED);
+  // A database that cannot be reached must not make every page look new. The
+  // catalogue's own date is the oldest defensible answer, not today's.
+  const edited = (await contentLastModified()) ?? catalogue;
   const staticPages = ['', '/catalog', '/collections', '/services', '/about', '/contact', '/quote', '/journal'];
   // The legal pages are listed too, at a low priority. They are not what anybody
   // is searching for, but a policy that cannot be found is a policy that does
@@ -46,27 +68,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticPages.map((p) => entry(p || '/', {
-      lastModified: now,
+      lastModified: edited,
       changeFrequency: 'weekly' as const,
       priority: p === '' ? 1 : 0.8,
     })),
     ...legalPages.map((p) => entry(p, {
-      lastModified: now,
+      lastModified: legal,
       changeFrequency: 'yearly' as const,
       priority: 0.2,
     })),
     ...getFamilies().map((f) => entry(`/collections/${f.slug}`, {
-      lastModified: now, changeFrequency: 'weekly' as const, priority: 0.7,
+      lastModified: catalogue, changeFrequency: 'weekly' as const, priority: 0.7,
     })),
     ...locations.map((l) => entry(`/locations/${l.slug}`, {
-      lastModified: now, changeFrequency: 'monthly' as const, priority: 0.6,
+      lastModified: edited, changeFrequency: 'monthly' as const, priority: 0.6,
     })),
     ...posts.map((p) => entry(`/journal/${p.slug}`, {
-      lastModified: p.published_at ? new Date(p.published_at) : now,
+      lastModified: p.published_at ? new Date(p.published_at) : edited,
       changeFrequency: 'monthly' as const, priority: 0.5,
     })),
-    ...getAllProducts().map((p) => entry(`/catalog/${p.slug}`, {
-      lastModified: now, changeFrequency: 'weekly' as const, priority: 0.6,
+    // Each specimen carries its photograph. A tree is bought on how it looks,
+    // and an image sitemap is what puts sixty-eight of them into Google Images
+    // — where somebody searching "ancient olive tree Dubai" actually looks.
+    ...getAllProducts().map((p) => ({
+      ...entry(`/catalog/${p.slug}`, {
+        lastModified: catalogue, changeFrequency: 'weekly' as const, priority: 0.6,
+      }),
+      images: [`${base}/products/${p.image}`],
     })),
   ];
 }

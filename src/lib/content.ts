@@ -408,3 +408,31 @@ export async function metadataFor(
     openGraph: { title, description, images: [ogImage] },
   };
 }
+
+/**
+ * When the editable content was last actually changed, per language.
+ *
+ * For `<lastmod>` in the sitemap, and for one reason: the sitemap stamped
+ * almost every URL with `new Date()`. A sitemap that says all ninety-five
+ * pages changed today, every day, is not information — and Google says
+ * plainly that it ignores lastmod it finds unreliable, which means the field
+ * was not merely useless but was training a crawler to disregard the one
+ * signal that tells it what to re-fetch.
+ *
+ * `null` when the database is unreachable or nothing has ever been edited.
+ * The caller falls back to a date it can defend rather than to today.
+ */
+export async function contentLastModified(): Promise<Date | null> {
+  try {
+    const rows = await query<{ at: string | null }>(
+      `SELECT GREATEST(
+                (SELECT max(updated_at) FROM content_blocks),
+                (SELECT max(updated_at) FROM page_seo),
+                (SELECT max(updated_at) FROM settings)
+              )::text AS at`);
+    const at = rows[0]?.at;
+    return at ? new Date(at) : null;
+  } catch {
+    return null;
+  }
+}

@@ -56,6 +56,14 @@ export const EDITABLE = {
   youtube:          { label: 'YouTube link', type: 'url' },
   tiktok:           { label: 'TikTok link', type: 'url' },
   licenceNumber:    { label: 'Trade licence number', type: 'text' },
+  // The half of the company's story that structured data cannot infer: it is
+  // new here and not new in Italy. Left blank until the owner fills them in —
+  // see the note in site.ts for why none of these is guessed at.
+  foundedIn:        { label: 'Founded (year, or yyyy-mm-dd)', type: 'text' },
+  foundedAt:        { label: 'Founded in (city, country)', type: 'text' },
+  italianName:      { label: 'Italian company behind this one, if any', type: 'text' },
+  italianUrl:       { label: 'Its website', type: 'url' },
+  italianSince:     { label: 'Growing / trading in Italy since (year)', type: 'text' },
   trn:              { label: 'TRN (tax registration number)', type: 'text' },
   vatEnabled:       { label: 'Charge VAT', type: 'boolean' },
   vatRate:          { label: 'VAT rate (0.05 = 5%)', type: 'number' },

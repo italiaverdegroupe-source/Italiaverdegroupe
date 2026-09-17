@@ -102,6 +102,63 @@ const dupes = locs.filter((p, i) => locs.indexOf(p) !== i);
 if (dupes.length) fail('sitemap has duplicate URLs', dupes.slice(0, 3).join(' '));
 else ok('no duplicate URLs in the sitemap');
 
+// ── lastmod, which is a promise to a crawler ──
+//
+// Every entry used to say `new Date()`. A sitemap that reports all
+// ninety-five pages as changed today, every day, is not information, and
+// Google's documentation says it ignores lastmod it judges unreliable — so
+// the field was actively teaching a crawler to disregard the one signal that
+// says what is worth re-fetching.
+//
+// Two ways it can quietly go back to lying, both checked here.
+const lastmods = [...sitemap.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map((m) => m[1]);
+// The tell is not the DATE — a written-down date is legitimately today on the
+// day somebody writes it. The tell is the TIME. `new Date()` produces
+// 2026-09-17T21:22:31.065Z, minutes old; a date somebody wrote produces
+// midnight, and a published article produces the hour it went out and then
+// never moves again. So this fails on a stamp that is within an hour of now,
+// which is what a generated one always is and a real one almost never is.
+const nowMs = Date.now();
+const fresh = lastmods.filter((d) => {
+  const t = Date.parse(d);
+  return Number.isFinite(t) && nowMs - t < 3600_000 && nowMs - t > -60_000;
+});
+if (fresh.length > 2) {
+  fail('the sitemap is stamped with the time of the build, not when pages changed',
+    `${fresh.length} of ${lastmods.length} are minutes old — e.g. ${fresh[0]}`);
+} else {
+  ok('lastmod is when a page changed, not when the build ran',
+    `${lastmods.length} entries, ${new Set(lastmods).size} distinct date(s)`);
+}
+
+// THE POINT: a written-down date is only true while somebody keeps it true.
+// The catalogue's date is written by hand in src/lib/catalogue-version.ts
+// because a file timestamp becomes the BUILD time once bundled — so this
+// hashes the catalogue and fails if the data moved without the date moving
+// with it. Change products.json and this tells you, in the same commit.
+{
+  const { createHash } = await import('node:crypto');
+  const { readFileSync } = await import('node:fs');
+  const sha = createHash('sha256')
+    .update(readFileSync('src/data/products.json')).digest('hex');
+  const src = readFileSync('src/lib/catalogue-version.ts', 'utf8');
+  const declared = /sha: '([0-9a-f]{64})'/.exec(src)?.[1];
+  const updated = /updated: '(\d{4}-\d{2}-\d{2})'/.exec(src)?.[1];
+  if (sha !== declared) {
+    fail('the catalogue changed but its date did not',
+      `set updated to today and sha to ${sha} in src/lib/catalogue-version.ts`);
+  } else if (!updated) {
+    fail('catalogue-version.ts has no date');
+  } else {
+    ok('the catalogue\u2019s lastmod matches the catalogue', `${updated} \u00b7 ${sha.slice(0, 12)}\u2026`);
+  }
+}
+
+// ── the images sixty-eight specimen pages are actually bought on ──
+const images = (sitemap.match(/<image:loc>/g) ?? []).length;
+if (images < 60) fail('specimen photographs are not in the sitemap', `${images} images`);
+else ok('every specimen photograph is in the sitemap', `${images} images`);
+
 // ── canonical ──
 for (const p of ['/', '/ar/about', '/it/catalog']) {
   const { html } = await blocks(p);

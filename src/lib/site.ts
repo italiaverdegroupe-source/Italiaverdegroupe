@@ -34,6 +34,29 @@ export const site = {
   licenceNumber: '',
   quoteValidityDays: 30,
 
+  /**
+   * Who this company is in time and place, for the markup a search engine
+   * reads. All four are EMPTY on purpose and are emitted only when set.
+   *
+   * The site's own story is that the trading company is new in the Emirates
+   * while the Italian side of it is not — and there is no way for code to
+   * know a founding year. A guess would become a fact Google repeats, and a
+   * wrong founding date on a company is worse than none, so nothing here is
+   * invented: an empty field is simply left out of the JSON-LD.
+   *
+   * foundedIn        the UAE company's own founding date — '2025' or '2025-04-01'
+   * foundedAt        where it was founded — 'Dubai, United Arab Emirates'
+   * italianName      the Italian company behind it, if there is one
+   * italianUrl       and its website
+   * italianSince     the year the Italian side has been growing or trading —
+   *                  the half of this business that is NOT new
+   */
+  foundedIn: '',
+  foundedAt: '',
+  italianName: '',
+  italianUrl: '',
+  italianSince: '',
+
   sourcingRegions: ['Toscana', 'Sicilia', 'Lombardia', 'Puglia'],
 
   /**

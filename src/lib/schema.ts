@@ -36,6 +36,12 @@ function sameAs(s: Settings): string[] {
 export function organisation(s: Settings, locale: Locale) {
   const social = sameAs(s);
   const hasAddress = Boolean((s.address ?? '').trim());
+  const trimmed = (v: string | undefined) => (v ?? '').trim();
+  const foundedIn = trimmed(s.foundedIn);
+  const foundedAt = trimmed(s.foundedAt);
+  const italianName = trimmed(s.italianName);
+  const italianUrl = trimmed(s.italianUrl);
+  const italianSince = trimmed(s.italianSince);
 
   return {
     '@context': 'https://schema.org',
@@ -89,6 +95,31 @@ export function organisation(s: Settings, locale: Locale) {
             '@type': 'Place',
             name: `${r}, Italy`,
           })),
+        },
+      }
+      : {}),
+    // ── new here, not new in Italy ──
+    //
+    // The thing this company most needs a search engine to understand, and
+    // the thing no amount of prose analysis will reliably give it: the trade
+    // is Italian nursery stock, the selling is in the Emirates, and the two
+    // halves have different ages. `knowsAbout` and `makesOffer` above say
+    // WHAT and FROM WHERE. These say WHEN and BY WHOM.
+    //
+    // Every one is omitted unless the owner has set it. A founding date is a
+    // fact Google will repeat in a Knowledge Panel, and inventing one to fill
+    // a field would be putting a lie into the machine-readable layer of the
+    // site — which is the one place nobody would think to check.
+    ...(foundedIn ? { foundingDate: foundedIn } : {}),
+    ...(foundedAt ? { foundingLocation: { '@type': 'Place', name: foundedAt } } : {}),
+    ...(italianName
+      ? {
+        parentOrganization: {
+          '@type': 'Organization',
+          name: italianName,
+          ...(italianUrl ? { url: italianUrl } : {}),
+          address: { '@type': 'PostalAddress', addressCountry: 'IT' },
+          ...(italianSince ? { foundingDate: italianSince } : {}),
         },
       }
       : {}),

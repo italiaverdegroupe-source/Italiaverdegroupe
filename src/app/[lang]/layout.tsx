@@ -94,6 +94,19 @@ export async function generateMetadata(
       template: `%s — ${site.legalName}`,
     },
     description: site.description,
+    /**
+     * Search Console verification, from the environment.
+     *
+     * Google will not show a property's coverage, its indexing errors or the
+     * queries it is found for until the site proves it owns the domain, and
+     * the meta-tag method is the one that needs no DNS access. Set
+     * GOOGLE_SITE_VERIFICATION on Railway to the content of the tag Search
+     * Console gives you and it appears on every page; leave it unset and
+     * nothing is emitted, rather than an empty tag that verifies nothing.
+     */
+    ...(process.env.GOOGLE_SITE_VERIFICATION
+      ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }
+      : {}),
     alternates: {
       canonical: localePath(lang, '/'),
       languages: { ...languages, 'x-default': localePath(DEFAULT_LOCALE, '/') },

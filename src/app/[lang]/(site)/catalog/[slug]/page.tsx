@@ -64,15 +64,22 @@ export default async function ProductPage(
     url: here,
     category: p.family,
     brand: { '@type': 'Brand', name: site.legalName },
+    // Said on every one of the sixty-eight specimen pages, because it is the
+    // single fact this business turns on and the one a search engine should
+    // not have to infer from prose: the tree was grown in Italy and brought
+    // here. The Organization markup says the company imports from Italy;
+    // this says it about the thing being sold.
+    countryOfOrigin: { '@type': 'Country', name: 'Italy' },
     // What was actually measured on this tree, which is the whole reason a
     // specimen has a page of its own rather than a line in a list.
-    ...(Object.keys(p.attributes ?? {}).length
-      ? {
-        additionalProperty: Object.entries(p.attributes).map(([name, value]) => ({
-          '@type': 'PropertyValue', name, value: String(value),
-        })),
-      }
-      : {}),
+    additionalProperty: [
+      ...Object.entries(p.attributes ?? {}).map(([name, value]) => ({
+        '@type': 'PropertyValue', name, value: String(value),
+      })),
+      // The catalogue's own attributes already carry Origin: Italy, so only
+      // the half they do not say is added here.
+      { '@type': 'PropertyValue', name: 'Imported to', value: 'United Arab Emirates' },
+    ],
     offers: {
       '@type': 'Offer',
       url: here,
