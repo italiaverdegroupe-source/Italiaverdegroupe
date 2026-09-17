@@ -19,6 +19,7 @@ export async function register() {
   const minutes = Number(process.env.ALERT_SCAN_MINUTES ?? 15);
   const { runScan, seedDefaultRules } = await import('@/lib/alerts');
   const { dueForBackup, runBackup } = await import('@/lib/backup');
+  const { drainOutbound } = await import('@/lib/outbound');
 
   const once = async (trigger: 'startup' | 'schedule') => {
     try {
@@ -28,6 +29,19 @@ export async function register() {
     } catch (err) {
       // A failing scan must never take the web server down with it.
       console.error('[alerts] scan failed:', err);
+    }
+
+    // Anything the scan just raised is queued by now, so draining here sends
+    // it on this tick rather than the next one. It rides the same timer for
+    // the same reason the backup does: one schedule is one thing to reason
+    // about, and none of this is urgent to the minute.
+    try {
+      const o = await drainOutbound();
+      if (o.sent || o.failed || o.retried) {
+        console.log(`[outbound] sent ${o.sent}, retrying ${o.retried}, failed ${o.failed}`);
+      }
+    } catch (err) {
+      console.error('[outbound] drain failed:', err);
     }
 
     // The backup rides on the same tick rather than a timer of its own. It

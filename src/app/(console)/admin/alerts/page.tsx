@@ -7,12 +7,25 @@ import {
   ALERT_KINDS, kindByKey, listAlerts, listRules, markDone, reopen,
   runScan, lastRun, outboundQueue, seedDefaultRules, type Severity,
 } from '@/lib/alerts';
+import { drainOutbound, outboundSummary, requeueBlocked } from '@/lib/outbound';
+import { mailProvider, sendMail, mailFrom } from '@/lib/mail';
 
 export const dynamic = 'force-dynamic';
 
 const SEV: Severity[] = ['info', 'warning', 'urgent'];
 const pillFor = (s: string) =>
   s === 'urgent' ? 'pill-lost' : s === 'warning' ? 'pill-negotiation' : 'pill-qualified';
+
+/**
+ * The From address, for display only.
+ *
+ * mailFrom() throws when nothing is configured, which is right for a send and
+ * wrong for a page: a settings screen that 500s because a setting is missing
+ * is the least useful place for it to fail.
+ */
+const safeFrom = () => {
+  try { return mailFrom(); } catch { return 'not set'; }
+};
 
 const when = (v: string | null) => {
   if (!v) return '—';
@@ -32,6 +45,78 @@ async function requireEditor() {
   if (!user) redirect('/admin/login');
   if (user.role === 'viewer') throw new Error('Viewers cannot change alerts.');
   return user;
+}
+
+/**
+ * Send whatever is waiting, now, rather than at the next tick.
+ *
+ * The drain runs on the same fifteen-minute timer as the alert scan, which is
+ * right for a queue nobody is watching and wrong for the ten minutes after
+ * somebody has just pasted in an SMTP password and wants to know.
+ */
+async function sendNow() {
+  'use server';
+  const user = await requireEditor();
+  const r = await drainOutbound({ limit: 50 });
+  await audit({
+    user, action: 'outbound.drained', entity: 'outbound',
+    after: { sent: r.sent, failed: r.failed, retried: r.retried },
+  });
+  revalidatePath('/admin/alerts');
+}
+
+/**
+ * One email to the person who just configured the mailbox.
+ *
+ * Every other message in this system is queued and drained. This one is sent
+ * inline and its error is thrown at the screen, because the only question
+ * being asked is "do these credentials work", and an answer that arrives in a
+ * table fifteen minutes later does not answer it.
+ */
+async function sendTest(formData: FormData) {
+  'use server';
+  await assertSameOrigin();
+  const user = await getSessionUser();
+  if (!user) redirect('/admin/login');
+  if (user.role !== 'owner') throw new Error('Only the owner can send a test.');
+
+  const to = String(formData.get('to') ?? '').trim();
+  if (!to.includes('@')) throw new Error('Enter an email address to send the test to.');
+
+  await sendMail({
+    to,
+    subject: 'Verde Garden Trading — mail is working',
+    text: [
+      'This is the test message from the operations console.',
+      '',
+      `If you are reading it, outgoing mail is configured correctly and every`,
+      `notification queued in the console will now be delivered.`,
+      '',
+      `Sent from: ${mailFrom()}`,
+      `Provider: ${mailProvider()}`,
+    ].join('\n'),
+  });
+
+  await audit({ user, action: 'outbound.test_sent', entity: 'outbound', after: { to } });
+  revalidatePath('/admin/alerts');
+}
+
+/**
+ * Release the backlog that was written 'blocked' when nothing could send.
+ *
+ * Seven days rather than everything. The rows older than that describe stock
+ * levels, permits and quotations as they were months ago; delivering them now
+ * would be a burst of notices about situations that have already resolved,
+ * which is how somebody learns to ignore this system's email.
+ */
+async function requeueNow() {
+  'use server';
+  const user = await requireEditor();
+  const n = await requeueBlocked(7);
+  await audit({
+    user, action: 'outbound.requeued', entity: 'outbound', after: { requeued: n },
+  });
+  revalidatePath('/admin/alerts');
 }
 
 async function dismiss(formData: FormData) {
@@ -112,12 +197,14 @@ export default async function AlertsPage({ searchParams }: {
   const includeDone = show === 'all';
   const view = tab === 'rules' ? 'rules' : tab === 'outbound' ? 'outbound' : 'inbox';
 
-  const [alerts, rules, runs, outbound] = await Promise.all([
+  const [alerts, rules, runs, outbound, counts] = await Promise.all([
     listAlerts({ id: user.id, role: user.role }, { includeDone }),
     listRules(),
     lastRun(),
     outboundQueue(60),
+    outboundSummary(),
   ]);
+  const provider = mailProvider();
   const run = runs[0];
   const open = alerts.filter((a) => !a.done_at);
   const urgent = open.filter((a) => a.severity === 'urgent').length;
@@ -319,14 +406,63 @@ export default async function AlertsPage({ searchParams }: {
 
       {view === 'outbound' && (
         <>
-          <p className="adm-sub">
-            Anything addressed outside the console. Nothing here is sent yet:
-            the company has no domain, no mailbox and no WhatsApp Business
-            account, so there is nothing to authenticate against. These rows
-            wait with the reason attached rather than being dropped — and
-            rather than the system claiming to have sent an email it never
-            could. Once a provider exists it is a setting, not a rebuild.
-          </p>
+          {/* This paragraph used to say "nothing here is sent yet" as a fact
+              about the world. It is a fact about a setting, and the setting
+              can change without anybody editing this file. */}
+          {provider ? (
+            <p className="adm-sub">
+              Anything addressed outside the console. Mail goes out over{' '}
+              <strong>{provider === 'smtp' ? 'SMTP' : 'Resend'}</strong>, from{' '}
+              <strong>{safeFrom()}</strong>. Queued messages are sent on the same
+              fifteen-minute tick as the alert scan; a failure waits and is tried
+              again, up to five times, and then stops with the reason on the row.
+            </p>
+          ) : (
+            <p className="adm-sub">
+              Anything addressed outside the console. <strong>Nothing is being
+              sent</strong>, because no mail provider is configured — set{' '}
+              <code>SMTP_URL</code> (a mailbox on the company domain) or{' '}
+              <code>RESEND_API_KEY</code>, plus <code>MAIL_FROM</code>, and these
+              rows go out on the next tick. They wait with the reason attached
+              rather than being dropped, and rather than this system claiming to
+              have sent an email it never could.
+            </p>
+          )}
+
+          <div className="adm-cards adm-out-cards">
+            {(['queued', 'sending', 'sent', 'failed', 'blocked'] as const).map((k) => (
+              <div className="adm-card" key={k}>
+                <b>{counts[k] ?? 0}</b><span>{k}</span>
+              </div>
+            ))}
+          </div>
+
+          {user.role !== 'viewer' && (
+            <div className="adm-out-acts">
+              <form action={sendNow}>
+                <button type="submit" className="adm-btn" disabled={!provider}>
+                  Send what is waiting
+                </button>
+              </form>
+              {provider && (counts.blocked ?? 0) > 0 && (
+                <form action={requeueNow}>
+                  <button type="submit" className="adm-btn adm-btn-sec">
+                    Requeue the last 7 days of blocked
+                  </button>
+                </form>
+              )}
+              {user.role === 'owner' && (
+                <form action={sendTest} className="adm-out-test">
+                  <input name="to" type="email" className="adm-search"
+                         placeholder="Send a test to…" defaultValue={user.email}
+                         required disabled={!provider} />
+                  <button type="submit" className="adm-btn adm-btn-sec" disabled={!provider}>
+                    Test
+                  </button>
+                </form>
+              )}
+            </div>
+          )}
           {outbound.length === 0 ? (
             <div className="adm-panel adm-pad">
               <p className="adm-empty">
@@ -346,7 +482,11 @@ export default async function AlertsPage({ searchParams }: {
                       <td>{m.address}</td>
                       <td>{m.subject}</td>
                       <td>
-                        <span className={`pill ${m.status === 'sent' ? 'pill-won' : m.status === 'blocked' ? 'pill-negotiation' : 'pill-new'}`}>
+                        <span className={`pill ${
+                          m.status === 'sent' ? 'pill-won'
+                          : m.status === 'failed' ? 'pill-lost'
+                          : m.status === 'blocked' ? 'pill-negotiation'
+                          : 'pill-new'}`}>
                           {m.status}
                         </span>
                         {m.status_note && (

@@ -614,3 +614,12 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
   .adm-t a { display: inline-flex; align-items: center; min-height: 44px; }
   .adm-search { min-height: 44px; }
 }
+
+/* ── the outbound queue ────────────────────────────────────── */
+.adm-out-cards { margin-bottom: 16px; }
+.adm-out-cards .adm-card { padding: 12px 14px; }
+.adm-out-cards .adm-card b { font-size: 1.5rem; }
+.adm-out-cards .adm-card span { text-transform: uppercase; letter-spacing: .12em; font-size: .62rem; }
+.adm-out-acts { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; align-items: center; }
+.adm-out-test { display: flex; gap: 8px; flex: 1 1 280px; }
+.adm-out-test .adm-search { flex: 1 1 auto; }

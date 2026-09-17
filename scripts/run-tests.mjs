@@ -25,6 +25,7 @@ const NEEDS = {
   'content.test.mjs': ['db'],
   'users.test.mjs': ['db'],
   'alerts.test.mjs': ['db'],
+  'outbound.test.mjs': ['db'],
   'backup.test.mjs': ['db'],
   'compliance.test.mjs': ['db'],
   'concurrency.test.mjs': ['db'],
