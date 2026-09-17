@@ -47,6 +47,11 @@
   --line-soft: var(--sand-200);
   --accent:    var(--olive-700);
 
+  /* The header's height, declared once: the bar uses it, and a page whose
+     hero runs under the header pulls itself up by exactly this much. Two
+     hand-tuned numbers drifting apart is how a one-pixel seam appears. */
+  --hdr-h: 78px;
+
   --radius: 3px;
   --radius-lg: 6px;
   --maxw: 1280px;
@@ -60,6 +65,8 @@
 
   --ease: cubic-bezier(.22, 1, .36, 1);
 }
+
+@media (max-width: 560px) { :root { --hdr-h: 66px; } }
 
 *, *::before, *::after { box-sizing: border-box; }
 

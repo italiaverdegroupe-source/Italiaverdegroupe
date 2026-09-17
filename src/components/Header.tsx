@@ -59,10 +59,19 @@ export default function Header() {
           -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
           border-bottom: 1px solid var(--line-soft);
         }
+        /* On a page whose hero is a full-bleed photograph, the bar would cut a
+           line across the top of the picture. :has() lets the header know what
+           the page below it looks like without threading a prop through the
+           layout — the hero's own travertine wash keeps the navigation legible. */
+        body:has(.hero-veil) .hdr {
+          background: linear-gradient(to bottom, rgb(250 247 240 / .86), rgb(250 247 240 / 0));
+          -webkit-backdrop-filter: none; backdrop-filter: none;
+          border-bottom-color: transparent;
+        }
         @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
           .hdr { background: var(--sand-50); }
         }
-        .hdr-in { display: flex; align-items: center; gap: 26px; min-height: 78px; }
+        .hdr-in { display: flex; align-items: center; gap: 26px; min-height: var(--hdr-h); }
 
         .brand { display: flex; align-items: center; gap: 11px; text-decoration: none; color: var(--olive-900); }
         .brand-mark { color: var(--olive-700); display: grid; place-items: center; }
@@ -102,7 +111,7 @@ export default function Header() {
         @media (max-width: 1099px) { .brand { margin-right: auto; } }
         .hdr-cta .btn { white-space: nowrap; }
         @media (max-width: 560px) {
-          .hdr-in { gap: 12px; min-height: 66px; }
+          .hdr-in { gap: 12px; }
           .hdr-cta .btn { padding: .6em .9em; font-size: .78rem; }
         }
         @media (max-width: 380px) {

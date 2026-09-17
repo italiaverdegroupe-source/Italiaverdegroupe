@@ -68,26 +68,57 @@ export default async function HomePage() {
   return (
     <>
       {/* ═══════════ hero ═══════════
-          A split composition rather than a photograph with text laid over it:
-          the words sit on travertine where they are simply readable, and the
-          photograph keeps its full range instead of being dimmed by a scrim to
-          make room for them. */}
+          ONE photograph with the words over it, not two rectangles side by
+          side. The first build split the viewport down the middle and the hard
+          vertical seam is what made it read as a template: the eye sees two
+          unrelated panels instead of one image. Here the photograph runs the
+          full width and a travertine wash fades across it from the left, so
+          the copy sits on a surface that belongs to the same picture. */}
       <section className="hero">
-        <div className="hero-copy">
-          <div className="hero-copy-in">
-            <p className="eyebrow">{c['home.hero.eyebrow']}</p>
-            <h1>{c['home.hero.title']}<br /><em>{c['home.hero.title.em']}</em></h1>
-            <p className="hero-lede">
-              {fill(c['home.hero.lede'], { regions: site.sourcingRegions.join(', ') })}
-            </p>
+        <div className="hero-media">
+          <Image src={HERO} alt="" fill priority sizes="100vw" className="hero-img" />
+        </div>
+        <div className="hero-veil" />
 
-            <div className="hero-cta">
-              <Link href="/catalog" className="btn btn-primary btn-lg">
-                {c['home.hero.cta']} <span aria-hidden="true">&rarr;</span>
-              </Link>
-              <Link href="/quote" className="btn btn-ghost btn-lg">{c['home.hero.cta.two']}</Link>
-            </div>
+        <div className="wrap hero-in">
+          <p className="eyebrow">{c['home.hero.eyebrow']}</p>
+          <h1>{c['home.hero.title']}<br /><em>{c['home.hero.title.em']}</em></h1>
+          <p className="hero-lede">
+            {fill(c['home.hero.lede'], { regions: site.sourcingRegions.join(', ') })}
+          </p>
+          <div className="hero-cta">
+            <Link href="/catalog" className="btn btn-primary btn-lg">
+              {c['home.hero.cta']} <span aria-hidden="true">&rarr;</span>
+            </Link>
+            <Link href="/quote" className="btn btn-ghost btn-lg">{c['home.hero.cta.two']}</Link>
+          </div>
+        </div>
 
+        {/* A seal, not a claim about anybody else: it says where the trees come
+            from, which is the one thing this company can vouch for. */}
+        <span className="hero-seal" aria-hidden="true">
+          <span className="hero-seal-in">
+            <b>{c['home.badge.top']}</b>
+            <strong>{c['home.badge.mid']}</strong>
+            <b>{c['home.badge.low']}</b>
+            <i className="hero-seal-flag" />
+          </span>
+        </span>
+
+        <Link href={`/collections/${heroFamily.slug}`} className="hero-feat">
+          <span className="hero-feat-img">
+            <Image src={`/products/${heroFamily.cover}`} alt="" fill sizes="160px" />
+          </span>
+          <span className="hero-feat-txt">
+            <span className="hero-feat-eyebrow">{c['home.featured.eyebrow']}</span>
+            <span className="hero-feat-name">{heroFamily.name}</span>
+            <span className="hero-feat-note">{c['home.featured.note']}</span>
+          </span>
+          <span className="hero-feat-go" aria-hidden="true">&rarr;</span>
+        </Link>
+
+        <div className="hero-assure-bar">
+          <div className="wrap">
             <ul className="hero-assure">
               {([
                 [c['home.feature.1'], 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20M2 12h20M12 2c2.5 2.7 3.8 6.1 3.8 10S14.5 19.3 12 22c-2.5-2.7-3.8-6.1-3.8-10S9.5 4.7 12 2'],
@@ -96,7 +127,7 @@ export default async function HomePage() {
                 [c['home.feature.4'], 'M12 3l7.5 3v5.3c0 4.3-3 8.3-7.5 9.7-4.5-1.4-7.5-5.4-7.5-9.7V6zM9 12l2.2 2.2L15.3 10'],
               ] as [string, string][]).map(([label, d]) => (
                 <li key={label}>
-                  <svg viewBox="0 0 24 24" width="19" height="19" fill="none"
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none"
                        stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
                        strokeLinejoin="round" aria-hidden="true">
                     <path d={d} />
@@ -106,34 +137,6 @@ export default async function HomePage() {
               ))}
             </ul>
           </div>
-        </div>
-
-        <div className="hero-media">
-          <Image src={HERO} alt="" fill priority sizes="(max-width: 1000px) 100vw, 55vw"
-                 className="hero-img" />
-
-          {/* A seal, not a claim about anybody else: it says where the trees
-              come from, which is the one thing this company can vouch for. */}
-          <span className="hero-seal" aria-hidden="true">
-            <span className="hero-seal-in">
-              <b>{c['home.badge.top']}</b>
-              <strong>{c['home.badge.mid']}</strong>
-              <b>{c['home.badge.low']}</b>
-              <i className="hero-seal-flag" />
-            </span>
-          </span>
-
-          <Link href={`/collections/${heroFamily.slug}`} className="hero-feat">
-            <span className="hero-feat-img">
-              <Image src={`/products/${heroFamily.cover}`} alt="" fill sizes="120px" />
-            </span>
-            <span className="hero-feat-txt">
-              <span className="hero-feat-eyebrow">{c['home.featured.eyebrow']}</span>
-              <span className="hero-feat-name">{heroFamily.name}</span>
-              <span className="hero-feat-note">{c['home.featured.note']}</span>
-            </span>
-            <span className="hero-feat-go" aria-hidden="true">&rarr;</span>
-          </Link>
         </div>
       </section>
 
@@ -379,126 +382,165 @@ export default async function HomePage() {
 
       <style>{`
         /* ── hero ──
-           Two columns on a wide screen, stacked on a narrow one. The
-           photograph runs to the right edge of the viewport rather than
-           stopping at the content gutter — that bleed is most of the effect. */
+           One photograph, full bleed, with a travertine wash drawn across it
+           from the left. The header sits over the top of it rather than on a
+           bar of its own, so the picture starts at the very top of the page. */
         .hero {
-          display: grid; align-items: stretch;
+          position: relative; isolation: isolate;
+          min-height: min(94vh, 940px);
+          display: flex; flex-direction: column; justify-content: center;
+          /* Pulled up under the sticky header so the photograph starts at the
+             top of the page. Without this the bar sits in the flow and leaves
+             a band of travertine above the picture. */
+          margin-top: calc(-1 * var(--hdr-h));
+          padding-top: calc(var(--hdr-h) + clamp(40px, 8vh, 92px));
+          padding-bottom: clamp(120px, 15vh, 190px);
           background: var(--sand-50);
-          border-bottom: 1px solid var(--line-soft);
+          overflow: hidden;
         }
-        .hero-copy { display: flex; align-items: center; padding-block: clamp(48px, 7vw, 96px); }
-        .hero-copy-in {
-          width: 100%; max-width: 620px;
-          margin-inline-start: auto;
-          padding-inline: var(--gutter);
+        .hero-media { position: absolute; inset: 0; z-index: -2; }
+        .hero-img {
+          object-fit: cover; object-position: 62% 48%;
+          /* The catalogue photographs are supplier snapshots in flat light.
+             A little warmth and contrast is grading, not deception — the tree
+             is the tree. */
+          filter: saturate(1.06) contrast(1.06) brightness(1.02);
         }
+        @media (prefers-reduced-motion: no-preference) {
+          .hero-img { animation: kenburns 38s ease-out both; }
+          @keyframes kenburns { from { transform: scale(1.03); } to { transform: scale(1.1); } }
+        }
+
+        .hero-veil {
+          position: absolute; inset: 0; z-index: -1;
+          background:
+            /* The wash. Opaque where the words are, gone by two thirds across,
+               with no hard edge anywhere — the seam is what made the first
+               attempt look like a template. */
+            linear-gradient(97deg,
+              rgb(250 247 240 / .985) 0%,
+              rgb(250 247 240 / .96) 26%,
+              rgb(250 247 240 / .78) 42%,
+              rgb(250 247 240 / .26) 58%,
+              rgb(250 247 240 / .04) 72%,
+              rgb(250 247 240 / 0) 84%),
+            /* a breath of warmth into the sky, which is blown out in the source */
+            linear-gradient(to bottom, rgb(239 226 198 / .34) 0%, rgb(239 226 198 / 0) 34%),
+            linear-gradient(to top, rgb(250 247 240 / .5) 0%, rgb(250 247 240 / 0) 26%);
+        }
+
+        .hero-in { position: relative; z-index: 2; width: 100%; }
         .hero h1 {
-          font-size: clamp(2.6rem, 5.4vw, 4.3rem);
-          line-height: 1.02; letter-spacing: -.035em;
-          margin: 0 0 .5em; color: var(--olive-950);
+          font-size: clamp(2.9rem, 6.4vw, 5.2rem);
+          line-height: .98; letter-spacing: -.04em;
+          margin: 0 0 .42em; color: var(--olive-950); max-width: 13ch;
         }
         .hero h1 em {
           font-style: italic; color: var(--olive-800);
           font-variation-settings: 'SOFT' 40, 'WONK' 1;
         }
         .hero-lede {
-          font-size: clamp(1rem, 1.25vw, 1.12rem); line-height: 1.65;
-          color: var(--fg-soft); max-width: 46ch; margin: 0 0 2.2rem;
+          font-size: clamp(1.02rem, 1.3vw, 1.18rem); line-height: 1.62;
+          color: var(--fg-soft); max-width: 44ch; margin: 0 0 2.4rem;
         }
-        .hero-cta { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 2.6rem; }
-
-        .hero-assure {
-          display: grid; gap: 18px 30px; list-style: none; margin: 0; padding: 26px 0 0;
-          /* Two by two. auto-fit gave three across and one stranded on its own
-             line, which reads as a mistake rather than a set. */
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          border-top: 1px solid var(--line-soft);
-        }
-        .hero-assure li { display: flex; align-items: flex-start; gap: 10px; }
-        .hero-assure svg { color: var(--olive-600); flex: none; margin-top: 1px; }
-        .hero-assure span { font-size: .82rem; line-height: 1.4; color: var(--fg-soft); }
-
-        .hero-media {
-          position: relative; min-height: clamp(360px, 52vw, 680px);
-          overflow: hidden; background: var(--olive-900);
-        }
-        .hero-img { object-fit: cover; object-position: 56% 46%; }
-        @media (prefers-reduced-motion: no-preference) {
-          /* Barely there. A tall crop of a landscape photograph is already
-             close in; a big ken-burns push turns the subject into texture. */
-          .hero-img { animation: kenburns 34s ease-out both; }
-          @keyframes kenburns {
-            from { transform: scale(1); }
-            to   { transform: scale(1.05); }
-          }
-        }
+        .hero-cta { display: flex; flex-wrap: wrap; gap: 14px; }
 
         /* the seal */
         .hero-seal {
-          position: absolute; top: clamp(18px, 3vw, 40px); right: clamp(18px, 3vw, 40px);
-          width: clamp(96px, 11vw, 132px); aspect-ratio: 1; border-radius: 50%;
+          position: absolute; z-index: 2;
+          top: clamp(96px, 13vh, 168px); right: clamp(20px, 4vw, 72px);
+          width: clamp(104px, 10.5vw, 146px); aspect-ratio: 1; border-radius: 50%;
           display: grid; place-items: center; text-align: center;
-          background: rgb(23 32 15 / .82);
-          -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-          border: 1px solid rgb(210 179 124 / .5);
-          box-shadow: 0 10px 30px -12px rgb(10 14 8 / .6);
+          background: rgb(23 32 15 / .9);
+          -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+          box-shadow: 0 14px 40px -14px rgb(10 14 8 / .6);
         }
-        .hero-seal-in { display: grid; gap: 1px; color: var(--brass-100); line-height: 1.25; }
+        /* the inset hairline ring, which is most of why the seal reads as a seal */
+        .hero-seal::after {
+          content: ''; position: absolute; inset: 7px; border-radius: 50%;
+          border: 1px solid rgb(210 179 124 / .62);
+        }
+        .hero-seal-in { display: grid; gap: 2px; color: var(--brass-100); line-height: 1.25; }
         .hero-seal b, .hero-seal strong {
-          font-weight: 500; font-size: clamp(.5rem, .62vw, .58rem);
-          letter-spacing: .2em; text-transform: uppercase;
+          font-weight: 500; font-size: clamp(.48rem, .58vw, .56rem);
+          letter-spacing: .22em; text-transform: uppercase;
         }
         .hero-seal strong {
-          font-family: var(--font-fraunces), serif; font-size: clamp(.72rem, .9vw, .86rem);
-          letter-spacing: .12em; color: #FFFDF8;
+          font-family: var(--font-fraunces), serif; font-size: clamp(.78rem, .95vw, .95rem);
+          letter-spacing: .1em; color: #FFFDF8; text-transform: uppercase;
         }
         .hero-seal-flag {
-          justify-self: center; margin-top: 5px; width: 20px; height: 13px; border-radius: 1px;
+          justify-self: center; margin-top: 6px; width: 21px; height: 14px; border-radius: 1px;
           background: linear-gradient(90deg, #167E3C 0 33.3%, #F3F1EA 33.3% 66.6%, #B4232C 66.6% 100%);
         }
 
         /* the floating collection card */
         .hero-feat {
-          position: absolute; right: clamp(14px, 2.4vw, 34px); bottom: clamp(14px, 2.4vw, 34px);
-          display: flex; align-items: center; gap: 14px;
-          max-width: min(420px, calc(100% - 28px));
-          padding: 12px 16px 12px 12px; border-radius: 6px; text-decoration: none;
-          background: rgb(252 250 245 / .93);
+          position: absolute; z-index: 3;
+          right: clamp(16px, 3vw, 56px); bottom: clamp(104px, 13vh, 150px);
+          display: flex; align-items: center; gap: 16px;
+          max-width: min(430px, calc(100% - 32px));
+          padding: 12px 18px 12px 12px; border-radius: 4px; text-decoration: none;
+          background: rgb(252 250 245 / .94);
           -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
-          border: 1px solid rgb(255 255 255 / .6);
-          box-shadow: 0 20px 48px -22px rgb(10 14 8 / .75);
-          transition: transform .25s var(--ease);
+          box-shadow: 0 24px 60px -26px rgb(10 14 8 / .7);
+          transition: transform .3s var(--ease);
         }
-        .hero-feat:hover { transform: translateY(-2px); }
+        .hero-feat:hover { transform: translateY(-3px); }
         .hero-feat-img {
-          position: relative; flex: none; width: 74px; height: 58px;
-          border-radius: 4px; overflow: hidden; background: var(--bg-warm);
+          position: relative; flex: none; width: 96px; height: 68px;
+          border-radius: 2px; overflow: hidden; background: var(--bg-warm);
         }
         .hero-feat-img img { object-fit: cover; }
-        .hero-feat-txt { display: grid; gap: 2px; min-width: 0; }
+        .hero-feat-txt { display: grid; gap: 3px; min-width: 0; }
         .hero-feat-eyebrow {
-          font-size: .6rem; letter-spacing: .18em; text-transform: uppercase;
-          color: var(--brass-700);
+          font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-400);
         }
         .hero-feat-name {
-          font-family: var(--font-fraunces), serif; font-size: 1rem; color: var(--olive-950);
+          font-family: var(--font-fraunces), serif; font-size: 1.06rem; color: var(--olive-950);
         }
         .hero-feat-note {
-          font-size: .76rem; color: var(--fg-soft);
+          font-size: .78rem; color: var(--fg-soft);
           overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
-        .hero-feat-go { flex: none; color: var(--olive-700); font-size: 1.1rem; }
-
-        @media (min-width: 1000px) {
-          .hero { grid-template-columns: minmax(0, 46fr) minmax(0, 54fr); }
+        .hero-feat-go {
+          flex: none; display: grid; place-items: center;
+          width: 30px; height: 30px; border-radius: 50%;
+          border: 1px solid var(--line); color: var(--olive-700); font-size: .92rem;
         }
-        @media (max-width: 999px) {
-          .hero-copy-in { margin-inline: auto; max-width: 720px; }
+
+        /* the assurances, one row along the foot of the picture */
+        .hero-assure-bar {
+          position: absolute; z-index: 2; left: 0; right: 0; bottom: 0;
+          background: rgb(250 247 240 / .82);
+          -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+          border-top: 1px solid rgb(255 255 255 / .6);
+        }
+        .hero-assure {
+          display: grid; gap: 14px 28px; list-style: none; margin: 0; padding: 20px 0;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+        .hero-assure li { display: flex; align-items: center; gap: 11px; }
+        .hero-assure svg { color: var(--olive-600); flex: none; }
+        .hero-assure span { font-size: .82rem; line-height: 1.35; color: var(--fg-soft); }
+
+        @media (max-width: 1100px) {
           .hero-feat { display: none; }
+        }
+        @media (max-width: 860px) {
+          .hero { min-height: auto; padding-bottom: clamp(150px, 22vh, 210px); }
+          .hero h1 { max-width: 16ch; }
+          .hero-veil {
+            background:
+              linear-gradient(to right, rgb(250 247 240 / .985) 0%, rgb(250 247 240 / .93) 55%, rgb(250 247 240 / .62) 100%),
+              linear-gradient(to top, rgb(250 247 240 / .7) 0%, rgb(250 247 240 / 0) 34%);
+          }
+          .hero-assure { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .hero-seal { width: 88px; top: auto; bottom: calc(100% - 100vh + 260px); }
         }
         @media (max-width: 560px) {
           .hero-cta .btn { width: 100%; }
+          .hero-seal { display: none; }
         }
 
         /* ── what we can prove ── */
