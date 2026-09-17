@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import L from '@/components/L';
 import { useState } from 'react';
 import { site, fallbackContact } from '@/lib/site';
 
@@ -56,7 +56,7 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
           We will come back with availability, lead time and a priced quotation.
           Very large or out-of-season specimens can take longer to confirm with the nursery.
         </p>
-        <Link className="btn btn-primary" href="/catalog">Back to the catalogue</Link>
+        <L className="btn btn-primary" href="/catalog">Back to the catalogue</L>
         <style>{`
           .done { padding: 48px 0; max-width: 56ch; }
           .done-ref { font-size: 1.1rem; }

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import L from '@/components/L';
 import type { ReactNode } from 'react';
 
 export type LegalSection = { id: string; heading: string; body: ReactNode };
@@ -55,11 +55,11 @@ export default function LegalPage({
             {footnote && <div className="lgl-foot">{footnote}</div>}
 
             <p className="lgl-other">
-              Also on this site: <Link href="/privacy">Privacy</Link>{' · '}
-              <Link href="/terms">Terms of use</Link>{' · '}
-              <Link href="/terms-of-sale">Terms of sale</Link>{' · '}
-              <Link href="/refunds">Replacements &amp; refunds</Link>{' · '}
-              <Link href="/disclaimer">Disclaimer</Link>
+              Also on this site: <L href="/privacy">Privacy</L>{' · '}
+              <L href="/terms">Terms of use</L>{' · '}
+              <L href="/terms-of-sale">Terms of sale</L>{' · '}
+              <L href="/refunds">Replacements &amp; refunds</L>{' · '}
+              <L href="/disclaimer">Disclaimer</L>
             </p>
           </div>
         </div>
@@ -184,7 +184,7 @@ export function LegalContact({ site }: {
       ) : (
         <p>
           Our published telephone number and mailbox go live with the company
-          domain. Until they do, the <Link href="/quote">enquiry form</Link> is the
+          domain. Until they do, the <L href="/quote">enquiry form</L> is the
           way to reach us, and every enquiry sent through it is read — including
           one about this policy. We would rather tell you that than print an
           address nobody is answering.

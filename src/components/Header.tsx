@@ -1,6 +1,7 @@
-import Link from 'next/link';
+import L from '@/components/L';
 import { getSettings } from '@/lib/settings';
 import MobileMenu from './MobileMenu';
+import LangSwitch from './LangSwitch';
 
 const NAV = [
   { href: '/catalog', label: 'Catalogue' },
@@ -16,7 +17,7 @@ export default async function Header() {
   return (
     <header className="hdr">
       <div className="wrap hdr-in">
-        <Link href="/" className="brand">
+        <L href="/" className="brand">
           <span className="brand-mark" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M12 21V11" strokeLinecap="round" />
@@ -28,7 +29,7 @@ export default async function Header() {
             <strong>Verde Garden</strong>
             <em>Trading</em>
           </span>
-        </Link>
+        </L>
 
         {/* The lockup from the brand sheet: a hairline rule, then the line that
             says what the company is for. Hidden on narrow screens, where it
@@ -40,17 +41,21 @@ export default async function Header() {
         <nav aria-label="Main">
           <ul className="nav">
             {NAV.map((n) => (
-              <li key={n.href}><Link href={n.href}>{n.label}</Link></li>
+              <li key={n.href}><L href={n.href}>{n.label}</L></li>
             ))}
           </ul>
         </nav>
 
         <div className="hdr-cta">
-          <Link href="/quote" className="btn btn-primary hdr-quote">
+          {/* Before the quote button, not after it. The language control is
+              what a reader who cannot read this page needs FIRST; putting it
+              past the call to action asks them to read the call to action. */}
+          <LangSwitch />
+          <L href="/quote" className="btn btn-primary hdr-quote">
             <span className="hdr-quote-long">Request a quote</span>
             <span className="hdr-quote-short">Quote</span>
             <span className="hdr-quote-arrow" aria-hidden="true">&rarr;</span>
-          </Link>
+          </L>
           {/* Below 900px .nav is display:none, and for a long time nothing
               stood in its place — the catalogue, the collections, the journal
               and the contact page were unreachable on a phone. */}
@@ -145,8 +150,8 @@ export default async function Header() {
         .hdr-cta .btn { padding: .7em 1.3em; font-size: .85rem; }
 
         @media (min-width: 1100px) { .brand-line { display: block; } }
-        @media (min-width: 900px) { .nav { display: flex; } .brand { margin-right: 0; } }
-        @media (max-width: 1099px) { .brand { margin-right: auto; } }
+        @media (min-width: 900px) { .nav { display: flex; } .brand { margin-inline-end: 0; } }
+        @media (max-width: 1099px) { .brand { margin-inline-end: auto; } }
         .hdr-cta .btn { white-space: nowrap; }
         @media (max-width: 560px) {
           .hdr-in { gap: 12px; }

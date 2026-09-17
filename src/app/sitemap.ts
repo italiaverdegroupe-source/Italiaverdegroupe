@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { publishedPosts } from '@/lib/content';
 import { getAllProducts, getFamilies } from '@/lib/products';
 import { locations } from '@/lib/locations';
+import { LOCALES, LOCALE_TAG, DEFAULT_LOCALE, localePath } from '@/lib/i18n';
 
 const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://verdegarden.example';
 
@@ -9,6 +10,28 @@ const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://verdegarden.example';
 // reasoning as the pages: a build that could not reach the database must not
 // leave the sitemap permanently missing the journal.
 export const revalidate = 300;
+
+/**
+ * One entry per page, listing that page in all three languages.
+ *
+ * Not three entries per page. A sitemap that lists /privacy, /ar/privacy and
+ * /it/privacy as three unrelated URLs tells a crawler there are three pages;
+ * `alternates.languages` on ONE entry tells it there is one page in three
+ * languages, which is the thing that is true and the thing that makes the
+ * Arabic version show up for an Arabic reader instead of competing with the
+ * English one.
+ */
+function entry(path: string, rest: Omit<MetadataRoute.Sitemap[number], 'url' | 'alternates'>) {
+  return {
+    url: `${base}${localePath(DEFAULT_LOCALE, path)}`,
+    alternates: {
+      languages: Object.fromEntries(
+        LOCALES.map((l) => [LOCALE_TAG[l], `${base}${localePath(l, path)}`]),
+      ),
+    },
+    ...rest,
+  };
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
@@ -22,33 +45,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await publishedPosts();
 
   return [
-    ...staticPages.map((p) => ({
-      url: `${base}${p}`,
+    ...staticPages.map((p) => entry(p || '/', {
       lastModified: now,
       changeFrequency: 'weekly' as const,
       priority: p === '' ? 1 : 0.8,
     })),
-    ...legalPages.map((p) => ({
-      url: `${base}${p}`,
+    ...legalPages.map((p) => entry(p, {
       lastModified: now,
       changeFrequency: 'yearly' as const,
       priority: 0.2,
     })),
-    ...getFamilies().map((f) => ({
-      url: `${base}/collections/${f.slug}`,
+    ...getFamilies().map((f) => entry(`/collections/${f.slug}`, {
       lastModified: now, changeFrequency: 'weekly' as const, priority: 0.7,
     })),
-    ...locations.map((l) => ({
-      url: `${base}/locations/${l.slug}`,
+    ...locations.map((l) => entry(`/locations/${l.slug}`, {
       lastModified: now, changeFrequency: 'monthly' as const, priority: 0.6,
     })),
-    ...posts.map((p) => ({
-      url: `${base}/journal/${p.slug}`,
+    ...posts.map((p) => entry(`/journal/${p.slug}`, {
       lastModified: p.published_at ? new Date(p.published_at) : now,
       changeFrequency: 'monthly' as const, priority: 0.5,
     })),
-    ...getAllProducts().map((p) => ({
-      url: `${base}/catalog/${p.slug}`,
+    ...getAllProducts().map((p) => entry(`/catalog/${p.slug}`, {
       lastModified: now, changeFrequency: 'weekly' as const, priority: 0.6,
     })),
   ];

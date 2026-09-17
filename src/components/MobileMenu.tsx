@@ -1,7 +1,9 @@
 'use client';
 
-import Link from 'next/link';
+import L from '@/components/L';
+import LangSwitch from './LangSwitch';
 import { usePathname } from 'next/navigation';
+import { splitLocale } from '@/lib/i18n';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useHydrated } from '@/lib/use-hydrated';
@@ -28,7 +30,9 @@ export default function MobileMenu({
   quoteHref?: string;
   contact?: { email: string; phone: string; whatsapp: string; whatsappLabel: string };
 }) {
-  const path = usePathname();
+  // Unprefixed, so the 'you are here' marker still matches the hrefs — which
+  // are written unprefixed — on /ar and /it as well as on English.
+  const path = splitLocale(usePathname()).path;
   const panel = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
 
@@ -135,14 +139,14 @@ export default function MobileMenu({
               const here = n.href === '/' ? path === '/' : path.startsWith(n.href);
               return (
                 <li key={n.href}>
-                  <Link href={n.href} aria-current={here ? 'page' : undefined}
+                  <L href={n.href} aria-current={here ? 'page' : undefined}
                         className={here ? 'on' : undefined}>
                     {n.label}
                     <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
                          strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M9 18l6-6-6-6" />
                     </svg>
-                  </Link>
+                  </L>
                 </li>
               );
             })}
@@ -150,9 +154,14 @@ export default function MobileMenu({
         </nav>
 
         <div className="mnu-foot">
-          <Link href={quoteHref} className="btn btn-primary btn-lg mnu-cta">
+          {/* The same control as the header. On a phone the header has room
+              for a logo and one button, so this is the only place a reader
+              can change language — leaving it out of the drawer would make
+              the site monolingual on the device most of its traffic uses. */}
+          <div className="mnu-lang"><LangSwitch id="lang-mobile" /></div>
+          <L href={quoteHref} className="btn btn-primary btn-lg mnu-cta">
             Request a quote
-          </Link>
+          </L>
           {/* Only channels that are actually configured. The rule everywhere
               else on this site applies here too. */}
           {contact?.whatsappLabel && wa && (
@@ -193,12 +202,15 @@ export default function MobileMenu({
 
         .mnu {
           position: fixed; z-index: 71;
-          top: 0; right: 0; bottom: 0;
+          top: 0; inset-inline-end: 0; bottom: 0;
           width: min(86vw, 22rem);
           display: flex; flex-direction: column;
           background: var(--bg-warm);
           border-inline-start: 1px solid var(--line);
           box-shadow: -18px 0 46px -18px rgb(10 20 8 / .3);
+/* 101% of the INLINE direction. translateX is physical, so in Arabic
+             the closed drawer would be parked off the right of a screen it
+             opens from the left — visible, over the page, all the time. */
           transform: translateX(101%);
           transition: transform .26s var(--ease);
           overflow-y: auto; overscroll-behavior: contain;

@@ -1,7 +1,8 @@
 'use client';
 
-import Link from 'next/link';
+import L from '@/components/L';
 import { usePathname } from 'next/navigation';
+import { splitLocale } from '@/lib/i18n';
 import { useShortlist } from '@/lib/use-shortlist';
 
 /**
@@ -13,7 +14,10 @@ import { useShortlist } from '@/lib/use-shortlist';
  * the shortlist page itself, where it would point at the page you are on.
  */
 export default function ShortlistBar() {
-  const path = usePathname();
+  // The locale prefix is stripped first. '/ar/shortlist'.startsWith('/shortlist')
+  // is false, so without this the floating bar would sit on top of the very
+  // page it points at, in both translated languages.
+  const { path } = splitLocale(usePathname());
   const list = useShortlist();
   const items = list.length;
   const count = list.reduce((s, i) => s + i.qty, 0);
@@ -21,7 +25,7 @@ export default function ShortlistBar() {
   if (items === 0 || path.startsWith('/shortlist')) return null;
 
   return (
-    <Link href="/shortlist" className="slb">
+    <L href="/shortlist" className="slb">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
            strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
@@ -35,7 +39,7 @@ export default function ShortlistBar() {
       <style>{`
         .slb {
           position: fixed; z-index: 60;
-          left: clamp(14px, 2.2vw, 26px); bottom: clamp(14px, 2.2vw, 26px);
+          inset-inline-start: clamp(14px, 2.2vw, 26px); bottom: clamp(14px, 2.2vw, 26px);
           display: inline-flex; align-items: center; gap: 10px;
           padding: 12px 16px; border-radius: 999px;
           background: var(--olive-900); color: #FBF9F4; text-decoration: none;
@@ -48,7 +52,7 @@ export default function ShortlistBar() {
         .slb em { font-style: normal; opacity: .72; }
         .slb-go { opacity: .7; }
         @media (max-width: 420px) {
-          .slb { padding: 10px 13px; gap: 8px; font-size: .8rem; left: 10px; bottom: 10px; }
+          .slb { padding: 10px 13px; gap: 8px; font-size: .8rem; inset-inline-start: 10px; bottom: 10px; }
           .slb em { display: none; }
         }
         @media (prefers-reduced-motion: reduce) {
@@ -57,6 +61,6 @@ export default function ShortlistBar() {
         }
         @media print { .slb { display: none; } }
       `}</style>
-    </Link>
+    </L>
   );
 }

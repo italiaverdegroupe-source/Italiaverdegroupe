@@ -76,7 +76,7 @@ check('an unknown token is left visible rather than blanked',
 const seoOf = (path) => JSON.parse(execFileSync(process.execPath, ['-e', `
   process.env.DATABASE_URL = ${JSON.stringify(process.env.DATABASE_URL)};
   const C = require('${process.cwd()}/.test-build/content.cjs');
-  C.metadataFor('${path}', { title: 'Built in', description: 'Built in description' })
+  C.metadataFor('en', '${path}', { title: 'Built in', description: 'Built in description' })
     .then((m) => { console.log(JSON.stringify(m)); process.exit(0); });
 `], { encoding: 'utf8' }));
 
@@ -91,6 +91,20 @@ check('a title of spaces does not blank the page title',
 await db.query(`UPDATE page_seo SET noindex = true WHERE path = '/about'`);
 check('hiding a page from search is expressed as noindex, follow',
       seoOf('/about').robots?.index === false && seoOf('/about').robots?.follow === true);
+
+// The SEO override is per PAGE, and the page exists in three languages. A
+// canonical without its translations tells a crawler the Arabic page is a
+// duplicate of the English one rather than a translation of it, so the two
+// are built together in one place and checked together here.
+const alts = seoOf('/about').alternates;
+check('the canonical is the page in the language it was asked for',
+      alts?.canonical === '/about', String(alts?.canonical));
+check('THE POINT: and it carries every language, not just its own',
+      alts?.languages?.['en-AE'] === '/about'
+      && alts?.languages?.['ar-AE'] === '/ar/about'
+      && alts?.languages?.['it-IT'] === '/it/about'
+      && alts?.languages?.['x-default'] === '/about',
+      JSON.stringify(alts?.languages));
 
 // ── a testimonial must be consented to ───────────────────────
 let refused = false;

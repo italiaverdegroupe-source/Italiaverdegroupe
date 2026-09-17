@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import L from '@/components/L';
 import { getSettings } from '@/lib/settings';
 import { getFamilies, getAllProducts } from '@/lib/products';
 import { site as fallback } from '@/lib/site';
@@ -19,7 +19,7 @@ export default async function Footer() {
         {/* ── the company ───────────────────────────────────── */}
         <div className="ftr-top">
           <div className="ftr-id">
-            <Link href="/" className="ftr-lockup">
+            <L href="/" className="ftr-lockup">
               <span className="ftr-mark" aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="26" height="26" fill="none"
                      stroke="currentColor" strokeWidth="1.5">
@@ -32,7 +32,7 @@ export default async function Footer() {
                 <strong>{site.brandName}</strong>
                 <em>Trading</em>
               </span>
-            </Link>
+            </L>
             <p className="ftr-tag">{site.tagline}</p>
             <p className="ftr-note">{site.description}</p>
             <Social links={site} className="ftr-soc" />
@@ -42,9 +42,9 @@ export default async function Footer() {
             <nav className="ftr-col" aria-label="Catalogue">
               <h3 className="ftr-h">Catalogue</h3>
               <ul>
-                <li><Link href="/catalog">All {total} specimens</Link></li>
+                <li><L href="/catalog">All {total} specimens</L></li>
                 {families.map((f) => (
-                  <li key={f.slug}><Link href={`/collections/${f.slug}`}>{f.name}</Link></li>
+                  <li key={f.slug}><L href={`/collections/${f.slug}`}>{f.name}</L></li>
                 ))}
               </ul>
             </nav>
@@ -52,11 +52,11 @@ export default async function Footer() {
             <nav className="ftr-col" aria-label="Company">
               <h3 className="ftr-h">Company</h3>
               <ul>
-                <li><Link href="/about">About us</Link></li>
-                <li><Link href="/services">Services</Link></li>
-                <li><Link href="/journal">Journal</Link></li>
-                <li><Link href="/contact">Contact</Link></li>
-                <li><Link href="/legal">Legal</Link></li>
+                <li><L href="/about">About us</L></li>
+                <li><L href="/services">Services</L></li>
+                <li><L href="/journal">Journal</L></li>
+                <li><L href="/contact">Contact</L></li>
+                <li><L href="/legal">Legal</L></li>
               </ul>
             </nav>
 
@@ -79,9 +79,9 @@ export default async function Footer() {
                 </ul>
               )}
               <ul>
-                <li><Link href="/quote">Request a quote</Link></li>
-                <li><Link href="/quote?type=bulk">Bulk &amp; project pricing</Link></li>
-                <li><Link href="/quote?type=sourcing">Source a specific tree</Link></li>
+                <li><L href="/quote">Request a quote</L></li>
+                <li><L href="/quote?type=bulk">Bulk &amp; project pricing</L></li>
+                <li><L href="/quote?type=sourcing">Source a specific tree</L></li>
               </ul>
             </div>
           </div>
@@ -94,9 +94,9 @@ export default async function Footer() {
             <dd>
               {/* Was a column of eight links. Seven is the number, and a list
                   of them was a lot of footer for one sentence. */}
-              <Link href="/locations/dubai">
+              <L href="/locations/dubai">
                 All {WORDS[site.emirates.length] ?? site.emirates.length} emirates
-              </Link>
+              </L>
             </dd>
           </div>
           <div>
@@ -114,11 +114,11 @@ export default async function Footer() {
         {/* ── the small print ───────────────────────────────── */}
         <div className="ftr-base">
           <nav className="ftr-legal" aria-label="Legal">
-            <Link href="/privacy">Privacy</Link>
-            <Link href="/terms">Terms of use</Link>
-            <Link href="/terms-of-sale">Terms of sale</Link>
-            <Link href="/refunds">Replacements &amp; refunds</Link>
-            <Link href="/disclaimer">Disclaimer</Link>
+            <L href="/privacy">Privacy</L>
+            <L href="/terms">Terms of use</L>
+            <L href="/terms-of-sale">Terms of sale</L>
+            <L href="/refunds">Replacements &amp; refunds</L>
+            <L href="/disclaimer">Disclaimer</L>
           </nav>
           <p>© {new Date().getFullYear()} {site.legalName}. All prices on request.</p>
           <p className="ftr-sm">

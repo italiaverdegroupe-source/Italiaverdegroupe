@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import L from '@/components/L';
 import Image from 'next/image';
 import type { Product } from '@/lib/products';
 import ShortlistButton from '@/components/ShortlistButton';
@@ -11,7 +11,7 @@ export default function ProductCard({ p, priority = false }: { p: Product; prior
   const [w, h] = p.imageSize.split('x').map(Number);
   return (
     <article className="spec reveal">
-      <Link href={`/catalog/${p.slug}`} className="spec-link">
+      <L href={`/catalog/${p.slug}`} className="spec-link">
         <div className="spec-frame">
           <Image
             src={`/products/${p.image}`}
@@ -54,7 +54,7 @@ export default function ProductCard({ p, priority = false }: { p: Product; prior
           </dl>
           <span className="spec-cta">{p.price || 'On request'}</span>
         </div>
-      </Link>
+      </L>
 
       {/* Outside the anchor on purpose: a button nested inside a link is
           invalid HTML, and a keyboard user landing on it would be told they
@@ -79,14 +79,14 @@ export default function ProductCard({ p, priority = false }: { p: Product; prior
         .spec:hover .spec-frame img { transform: scale(1.055); }
 
         .spec-ref {
-          position: absolute; left: 10px; top: 10px;
+          position: absolute; inset-inline-start: 10px; top: 10px;
           padding: .32em .6em;
           font-size: .62rem; font-weight: 600; letter-spacing: .13em;
           color: var(--sand-50); background: rgb(20 21 15 / .52);
           backdrop-filter: blur(6px); border-radius: 2px;
         }
         .spec-flag {
-          position: absolute; left: 10px; bottom: 10px;
+          position: absolute; inset-inline-start: 10px; bottom: 10px;
           display: inline-flex; align-items: center; gap: .45em;
           padding: .34em .68em; font-size: .75rem; letter-spacing: .03em;
           background: rgb(16 21 9 / .82); color: #F3EFE4; border-radius: 2px;

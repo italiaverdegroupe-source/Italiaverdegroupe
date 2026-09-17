@@ -171,7 +171,7 @@ img, svg { max-width: 100%; display: block; }
 }
 .faq summary::-webkit-details-marker { display: none; }
 .faq summary::after {
-  content: '+'; position: absolute; right: 8px; top: 50%;
+  content: '+'; position: absolute; inset-inline-end: 8px; top: 50%;
   transform: translateY(-50%); font-size: 1.3rem; color: var(--brass-700);
   transition: transform .18s ease;
 }
@@ -257,3 +257,129 @@ img, svg { max-width: 100%; display: block; }
   position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip-path: inset(50%); white-space: nowrap;
 }
+
+/* ═══════════ the language switcher ═══════════ */
+.lang { position: relative; }
+.lang-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 40px; padding: 0 10px;
+  background: transparent; border: 1px solid transparent; border-radius: 4px;
+  font: inherit; font-size: .84rem; color: var(--ink-600); cursor: pointer;
+}
+.lang-btn:hover { color: var(--olive-800); border-color: var(--line-soft); }
+.lang-caret {
+  width: 0; height: 0; margin-inline-start: 1px;
+  border-inline: 3.5px solid transparent; border-top: 4px solid currentColor;
+}
+/* A finger, not a mouse. Same rule as every other target on the site. */
+@media (pointer: coarse) { .lang-btn { min-height: 44px; } }
+
+/* On a narrow phone the header holds a logo, a quote button and a menu
+   button, and there is no room for a fourth control: at 320px adding this one
+   pushed the header 34px past the edge and gave the whole site a sideways
+   scroll. It is not lost — the drawer carries the same switcher, and below
+   this width the drawer is how everything else on the site is reached too. */
+@media (max-width: 479px) { .hdr .lang { display: none; } }
+
+.lang-menu {
+  position: absolute; z-index: 60; top: calc(100% + 6px);
+  /* Logical, not left/right: in Arabic the header is mirrored and a menu
+     pinned to `right` would open off the side of the screen. */
+  inset-inline-end: 0;
+  min-width: 168px; margin: 0; padding: 5px; list-style: none;
+  background: var(--bg-raised, #FFFDF9);
+  border: 1px solid var(--line); border-radius: 6px;
+  box-shadow: 0 18px 44px -20px rgb(10 14 8 / .3);
+}
+.lang-menu a {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  min-height: 40px; padding: 0 10px; border-radius: 4px;
+  font-size: .9rem; color: var(--ink-800); text-decoration: none;
+}
+.lang-menu a:hover { background: var(--sand-100, #F3EFE6); color: var(--olive-900); }
+.lang-menu a[aria-current='true'] { color: var(--olive-800); font-weight: 600; }
+.lang-tick { font-style: normal; color: var(--olive-600); }
+@media (pointer: coarse) { .lang-menu a { min-height: 44px; } }
+
+.mnu-lang { margin-bottom: 14px; }
+.mnu-lang .lang-btn { border-color: var(--line); width: 100%; justify-content: center; }
+
+/* ═══════════ Arabic ═══════════
+   Everything above is written with logical properties where it matters, so
+   most of the site mirrors itself. These are the places where a physical
+   direction was baked in and a mirrored page would otherwise be wrong. */
+[dir='rtl'] {
+  /* Amiri for display and IBM Plex Sans Arabic for text, loaded only on
+     Arabic pages — see the note in the root layout. The fallbacks matter:
+     between the font arriving and not, an Arabic page must not render in a
+     Latin serif with no Arabic glyphs at all. */
+  --font-display: var(--font-arabic-display), 'Amiri', 'Times New Roman', serif;
+  --font-sans: var(--font-arabic-body), 'Segoe UI', Tahoma, sans-serif;
+}
+[dir='rtl'] h1, [dir='rtl'] h2, [dir='rtl'] h3,
+[dir='rtl'] .ftr-lockup-txt strong, [dir='rtl'] .hero h1 {
+  font-family: var(--font-display);
+  /* Arabic has no italic. Fraunces' second line is set in italic, and a
+     synthesised slant on naskh is not a style, it is damage. */
+  font-style: normal;
+  /* Tight Latin tracking closes up Arabic joins until the word is a smear. */
+  letter-spacing: 0;
+}
+[dir='rtl'] .hero h1 em { font-style: normal; }
+/* Arabic ascenders and descenders need more room than Latin at the same size. */
+[dir='rtl'] h1, [dir='rtl'] h2 { line-height: 1.35; }
+[dir='rtl'] p, [dir='rtl'] li { line-height: 1.95; }
+
+/* An arrow drawn to point at the next thing points the other way when the
+   next thing is to the left. Glyph arrows are flipped; SVG chevrons already
+   sit inside mirrored flex rows, so only the drawn ones need this. */
+[dir='rtl'] .hdr-quote-arrow,
+[dir='rtl'] .hero-feat-go,
+[dir='rtl'] .btn .arrow { display: inline-block; transform: scaleX(-1); }
+
+/* Numbers, references and dates stay left-to-right inside Arabic sentences.
+   VG-OL-007 rendered right-to-left is not the reference anybody can search. */
+[dir='rtl'] .ref, [dir='rtl'] code, [dir='rtl'] .adm-t td:has(code),
+[dir='rtl'] .proof-list strong, [dir='rtl'] .stat-n {
+  direction: ltr; unicode-bidi: isolate;
+}
+
+/* translateX is physical and cannot be written logically, so the drawer's
+   parked position is mirrored here instead. Without this the Arabic menu sits
+   open over the page: it is pushed off the right while it opens from the left. */
+[dir='rtl'] .mnu { transform: translateX(-101%); }
+[dir='rtl'] .mnu.on { transform: translateX(0); }
+
+/* ── mixed scripts on an Arabic page ──
+   An Arabic page is never all Arabic. Botanical names are Latin by definition
+   (Olea europaea), references are Latin and numeric (VG-OL-007), the growing
+   regions are Italian, and until a block has been translated its text is still
+   English. Inside dir="rtl" the browser reorders a Latin sentence's trailing
+   punctuation to the other end, so "Ancient Italian olives." renders as
+   ".Ancient Italian olives" — which is what the untranslated pages did.
+
+   `unicode-bidi: plaintext` takes each paragraph's direction from its own
+   first strong character instead of from the page, which is the correct answer
+   for every one of those cases and needs no markup change. */
+[dir='rtl'] h1, [dir='rtl'] h2, [dir='rtl'] h3, [dir='rtl'] h4,
+[dir='rtl'] p, [dir='rtl'] li, [dir='rtl'] dt, [dir='rtl'] dd,
+[dir='rtl'] figcaption, [dir='rtl'] blockquote, [dir='rtl'] label,
+[dir='rtl'] th, [dir='rtl'] td, [dir='rtl'] summary,
+/* and the inline labels, which in this design are whole phrases rather than
+   words inside a sentence — a card's note, a stat's caption, a chip. */
+[dir='rtl'] span, [dir='rtl'] strong, [dir='rtl'] em, [dir='rtl'] small {
+  unicode-bidi: plaintext;
+}
+
+/* ── the hero does not mirror ──
+   The photograph behind it is fixed: the sunrise and the skyline are on the
+   left of the frame and the olive tree is on the right. Mirroring the layout
+   moved the copy pane on top of the tree and left the sky empty, and put the
+   seal and the featured-collection card on top of the pane.
+
+   Reading direction mirrors. A photograph does not. The pane stays over the
+   sky in every language and right-aligns its Arabic inside itself, which is
+   what a designer laying this out in Arabic would have done anyway. */
+[dir='rtl'] .hero-card { margin-inline-start: auto; }
+[dir='rtl'] .hero-seal { inset-inline-end: auto; inset-inline-start: clamp(20px, 4vw, 72px); }
+[dir='rtl'] .hero-feat { inset-inline-end: auto; inset-inline-start: clamp(16px, 3vw, 56px); }

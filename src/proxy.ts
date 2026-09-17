@@ -76,25 +76,55 @@ function redirectFrom(canonical: string): RegExp[] {
   ];
 }
 
+/**
+ * Paths this never touches.
+ *
+ * The console, the API, and anything with a file extension — robots.txt,
+ * sitemap.xml, icon.svg, a photograph. The extension rule is the one that
+ * matters: the locale rewrite below would otherwise turn /robots.txt into
+ * /en/robots.txt, which is not a route, so the file that tells crawlers what
+ * to do would 404 and nobody would notice until the site stopped being
+ * crawled.
+ */
+function isExempt(pathname: string): boolean {
+  return pathname.startsWith('/admin')
+    || pathname.startsWith('/api')
+    || pathname.startsWith('/_next')
+    || /\.[a-z0-9]+$/i.test(pathname);
+}
+
+/** Already carries a locale that has its own prefix. */
+const PREFIXED = /^\/(ar|it)(\/|$)/;
+
 export function proxy(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+  if (isExempt(pathname)) return NextResponse.next();
+
+  // ── English has no prefix ───────────────────────────────────
+  // /en/catalog and /catalog would otherwise be two URLs serving one page,
+  // which is the duplicate-content problem this file was written for, aimed
+  // at ourselves. The short one is canonical because it is the one already
+  // published; the long one permanently redirects to it.
+  if (pathname === '/en' || pathname.startsWith('/en/')) {
+    const url = req.nextUrl.clone();
+    url.pathname = pathname.slice(3) || '/';
+    return NextResponse.redirect(url, 308);
+  }
+
   const canonical = canonicalHost();
 
   // The console is never indexed at any host, and never redirected — moving a
-  // signed-in operator between hostnames would drop the session cookie.
-  const isConsole = req.nextUrl.pathname.startsWith('/admin')
-    || req.nextUrl.pathname.startsWith('/api/admin');
-
-  if (!canonical || isConsole) return NextResponse.next();
-
-  // x-forwarded-host is what the platform's proxy sets; host is the fallback.
+  // signed-in operator between hostnames would drop the session cookie. (It
+  // is already exempt above; this is the host logic's own reading of it.)
   const seen = (req.headers.get('x-forwarded-host') ?? req.headers.get('host') ?? '')
     .split(',')[0].trim().toLowerCase();
-  if (!seen || seen === canonical || PASS_THROUGH.has(seen)) return NextResponse.next();
+  const wrongHost = Boolean(canonical) && Boolean(seen)
+    && seen !== canonical && !PASS_THROUGH.has(seen);
 
-  if (process.env.CANONICAL_REDIRECT === '1'
-      && redirectFrom(canonical).some((re) => re.test(seen))) {
+  if (wrongHost && process.env.CANONICAL_REDIRECT === '1'
+      && redirectFrom(canonical!).some((re) => re.test(seen))) {
     const url = req.nextUrl.clone();
-    url.host = canonical;
+    url.host = canonical!;
     url.port = '';
     url.protocol = 'https:';
     // 308, not 302: permanent, and it keeps the method, so a POST to the wrong
@@ -102,8 +132,16 @@ export function proxy(req: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
-  const res = NextResponse.next();
-  res.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  // ── the locale rewrite ──────────────────────────────────────
+  // A REWRITE, not a redirect. The address bar keeps saying /catalog while the
+  // router resolves /en/catalog, so every URL this site has ever published
+  // still answers at the address it was published at — no extra hop, no
+  // re-indexing, no dead links in anybody's email.
+  const res = PREFIXED.test(pathname)
+    ? NextResponse.next()
+    : NextResponse.rewrite(new URL(`/en${pathname === '/' ? '' : pathname}`, req.url));
+
+  if (wrongHost) res.headers.set('X-Robots-Tag', 'noindex, nofollow');
   return res;
 }
 

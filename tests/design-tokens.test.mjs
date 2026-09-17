@@ -50,15 +50,37 @@ check('the stylesheet was actually read', files.length > 10 && defined.size > 20
 // console that forgot would fall back to the browser's serif on every screen.
 const roots = files.filter((f) => /layout\.tsx$/.test(f) && readFileSync(f, 'utf8').includes('<html'));
 check('both root layouts were found', roots.length === 2, roots.join(', '));
-const fromFont = ['--font-inter', '--font-fraunces'];
-for (const t of fromFont) {
-  const declaring = roots.filter((f) => {
-    const s = readFileSync(f, 'utf8');
-    return s.includes(`variable: '${t}'`) || s.includes(`variable: "${t}"`);
-  });
+const declaresFont = (f, t) => {
+  const s = readFileSync(f, 'utf8');
+  return s.includes(`variable: '${t}'`) || s.includes(`variable: "${t}"`);
+};
+
+const latinFonts = ['--font-inter', '--font-fraunces'];
+for (const t of latinFonts) {
+  const declaring = roots.filter((f) => declaresFont(f, t));
   check(`${t} is declared by next/font in every root layout`,
     declaring.length === roots.length, `${declaring.length} of ${roots.length}`);
 }
+
+// The Arabic faces are the opposite rule: the SITE layout must declare them,
+// and the console must not. Arabic pages set --font-sans and --font-display to
+// these under [dir='rtl'], so a site layout that dropped them would render
+// Arabic in a Latin serif with no Arabic glyphs in it. The console is an
+// English-only tool, and loading two Arabic webfonts on every operations
+// screen would be weight bought for nobody.
+const arabicFonts = ['--font-arabic-display', '--font-arabic-body'];
+const siteRoot = roots.find((f) => f.includes('[lang]'));
+const consoleRoot = roots.find((f) => f.includes('(console)'));
+check('the site root layout is the one under [lang]', Boolean(siteRoot), String(siteRoot));
+check('the console has a root layout of its own', Boolean(consoleRoot), String(consoleRoot));
+for (const t of arabicFonts) {
+  check(`${t} is declared by the site layout`,
+    Boolean(siteRoot) && declaresFont(siteRoot, t));
+  check(`${t} is NOT loaded by the console`,
+    Boolean(consoleRoot) && !declaresFont(consoleRoot, t));
+}
+
+const fromFont = [...latinFonts, ...arabicFonts];
 
 const missing = [...used.keys()].filter((t) => !defined.has(t) && !fromFont.includes(t));
 check('THE POINT: no custom property is used without being defined',

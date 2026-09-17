@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import L from '@/components/L';
 import React from 'react';
 
 /**
@@ -47,7 +47,7 @@ function inline(text: string, keyBase: string): React.ReactNode[] {
       // than vanishing — the reader still gets the sentence.
       if (!href) return <span key={key}>{link[1]}</span>;
       return href.startsWith('/')
-        ? <Link key={key} href={href}>{link[1]}</Link>
+        ? <L key={key} href={href}>{link[1]}</L>
         : <a key={key} href={href} rel="noopener nofollow" target="_blank">{link[1]}</a>;
     }
     return <React.Fragment key={key}>{part}</React.Fragment>;

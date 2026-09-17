@@ -1,6 +1,7 @@
 import { cache } from 'react';
 import { query } from '@/lib/db';
 import { ogImage } from '@/lib/site';
+import { alternates, type Locale } from '@/lib/i18n';
 
 /**
  * Editable site content.
@@ -288,11 +289,12 @@ export function slugify(s: string): string {
  * would be a ranking loss with no visible symptom.
  */
 export async function metadataFor(
+  locale: Locale,
   path: string,
   base: { title: string; description: string },
 ): Promise<{
   title: string; description: string;
-  alternates: { canonical: string };
+  alternates: ReturnType<typeof alternates>;
   robots?: { index: boolean; follow: boolean };
   openGraph: { title: string; description: string; images: [typeof ogImage] };
 }> {
@@ -301,7 +303,7 @@ export async function metadataFor(
   const description = seo?.description ?? base.description;
   return {
     title, description,
-    alternates: { canonical: path },
+    alternates: alternates(locale, path),
     ...(seo?.noindex ? { robots: { index: false, follow: true } } : {}),
     // The image has to be repeated here. openGraph is merged shallowly, so a
     // page that names its own title drops everything the layout set.

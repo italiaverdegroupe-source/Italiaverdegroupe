@@ -45,7 +45,7 @@ export default async function WhatsAppButton() {
       <style>{`
         .wa {
           position: fixed; z-index: 60;
-          right: clamp(14px, 2.2vw, 26px); bottom: clamp(14px, 2.2vw, 26px);
+          inset-inline-end: clamp(14px, 2.2vw, 26px); bottom: clamp(14px, 2.2vw, 26px);
           display: inline-flex; align-items: center; gap: 9px;
           padding: 13px 18px 13px 15px; border-radius: 999px;
           background: #1F7A44; color: #fff; text-decoration: none;
@@ -72,7 +72,7 @@ export default async function WhatsAppButton() {
            A floating button overlapping copy as you scroll past is normal; one
            that takes a sixth of a narrow screen is not. */
         @media (max-width: 400px) {
-          .wa { padding: 11px; right: 10px; bottom: 10px; }
+          .wa { padding: 11px; inset-inline-end: 10px; bottom: 10px; }
           .wa svg { width: 21px; height: 21px; }
         }
         @media (prefers-reduced-motion: reduce) {
