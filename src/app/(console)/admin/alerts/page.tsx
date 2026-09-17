@@ -83,21 +83,38 @@ async function sendTest(formData: FormData) {
   const to = String(formData.get('to') ?? '').trim();
   if (!to.includes('@')) throw new Error('Enter an email address to send the test to.');
 
-  await sendMail({
-    to,
-    subject: 'Verde Garden Trading — mail is working',
-    text: [
-      'This is the test message from the operations console.',
-      '',
-      `If you are reading it, outgoing mail is configured correctly and every`,
-      `notification queued in the console will now be delivered.`,
-      '',
-      `Sent from: ${mailFrom()}`,
-      `Provider: ${mailProvider()}`,
-    ].join('\n'),
-  });
+  // The outcome is recorded rather than thrown.
+  //
+  // A thrown server action reaches the browser as Next's generic error page
+  // with the message stripped out in a production build — and the whole
+  // question being asked here is *why* the mail server refused. "An error
+  // occurred" is the one answer that does not answer it. So both outcomes go
+  // to the audit log and the page prints the last one underneath the button.
+  let ok = true;
+  let detail = '';
+  try {
+    await sendMail({
+      to,
+      subject: 'Verde Garden Trading — mail is working',
+      text: [
+        'This is the test message from the operations console.',
+        '',
+        `If you are reading it, outgoing mail is configured correctly and every`,
+        `notification queued in the console will now be delivered.`,
+        '',
+        `Sent from: ${mailFrom()}`,
+        `Provider: ${mailProvider()}`,
+      ].join('\n'),
+    });
+  } catch (err) {
+    ok = false;
+    detail = err instanceof Error ? err.message : String(err);
+  }
 
-  await audit({ user, action: 'outbound.test_sent', entity: 'outbound', after: { to } });
+  await audit({
+    user, action: 'outbound.test', entity: 'outbound',
+    after: { to, ok, detail: detail.slice(0, 500) },
+  });
   revalidatePath('/admin/alerts');
 }
 
@@ -231,13 +248,17 @@ export default async function AlertsPage({ searchParams }: {
   const includeDone = show === 'all';
   const view = tab === 'rules' ? 'rules' : tab === 'outbound' ? 'outbound' : 'inbox';
 
-  const [alerts, rules, runs, outbound, counts] = await Promise.all([
+  const [alerts, rules, runs, outbound, counts, tests] = await Promise.all([
     listAlerts({ id: user.id, role: user.role }, { includeDone }),
     listRules(),
     lastRun(),
     outboundQueue(60),
     outboundSummary(),
+    query<{ at: string; after: { to?: string; ok?: boolean; detail?: string } }>(
+      `SELECT at, after FROM audit_log
+        WHERE action = 'outbound.test' ORDER BY at DESC LIMIT 1`),
   ]);
+  const lastTest = tests[0];
   const provider = mailProvider();
   // How many rules would actually send. A queue with a provider and no
   // recipients is as silent as one with recipients and no provider, and the
@@ -520,6 +541,16 @@ export default async function AlertsPage({ searchParams }: {
                 </form>
               )}
             </div>
+          )}
+          {/* What happened the last time somebody pressed Test. Printed here
+              rather than thrown, because a production build strips the reason
+              out of a thrown server action and the reason is the answer. */}
+          {lastTest && (
+            <p className={lastTest.after?.ok ? 'adm-sub' : 'adm-err'}>
+              {lastTest.after?.ok
+                ? `Test message accepted for ${lastTest.after?.to} — ${when(lastTest.at)}.`
+                : `Test message failed ${when(lastTest.at)}: ${lastTest.after?.detail ?? 'no reason given'}`}
+            </p>
           )}
           {outbound.length === 0 ? (
             <div className="adm-panel adm-pad">
