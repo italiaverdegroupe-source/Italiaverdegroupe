@@ -22,7 +22,21 @@ export default function ProductCard({ p, priority = false }: { p: Product; prior
             priority={priority}
           />
           <span className="spec-ref">{p.reference}</span>
-          {!p.photoVerified && <span className="spec-flag">Photo under review</span>}
+          {!p.photoVerified && (
+            // Said plainly, and in the same ink as the reference chip rather
+            // than in warning red. A third of the catalogue carries this while
+            // the photographs are being retaken, and a grid of red labels
+            // reads as a broken site rather than an honest one — which would
+            // be the wrong thing to have learned from telling the truth.
+            <span className="spec-flag">
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor"
+                   strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+              New photograph coming
+            </span>
+          )}
         </div>
 
         <div className="spec-body">
@@ -73,9 +87,12 @@ export default function ProductCard({ p, priority = false }: { p: Product; prior
         }
         .spec-flag {
           position: absolute; left: 10px; bottom: 10px;
-          padding: .3em .6em; font-size: .62rem; letter-spacing: .05em;
-          background: rgb(140 70 42 / .9); color: #fff; border-radius: 2px;
+          display: inline-flex; align-items: center; gap: .45em;
+          padding: .34em .65em; font-size: .62rem; letter-spacing: .05em;
+          background: rgb(16 21 9 / .82); color: #F3EFE4; border-radius: 2px;
+          backdrop-filter: blur(3px);
         }
+        .spec-flag svg { opacity: .8; }
 
         .spec-body { display: grid; gap: 10px; }
         .spec-name { margin: 0; font-size: 1.22rem; line-height: 1.15; }

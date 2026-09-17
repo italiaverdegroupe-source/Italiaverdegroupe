@@ -187,7 +187,8 @@
     "slug": "agave-attenuata-variegata",
     "image": "VG-AG-010-agave-attenuata-variegata.jpg",
     "imageSize": "1376x838",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows a plain blue-green attenuata. No variegation, which is the whole listing."
   },
   {
     "reference": "VG-AG-011",
@@ -244,7 +245,8 @@
     "slug": "columnar-cactus",
     "image": "VG-CA-001-columnar-cactus.jpg",
     "imageSize": "1371x838",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows a globular barrel cactus in a saucer, not a ribbed columnar cactus."
   },
   {
     "reference": "VG-CA-002",
@@ -263,7 +265,8 @@
     "slug": "columnar-cactus-tall",
     "image": "VG-CA-002-columnar-cactus-tall.jpg",
     "imageSize": "1371x838",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows a Euphorbia — flat segmented branches with leaves — not a cactus."
   },
   {
     "reference": "VG-CA-003",
@@ -282,7 +285,8 @@
     "slug": "barrel-cactus",
     "image": "VG-CA-003-barrel-cactus.jpg",
     "imageSize": "1371x840",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows a Mammillaria in pink flower, not a golden-spined barrel."
   },
   {
     "reference": "VG-CA-004",
@@ -320,7 +324,8 @@
     "slug": "prickly-pear-cactus",
     "image": "VG-CA-005-prickly-pear-cactus.jpg",
     "imageSize": "1369x840",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows columnar cacti in white flower. A prickly pear has flat pads."
   },
   {
     "reference": "VG-CA-006",
@@ -339,7 +344,8 @@
     "slug": "prickly-pear-large",
     "image": "VG-CA-006-prickly-pear-large.jpg",
     "imageSize": "1376x838",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows a Cleistocactus with red tubular flowers, not a prickly pear."
   },
   {
     "reference": "VG-CA-007",
@@ -358,7 +364,8 @@
     "slug": "organ-pipe-cactus",
     "image": "VG-CA-007-organ-pipe-cactus.jpg",
     "imageSize": "1370x838",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows woolly white old-man cactus in pots, not an organ pipe."
   },
   {
     "reference": "VG-CA-008",
@@ -377,7 +384,8 @@
     "slug": "organ-pipe-cactus-large",
     "image": "VG-CA-008-organ-pipe-cactus-large.jpg",
     "imageSize": "1377x839",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows golden-spined columns and barrels in pots, not an organ pipe."
   },
   {
     "reference": "VG-CA-009",
@@ -396,7 +404,8 @@
     "slug": "golden-barrel-cactus",
     "image": "VG-CA-009-golden-barrel-cactus.jpg",
     "imageSize": "1367x838",
-    "photoVerified": false
+    "photoVerified": false,
+    "photoNote": "Shows tall columnar cacti, not a spherical golden barrel."
   },
   {
     "reference": "VG-CA-010",
@@ -415,7 +424,8 @@
     "slug": "golden-barrel-large",
     "image": "VG-CA-010-golden-barrel-large.jpg",
     "imageSize": "1377x840",
-    "photoVerified": false
+    "photoVerified": false,
+    "photoNote": "Shows tall columnar cacti against sky, not a large golden barrel."
   },
   {
     "reference": "VG-CA-011",
@@ -548,7 +558,8 @@
     "slug": "olive-tree-pom-pom",
     "image": "VG-OL-005-olive-tree-pom-pom.jpg",
     "imageSize": "1369x839",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "A nursery avenue of ordinary olives. None of them is pom-pom pruned."
   },
   {
     "reference": "VG-OL-006",
@@ -624,7 +635,8 @@
     "slug": "olive-tree-tall-form",
     "image": "VG-OL-009-olive-tree-tall-form.jpg",
     "imageSize": "1373x837",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows a cloud-pruned olive against a wall, not a tall upright form."
   },
   {
     "reference": "VG-OL-010",
@@ -643,7 +655,8 @@
     "slug": "olive-tree-weeping",
     "image": "VG-OL-010-olive-tree-weeping.jpg",
     "imageSize": "1376x838",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows thick-trunked potted olives with upright canopies, not a weeping form."
   },
   {
     "reference": "VG-OL-011",
@@ -681,7 +694,8 @@
     "slug": "olive-tree-dwarf",
     "image": "VG-OL-012-olive-tree-dwarf.jpg",
     "imageSize": "1377x837",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows a large multi-head pruned olive in a garden, not a dwarf for containers."
   },
   {
     "reference": "VG-OL-013",
@@ -871,7 +885,8 @@
     "slug": "archontophoenix-tall",
     "image": "VG-PL-006-archontophoenix-tall.jpg",
     "imageSize": "1377x840",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Right species, wrong size: a young greenhouse plant against a 3.0–4.5 m listing."
   },
   {
     "reference": "VG-PL-007",
@@ -928,7 +943,8 @@
     "slug": "brahea-armata",
     "image": "VG-PL-009-brahea-armata.jpg",
     "imageSize": "1370x839",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows an avenue of green feather palms. Brahea armata is a silver-blue fan palm."
   },
   {
     "reference": "VG-PL-010",
@@ -947,7 +963,8 @@
     "slug": "brahea-armata-large",
     "image": "VG-PL-010-brahea-armata-large.jpg",
     "imageSize": "1375x839",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows green feather palms on a verge, not silver fan palms."
   },
   {
     "reference": "VG-PL-011",
@@ -966,7 +983,8 @@
     "slug": "butia-capitata",
     "image": "VG-PL-011-butia-capitata.jpg",
     "imageSize": "1371x839",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows a silver-blue fan palm (Bismarckia). Butia is a green-blue feather palm."
   },
   {
     "reference": "VG-PL-012",
@@ -985,7 +1003,8 @@
     "slug": "butia-capitata-specimen",
     "image": "VG-PL-012-butia-capitata-specimen.jpg",
     "imageSize": "1377x841",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows a silver-blue fan palm (Bismarckia), not a jelly palm."
   },
   {
     "reference": "VG-PL-013",
@@ -1004,7 +1023,8 @@
     "slug": "chamaerops-humilis",
     "image": "VG-PL-013-chamaerops-humilis.jpg",
     "imageSize": "1374x840",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows a feather palm. Chamaerops humilis is a multi-trunk fan palm."
   },
   {
     "reference": "VG-PL-014",
@@ -1023,7 +1043,8 @@
     "slug": "chamaerops-humilis-large",
     "image": "VG-PL-014-chamaerops-humilis-large.jpg",
     "imageSize": "1377x838",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows a feather palm with arching pinnate fronds, not a European fan palm."
   },
   {
     "reference": "VG-PL-015",
@@ -1042,7 +1063,8 @@
     "slug": "chamaerops-excelsa",
     "image": "VG-PL-015-chamaerops-excelsa.jpg",
     "imageSize": "1373x840",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows a pinnate feather palm, not an upright Mediterranean fan palm."
   },
   {
     "reference": "VG-PL-016",
@@ -1080,7 +1102,8 @@
     "slug": "phoenix-canariensis",
     "image": "VG-PL-017-phoenix-canariensis.jpg",
     "imageSize": "1368x838",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows a small potted fan palm, not a Canary Island date palm."
   },
   {
     "reference": "VG-PL-018",
@@ -1099,7 +1122,8 @@
     "slug": "phoenix-canariensis-large",
     "image": "VG-PL-018-phoenix-canariensis-large.jpg",
     "imageSize": "1377x840",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows a fan palm on a deck, not a large-trunked Canary date palm."
   },
   {
     "reference": "VG-PL-019",
@@ -1118,7 +1142,8 @@
     "slug": "washingtonia-robusta",
     "image": "VG-PL-019-washingtonia-robusta.jpg",
     "imageSize": "1371x839",
-    "photoVerified": true
+    "photoVerified": false,
+    "photoNote": "Shows low multi-trunk Chamaerops in pots. Washingtonia has a single slender trunk."
   },
   {
     "reference": "VG-PL-020",

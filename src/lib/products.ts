@@ -13,6 +13,11 @@ export type Product = {
   imageSize: string;
   /** false when the catalogue photo contradicts the specimen's own description */
   photoVerified: boolean;
+  /** Present only when photoVerified is false: what the photograph actually
+   *  shows, so whoever replaces it knows what they are replacing. Never shown
+   *  to a visitor — telling somebody the picture is of a different plant is
+   *  worse than the notice already on the card. */
+  photoNote?: string;
 };
 
 export type Family = {
@@ -121,7 +126,10 @@ export function getFamilies(): Family[] {
       name,
       blurb: FAMILY_BLURB[name] ?? '',
       count: list.length,
-      cover: (list.find((p) => p.reference === FAMILY_COVER[name])
+      // A curated cover is still only a preference. If the specimen it names
+      // is ever flagged, the shop window must not be the one photograph the
+      // catalogue says is wrong.
+      cover: (list.find((p) => p.reference === FAMILY_COVER[name] && p.photoVerified)
         ?? list.find((p) => p.photoVerified) ?? list[0]).image,
       heights: heightRange(list),
     }))
