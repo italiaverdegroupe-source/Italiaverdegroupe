@@ -23,6 +23,7 @@ const TARGETS = [
   { file: 'procurement', format: 'cjs' },
   { file: 'quotes', format: 'cjs' },
   { file: 'reports', format: 'cjs' },
+  { file: 'settings', format: 'cjs' },
   { file: 'rate-limit', format: 'cjs' },
   { file: 's3', format: 'cjs' },
   { file: 'users', format: 'cjs' },

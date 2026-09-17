@@ -46,7 +46,7 @@ const STAGES: { title: string; body: string; detail: string }[] = [
   {
     title: 'Transport & offloading',
     body: 'Low-loader, and crane or hiab where the root ball demands it. Site access — gate widths, overhead lines, ground bearing — is confirmed before a delivery date is agreed.',
-    detail: `Across all ${site.emirates.length} emirates.`,
+    detail: `Across all ${site.emirates.length} emirates, and Al Ain.`,
   },
   {
     title: 'Planting',

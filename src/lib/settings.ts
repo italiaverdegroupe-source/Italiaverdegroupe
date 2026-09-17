@@ -50,6 +50,11 @@ export const EDITABLE = {
   address:          { label: 'Registered address', type: 'textarea' },
   city:             { label: 'City / emirate', type: 'text' },
   country:          { label: 'Country', type: 'text' },
+  instagram:        { label: 'Instagram link', type: 'url' },
+  linkedin:         { label: 'LinkedIn link', type: 'url' },
+  facebook:         { label: 'Facebook link', type: 'url' },
+  youtube:          { label: 'YouTube link', type: 'url' },
+  tiktok:           { label: 'TikTok link', type: 'url' },
   licenceNumber:    { label: 'Trade licence number', type: 'text' },
   trn:              { label: 'TRN (tax registration number)', type: 'text' },
   vatEnabled:       { label: 'Charge VAT', type: 'boolean' },
@@ -60,6 +65,29 @@ export const EDITABLE = {
 
 export type EditableKey = keyof typeof EDITABLE;
 
+/**
+ * A link somebody pasted, made safe to put in an href.
+ *
+ * "instagram.com/verdegarden" without a scheme is a RELATIVE link: it would
+ * point at a page on this site that does not exist, from every page in the
+ * footer. And a javascript: or data: URL in a field the console can write is
+ * a script we would be rendering on the public site. Both are one paste away,
+ * so neither is left to chance: a scheme is added when it is missing, and
+ * anything that is not http(s) afterwards is dropped.
+ */
+export function normaliseUrl(raw: unknown): string {
+  const v = String(raw ?? '').trim();
+  if (!v) return '';
+  const withScheme = /^[a-z][a-z0-9+.-]*:/i.test(v) ? v : `https://${v}`;
+  try {
+    const u = new URL(withScheme);
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return '';
+    return u.toString();
+  } catch {
+    return '';
+  }
+}
+
 const coerce = (key: EditableKey, raw: unknown) => {
   const kind = EDITABLE[key].type;
   if (kind === 'boolean') return raw === true || raw === 'true' || raw === 'on';
@@ -67,6 +95,7 @@ const coerce = (key: EditableKey, raw: unknown) => {
     const n = Number(raw);
     return Number.isFinite(n) ? n : 0;
   }
+  if (kind === 'url') return normaliseUrl(raw);
   return String(raw ?? '');
 };
 

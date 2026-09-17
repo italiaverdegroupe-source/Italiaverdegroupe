@@ -32,6 +32,7 @@ const NEEDS = {
   'reports.test.mjs': ['db'],
   'shortlist.test.mjs': ['db', 'server'],
   'collections.test.mjs': ['server'],
+  'footer.test.mjs': ['server'],
   'mobile.test.mjs': ['server'],
   'hero-contrast.mjs': ['server'],
   'contrast-sweep.mjs': ['server'],

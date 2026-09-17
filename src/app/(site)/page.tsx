@@ -4,7 +4,7 @@ import Image from 'next/image';
 import RouteMap from '@/components/RouteMap';
 import ProductCard from '@/components/ProductCard';
 import { getSettings } from '@/lib/settings';
-import { ogImage } from '@/lib/site';
+import { ogImage, deliveryLocations } from '@/lib/site';
 import { getBlocks, fill, publishedFaqs, publishedTestimonials, getSeo } from '@/lib/content';
 import { getAllProducts, getShowcaseProducts, getFamilies, imageFor } from '@/lib/products';
 
@@ -164,11 +164,12 @@ export default async function HomePage() {
           <ul className="proof-list">
             {[[String(all.length), 'specimens catalogued'],
               [String(site.sourcingRegions.length), 'Italian growing regions'],
-              // "emirates covered" would have read 8, because the list is the
-              // seven emirates plus Al Ain — a city in Abu Dhabi, not an
-              // emirate. On a strip whose whole point is that every number can
-              // be checked, that is the one error that cannot be there.
-              [String(site.emirates.length), 'UAE delivery locations'],
+              // "emirates covered" would read one too many here, because this
+              // counts everywhere we deliver and Al Ain is a city in Abu Dhabi
+              // rather than an eighth emirate. On a strip whose whole point is
+              // that every number can be checked, that is the one error that
+              // cannot be there.
+              [String(deliveryLocations(site).length), 'UAE delivery locations'],
               [`${site.leadTimeWeeks.min}–${site.leadTimeWeeks.max}`, 'weeks, order to site']]
               .map(([n, l]) => (
               <li key={l}><strong>{n}</strong><span>{l}</span></li>
@@ -309,7 +310,7 @@ export default async function HomePage() {
             <p className="eyebrow">Coverage</p>
             <h2>{c['home.coverage.title']}</h2>
             <ul className="em-list">
-              {site.emirates.map((e, i) => (
+              {deliveryLocations(site).map((e, i) => (
                 <li key={e.slug}>
                   <Link href={`/locations/${e.slug}`}>
                     <span className="em-n">{String(i + 1).padStart(2, '0')}</span>

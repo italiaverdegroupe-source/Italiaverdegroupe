@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { metadataFor } from '@/lib/content';
 import { getSettings } from '@/lib/settings';
+import { deliveryLocations } from '@/lib/site';
 
 export const revalidate = 300;
 
@@ -51,7 +52,7 @@ export default async function ContactPage() {
         <h1>Talk to us about the project.</h1>
         <p className="lede">
           We supply landscaping contractors, developers, hotels and private estates
-          across the {site.emirates.length} delivery locations below. Tell us what the
+          across the {deliveryLocations(site).length} delivery locations below. Tell us what the
           drawing calls for and we will tell you what we hold, what we can bring in,
           and how long it takes.
         </p>
@@ -109,7 +110,7 @@ export default async function ContactPage() {
               acclimatised here.
             </p>
             <ul className="ct-emirates">
-              {site.emirates.map((e) => (
+              {deliveryLocations(site).map((e) => (
                 <li key={e.slug}><Link href={`/locations/${e.slug}`}>{e.name}</Link></li>
               ))}
             </ul>

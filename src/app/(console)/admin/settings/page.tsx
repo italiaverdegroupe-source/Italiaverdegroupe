@@ -56,8 +56,16 @@ export default async function SettingsPage() {
   const groups: [string, EditableKey[]][] = [
     ['Company',  ['legalName', 'brandName', 'tagline', 'description', 'licenceNumber']],
     ['Contact',  ['phone', 'whatsapp', 'whatsappLabel', 'email']],
+    ['Registered office', ['address', 'city', 'country']],
+    ['Social',   ['instagram', 'linkedin', 'facebook', 'youtube', 'tiktok']],
     ['Commerce', ['currency', 'quoteValidityDays', 'trn', 'vatEnabled', 'vatRate']],
   ];
+
+  // Every editable field belongs in a group or it is not on this screen at
+  // all — which is how `address`, `city` and `country` came to be settings
+  // nobody could set. Named here rather than left to be noticed.
+  const shown = new Set(groups.flatMap(([, keys]) => keys));
+  const orphans = (Object.keys(EDITABLE) as EditableKey[]).filter((k) => !shown.has(k));
 
   return (
     <>
@@ -66,6 +74,13 @@ export default async function SettingsPage() {
         These are the values the website and every document read at runtime.
         Changing them here takes effect immediately — no deploy, no developer.
       </p>
+
+      {orphans.length > 0 && (
+        <p className="adm-err">
+          Not shown anywhere on this page, so nobody can change them:{' '}
+          {orphans.join(', ')}. Add them to a group in this file.
+        </p>
+      )}
 
       {user.role !== 'owner' && (
         <p className="adm-err">You can see these, but only the owner can change them.</p>
@@ -111,8 +126,10 @@ export default async function SettingsPage() {
                   <label key={key} className="adm-field">
                     <span>{f.label}</span>
                     <input name={key}
-                           type={f.type === 'number' ? 'number' : 'text'}
+                           type={f.type === 'number' ? 'number' : f.type === 'url' ? 'url' : 'text'}
                            step={f.type === 'number' ? 'any' : undefined}
+                           inputMode={f.type === 'url' ? 'url' : undefined}
+                           placeholder={f.type === 'url' ? 'https://…' : undefined}
                            defaultValue={String(value ?? '')}
                            disabled={user.role !== 'owner'} />
                   </label>

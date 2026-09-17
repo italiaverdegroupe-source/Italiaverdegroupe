@@ -36,6 +36,13 @@ export const site = {
 
   sourcingRegions: ['Toscana', 'Sicilia', 'Lombardia', 'Puglia'],
 
+  /**
+   * The seven. There are seven emirates in the United Arab Emirates, and this
+   * list used to hold eight because Al Ain was in it — Al Ain is a city in the
+   * emirate of Abu Dhabi, not an eighth emirate. Two public pages counted this
+   * array and printed "all eight emirates", which is the kind of mistake a UAE
+   * reader notices in the first second and does not need to read twice.
+   */
   emirates: [
     { slug: 'dubai', name: 'Dubai' },
     { slug: 'abu-dhabi', name: 'Abu Dhabi' },
@@ -44,8 +51,27 @@ export const site = {
     { slug: 'ras-al-khaimah', name: 'Ras Al Khaimah' },
     { slug: 'fujairah', name: 'Fujairah' },
     { slug: 'umm-al-quwain', name: 'Umm Al Quwain' },
+  ],
+
+  /**
+   * Places we deliver to that are not emirates. Al Ain has its own landscape
+   * market and its own page, and a buyer there searches for it by name — so it
+   * stays a destination without being promoted to an emirate.
+   */
+  otherLocations: [
     { slug: 'al-ain', name: 'Al Ain' },
   ],
+
+  /**
+   * Where the company is on the internet. Empty until an account exists — a
+   * footer icon linking to a page nobody has posted on says more about the
+   * company than no icon does.
+   */
+  instagram: '',
+  linkedin: '',
+  facebook: '',
+  youtube: '',
+  tiktok: '',
 
   projectTypes: [
     'Villa / Private Estate',
@@ -66,6 +92,18 @@ export const site = {
 } as const;
 
 export type Site = typeof site;
+
+/**
+ * Everywhere we deliver: the seven emirates and the cities named separately.
+ * Used for the enquiry form's list and the location pages — anything that is
+ * about reaching somewhere rather than about how many emirates there are.
+ */
+export function deliveryLocations(s: {
+  emirates: readonly { slug: string; name: string }[];
+  otherLocations: readonly { slug: string; name: string }[];
+}): { slug: string; name: string }[] {
+  return [...s.emirates, ...s.otherLocations];
+}
 
 /**
  * What to tell someone when the enquiry form itself fails. Never names a
