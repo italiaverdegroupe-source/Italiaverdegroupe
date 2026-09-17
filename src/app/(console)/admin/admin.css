@@ -623,3 +623,10 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 .adm-out-acts { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; align-items: center; }
 .adm-out-test { display: flex; gap: 8px; flex: 1 1 280px; }
 .adm-out-test .adm-search { flex: 1 1 auto; }
+
+/* The one-address-for-every-rule row, above the sixteen rule forms. */
+.adm-rule-all {
+  display: flex; flex-wrap: wrap; align-items: center;
+  justify-content: space-between; gap: 12px 20px; margin-bottom: 16px;
+}
+.adm-rule-all .adm-sub { flex: 1 1 260px; }

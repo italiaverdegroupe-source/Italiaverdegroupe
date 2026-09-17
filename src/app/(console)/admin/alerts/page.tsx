@@ -109,6 +109,40 @@ async function sendTest(formData: FormData) {
  * would be a burst of notices about situations that have already resolved,
  * which is how somebody learns to ignore this system's email.
  */
+/**
+ * One address on every rule at once.
+ *
+ * There are sixteen rules and each has its own "Also email" field, so turning
+ * notifications on meant typing the same mailbox sixteen times and saving
+ * sixteen forms — which is how a company ends up with it on four of them and
+ * wonders why it hears about permits but not overdue invoices. The per-rule
+ * field stays: a company that wants stock warnings at the yard and invoices at
+ * accounts still sets those one at a time. This is the first step, not the
+ * only one.
+ */
+async function emailAll(formData: FormData) {
+  'use server';
+  await assertSameOrigin();
+  const user = await getSessionUser();
+  if (!user) redirect('/admin/login');
+  if (user.role !== 'owner') throw new Error('Only the owner can change rules.');
+
+  const to = String(formData.get('email_all') ?? '').trim();
+  // Empty clears them — deliberately possible, because turning it off should
+  // be as easy as turning it on and not a matter of emptying sixteen fields.
+  if (to && !to.includes('@')) throw new Error('That is not an email address.');
+
+  const rows = await query<{ id: string }>(
+    `UPDATE alert_rules SET email_to = $1, updated_at = now(), updated_by = $2
+      WHERE email_to IS DISTINCT FROM $1 RETURNING id`, [to || null, user.id]);
+
+  await audit({
+    user, action: 'alert_rule.email_all', entity: 'alert_rule',
+    after: { email_to: to || null, rules: rows.length },
+  });
+  revalidatePath('/admin/alerts');
+}
+
 async function requeueNow() {
   'use server';
   const user = await requireEditor();
@@ -205,6 +239,10 @@ export default async function AlertsPage({ searchParams }: {
     outboundSummary(),
   ]);
   const provider = mailProvider();
+  // How many rules would actually send. A queue with a provider and no
+  // recipients is as silent as one with recipients and no provider, and the
+  // rules screen is the only place that second half can be seen.
+  const withEmail = rules.filter((r) => (r.email_to ?? '').trim() !== '').length;
   const run = runs[0];
   const open = alerts.filter((a) => !a.done_at);
   const urgent = open.filter((a) => a.severity === 'urgent').length;
@@ -314,6 +352,26 @@ export default async function AlertsPage({ searchParams }: {
           </p>
           {user.role !== 'owner' && (
             <p className="adm-err">You can see these, but only the owner can change them.</p>
+          )}
+          {user.role === 'owner' && rules.length > 0 && (
+            <div className="adm-panel adm-pad adm-rule-all">
+              <p className="adm-sub" style={{ margin: 0 }}>
+                {withEmail === 0 ? (
+                  <>
+                    <strong>No rule has an address on it</strong>, so nothing would be
+                    emailed even with a mail provider configured. An alert with no
+                    recipient is raised in the console and goes no further.
+                  </>
+                ) : (
+                  <>{withEmail} of {rules.length} rules send an email.</>
+                )}
+              </p>
+              <form action={emailAll} className="adm-out-test">
+                <input name="email_all" type="email" className="adm-search"
+                       placeholder="Send every alert to…" defaultValue={user.email} />
+                <button type="submit" className="adm-btn">Apply to all {rules.length}</button>
+              </form>
+            </div>
           )}
           {rules.length === 0 && (
             <div className="adm-panel adm-pad">
