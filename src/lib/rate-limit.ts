@@ -2,28 +2,39 @@
  * A fixed-window limiter that does not pretend to know more than it does.
  *
  * The thing a limiter needs, and the thing an HTTP request does not reliably
- * give you, is a stable identity for the caller. Behind Cloudflare there is
- * one: CF-Connecting-IP, which the edge overwrites. Reached directly on its
+ * give you, is a stable identity for the caller. Through our own edge there is
+ * one: an address the edge vouched for. Reached directly on the origin's
  * *.up.railway.app hostname, there is not — the caller picks their own
- * x-forwarded-for, so every request can arrive as a new person with a fresh
+ * headers, so every request can arrive as a new person with a fresh
  * allowance. A limiter keyed on that is decoration.
  *
  * So callers are split in two.
  *
- * VERIFIED callers (the edge vouched for the address) get an allowance each,
- * as you would expect.
+ * VERIFIED callers get an allowance each, as you would expect, and nothing
+ * anybody else does can take it away from them.
  *
- * UNVERIFIED callers get an allowance each as well — but only while the number
- * of distinct unverified callers stays small. Past that, they all share one.
- * The reasoning: this business sees a handful of enquiries a week, so dozens
- * of distinct unverified addresses in ten minutes is not a busy afternoon, it
- * is one machine inventing addresses. Collapsing them into a single bucket
- * takes the attack from unlimited to one allowance, while a real visitor
- * arriving on a day when the edge is bypassed still gets their own.
+ * UNVERIFIED callers get an allowance each too, and then a ceiling across all
+ * of them together.
  *
- * Losing an enquiry is the worst thing this codebase can do — see lib/db.ts —
- * so every threshold here is set far above real traffic rather than close to
- * it, and the global ceiling logs loudly when it bites.
+ * An earlier attempt here capped how many DISTINCT unverified callers could
+ * hold an allowance, pushing the rest into one shared bucket. That bounded the
+ * attacker — and denied real people. Measured: a flood occupying the fifty
+ * slots and burning the overflow made the next genuine visitor a 429. Which is
+ * the fundamental problem, stated plainly: WITHOUT VERIFICATION THERE IS NO
+ * WAY TO TELL a hundred real visitors from one machine with a hundred invented
+ * addresses. Any rule that stops the second stops the first.
+ *
+ * So the choice is made deliberately, in the direction lib/db.ts names: losing
+ * an enquiry is the worst thing this codebase can do. The per-caller limit
+ * stops naive repetition, and one ceiling bounds the total damage a forger can
+ * do in a window. Below that ceiling nobody is refused for somebody else's
+ * behaviour. A forger can spend the ceiling — that is the cost of not having
+ * verification — but sixty enquiries in ten minutes is already several years
+ * of this company's real volume, so the bound is far above the business and
+ * far below "unlimited", which is where it started.
+ *
+ * Configure EDGE_SECRET and the matching Cloudflare rule and this path stops
+ * mattering: verified visitors are never touched by the ceiling at all.
  *
  * State is per instance and in memory. One replica runs this today; with two,
  * each keeps its own counts and the effective limits double. Stated rather
@@ -35,20 +46,33 @@ export type LimiterOptions = {
   windowMs: number;
   /** Requests allowed per caller per window. */
   perCaller: number;
-  /** Requests allowed across all callers per window, whoever they are. */
-  global: number;
-  /** How many distinct unverified callers get an allowance of their own. */
+  /** Accepted requests allowed per window across all UNVERIFIED callers. */
+  globalUnverified: number;
+  /**
+   * Optional: how many distinct unverified callers may hold an allowance of
+   * their own before the rest share one. Left unset by default — see above,
+   * it denies real visitors to bound an attacker. Kept because a surface with
+   * no enquiries to lose may want the opposite trade.
+   */
   unverifiedCallers?: number;
   /** Hard cap on tracked callers, so the map cannot grow without bound. */
   maxTracked?: number;
-  /** Called when the global ceiling refuses a request. */
+  /** Called when the ceiling refuses a request. */
   onGlobalLimit?: (count: number) => void;
 };
 
 export type Caller = { id: string | null; verified: boolean };
 
-const SHARED_UNVERIFIED = '~shared';
-const UNIDENTIFIED = '~none';
+/**
+ * Reserved keys start with "!", which the caller-derived prefixes "v:" and
+ * "u:" can never produce. The first version built keys as `~${id}`, which put
+ * them in the same namespace as the reserved ones: sending the address
+ * "shared" landed you on the shared bucket and let you burn it for everybody,
+ * and a verified id of "~1.2.3.4" collided exactly with unverified 1.2.3.4,
+ * so a forger could spend one named person's allowance.
+ */
+const SHARED_UNVERIFIED = '!shared';
+const UNIDENTIFIED = '!none';
 
 export class Limiter {
   private hits = new Map<string, { n: number; t: number }>();
@@ -60,37 +84,46 @@ export class Limiter {
   /** True when this request should be refused. */
   limited(caller: Caller, now: number = Date.now()): boolean {
     if (now - this.globalT > this.o.windowMs) { this.globalT = now; this.globalN = 0; }
-    this.globalN += 1;
-    if (this.globalN > this.o.global) {
-      this.o.onGlobalLimit?.(this.globalN);
-      return true;
-    }
 
     const key = this.keyFor(caller, now);
     const cur = this.hits.get(key);
     if (cur && now - cur.t <= this.o.windowMs) {
+      if (cur.n + 1 > this.o.perCaller) return true;      // refused: costs nothing
+      if (!caller.verified && this.globalN + 1 > this.o.globalUnverified) {
+        this.o.onGlobalLimit?.(this.globalN + 1);
+        return true;
+      }
       cur.n += 1;
-      return cur.n > this.o.perCaller;
+      if (!caller.verified) this.globalN += 1;
+      return false;
+    }
+
+    if (!caller.verified && this.globalN + 1 > this.o.globalUnverified) {
+      this.o.onGlobalLimit?.(this.globalN + 1);
+      return true;
     }
     this.makeRoom(now);
     this.hits.set(key, { n: 1, t: now });
+    if (!caller.verified) this.globalN += 1;
     return false;
   }
 
   private keyFor(caller: Caller, now: number): string {
     if (!caller.id) return UNIDENTIFIED;
-    if (caller.verified) return caller.id;
+    if (caller.verified) return `v:${caller.id}`;
 
-    const mine = `~${caller.id}`;
+    const mine = `u:${caller.id}`;
     // Already being counted: keep counting them, never promote to the shared
     // bucket mid-window — that would hand them a fresh allowance.
     if (this.hits.has(mine)) return mine;
 
+    const cap = this.o.unverifiedCallers;
+    if (cap === undefined) return mine;
+
     this.prune(now);
-    const cap = this.o.unverifiedCallers ?? 50;
     let distinct = 0;
     for (const k of this.hits.keys()) {
-      if (k.startsWith('~') && k !== SHARED_UNVERIFIED && k !== UNIDENTIFIED) distinct += 1;
+      if (k.startsWith('u:')) distinct += 1;
       if (distinct >= cap) return SHARED_UNVERIFIED;
     }
     return mine;

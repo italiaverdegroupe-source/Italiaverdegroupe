@@ -63,7 +63,18 @@ const PASS_THROUGH = new Set(['healthcheck.railway.app']);
  * same deployment is ever bounced. That is the whole of the duplicate-content
  * problem this was written for, because the temporary address IS that address.
  */
-const REDIRECT_FROM: RegExp[] = [/(^|\.)up\.railway\.app$/];
+function redirectFrom(canonical: string): RegExp[] {
+  const bare = canonical.replace(/^www\./, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return [
+    // The deployment's own temporary address, which is the whole of the
+    // duplicate-content problem this was written for.
+    /(^|\.)up\.railway\.app$/,
+    // and www, which a visitor types without thinking. Left off the list it
+    // would serve the entire site at 200 on a second name for ever, marked
+    // noindex, with nothing ever canonicalising a link shared from there.
+    new RegExp(`^www\\.${bare}$`),
+  ];
+}
 
 export function proxy(req: NextRequest) {
   const canonical = canonicalHost();
@@ -80,7 +91,8 @@ export function proxy(req: NextRequest) {
     .split(',')[0].trim().toLowerCase();
   if (!seen || seen === canonical || PASS_THROUGH.has(seen)) return NextResponse.next();
 
-  if (process.env.CANONICAL_REDIRECT === '1' && REDIRECT_FROM.some((re) => re.test(seen))) {
+  if (process.env.CANONICAL_REDIRECT === '1'
+      && redirectFrom(canonical).some((re) => re.test(seen))) {
     const url = req.nextUrl.clone();
     url.host = canonical;
     url.port = '';

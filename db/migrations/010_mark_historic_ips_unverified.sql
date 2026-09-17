@@ -13,7 +13,31 @@
 -- fact about those addresses that the schema previously had no way to hold:
 -- nobody checked them.
 --
--- Idempotent, and it cannot double-prefix.
-UPDATE audit_log      SET ip = '~' || ip WHERE ip IS NOT NULL AND ip NOT LIKE '~%';
-UPDATE sessions       SET ip = '~' || ip WHERE ip IS NOT NULL AND ip NOT LIKE '~%';
-UPDATE login_attempts SET ip = '~' || ip WHERE ip IS NOT NULL AND ip NOT LIKE '~%';
+-- THE CUT-OFF IS THE POINT, and the first version of this file did not have
+-- one. There is no migration runner in this repository and no table recording
+-- what has been applied, so "run the migrations" — the documented way to
+-- rebuild a database before restoring a backup, see src/lib/backup.ts — means
+-- running this whole directory, every file, every time. A guard of
+-- "ip NOT LIKE '~%'" stops double-prefixing but cannot tell a historic
+-- unverified address from a verified one written yesterday, so a second run
+-- would relabel genuinely verified addresses as unverified — irreversibly,
+-- since afterwards nothing distinguishes them — and would clear any lockout
+-- in flight, because the per-address count is keyed on the exact string.
+--
+-- Bounding it by time makes it one-shot for good. The timestamp is the moment
+-- the change was deployed; nothing written after it was ever unverified by
+-- default, so nothing after it is ever eligible.
+UPDATE audit_log
+   SET ip = '~' || ip
+ WHERE ip IS NOT NULL AND ip NOT LIKE '~%'
+   AND at < TIMESTAMPTZ '2026-09-17 03:20:00+00';
+
+UPDATE sessions
+   SET ip = '~' || ip
+ WHERE ip IS NOT NULL AND ip NOT LIKE '~%'
+   AND created_at < TIMESTAMPTZ '2026-09-17 03:20:00+00';
+
+UPDATE login_attempts
+   SET ip = '~' || ip
+ WHERE ip IS NOT NULL AND ip NOT LIKE '~%'
+   AND at < TIMESTAMPTZ '2026-09-17 03:20:00+00';

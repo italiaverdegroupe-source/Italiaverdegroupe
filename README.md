@@ -67,20 +67,29 @@ src/app/(console)/*           the operations console, its own root layout —
   with each hash so they can be raised without invalidating existing passwords.
 - Only the SHA-256 of a session token is stored: a database dump cannot be
   replayed as a login.
-- The client's address is read from `CF-Connecting-IP`, which Cloudflare
-  overwrites on every request it proxies. `x-forwarded-for` is a list every
-  proxy **appends** to, so its first entry is whatever the caller typed before
-  sending — reading it, as this did, filed an attacker-chosen string in
-  `audit_log` as evidence and handed the rate limiter a key the caller picks.
-  Where the header is absent the address is still recorded, prefixed `~`, and
-  the console prints it as **unverified** rather than as a fact.
+- `x-forwarded-for` is a list every proxy **appends** to, so its first entry is
+  whatever the caller typed before sending. Reading it, as this did, filed an
+  attacker-chosen string in `audit_log` as evidence and handed the rate limiter
+  a key the caller picks.
+- An address counts as **verified** only when the request also carries a secret
+  header the public internet cannot produce. `CF-Connecting-IP` is better than
+  `x-forwarded-for` — Cloudflare overwrites it — but only for a request that
+  actually went through Cloudflare, and the Railway origin still answers on its
+  own hostname. Trusting the header on sight would make forging it *easier*
+  than forging `x-forwarded-for`, and would write the forgery into the audit log
+  with no mark on it. Everything is unverified until both halves are set:
+  `EDGE_SECRET` on the service, and a Cloudflare Transform Rule adding
+  `x-edge-secret` with the same value. Unverified addresses are still recorded,
+  prefixed `~`, and the console prints them as **unverified** rather than as
+  fact.
 - Failed logins lock the **(email, address) pair** at six in fifteen minutes,
-  and the email itself at thirty. The rule before counted the email alone, so
-  anyone who knew the owner's address — it is on the contact page — could lock
-  the only account that reaches the console, from anywhere, with six wrong
-  guesses, and repeat it all day. Locking the real operator out was easier than
-  guessing the password. The pair is only worth keying on because the address
-  itself is now trustworthy.
+  and the email at thirty — except for an address the account has signed in
+  from before, which is never locked by somebody else's guessing. The rule
+  before counted the email alone, so anyone who knew the owner's address (it is
+  on the contact page) could lock the only account that reaches the console,
+  from anywhere, with six wrong guesses. Locking the real operator out was
+  easier than guessing the password, and a threshold of thirty only raises the
+  price of that — the exemption is what removes it.
 - A login for an unknown account still runs a full password verification, so
   timing does not reveal which emails exist.
 - Every operator state change is written to `audit_log` with before/after.

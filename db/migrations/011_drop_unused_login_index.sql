@@ -1,0 +1,11 @@
+-- 009 added (email, ip, at DESC) on the belief that the lockout query filters
+-- on the pair. It does not: `ip` appears only inside an aggregate FILTER, never
+-- in the WHERE clause, so the planner has no way to use it and picks the
+-- pre-existing (email, at DESC) index instead. Verified on sixty thousand
+-- rows: EXPLAIN chooses login_attempts_idx, and pg_stat_user_indexes reports
+-- idx_scan = 0 for the new one.
+--
+-- An index nothing reads is not free. login_attempts takes an insert on every
+-- sign-in attempt, including every failed one during an attack, which is
+-- exactly when the extra write is least welcome.
+DROP INDEX IF EXISTS login_attempts_email_ip_idx;

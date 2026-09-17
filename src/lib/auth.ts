@@ -118,26 +118,46 @@ export async function destroySession(): Promise<void> {
 const MAX_PER_ADDRESS = 6;
 const MAX_PER_EMAIL = 30;
 const WINDOW_MIN = 15;
+const KNOWN_DAYS = 90;
 
 export async function isLocked(email: string): Promise<boolean> {
   const h = await headers();
   const ip = clientIpForRecord(h);
-  const rows = await query<{ here: string; anywhere: string }>(
-    `SELECT count(*) FILTER (WHERE $2::text IS NOT NULL AND ip = $2) AS here,
-            count(*) AS anywhere
+  const rows = await query<{ here: string; anywhere: string; known: string }>(
+    `SELECT count(*) FILTER (WHERE NOT successful
+                               AND at > now() - ($3 || ' minutes')::interval
+                               AND $2::text IS NOT NULL AND ip = $2)          AS here,
+            count(*) FILTER (WHERE NOT successful
+                               AND at > now() - ($3 || ' minutes')::interval) AS anywhere,
+            count(*) FILTER (WHERE successful
+                               AND $2::text IS NOT NULL AND ip = $2)          AS known
        FROM login_attempts
-      WHERE email = $1 AND NOT successful
-        AND at > now() - ($3 || ' minutes')::interval`,
-    [email.toLowerCase(), ip, String(WINDOW_MIN)],
+      WHERE email = $1 AND at > now() - ($4 || ' days')::interval`,
+    [email.toLowerCase(), ip, String(WINDOW_MIN), String(KNOWN_DAYS)],
   );
   const here = Number(rows[0]?.here ?? 0);
   const anywhere = Number(rows[0]?.anywhere ?? 0);
+  const known = Number(rows[0]?.known ?? 0);
 
   // Nothing identified the caller at all: there is no pair to key on, so fall
   // back to the old email-only rule rather than letting it through unlimited.
   if (!ip) return anywhere >= MAX_PER_ADDRESS;
 
-  return here >= MAX_PER_ADDRESS || anywhere >= MAX_PER_EMAIL;
+  // This address is the one doing the guessing. Stop it, whoever it belongs to.
+  if (here >= MAX_PER_ADDRESS) return true;
+
+  // An address this account has actually signed in from before is never
+  // collateral damage. Without this, MAX_PER_EMAIL is still a lockout switch:
+  // thirty wrong guesses from one attacker — seconds of work, and the owner's
+  // address is published on the contact page — and the owner is shut out of
+  // the only console account from their own desk. Raising the price of that
+  // attack from six guesses to thirty is not the same as removing it.
+  if (known > 0) return false;
+
+  // An address we have never seen succeed, while a lot of guessing is going on
+  // against this email from somewhere. That is the distributed case, and there
+  // is nothing to distinguish this caller from the attack.
+  return anywhere >= MAX_PER_EMAIL;
 }
 
 export async function recordAttempt(email: string, successful: boolean): Promise<void> {

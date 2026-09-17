@@ -29,15 +29,20 @@ const Schema = z.object({
 });
 
 /**
- * Six enquiries per caller per ten minutes, and a ceiling of 240 across
- * everyone — roughly thirty thousand a day, which no real week of this
- * business could approach. The reasoning behind the two numbers, and behind
- * treating verified and unverified callers differently, is in lib/rate-limit.
+ * Six enquiries per caller per ten minutes, and a ceiling of sixty ACCEPTED
+ * enquiries per window from callers nobody vouched for.
+ *
+ * Sixty is chosen against this business, not against a threat model: the
+ * company has taken fewer enquiries in its life than that ceiling allows in
+ * ten minutes, so no real day can reach it, while a machine inventing
+ * addresses is bounded at sixty a window instead of unlimited. A visitor
+ * arriving through the edge is never refused by it at all. The reasoning, and
+ * why there is no cap on distinct unverified callers, is in lib/rate-limit.
  */
 const limiter = new Limiter({
   windowMs: 10 * 60_000,
   perCaller: 6,
-  global: 240,
+  globalUnverified: 60,
   onGlobalLimit: (n) => {
     // Loud, because this should never happen and it means enquiries are being
     // refused — the one thing this site exists to collect.

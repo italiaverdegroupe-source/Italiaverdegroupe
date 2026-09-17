@@ -135,11 +135,11 @@ export default async function AccountPage({ searchParams }: {
         <h2>Recent sign-in attempts</h2>
         <p className="adm-sub">
           Failed attempts on your email, whoever made them. Six failures within
-          fifteen minutes lock the address they came from; thirty across
-          different addresses lock the email itself. That way somebody guessing
-          from one place cannot lock you out of your own console from another —
-          which, when the rule counted your email alone, took six wrong guesses
-          from anywhere.
+          fifteen minutes lock the address they came from. Thirty across
+          different addresses lock the email — but never an address you have
+          signed in from before, so somebody else guessing can no longer shut
+          you out of your own console. When this rule counted your email alone,
+          six wrong guesses from anywhere did exactly that.
         </p>
         <table className="adm-t">
           <thead><tr><th>When</th><th>From</th><th>Result</th></tr></thead>
