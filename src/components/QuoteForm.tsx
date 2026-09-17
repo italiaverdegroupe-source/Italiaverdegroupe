@@ -223,8 +223,22 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
 
         .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
-        .consent { display: flex; gap: 10px; align-items: flex-start; font-size: .86rem; color: var(--fg-soft); }
-        .consent input { margin-top: .25em; flex-shrink: 0; width: 16px; height: 16px; accent-color: var(--olive-700); }
+        /* The whole label is the target, not the 16px box beside it — the
+           consent tick is required, so a visitor who cannot hit it cannot send
+           the enquiry at all. */
+        .consent {
+          display: flex; gap: 10px; align-items: flex-start;
+          font-size: .86rem; color: var(--fg-soft);
+          padding: .5em 0; cursor: pointer;
+        }
+        .consent input {
+          margin-top: .1em; flex-shrink: 0;
+          width: 22px; height: 22px; accent-color: var(--olive-700);
+        }
+        @media (pointer: coarse) {
+          .consent { min-height: 44px; align-items: center; }
+          .consent input { width: 26px; height: 26px; margin-top: 0; }
+        }
 
         .err {
           margin: 0; padding: .8em 1em; font-size: .88rem;

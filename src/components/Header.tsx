@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { getSettings } from '@/lib/settings';
+import MobileMenu from './MobileMenu';
 
 const NAV = [
   { href: '/catalog', label: 'Catalogue' },
@@ -9,7 +11,8 @@ const NAV = [
   { href: '/contact', label: 'Contact' },
 ];
 
-export default function Header() {
+export default async function Header() {
+  const site = await getSettings();
   return (
     <header className="hdr">
       <div className="wrap hdr-in">
@@ -43,9 +46,21 @@ export default function Header() {
         </nav>
 
         <div className="hdr-cta">
-          <Link href="/quote" className="btn btn-primary">
-            Request a quote <span aria-hidden="true">&rarr;</span>
+          <Link href="/quote" className="btn btn-primary hdr-quote">
+            <span className="hdr-quote-long">Request a quote</span>
+            <span className="hdr-quote-short">Quote</span>
+            <span className="hdr-quote-arrow" aria-hidden="true">&rarr;</span>
           </Link>
+          {/* Below 900px .nav is display:none, and for a long time nothing
+              stood in its place — the catalogue, the collections, the journal
+              and the contact page were unreachable on a phone. */}
+          <MobileMenu
+            items={NAV}
+            contact={{
+              email: site.email, phone: site.phone,
+              whatsapp: site.whatsapp, whatsappLabel: site.whatsappLabel,
+            }}
+          />
         </div>
       </div>
 
@@ -123,6 +138,10 @@ export default function Header() {
         }
         .nav a:hover { color: var(--olive-700); border-bottom-color: var(--brass-500); }
 
+        .hdr-cta { display: flex; align-items: center; gap: 8px; }
+        /* The logo is the way home from every page, and it was a 28px-tall
+           line of text. */
+        @media (pointer: coarse) { .brand { min-height: 44px; } }
         .hdr-cta .btn { padding: .7em 1.3em; font-size: .85rem; }
 
         @media (min-width: 1100px) { .brand-line { display: block; } }
@@ -133,9 +152,18 @@ export default function Header() {
           .hdr-in { gap: 12px; }
           .hdr-cta .btn { padding: .6em .9em; font-size: .78rem; }
         }
-        @media (max-width: 380px) {
-          /* Below this the arrow is the first thing that can go. */
-          .hdr-cta .btn span { display: none; }
+        /* At 320px the bar came to 347px wide and the page scrolled sideways.
+           Three things share that row — the lockup, this button and the menu —
+           and the button is the one that can say less without losing anything:
+           the panel carries a full-width "Request a quote" of its own. */
+        .hdr-quote-short { display: none; }
+        @media (max-width: 420px) {
+          .hdr-quote-arrow { display: none; }
+        }
+        @media (max-width: 400px) {
+          .hdr-quote-long { display: none; }
+          .hdr-quote-short { display: inline; }
+          .hdr-cta .btn { padding: .6em 1em; }
         }
       `}</style>
     </header>

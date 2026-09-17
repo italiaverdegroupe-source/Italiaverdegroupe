@@ -132,7 +132,9 @@ img, svg { max-width: 100%; display: block; }
 /* letterspaced index label */
 .eyebrow {
   display: inline-flex; align-items: center; gap: .8em;
-  font-size: .7rem; font-weight: 600;
+  /* .7rem is 11.2px, which is under the floor this site holds itself to for
+     anything with words in it — including a label. */
+  font-size: .76rem; font-weight: 600;
   letter-spacing: .2em; text-transform: uppercase;
   color: var(--terra-700);
   margin: 0 0 1.4rem;
@@ -142,6 +144,19 @@ img, svg { max-width: 100%; display: block; }
 }
 
 :focus-visible { outline: 2px solid var(--terra-500); outline-offset: 3px; border-radius: 2px; }
+
+/* ── a finger is not a mouse ───────────────────────────────────
+   Measured at 390px: the buttons came out 38px tall, the catalogue filters
+   37px, "Add to list" 32px and the footer links 17px. None of those is a
+   target, and the phone is where most of this site is read. Raised only where
+   the pointer is coarse, so the desktop composition is untouched. */
+@media (pointer: coarse) {
+  .btn { min-height: 48px; }
+  .btn-lg { min-height: 54px; }
+  /* A standalone link in a list or a row, as opposed to one inside a
+     sentence — those are exempt, and stretching them would tear the line. */
+  .tlink { display: inline-flex; align-items: center; min-height: 44px; }
+}
 
 /* ── an answered question ──────────────────────────────────────
    Lived in the home page's own <style> until the services page needed the

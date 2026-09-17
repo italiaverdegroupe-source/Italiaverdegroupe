@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { removeFromShortlist, setShortlistQty, clearShortlist } from '@/lib/shortlist';
-import { useShortlist, useHydrated } from '@/lib/use-shortlist';
+import { useShortlist } from '@/lib/use-shortlist';
+import { useHydrated } from '@/lib/use-hydrated';
 
 /**
  * The shortlist, and one enquiry for all of it.

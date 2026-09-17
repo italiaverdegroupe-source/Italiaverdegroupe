@@ -27,6 +27,7 @@ const B = process.env.BASE ?? 'http://127.0.0.1:3520';
 const PAGES = process.env.PAGES?.split(',') ?? [
   '/', '/catalog', '/collections', '/collections/olive-trees', '/services', '/about',
   '/quote', '/journal', '/contact', '/shortlist', '/locations/dubai',
+  '/legal', '/privacy', '/terms-of-sale', '/refunds',
 ];
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
 const page = await browser.newPage({ viewport: { width: 1280, height: 900 }, deviceScaleFactor: 1 });

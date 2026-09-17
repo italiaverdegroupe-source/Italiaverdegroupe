@@ -161,6 +161,10 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
           background: none; border: 0; padding: .55em 0;
         }
         .cat-search input:focus { outline: none; }
+        @media (pointer: coarse) {
+          .cat-search input { min-height: 44px; }
+          .cat-clear { display: inline-flex; align-items: center; min-height: 44px; }
+        }
         .cat-search input::placeholder { color: var(--ink-400); }
         .cat-search .btn { flex: none; padding: .7em 1.4em; font-size: .88rem; }
         .cat-clear { flex: none; font-size: .84rem; color: var(--ink-600); padding-inline: 6px; }
@@ -182,11 +186,13 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
         .chip {
           display: inline-flex; align-items: baseline; gap: .45em;
           padding: .45em .95em; font-size: .86rem; text-decoration: none;
+          /* A filter you have to aim at is a filter nobody uses on a phone. */
           background: var(--bg-raised); border: 1px solid var(--line);
           border-radius: 999px; transition: all .16s ease;
         }
         .chip em { font-style: normal; font-size: .72rem; color: var(--fg-mute); }
         .chip:hover { border-color: var(--olive-400); }
+        @media (pointer: coarse) { .chip { min-height: 44px; align-items: center; } }
         .chip.on { background: var(--olive-700); color: #fff; border-color: var(--olive-700); }
         .chip.on em { color: rgb(255 255 255 / .7); }
         .count { font-size: .85rem; color: var(--fg-mute); margin-bottom: 24px; }

@@ -187,7 +187,7 @@ export default function CollectionsPage() {
         }
         .coll-body h2 { font-size: clamp(1.3rem, 1.9vw, 1.6rem); margin-bottom: .25rem; }
         .coll-meta {
-          font-size: .7rem; letter-spacing: .13em; text-transform: uppercase;
+          font-size: .75rem; letter-spacing: .12em; text-transform: uppercase;
           color: var(--brass-700); margin: 0 0 .75rem;
         }
         .coll-sep { opacity: .5; }

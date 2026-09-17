@@ -18,6 +18,13 @@ export const site = {
   whatsappLabel: '',
   email: '',
 
+  // The registered office, for the legal pages. Empty until there is one to
+  // state: an invented address on a privacy policy is the one lie that makes
+  // every other sentence on the page worthless.
+  address: '',
+  city: 'Dubai',
+  country: 'United Arab Emirates',
+
   // Commerce. VAT stays OFF until a TRN is issued — charging VAT without
   // registration is an offence, so quotes must not show a VAT line yet.
   currency: 'AED',

@@ -56,8 +56,8 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
 
       <form method="get" className="adm-filters">
         {status && <input type="hidden" name="status" value={status} />}
-        <input name="q" defaultValue={q} placeholder="Search name, company, email, reference"
-               style={{ flex: '1 1 260px', padding: '.5em .7em', border: '1px solid #E4DFD2', borderRadius: 999 }} />
+        <input name="q" defaultValue={q} className="adm-search"
+               placeholder="Search name, company, email, reference" />
         <button className="adm-btn adm-btn-sec" type="submit">Search</button>
       </form>
 

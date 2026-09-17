@@ -93,6 +93,10 @@ export default async function CollectionPage({ params }: { params: Promise<{ fam
         .crumbs { display: flex; gap: .55em; font-size: .82rem; color: var(--fg-mute); margin-bottom: 28px; }
         .crumbs a { text-decoration: none; }
         .crumbs a:hover { text-decoration: underline; }
+        @media (pointer: coarse) {
+          .crumbs { align-items: center; }
+          .crumbs a { display: inline-flex; align-items: center; min-height: 44px; }
+        }
 
         .fam-head {
           display: grid; gap: clamp(22px, 3vw, 56px); align-items: end;

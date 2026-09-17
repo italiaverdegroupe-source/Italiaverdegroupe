@@ -1,5 +1,4 @@
-import Link from 'next/link';
-import AdminNav from '@/components/admin/Nav';
+import AdminSide from '@/components/admin/Side';
 import { getSessionUser } from '@/lib/auth';
 import { countOpen } from '@/lib/alerts';
 import './admin.css';
@@ -26,25 +25,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           added; in a column they group by purpose, carry a mark each, and
           leave the width of the screen to the tables, which is what anybody
           actually spends the day reading. */}
-      <aside className="adm-side">
-        <Link href="/admin" className="adm-brand">
-          <span className="adm-brandmark" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M12 21V11" strokeLinecap="round" />
-              <path d="M12 12c0-4.4 3.1-8 7-8 .4 3.9-2.4 8-7 8Z" strokeLinejoin="round" />
-              <path d="M12 16c-3.4 0-6-2.8-6-6.2 3 .3 6 2.9 6 6.2Z" strokeLinejoin="round" />
-            </svg>
-          </span>
-          <span className="adm-brandtxt">
-            <strong>Verde Garden</strong>
-            <em>Operations</em>
-          </span>
-        </Link>
-
-        <AdminNav open={badge.open} urgent={badge.urgent > 0}
-                  user={{ name: user.name, role: user.role }} />
-
-      </aside>
+      <AdminSide open={badge.open} urgent={badge.urgent > 0}
+                 user={{ name: user.name, role: user.role }} />
       <div className="adm-body">{children}</div>
     </div>
   );

@@ -58,6 +58,9 @@ export default function ShortlistButton({
         }
         .sl-btn.on:hover { background: var(--olive-900); border-color: var(--olive-900); color: #fff; }
         .sl-btn-compact { padding: .42em .8em; font-size: .76rem; }
+        /* 32px on a phone, on the one control that turns a browse into an
+           enquiry. */
+        @media (pointer: coarse) { .sl-btn, .sl-btn-compact { min-height: 44px; } }
         @media (prefers-reduced-motion: reduce) { .sl-btn { transition: none; } }
       `}</style>
     </button>

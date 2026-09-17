@@ -73,6 +73,7 @@ export default async function LocationPage({ params }: { params: Promise<{ emira
           border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-raised);
         }
         .em:hover { border-color: var(--olive-700); color: var(--olive-700); }
+        @media (pointer: coarse) { .em { display: inline-flex; align-items: center; min-height: 44px; } }
       `}</style>
     </div>
   );

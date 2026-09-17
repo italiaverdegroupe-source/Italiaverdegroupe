@@ -109,25 +109,61 @@
 /* ── the work ────────────────────────────────────────────────── */
 .adm-body { padding: 30px clamp(20px, 2.6vw, 40px) 72px; max-width: 1480px; }
 
-/* Narrow screens: the column becomes a strip along the top, scrolled
-   sideways. A console is a desk tool and this is the fallback, not a design —
-   but it must not be broken. */
+/* ── the bar and the drawer, on a phone ───────────────────────
+   This used to be the column laid on its side: fifteen destinations in a
+   31px-tall strip that scrolled sideways, most of them past the edge of the
+   screen, with nothing to say they were there. A console is a desk tool, but
+   "did that delivery land" gets asked from a car. */
+.adm-bar { display: none; }
+
 @media (max-width: 900px) {
   .adm { grid-template-columns: minmax(0, 1fr); }
-  .adm-side {
-    height: auto; position: static;
-    flex-direction: row; align-items: center; gap: 10px;
-    padding: 10px 14px; overflow-x: auto;
-    border-right: 0; border-bottom: 1px solid #000;
+
+  .adm-bar {
+    position: sticky; top: 0; z-index: 40;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 8px 12px 8px 14px;
+    background: #14150F; color: #F2EFE6;
+    border-bottom: 1px solid #000;
   }
-  .adm-brand { padding: 0 8px 0 0; }
-  .adm-nav { flex-direction: row; gap: 10px; align-items: center; }
-  .adm-navtitle { display: none; }
-  .adm-navgroup ul { display: flex; gap: 2px; }
-  .adm-nav a { white-space: nowrap; }
-  .adm-navlabel { font-size: .8rem; }
-  .adm-me { margin: 0; padding: 0 0 0 10px; border-top: 0; border-left: 1px solid rgb(242 239 230 / .12); }
-  .adm-whotxt { display: none; }
+  .adm-bar-brand {
+    display: flex; align-items: center; gap: 10px;
+    min-height: 44px; text-decoration: none; color: #F2EFE6;
+    font-family: var(--font-fraunces), serif; font-size: .98rem;
+  }
+  .adm-bar-btn {
+    position: relative; display: grid; place-items: center;
+    width: 46px; height: 46px; flex: none;
+    background: none; border: 1px solid rgb(242 239 230 / .22); border-radius: 6px;
+    color: #F2EFE6; cursor: pointer;
+  }
+  .adm-bar-btn:hover { border-color: rgb(242 239 230 / .45); }
+  .adm-bar-dot {
+    position: absolute; top: 7px; right: 7px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #C2503A; box-shadow: 0 0 0 2px #14150F;
+  }
+
+  .adm-scrim {
+    position: fixed; inset: 0; z-index: 44;
+    background: rgb(0 0 0 / .5);
+  }
+
+  .adm-side {
+    position: fixed; z-index: 45;
+    top: 0; left: 0; bottom: 0;
+    width: min(82vw, 18rem); height: 100dvh;
+    transform: translateX(-101%);
+    transition: transform .24s cubic-bezier(.22, 1, .36, 1);
+    border-right: 1px solid #000;
+    overscroll-behavior: contain;
+  }
+  .adm-side.on { transform: translateX(0); }
+  @media (prefers-reduced-motion: reduce) { .adm-side { transition: none; } }
+
+  /* Every destination a thumb has to hit. */
+  .adm-nav a { min-height: 46px; }
+  .adm-me { min-height: 52px; }
 }
 
 .adm h1 { font-family: var(--font-fraunces), serif; font-size: 1.85rem; font-weight: 500; margin: 0 0 .18em; letter-spacing: -.025em; line-height: 1.12; }
@@ -140,7 +176,23 @@
 .adm-card b { display: block; font-family: var(--font-fraunces), serif; font-size: 2rem; font-weight: 450; line-height: 1; letter-spacing: -.03em; }
 .adm-card span { display: block; margin-top: 6px; font-size: .76rem; letter-spacing: .09em; text-transform: uppercase; color: #8A8D7D; }
 
-.adm-panel { background: #fff; border: 1px solid #E4DFD2; border-radius: 6px; overflow: hidden; }
+/* overflow was `hidden`, which on a phone meant a nine-column table simply
+   stopped at the edge of the screen and the rest of it could not be reached at
+   all. It scrolls now, and the shadows at the edges appear only while there is
+   something past them — the one hint that costs no space. */
+.adm-panel {
+  background: #fff; border: 1px solid #E4DFD2; border-radius: 6px;
+  overflow-x: auto; overscroll-behavior-x: contain;
+  background-image:
+    linear-gradient(to right, #fff 30%, rgb(255 255 255 / 0)),
+    linear-gradient(to left,  #fff 30%, rgb(255 255 255 / 0)),
+    radial-gradient(farthest-side at 0 50%, rgb(20 21 15 / .13), rgb(20 21 15 / 0)),
+    radial-gradient(farthest-side at 100% 50%, rgb(20 21 15 / .13), rgb(20 21 15 / 0));
+  background-position: 0 0, 100% 0, 0 0, 100% 0;
+  background-size: 44px 100%, 44px 100%, 14px 100%, 14px 100%;
+  background-repeat: no-repeat;
+  background-attachment: local, local, scroll, scroll;
+}
 table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 .adm-t th {
   text-align: left; padding: 11px 14px; font-size: .7rem; letter-spacing: .1em;
@@ -373,6 +425,15 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 
 /* filters */
 .adm-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+/* Was four inline style properties on one input, which no media query could
+   reach — so it stayed 30px tall on a phone whatever the rules below said. */
+.adm-search {
+  flex: 1 1 260px; min-width: 0;
+  font: inherit; font-size: .88rem; padding: .5em .9em;
+  border: 1px solid #E4DFD2; border-radius: 999px;
+  background: #fff; color: #14150F;
+}
+.adm-search:focus { outline: 2px solid #A68849; outline-offset: 1px; }
 .adm-chip {
   padding: .4em .85em; font-size: .8rem; text-decoration: none; color: #4C4F41;
   background: #fff; border: 1px solid #E4DFD2; border-radius: 999px;
@@ -536,3 +597,20 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 /* Zero of something you were hoping to sell should not read like any other
    number on the row. */
 .adm-none { color: #9A9C90; font-weight: 400; }
+
+/* ── a finger, in the console ──────────────────────────────────
+   Measured at 390px: buttons 41px, filter chips 27–31px, filter inputs 30px.
+   The console is a desk tool, but "did that land" gets asked from a car, and a
+   control you have to aim at twice is worse there than anywhere. */
+@media (pointer: coarse) {
+  .adm-btn, .adm-chip { min-height: 44px; }
+  .adm-chip { display: inline-flex; align-items: center; }
+  .adm-field input, .adm-field select, .adm-field textarea,
+  .adm input[type='text'], .adm input[type='search'], .adm input[type='email'],
+  .adm input[type='number'], .adm input[type='date'], .adm input[type='password'],
+  .adm select { min-height: 44px; }
+  /* Opening a record is what a table is for, and the link in the cell is the
+     way in. */
+  .adm-t a { display: inline-flex; align-items: center; min-height: 44px; }
+  .adm-search { min-height: 44px; }
+}

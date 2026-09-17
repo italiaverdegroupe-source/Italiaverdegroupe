@@ -88,7 +88,7 @@ export default function ProductCard({ p, priority = false }: { p: Product; prior
         .spec-flag {
           position: absolute; left: 10px; bottom: 10px;
           display: inline-flex; align-items: center; gap: .45em;
-          padding: .34em .65em; font-size: .62rem; letter-spacing: .05em;
+          padding: .34em .68em; font-size: .75rem; letter-spacing: .03em;
           background: rgb(16 21 9 / .82); color: #F3EFE4; border-radius: 2px;
           backdrop-filter: blur(3px);
         }

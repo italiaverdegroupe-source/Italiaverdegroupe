@@ -171,6 +171,9 @@ export default async function ContactPage() {
           list-style: none; margin: 0 0 0; padding: 0;
           display: flex; flex-wrap: wrap; gap: 8px;
         }
+        @media (pointer: coarse) {
+          .ct-emirates a { display: inline-flex; align-items: center; min-height: 44px; }
+        }
         .ct-emirates a {
           display: inline-block; padding: .4em .85em;
           border: 1px solid var(--line); border-radius: 999px;
@@ -187,6 +190,12 @@ export default async function ContactPage() {
           .ct-channels li { grid-template-columns: minmax(0, 1fr); }
           .ct-k { grid-row: auto; }
         }
+        /* A row of channels is the whole point of this page; on a phone each
+           of them has to be a target rather than a line of text. */
+        @media (pointer: coarse) {
+          .ch a, .ch-link, .ct-chan a { display: inline-flex; align-items: center; min-height: 44px; }
+        }
+
       `}</style>
     </div>
   );

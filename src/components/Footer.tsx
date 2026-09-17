@@ -68,11 +68,28 @@ export default async function Footer() {
         <hr className="rule" />
 
         <div className="ftr-base">
+          {/* Where people look for these. Kept out of the four columns above so
+              the catalogue does not have to make room for the small print, and
+              given targets a thumb can actually hit. */}
+          <nav className="ftr-legal" aria-label="Legal">
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms of use</Link>
+            <Link href="/terms-of-sale">Terms of sale</Link>
+            <Link href="/refunds">Replacements &amp; refunds</Link>
+            <Link href="/disclaimer">Disclaimer</Link>
+          </nav>
           <p>© {new Date().getFullYear()} {site.legalName}. All prices on request.</p>
           <p className="ftr-sm">
             Prices exclusive of VAT where applicable. Specifications are indicative;
             living stock varies in size and form.
           </p>
+          {(site.licenceNumber || site.trn) && (
+            <p className="ftr-sm">
+              {site.licenceNumber && <>Trade licence {site.licenceNumber}</>}
+              {site.licenceNumber && site.trn && ' · '}
+              {site.trn && <>TRN {site.trn}</>}
+            </p>
+          )}
         </div>
       </div>
 
@@ -99,7 +116,14 @@ export default async function Footer() {
           font-size: .72rem; font-weight: 600; letter-spacing: .16em;
           text-transform: uppercase; color: var(--brass-300); margin-bottom: 1rem;
         }
-        .ftr ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+        .ftr ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .2rem; }
+        /* A footer link was a 17px-tall line of text. On a phone that is not a
+           target, it is a hope. The row grows where the pointer is a finger. */
+        .ftr li a { display: inline-flex; align-items: center; min-height: 34px; }
+        @media (pointer: coarse) {
+          .ftr li a { min-height: 44px; }
+          .ftr ul { gap: 0; }
+        }
         .ftr-contact { margin-bottom: 1.1rem !important; }
         .ftr-contact a { color: var(--brass-300); }
         .ftr a { color: rgb(251 249 244 / .72); text-decoration: none; font-size: .9rem; }
@@ -109,6 +133,18 @@ export default async function Footer() {
         .ftr .rule { background: rgb(251 249 244 / .12); }
         .ftr-base { padding-top: 24px; display: grid; gap: .35rem; }
         .ftr-base p { margin: 0; font-size: .82rem; color: rgb(251 249 244 / .5); }
+        .ftr-legal {
+          display: flex; flex-wrap: wrap; align-items: center;
+          gap: 0 1.4rem; margin-bottom: .6rem;
+        }
+        .ftr-legal a {
+          display: inline-flex; align-items: center; min-height: 34px;
+          font-size: .84rem; color: rgb(251 249 244 / .82);
+        }
+        @media (pointer: coarse) {
+          .ftr-legal { gap: 0 1.2rem; }
+          .ftr-legal a { min-height: 44px; }
+        }
       `}</style>
     </footer>
   );
