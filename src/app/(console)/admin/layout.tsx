@@ -1,25 +1,10 @@
 import Link from 'next/link';
+import AdminNav from '@/components/admin/Nav';
 import { getSessionUser } from '@/lib/auth';
 import { countOpen } from '@/lib/alerts';
 import './admin.css';
 
 export const dynamic = 'force-dynamic';
-
-const NAV = [
-  { href: '/admin', label: 'Overview' },
-  { href: '/admin/leads', label: 'Leads' },
-  { href: '/admin/inventory', label: 'Inventory' },
-  { href: '/admin/quotes', label: 'Quotations' },
-  { href: '/admin/orders', label: 'Orders' },
-  { href: '/admin/shipments', label: 'Shipments' },
-  { href: '/admin/finance', label: 'Finance' },
-  { href: '/admin/alerts', label: 'Alerts' },
-  { href: '/admin/reports', label: 'Reports' },
-  { href: '/admin/content', label: 'Content' },
-  { href: '/admin/settings', label: 'Settings' },
-  { href: '/admin/backups', label: 'Backups' },
-  { href: '/admin/users', label: 'Accounts' },
-];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await getSessionUser();
@@ -36,27 +21,30 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="adm">
-      <header className="adm-bar">
+      {/* Down the side, not across the top. Thirteen destinations in a row is a
+          line of undifferentiated words that gets narrower every time one is
+          added; in a column they group by purpose, carry a mark each, and
+          leave the width of the screen to the tables, which is what anybody
+          actually spends the day reading. */}
+      <aside className="adm-side">
         <Link href="/admin" className="adm-brand">
-          Verde Garden <span>Operations</span>
+          <span className="adm-brandmark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M12 21V11" strokeLinecap="round" />
+              <path d="M12 12c0-4.4 3.1-8 7-8 .4 3.9-2.4 8-7 8Z" strokeLinejoin="round" />
+              <path d="M12 16c-3.4 0-6-2.8-6-6.2 3 .3 6 2.9 6 6.2Z" strokeLinejoin="round" />
+            </svg>
+          </span>
+          <span className="adm-brandtxt">
+            <strong>Verde Garden</strong>
+            <em>Operations</em>
+          </span>
         </Link>
-        <nav>
-          {NAV.map((n) => (
-            <Link key={n.href} href={n.href}>
-              {n.label}
-              {n.href === '/admin/alerts' && badge.open > 0 && (
-                <span className="adm-badge" data-urgent={badge.urgent > 0}>{badge.open}</span>
-              )}
-            </Link>
-          ))}
-        </nav>
-        <div className="adm-me">
-          <Link href="/admin/account" className="adm-who">{user.name}</Link>
-          <form action="/api/admin/logout" method="post">
-            <button type="submit" className="adm-out">Sign out</button>
-          </form>
-        </div>
-      </header>
+
+        <AdminNav open={badge.open} urgent={badge.urgent > 0}
+                  user={{ name: user.name, role: user.role }} />
+
+      </aside>
       <div className="adm-body">{children}</div>
     </div>
   );

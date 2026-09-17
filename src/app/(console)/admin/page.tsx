@@ -3,14 +3,44 @@ import { redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { STATUSES, StatusPill, fmtDate } from '@/components/admin/bits';
+import { TimeArea, BarList, Funnel, Donut } from '@/components/admin/Charts';
 
 export const dynamic = 'force-dynamic';
+
+/**
+ * The overview answers four questions, in the order somebody walking up to the
+ * screen actually asks them: is anything on fire, what is coming in, where is
+ * it stuck, and where is it coming from. Numbers alone answered the first and
+ * none of the others — "18 new" tells you nothing about whether that is a good
+ * week or a dead one, which is the only reason to draw a shape instead.
+ */
+
+const DAYS = 30;
+
+/** Fills the gaps. A day with no enquiries is a fact about the business and
+ *  must be drawn as a zero, not skipped — a series that omits quiet days
+ *  compresses a flat month into a line that looks busy. */
+function densify(rows: { d: string; n: string }[], days: number): { t: string; v: number }[] {
+  const byDay = new Map(rows.map((r) => [r.d.slice(0, 10), Number(r.n)]));
+  const out: { t: string; v: number }[] = [];
+  const today = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setUTCDate(d.getUTCDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    out.push({
+      t: d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }),
+      v: byDay.get(key) ?? 0,
+    });
+  }
+  return out;
+}
 
 export default async function Overview() {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
 
-  const [counts, recent, stale] = await Promise.all([
+  const [counts, recent, stale, daily, byEmirate, bySource, byType] = await Promise.all([
     query<{ status: string; n: string }>(
       'SELECT status, count(*) AS n FROM leads GROUP BY status'),
     query<{ reference: string; name: string; company: string | null; emirate: string | null;
@@ -20,6 +50,26 @@ export default async function Overview() {
     query<{ n: string }>(
       `SELECT count(*) AS n FROM leads
         WHERE status = 'new' AND created_at < now() - interval '24 hours'`),
+    query<{ d: string; n: string }>(
+      `SELECT date_trunc('day', created_at)::date::text AS d, count(*) AS n
+         FROM leads WHERE created_at > now() - ($1 || ' days')::interval
+        GROUP BY 1 ORDER BY 1`, [String(DAYS)]),
+    query<{ k: string; n: string }>(
+      `SELECT coalesce(nullif(btrim(emirate), ''), 'Not stated') AS k, count(*) AS n
+         FROM leads GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 8`),
+    // Grouped on the LOWERCASED value, then presented in title case. Without
+    // that, "direct" and "Direct" are two sources in the chart and the two
+    // bars add up to the truth only if you notice they are the same word —
+    // which is exactly the sort of thing a chart is supposed to stop you
+    // having to do. The source string comes off a public form and a query
+    // parameter, so its casing is not ours to rely on.
+    query<{ k: string; n: string }>(
+      `SELECT initcap(lower(coalesce(nullif(btrim(source), ''), 'direct'))) AS k,
+              count(*) AS n
+         FROM leads GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 6`),
+    query<{ k: string; n: string }>(
+      `SELECT initcap(lower(enquiry_type)) AS k, count(*) AS n
+         FROM leads GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 6`),
   ]);
 
   const by = Object.fromEntries(counts.map((c) => [c.status, Number(c.n)]));
@@ -27,16 +77,42 @@ export default async function Overview() {
   const open = total - (by.won ?? 0) - (by.lost ?? 0);
   const uncontacted = Number(stale[0]?.n ?? 0);
 
+  const series = densify(daily, DAYS);
+  const last7 = series.slice(-7).reduce((s, p) => s + p.v, 0);
+  const prev7 = series.slice(-14, -7).reduce((s, p) => s + p.v, 0);
+  // A change against nothing is not a percentage. Say "first week" instead of
+  // dividing by zero and printing Infinity%.
+  const trend = prev7 === 0 ? null : Math.round(((last7 - prev7) / prev7) * 100);
+
+  const won = by.won ?? 0;
+  const decided = won + (by.lost ?? 0);
+  const winRate = decided === 0 ? null : Math.round((won / decided) * 100);
+
   return (
     <>
       <h1>Overview</h1>
       <p className="adm-sub">Signed in as {user.name}</p>
 
       <div className="adm-cards">
-        <div className="adm-card"><b>{total}</b><span>Total leads</span></div>
-        <div className="adm-card"><b>{by.new ?? 0}</b><span>New</span></div>
+        <div className="adm-card">
+          <b>{total}</b><span>Total leads</span>
+        </div>
+        <div className="adm-card">
+          <b>{last7}</b>
+          <span>
+            Last 7 days
+            {trend !== null && (
+              <i className="adm-trend" data-dir={trend >= 0 ? 'up' : 'down'}>
+                {trend >= 0 ? '▲' : '▼'} {Math.abs(trend)}%
+              </i>
+            )}
+          </span>
+        </div>
         <div className="adm-card"><b>{open}</b><span>Open</span></div>
-        <div className="adm-card"><b>{by.won ?? 0}</b><span>Won</span></div>
+        <div className="adm-card">
+          <b>{winRate === null ? '—' : `${winRate}%`}</b>
+          <span>{decided === 0 ? 'Win rate — none decided yet' : `Win rate of ${decided} decided`}</span>
+        </div>
       </div>
 
       {uncontacted > 0 && (
@@ -45,6 +121,42 @@ export default async function Overview() {
           uncontacted for more than 24 hours. <Link href="/admin/leads?status=new">Open them →</Link>
         </p>
       )}
+
+      <div className="adm-grid-2">
+        <section className="adm-panel adm-pad">
+          <h2>Enquiries, last {DAYS} days</h2>
+          <p className="adm-sub adm-sub-tight">
+            {last7} in the last seven days
+            {trend !== null && `, ${trend >= 0 ? 'up' : 'down'} ${Math.abs(trend)}% on the seven before`}
+            {trend === null && last7 > 0 && ' — the first week with any'}.
+          </p>
+          <TimeArea points={series} label={`Enquiries over ${DAYS} days`} />
+        </section>
+
+        <section className="adm-panel adm-pad">
+          <h2>Where they are</h2>
+          <p className="adm-sub adm-sub-tight">
+            Every lead sits at one stage. The percentage is how many of the
+            previous stage reached this one.
+          </p>
+          <Funnel stages={STATUSES.filter((s) => s !== 'lost').map((s) => ({ k: s, v: by[s] ?? 0 }))} />
+        </section>
+      </div>
+
+      <div className="adm-grid-3">
+        <section className="adm-panel adm-pad">
+          <h2>By emirate</h2>
+          <BarList rows={byEmirate.map((r) => ({ k: r.k, v: Number(r.n) }))} label="Leads by emirate" />
+        </section>
+        <section className="adm-panel adm-pad">
+          <h2>By enquiry</h2>
+          <Donut rows={byType.map((r) => ({ k: r.k, v: Number(r.n) }))} label="Leads by enquiry type" />
+        </section>
+        <section className="adm-panel adm-pad">
+          <h2>How they found us</h2>
+          <BarList rows={bySource.map((r) => ({ k: r.k, v: Number(r.n) }))} label="Leads by source" />
+        </section>
+      </div>
 
       <h2>Latest enquiries</h2>
       <div className="adm-panel">
@@ -78,10 +190,6 @@ export default async function Overview() {
           </table>
         )}
       </div>
-
-      <p className="adm-sub" style={{ marginTop: 20 }}>
-        Pipeline: {STATUSES.map((s) => `${s} ${by[s] ?? 0}`).join(' · ')}
-      </p>
     </>
   );
 }

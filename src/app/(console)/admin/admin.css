@@ -1,38 +1,138 @@
 /* Operations console — dense, quiet, built to be read all day. */
 .adm {
-  min-height: 100vh; background: #F7F6F2; color: #14150F;
-  font-family: var(--font-inter), system-ui, sans-serif; font-size: 14px;
+  min-height: 100vh; background: #F4F3EE; color: #14150F;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  /* 14px was a fraction too small for a screen somebody reads for eight hours,
+     and the numbers in the tables were the part that suffered. */
+  font-size: 14.5px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  /* Figures line up in a column when they are tabular. In a console where
+     every other cell is a quantity or a price, proportional digits make a
+     table impossible to scan down. */
+  font-variant-numeric: tabular-nums;
+
+  display: grid;
+  grid-template-columns: var(--adm-side, 232px) minmax(0, 1fr);
 }
-.adm-bar {
-  display: flex; align-items: center; gap: 28px;
-  padding: 0 24px; height: 56px;
+
+/* ── the sidebar ─────────────────────────────────────────────── */
+.adm-side {
+  position: sticky; top: 0; align-self: start;
+  height: 100vh; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 18px 12px 14px;
   background: #14150F; color: #F2EFE6;
-  position: sticky; top: 0; z-index: 40;
+  border-right: 1px solid #000;
 }
+
 .adm-brand {
-  font-family: var(--font-fraunces), serif; font-size: 1rem;
-  text-decoration: none; color: #F2EFE6; letter-spacing: -.01em;
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 10px 16px; text-decoration: none; color: #F2EFE6;
 }
-.adm-brand span { color: #A68849; }
-.adm-bar nav { display: flex; gap: 20px; margin-right: auto; }
-.adm-bar nav a {
-  color: rgb(242 239 230 / .72); text-decoration: none; font-size: .86rem;
-  padding: 6px 0; border-bottom: 2px solid transparent;
+.adm-brandmark {
+  display: grid; place-items: center; flex: none;
+  width: 32px; height: 32px; border-radius: 6px;
+  background: rgb(166 136 73 / .16); color: #C9A85C;
 }
-.adm-bar nav a:hover { color: #fff; border-bottom-color: #A68849; }
-.adm-me { display: flex; align-items: center; gap: 14px; font-size: .82rem; color: rgb(242 239 230 / .7); }
+.adm-brandtxt { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+.adm-brandtxt strong {
+  font-family: var(--font-fraunces), serif; font-size: .96rem;
+  font-weight: 500; letter-spacing: -.01em; white-space: nowrap;
+}
+.adm-brandtxt em {
+  font-style: normal; font-size: .58rem; letter-spacing: .22em;
+  text-transform: uppercase; color: #A68849;
+}
+
+.adm-nav { flex: 1 1 auto; display: flex; flex-direction: column; gap: 14px; }
+.adm-navgroup ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+.adm-navtitle {
+  margin: 0 0 6px; padding-inline-start: 10px;
+  font-size: .58rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
+  color: rgb(242 239 230 / .38);
+}
+.adm-nav a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 10px; border-radius: 5px;
+  color: rgb(242 239 230 / .74); text-decoration: none;
+  font-size: .855rem; line-height: 1.3;
+  transition: background .12s ease, color .12s ease;
+}
+.adm-nav a:hover { background: rgb(242 239 230 / .07); color: #fff; }
+.adm-navicon { display: grid; place-items: center; flex: none; opacity: .8; }
+.adm-navlabel { flex: 1 1 auto; min-width: 0; }
+
+/* The current page, said twice — a fill and a rule — so it survives being
+   looked at quickly and does not depend on colour alone. */
+.adm-nav a.on {
+  background: rgb(166 136 73 / .17); color: #fff; font-weight: 500;
+  box-shadow: inset 2px 0 0 #C9A85C;
+}
+.adm-nav a.on .adm-navicon { opacity: 1; color: #C9A85C; }
+
+/* ── who is signed in ────────────────────────────────────────── */
+.adm-me {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 10px; padding-top: 12px;
+  border-top: 1px solid rgb(242 239 230 / .12);
+}
+.adm-who {
+  display: flex; align-items: center; gap: 9px; min-width: 0;
+  flex: 1 1 auto; padding: 5px 6px; border-radius: 5px;
+  color: inherit; text-decoration: none;
+}
+.adm-who:hover { background: rgb(242 239 230 / .07); }
+.adm-avatar {
+  display: grid; place-items: center; flex: none;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgb(166 136 73 / .2); color: #D8BC7A;
+  font-size: .66rem; font-weight: 600; letter-spacing: .04em;
+}
+.adm-whotxt { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+.adm-whotxt strong {
+  font-size: .8rem; font-weight: 500; color: #F2EFE6;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.adm-whotxt em {
+  font-style: normal; font-size: .6rem; letter-spacing: .12em;
+  text-transform: uppercase; color: rgb(242 239 230 / .5);
+}
 .adm-out {
-  font: inherit; font-size: .8rem; background: none; cursor: pointer;
-  color: rgb(242 239 230 / .7); border: 1px solid rgb(242 239 230 / .28);
-  border-radius: 3px; padding: .35em .8em;
+  display: grid; place-items: center; flex: none;
+  width: 30px; height: 30px; padding: 0;
+  font: inherit; background: none; cursor: pointer;
+  color: rgb(242 239 230 / .6); border: 1px solid rgb(242 239 230 / .2);
+  border-radius: 5px;
 }
-.adm-out:hover { color: #fff; border-color: #fff; }
+.adm-out:hover { color: #fff; border-color: rgb(242 239 230 / .5); }
 
-.adm-body { padding: 28px 24px 64px; max-width: 1400px; margin-inline: auto; }
+/* ── the work ────────────────────────────────────────────────── */
+.adm-body { padding: 30px clamp(20px, 2.6vw, 40px) 72px; max-width: 1480px; }
 
-.adm h1 { font-family: var(--font-fraunces), serif; font-size: 1.7rem; margin: 0 0 .2em; letter-spacing: -.02em; }
-.adm h2 { font-family: var(--font-fraunces), serif; font-size: 1.15rem; margin: 0 0 .6em; }
-.adm-sub { color: #6B6E60; margin: 0 0 24px; font-size: .9rem; }
+/* Narrow screens: the column becomes a strip along the top, scrolled
+   sideways. A console is a desk tool and this is the fallback, not a design —
+   but it must not be broken. */
+@media (max-width: 900px) {
+  .adm { grid-template-columns: minmax(0, 1fr); }
+  .adm-side {
+    height: auto; position: static;
+    flex-direction: row; align-items: center; gap: 10px;
+    padding: 10px 14px; overflow-x: auto;
+    border-right: 0; border-bottom: 1px solid #000;
+  }
+  .adm-brand { padding: 0 8px 0 0; }
+  .adm-nav { flex-direction: row; gap: 10px; align-items: center; }
+  .adm-navtitle { display: none; }
+  .adm-navgroup ul { display: flex; gap: 2px; }
+  .adm-nav a { white-space: nowrap; }
+  .adm-navlabel { font-size: .8rem; }
+  .adm-me { margin: 0; padding: 0 0 0 10px; border-top: 0; border-left: 1px solid rgb(242 239 230 / .12); }
+  .adm-whotxt { display: none; }
+}
+
+.adm h1 { font-family: var(--font-fraunces), serif; font-size: 1.85rem; font-weight: 500; margin: 0 0 .18em; letter-spacing: -.025em; line-height: 1.12; }
+.adm h2 { font-family: var(--font-fraunces), serif; font-size: 1.22rem; font-weight: 500; margin: 0 0 .6em; letter-spacing: -.015em; }
+.adm-sub { color: #61645A; margin: 0 0 26px; font-size: .9rem; line-height: 1.55; }
 
 /* cards + tables */
 .adm-cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); margin-bottom: 32px; }
@@ -306,3 +406,60 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
   padding: 10px 14px; margin-bottom: 16px; font-size: .9rem;
   color: #2E4420; background: #F1F5EC; border: 1px solid #CBD8BE; border-radius: 3px;
 }
+
+/* ── charts ──────────────────────────────────────────────────── */
+.adm-grid-2 { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); margin-bottom: 14px; }
+.adm-grid-3 { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-bottom: 32px; }
+.adm-sub-tight { margin-bottom: 14px; font-size: .82rem; }
+.adm-chart { margin: 0; }
+.adm-chart-empty {
+  margin: 0; padding: 22px 0; color: #61645A; font-size: .84rem; text-align: center;
+}
+
+/* a value against a peak */
+.adm-trend { font-style: normal; margin-inline-start: .5em; font-size: .92em; }
+.adm-trend[data-dir='up'] { color: #3F5C2D; }
+.adm-trend[data-dir='down'] { color: #9B3A2B; }
+
+/* ranked bars */
+.adm-bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+.adm-bars li { display: grid; grid-template-columns: minmax(64px, 34%) 1fr auto; align-items: center; gap: 10px; }
+.adm-bar-k {
+  font-size: .8rem; color: #3A3C33;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.adm-bar-track { height: 8px; border-radius: 4px; background: #EDEAE0; overflow: hidden; }
+.adm-bar-fill { display: block; height: 100%; border-radius: 4px; }
+.adm-bar-v { font-size: .8rem; font-weight: 500; color: #14150F; min-width: 2ch; text-align: right; }
+
+/* the pipeline */
+.adm-funnel {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px;
+  align-items: end; min-height: 150px;
+}
+.adm-funnel li { display: grid; gap: 6px; justify-items: center; }
+.adm-funnel-top { display: flex; align-items: baseline; gap: 5px; }
+.adm-funnel-top b { font-size: 1rem; font-weight: 600; }
+.adm-funnel-top i { font-style: normal; font-size: .64rem; color: #61645A; }
+.adm-funnel-track {
+  display: flex; align-items: flex-end; justify-content: center;
+  width: 100%; height: 86px; background: #EDEAE0; border-radius: 4px; overflow: hidden;
+}
+.adm-funnel-fill { display: block; width: 100%; border-radius: 4px 4px 0 0; }
+.adm-funnel-k {
+  font-size: .62rem; letter-spacing: .08em; text-transform: uppercase;
+  color: #61645A; text-align: center;
+}
+
+/* share of a whole */
+.adm-donut { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.adm-legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; flex: 1 1 120px; min-width: 0; }
+.adm-legend li { display: flex; align-items: center; gap: 8px; font-size: .8rem; }
+.adm-legend i { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+.adm-legend span { flex: 1 1 auto; color: #3A3C33; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm-legend b { font-weight: 500; }
+
+.adm-pad { padding: 18px 20px 20px; }
+.adm-who.on { background: rgb(166 136 73 / .17); box-shadow: inset 2px 0 0 #C9A85C; }
+.adm-who.on .adm-whotxt strong { color: #fff; }
