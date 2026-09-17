@@ -11,6 +11,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import LocaleProvider from '@/components/LocaleProvider';
 import { ui } from '@/lib/ui';
+import { getSettings } from '@/lib/settings';
+import { organisation, website, ldJson } from '@/lib/schema';
 import '../globals.css';
 
 const fraunces = Fraunces({
@@ -119,12 +121,22 @@ export default async function RootLayout(
   // put an unbounded number of duplicate URLs in front of a crawler.
   if (!isLocale(lang)) notFound();
 
+  // Once, in the layout, so every page carries it — a search engine that
+  // lands on a specimen page deep in the catalogue should still learn who
+  // publishes it. Both blocks are @id'd, so the per-page markup can point at
+  // them instead of describing the company again and disagreeing with itself.
+  const settings = await getSettings();
+
   const latin = `${fraunces.variable} ${inter.variable}`;
   const fonts = lang === 'ar' ? `${latin} ${amiri.variable} ${plexArabic.variable}` : latin;
 
   return (
     <html lang={LOCALE_TAG[lang]} dir={dir(lang)} className={fonts}>
       <body className="grain">
+        <script type="application/ld+json" suppressHydrationWarning
+                dangerouslySetInnerHTML={ldJson(organisation(settings, lang))} />
+        <script type="application/ld+json" suppressHydrationWarning
+                dangerouslySetInnerHTML={ldJson(website(settings, lang))} />
         <LocaleProvider locale={lang}>
           <a href="#main" className="visually-hidden">{ui(lang)('nav.skip')}</a>
           <Header locale={lang} />

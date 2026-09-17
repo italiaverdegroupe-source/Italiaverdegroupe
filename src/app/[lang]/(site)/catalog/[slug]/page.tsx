@@ -7,6 +7,9 @@ import { notFound } from 'next/navigation';
 import ProductCard from '@/components/ProductCard';
 import { getSettings } from '@/lib/settings';
 import { getAllProducts, getProduct, familySlug } from '@/lib/products';
+import { breadcrumbs, ldJson } from '@/lib/schema';
+import { localePath } from '@/lib/i18n';
+import { ui } from '@/lib/ui';
 
 export function generateStaticParams() {
   return getAllProducts().map((p) => ({ slug: p.slug }));
@@ -31,6 +34,7 @@ export default async function ProductPage(
   { params }: { params: Promise<{ lang: Locale; slug: string }> },
 ) {
   const { lang, slug } = await params;
+  const t = ui(lang);
   const p = getProduct(slug);
   if (!p) notFound();
   const site = await getSettings();
@@ -40,27 +44,62 @@ export default async function ProductPage(
     .filter((x) => x.family === p.family && x.reference !== p.reference)
     .slice(0, 4);
 
+  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://verdegarden.example';
+  const here = `${origin}${localePath(lang, `/catalog/${p.slug}`)}`;
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: p.name,
     sku: p.reference,
     description: p.description,
-    image: [`/products/${p.image}`],
+    // ABSOLUTE. This was `/products/x.webp`, and a relative URL in structured
+    // data is not a URL as far as a crawler is concerned — the image was
+    // being declared and then discarded, on all sixty-eight pages.
+    image: [`${origin}/products/${p.image}`],
+    url: here,
     category: p.family,
     brand: { '@type': 'Brand', name: site.legalName },
+    // What was actually measured on this tree, which is the whole reason a
+    // specimen has a page of its own rather than a line in a list.
+    ...(Object.keys(p.attributes ?? {}).length
+      ? {
+        additionalProperty: Object.entries(p.attributes).map(([name, value]) => ({
+          '@type': 'PropertyValue', name, value: String(value),
+        })),
+      }
+      : {}),
     offers: {
       '@type': 'Offer',
+      url: here,
       priceCurrency: site.currency,
       availability: 'https://schema.org/PreOrder',
-      seller: { '@type': 'Organization', name: site.legalName },
+      // Points at the Organization declared once in the layout rather than
+      // describing the seller again on every one of sixty-eight pages and
+      // risking two descriptions that disagree.
+      seller: { '@id': `${origin}/#organisation` },
       areaServed: site.emirates.map((e) => e.name),
+      // There is no price to state, and stating one would be a lie. This says
+      // so in the vocabulary's own terms instead of leaving the field absent.
+      priceSpecification: {
+        '@type': 'PriceSpecification',
+        priceCurrency: site.currency,
+        valueAddedTaxIncluded: false,
+        description: 'Quoted individually — availability, size and season decide the price.',
+      },
     },
   };
 
   return (
     <div className="section section-tight det-top">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" suppressHydrationWarning
+              dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" suppressHydrationWarning
+              dangerouslySetInnerHTML={ldJson(breadcrumbs(lang, [
+                { name: t('Catalogue'), path: '/catalog' },
+                { name: p.family, path: `/collections/${familySlug(p.family)}` },
+                { name: p.name, path: `/catalog/${p.slug}` },
+              ]))} />
       <div className="wrap">
         <nav aria-label="Breadcrumb" className="crumbs">
           <L href="/catalog">Catalogue</L>

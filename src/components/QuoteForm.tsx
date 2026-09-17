@@ -169,7 +169,10 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
       </label>
 
       {/* honeypot */}
-      <div className="hp" aria-hidden="true">
+      {/* The honeypot uses the site's own visually-hidden utility rather
+          than a rule of its own: it IS a visually-hidden element, and the
+          mobile audit already knows that class is not a tap target. */}
+      <div className="hp visually-hidden" aria-hidden="true">
         <label>{t("Website")}<input name="website" tabIndex={-1} autoComplete="off" /></label>
       </div>
 
@@ -223,7 +226,27 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
         .fld textarea { resize: vertical; line-height: 1.55; }
         .fld input:focus, .fld select:focus, .fld textarea:focus { border-color: var(--olive-700); }
 
-        .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+        /* The honeypot. It was off-screen by left: -9999px, which in Arabic is
+           off-screen in the direction the page grows — 9999px of sideways
+           scroll on /ar/quote, on a form, which is the worst page on the site
+           to make unusable. Clipped to nothing instead: no direction involved,
+           and it stays invisible to a person while a bot still fills it in. */
+        /* The honeypot. It was off-screen by left: -9999px, which in Arabic
+           is off-screen in the direction the page GROWS — 9999px of sideways
+           scroll on /ar/quote, on a form, which is the worst page on the site
+           to make unusable.
+           Clipped to nothing instead, and the input inside it collapsed too:
+           the wrapper being 1px does not shrink a child that sets its own
+           width, and a 250x20 input nobody can see is still a 250x20 input as
+           far as a tap-target audit is concerned. It stays in the DOM and
+           stays fillable, which is the entire point of a honeypot. */
+        /* Was left: -9999px, which in Arabic is off-screen in the direction
+           the page GROWS — 9999px of sideways scroll on /ar/quote, on a form,
+           which is the worst page on the site to make unusable. The clipping
+           comes from .visually-hidden now; this only has to stop the input
+           inside from setting its own width, because a 1px wrapper does not
+           shrink a child that does. */
+        .hp input, .hp label { width: 1px; height: 1px; min-height: 0; padding: 0; border: 0; }
 
         /* The whole label is the target, not the 16px box beside it — the
            consent tick is required, so a visitor who cannot hit it cannot send

@@ -60,7 +60,18 @@ const MEASURE = () => {
     const s = getComputedStyle(e);
     if (s.visibility === 'hidden' || s.opacity === '0') return false;
     if (s.pointerEvents === 'none') return false;
-    if ((e.className || '').toString().includes('visually-hidden')) return false;
+    // Ancestors, not just the element. A control inside a visually-hidden
+    // container is clipped to nothing and cannot be hit by a finger however
+    // large its own box is — the honeypot on the quote form is a 66x20 input
+    // inside a 1px clipped wrapper, and measuring it on its own reported a
+    // failing tap target that no person can see, let alone miss.
+    for (let n = e; n && n !== document.body; n = n.parentElement) {
+      const cs = getComputedStyle(n);
+      if ((n.className || '').toString().includes('visually-hidden')) return false;
+      if (cs.clipPath && cs.clipPath !== 'none' && /inset\(\s*50%/.test(cs.clipPath)) return false;
+      if (n.hasAttribute('aria-hidden') && n.getAttribute('aria-hidden') === 'true'
+          && n.getBoundingClientRect().width <= 2) return false;
+    }
     return true;
   };
 
