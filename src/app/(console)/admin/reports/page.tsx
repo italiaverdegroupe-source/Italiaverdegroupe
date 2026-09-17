@@ -7,6 +7,7 @@ import {
 } from '@/lib/reports';
 import { getAllProducts } from '@/lib/products';
 import { fmtDay } from '@/components/admin/bits';
+import { adminUi, adminStatus } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,6 +47,8 @@ function Report({ title, question, empty, children }: {
 export default async function ReportsPage() {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
+  const t = adminUi(user.locale);
+  const st = adminStatus(user.locale);
 
   const [prod, cust, emir, src, sales, stuck, cash, inbound, pipe] = await Promise.all([
     byProduct(), byCustomer(), byEmirate(), bySource(), bySalesperson(),
@@ -57,28 +60,26 @@ export default async function ReportsPage() {
 
   return (
     <>
-      <h1>Reports</h1>
+      <h1>{t("Reports")}</h1>
       <p className="adm-sub">
-        One query per question a manager actually asks. Figures come from the
-        snapshots stored on each document — the price quoted, the landed cost at
-        the time — so last quarter still reads as last quarter.
+        {t("One query per question a manager actually asks. Figures come from the snapshots stored on each document — the price quoted, the landed cost at the time — so last quarter still reads as last quarter.")}
       </p>
 
       <div className="adm-cards">
-        <div className="adm-card"><b>{stage.leads?.n ?? 0}</b><span>Open leads</span></div>
-        <div className="adm-card"><b>{stage.quoted?.n ?? 0}</b><span>Live quotations</span></div>
-        <div className="adm-card"><b>{aed(stage.quoted?.value ?? 0)}</b><span>Pipeline AED</span></div>
-        <div className="adm-card"><b>{aed(stage.accepted?.value ?? 0)}</b><span>Accepted AED</span></div>
-        <div className="adm-card"><b>{aed(c?.total ?? 0)}</b><span>Cash in stock AED</span></div>
+        <div className="adm-card"><b>{stage.leads?.n ?? 0}</b><span>{t("Open leads")}</span></div>
+        <div className="adm-card"><b>{stage.quoted?.n ?? 0}</b><span>{t("Live quotations")}</span></div>
+        <div className="adm-card"><b>{aed(stage.quoted?.value ?? 0)}</b><span>{t("Pipeline AED")}</span></div>
+        <div className="adm-card"><b>{aed(stage.accepted?.value ?? 0)}</b><span>{t("Accepted AED")}</span></div>
+        <div className="adm-card"><b>{aed(c?.total ?? 0)}</b><span>{t("Cash in stock AED")}</span></div>
       </div>
 
-      <Report title="Which trees make money"
+      <Report title={t("Which trees make money")}
               question="What are we selling, and what does it actually earn after landed cost?"
               empty="No delivered or confirmed orders yet.">
         {prod.length > 0 && (
           <table className="adm-t">
-            <thead><tr><th>Reference</th><th>Name</th><th>Units</th><th>Revenue</th>
-                       <th>Landed cost</th><th>Profit</th><th>Margin</th></tr></thead>
+            <thead><tr><th>{t("Reference")}</th><th>{t("Name")}</th><th>{t("Units")}</th><th>{t("Revenue")}</th>
+                       <th>{t("Landed cost")}</th><th>{t("Profit")}</th><th>{t("Margin")}</th></tr></thead>
             <tbody>
               {prod.map((r) => (
                 <tr key={r.product_ref}>
@@ -100,13 +101,13 @@ export default async function ReportsPage() {
         )}
       </Report>
 
-      <Report title="Which channel generates revenue"
+      <Report title={t("Which channel generates revenue")}
               question="Not how many leads a channel produces — how much money it produces."
               empty="No leads recorded yet.">
         {src.length > 0 && (
           <table className="adm-t">
-            <thead><tr><th>Source</th><th>Leads</th><th>Quoted</th><th>Won</th>
-                       <th>Revenue</th><th>Lead → sale</th></tr></thead>
+            <thead><tr><th>{t("Source")}</th><th>{t("Leads")}</th><th>{t("Quoted")}</th><th>{t("Won")}</th>
+                       <th>{t("Revenue")}</th><th>{t("Lead → sale")}</th></tr></thead>
             <tbody>
               {src.map((r) => (
                 <tr key={r.source}>
@@ -123,13 +124,13 @@ export default async function ReportsPage() {
         )}
       </Report>
 
-      <Report title="Who buys, and who comes back"
+      <Report title={t("Who buys, and who comes back")}
               question="Which customers are worth the most, and which order more than once?"
               empty="No orders yet.">
         {cust.length > 0 && (
           <table className="adm-t">
-            <thead><tr><th>Customer</th><th>Orders</th><th>Revenue</th>
-                       <th>First</th><th>Latest</th><th></th></tr></thead>
+            <thead><tr><th>{t("Customer")}</th><th>{t("Orders")}</th><th>{t("Revenue")}</th>
+                       <th>{t("First")}</th><th>{t("Latest")}</th><th></th></tr></thead>
             <tbody>
               {cust.map((r) => (
                 <tr key={r.customer}>
@@ -146,12 +147,12 @@ export default async function ReportsPage() {
         )}
       </Report>
 
-      <Report title="Where the money is"
+      <Report title={t("Where the money is")}
               question="Which emirates are actually producing revenue?"
               empty="No orders yet.">
         {emir.length > 0 && (
           <table className="adm-t">
-            <thead><tr><th>Emirate</th><th>Orders</th><th>Revenue</th></tr></thead>
+            <thead><tr><th>{t("Emirate")}</th><th>{t("Orders")}</th><th>{t("Revenue")}</th></tr></thead>
             <tbody>
               {emir.map((r) => (
                 <tr key={r.emirate}>
@@ -164,13 +165,13 @@ export default async function ReportsPage() {
         )}
       </Report>
 
-      <Report title="Who converts"
+      <Report title={t("Who converts")}
               question="Which salesperson turns quotations into orders?"
               empty="No quotations raised yet.">
         {sales.length > 0 && (
           <table className="adm-t">
-            <thead><tr><th>Who</th><th>Quotations</th><th>Accepted</th>
-                       <th>Conversion</th><th>Value won</th></tr></thead>
+            <thead><tr><th>{t("Who")}</th><th>{t("Quotations")}</th><th>{t("Accepted")}</th>
+                       <th>{t("Conversion")}</th><th>{t("Value won")}</th></tr></thead>
             <tbody>
               {sales.map((r) => (
                 <tr key={r.who}>
@@ -184,13 +185,13 @@ export default async function ReportsPage() {
         )}
       </Report>
 
-      <Report title="Stock that is not moving"
+      <Report title={t("Stock that is not moving")}
               question="What has been sitting over 90 days? Living stock costs water, labour and space every month it waits."
               empty="Nothing has been held that long.">
         {stuck.length > 0 && (
           <table className="adm-t">
-            <thead><tr><th>Code</th><th>Reference</th><th>Status</th><th>Health</th>
-                       <th>Days held</th><th>Landed cost</th><th>Asking</th><th>Where</th></tr></thead>
+            <thead><tr><th>{t("Code")}</th><th>{t("Reference")}</th><th>{t("Status")}</th><th>{t("Health")}</th>
+                       <th>{t("Days held")}</th><th>{t("Landed cost")}</th><th>{t("Asking")}</th><th>{t("Where")}</th></tr></thead>
             <tbody>
               {stuck.map((r) => (
                 <tr key={r.code}>
@@ -208,20 +209,20 @@ export default async function ReportsPage() {
         )}
       </Report>
 
-      <Report title="What is on the way"
+      <Report title={t("What is on the way")}
               question="Which consignments are inbound, and will their import permit still be valid when they land?"
               empty="Nothing inbound.">
         {inbound.length > 0 && (
           <table className="adm-t">
-            <thead><tr><th>Shipment</th><th>Status</th><th>ETA</th><th>Container</th>
-                       <th>Supplier</th><th>Units</th><th>Permit</th></tr></thead>
+            <thead><tr><th>{t("Shipment")}</th><th>{t("Status")}</th><th>ETA</th><th>{t("Container")}</th>
+                       <th>{t("Supplier")}</th><th>{t("Units")}</th><th>{t("Permit")}</th></tr></thead>
             <tbody>
               {inbound.map((r) => {
                 const left = r.permit_days_left === null ? null : Number(r.permit_days_left);
                 return (
                   <tr key={r.code}>
                     <td><Link href={`/admin/shipments/${r.code}`}>{r.code}</Link></td>
-                    <td>{r.status.replace(/_/g,' ')}</td>
+                    <td>{st(r.status)}</td>
                     <td className="num">{r.eta ? fmtDay(r.eta) : '—'}</td>
                     <td>{r.container_no ?? '—'}</td>
                     <td>{r.supplier ?? '—'}</td>
@@ -242,21 +243,19 @@ export default async function ReportsPage() {
       </Report>
 
       <section>
-        <h2>Cash tied up in stock</h2>
+        <h2>{t("Cash tied up in stock")}</h2>
         <p className="adm-sub">
-          Landed cost of everything not yet sold — incoming, acclimatising, available
-          and reserved. This is working capital sitting in a nursery, not profit.
+          {t("Landed cost of everything not yet sold — incoming, acclimatising, available and reserved. This is working capital sitting in a nursery, not profit.")}
         </p>
         <div className="adm-panel adm-pad">
           <dl className="adm-dl">
-            <div><dt>Specimens</dt><dd>{c?.specimens ?? 0} · AED {aed(c?.specimen_cost ?? 0)}</dd></div>
-            <div><dt>Lot units</dt><dd>{c?.batch_units ?? 0} · AED {aed(c?.batch_cost ?? 0)}</dd></div>
-            <div><dt><b>Total</b></dt><dd><b>AED {aed(c?.total ?? 0)}</b></dd></div>
+            <div><dt>{t("Specimens")}</dt><dd>{c?.specimens ?? 0} {t("· AED")} {aed(c?.specimen_cost ?? 0)}</dd></div>
+            <div><dt>{t("Lot units")}</dt><dd>{c?.batch_units ?? 0} {t("· AED")} {aed(c?.batch_cost ?? 0)}</dd></div>
+            <div><dt><b>{t("Total")}</b></dt><dd><b>AED {aed(c?.total ?? 0)}</b></dd></div>
           </dl>
           {Number(c?.total ?? 0) === 0 && (
             <p className="adm-sub" style={{ margin: '12px 0 0' }}>
-              Zero because no landed cost has been recorded against stock yet —
-              cost a shipment and this fills in.
+              {t("Zero because no landed cost has been recorded against stock yet — cost a shipment and this fills in.")}
             </p>
           )}
         </div>

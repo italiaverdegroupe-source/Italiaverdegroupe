@@ -11,6 +11,7 @@ import {
 } from '@/lib/procurement';
 import { getAllProducts } from '@/lib/products';
 import { fmtDay } from '@/components/admin/bits';
+import { adminUi, adminStatus } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -152,6 +153,8 @@ async function startChecklist(formData: FormData) {
 export default async function ShipmentPage({ params }: { params: Promise<{ code: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
+  const t = adminUi(user.locale);
+  const st = adminStatus(user.locale);
   const { code } = await params;
 
   const s = await getShipment(code);
@@ -177,7 +180,7 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
 
   return (
     <>
-      <p className="adm-sub"><Link href="/admin/shipments">← Shipments</Link></p>
+      <p className="adm-sub"><Link href="/admin/shipments">{t("← Shipments")}</Link></p>
       <h1>{s.code}</h1>
       <p className="adm-sub">
         {s.status.replace('_', ' ')}
@@ -188,37 +191,33 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
 
       {permitDead && (
         <p className="adm-err">
-          Import permit {s.permit_number} expired on {fmtDay(s.permit_expires_on!)}.
-          A consignment of live plants cannot clear on an expired permit — it will sit at
-          the port accruing storage. Renew before arrival.
+          Import permit {s.permit_number} expired on {fmtDay(s.permit_expires_on!)}. A consignment of live plants cannot clear on an expired permit — it will sit at the port accruing storage. Renew before arrival.
         </p>
       )}
       {costed.warnings.map((w) => <p key={w} className="adm-err">{w}</p>)}
 
       <div className="adm-cards">
-        <div className="adm-card"><b>{aed(costed.goodsAed)}</b><span>Goods (AED)</span></div>
-        <div className="adm-card"><b>{aed(costed.costsAed)}</b><span>Import costs</span></div>
-        <div className="adm-card"><b>{aed(costed.totalAed)}</b><span>Total landed</span></div>
+        <div className="adm-card"><b>{aed(costed.goodsAed)}</b><span>{t("Goods (AED)")}</span></div>
+        <div className="adm-card"><b>{aed(costed.costsAed)}</b><span>{t("Import costs")}</span></div>
+        <div className="adm-card"><b>{aed(costed.totalAed)}</b><span>{t("Total landed")}</span></div>
         <div className="adm-card"><b>{costed.totalVolumeM3}</b><span>m³ shipped</span></div>
-        <div className="adm-card"><b>{costed.totalPieces}</b><span>Pieces</span></div>
+        <div className="adm-card"><b>{costed.totalPieces}</b><span>{t("Pieces")}</span></div>
       </div>
 
-      <h2>Landed cost per line</h2>
+      <h2>{t("Landed cost per line")}</h2>
       <p className="adm-sub">
-        Each cost is spread by its own basis — freight by volume, duty by value,
-        handling per piece. Spreading freight by value would load it onto the
-        expensive tree instead of the bulky one and invert the margins.
+        {t("Each cost is spread by its own basis — freight by volume, duty by value, handling per piece. Spreading freight by value would load it onto the expensive tree instead of the bulky one and invert the margins.")}
       </p>
       <div className="adm-panel" style={{ marginBottom: 28 }}>
         {costed.lines.length === 0 ? (
-          <p className="adm-empty">No lines on this shipment yet.</p>
+          <p className="adm-empty">{t("No lines on this shipment yet.")}</p>
         ) : (
           <table className="adm-t">
             <thead>
               <tr>
-                <th>Reference</th><th>Qty</th><th>Unit cost</th><th>Goods AED</th>
-                <th>m³ each</th><th>% of volume</th><th>% of value</th>
-                <th>Allocated AED</th><th>Landed total</th><th>Landed unit</th>
+                <th>{t("Reference")}</th><th>{t("Qty")}</th><th>{t("Unit cost")}</th><th>{t("Goods AED")}</th>
+                <th>m³ each</th><th>{t("% of volume")}</th><th>{t("% of value")}</th>
+                <th>{t("Allocated AED")}</th><th>{t("Landed total")}</th><th>{t("Landed unit")}</th>
               </tr>
             </thead>
             <tbody>
@@ -243,11 +242,11 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
 
       <div className="adm-two">
         <div>
-          <h2>Import costs</h2>
+          <h2>{t("Import costs")}</h2>
           <div className="adm-panel" style={{ marginBottom: 20 }}>
-            {costed.lines.length === 0 && <p className="adm-empty">Add lines first.</p>}
+            {costed.lines.length === 0 && <p className="adm-empty">{t("Add lines first.")}</p>}
             <table className="adm-t">
-              <thead><tr><th>Kind</th><th>Description</th><th>Amount</th><th>Basis</th></tr></thead>
+              <thead><tr><th>{t("Kind")}</th><th>{t("Description")}</th><th>{t("Amount")}</th><th>{t("Basis")}</th></tr></thead>
               <tbody>
                 {(await query<{ kind: string; description: string | null; amount: string; currency: string; allocation: string }>(
                   `SELECT kind, description, amount::text, currency, allocation
@@ -268,46 +267,46 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
         {user.role !== 'viewer' && (
           <div>
             <div className="adm-panel adm-pad" style={{ marginBottom: 20 }}>
-              <h2>Add a line</h2>
+              <h2>{t("Add a line")}</h2>
               <form action={addItem}>
                 <input type="hidden" name="code" value={s.code} />
-                <label className="adm-field"><span>Catalogue reference</span>
+                <label className="adm-field"><span>{t("Catalogue reference")}</span>
                   <select name="product_ref" required defaultValue="">
-                    <option value="">Select…</option>
+                    <option value="">{t("Select…")}</option>
                     {catalogue.map((p) => <option key={p.reference} value={p.reference}>{p.reference} — {p.name}</option>)}
                   </select>
                 </label>
-                <label className="adm-field"><span>Quantity</span><input name="quantity" type="number" min={1} defaultValue={1} /></label>
-                <label className="adm-field"><span>Unit cost</span><input name="unit_cost" type="number" step="0.01" /></label>
-                <label className="adm-field"><span>Currency</span>
+                <label className="adm-field"><span>{t("Quantity")}</span><input name="quantity" type="number" min={1} defaultValue={1} /></label>
+                <label className="adm-field"><span>{t("Unit cost")}</span><input name="unit_cost" type="number" step="0.01" /></label>
+                <label className="adm-field"><span>{t("Currency")}</span>
                   <select name="cost_currency" defaultValue="EUR"><option>EUR</option><option>AED</option><option>USD</option></select>
                 </label>
-                <label className="adm-field"><span>FX to AED</span><input name="fx_rate_to_aed" type="number" step="0.000001" placeholder="3.95" /></label>
-                <label className="adm-field"><span>Volume each (m³)</span><input name="unit_volume_m3" type="number" step="0.001" /></label>
-                <label className="adm-field"><span>Weight each (kg)</span><input name="unit_weight_kg" type="number" step="0.01" /></label>
+                <label className="adm-field"><span>{t("FX to AED")}</span><input name="fx_rate_to_aed" type="number" step="0.000001" placeholder="3.95" /></label>
+                <label className="adm-field"><span>{t("Volume each (m³)")}</span><input name="unit_volume_m3" type="number" step="0.001" /></label>
+                <label className="adm-field"><span>{t("Weight each (kg)")}</span><input name="unit_weight_kg" type="number" step="0.01" /></label>
                 <label className="adm-field" style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                   <input name="is_specimen" type="checkbox" defaultChecked style={{ width: 16 }} />
-                  <span>Individually tracked specimens</span>
+                  <span>{t("Individually tracked specimens")}</span>
                 </label>
-                <button className="adm-btn adm-add-item" type="submit" style={{ width: '100%' }}>Add line</button>
+                <button className="adm-btn adm-add-item" type="submit" style={{ width: '100%' }}>{t("Add line")}</button>
               </form>
             </div>
 
             <div className="adm-panel adm-pad">
-              <h2>Add a cost</h2>
+              <h2>{t("Add a cost")}</h2>
               <form action={addCost}>
                 <input type="hidden" name="code" value={s.code} />
-                <label className="adm-field"><span>Kind</span>
+                <label className="adm-field"><span>{t("Kind")}</span>
                   <select name="kind" defaultValue="freight">
                     {COST_KINDS.map((k) => <option key={k} value={k}>{k.replace('_', ' ')}</option>)}
                   </select>
                 </label>
-                <label className="adm-field"><span>Description</span><input name="description" /></label>
-                <label className="adm-field"><span>Amount</span><input name="amount" type="number" step="0.01" required /></label>
-                <label className="adm-field"><span>Currency</span>
+                <label className="adm-field"><span>{t("Description")}</span><input name="description" /></label>
+                <label className="adm-field"><span>{t("Amount")}</span><input name="amount" type="number" step="0.01" required /></label>
+                <label className="adm-field"><span>{t("Currency")}</span>
                   <select name="currency" defaultValue="AED"><option>AED</option><option>EUR</option><option>USD</option></select>
                 </label>
-                <label className="adm-field"><span>FX to AED</span><input name="fx_rate_to_aed" type="number" step="0.000001" defaultValue={1} /></label>
+                <label className="adm-field"><span>{t("FX to AED")}</span><input name="fx_rate_to_aed" type="number" step="0.000001" defaultValue={1} /></label>
                 <label className="adm-field">
                   <span>Spread by</span>
                   <select name="allocation" defaultValue="volume">
@@ -317,34 +316,33 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
                     <option value="weight">weight</option>
                   </select>
                 </label>
-                <button className="adm-btn adm-add-cost" type="submit" style={{ width: '100%' }}>Add cost</button>
+                <button className="adm-btn adm-add-cost" type="submit" style={{ width: '100%' }}>{t("Add cost")}</button>
               </form>
             </div>
           </div>
         )}
       </div>
 
-        <h2>Compliance</h2>
+        <h2>{t("Compliance")}</h2>
         <div className="adm-panel adm-pad">
           {outstanding > 0 && (
             <p className="adm-doc-lead">
               <strong>{outstanding}</strong> of {docs.length} still outstanding
               {expired.length > 0 && <> · <span className="adm-doc-bad">{expired.length} expired</span></>}
-              {expiring.length > 0 && <> · {expiring.length} expiring within 30 days</>}.
-              A container does not clear on the strength of the ones that are done.
+              {expiring.length > 0 && <> · {expiring.length} expiring within 30 days</>}. A container does not clear on the strength of the ones that are done.
             </p>
           )}
           {docs.length > 0 && outstanding === 0 && expired.length === 0 && (
-            <p className="adm-doc-lead">Every document on this checklist is in and verified.</p>
+            <p className="adm-doc-lead">{t("Every document on this checklist is in and verified.")}</p>
           )}
 
           {docs.length === 0 ? (
             <>
-              <p className="adm-empty">No document checklist on this shipment yet.</p>
+              <p className="adm-empty">{t("No document checklist on this shipment yet.")}</p>
               {!readOnly && (
                 <form action={startChecklist}>
                   <input type="hidden" name="code" value={s.code} />
-                  <button className="adm-btn" type="submit">Start the standard checklist</button>
+                  <button className="adm-btn" type="submit">{t("Start the standard checklist")}</button>
                 </form>
               )}
             </>
@@ -360,14 +358,14 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
                       <input type="hidden" name="kind" value={d.kind} />
 
                       <span className="adm-doc-name">
-                        {DOC_LABEL[d.kind as DocKind] ?? d.kind.replace(/_/g, ' ')}
+                        {DOC_LABEL[d.kind as DocKind] ?? st(d.kind)}
                         {due !== null && due < 0 && <b className="adm-doc-bad"> expired</b>}
                         {due !== null && due >= 0 && due <= 30 && <b> {due}d left</b>}
                       </span>
 
                       <input name="reference" defaultValue={d.reference ?? ''}
-                             placeholder="Reference" aria-label="Reference" disabled={readOnly} />
-                      <select name="status" defaultValue={d.status} aria-label="Status" disabled={readOnly}>
+                             placeholder={t("Reference")} aria-label={t("Reference")} disabled={readOnly} />
+                      <select name="status" defaultValue={st(d.status)} aria-label={t("Status")} disabled={readOnly}>
                         {DOC_STATUSES.map((k) => (
                           <option key={k} value={k}>{DOC_STATUS_LABEL[k as DocStatus]}</option>
                         ))}
@@ -383,7 +381,7 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
                                disabled={readOnly} />
                       </label>
                       <input name="note" defaultValue={d.note ?? ''}
-                             placeholder="Note" aria-label="Note" disabled={readOnly} />
+                             placeholder={t("Note")} aria-label={t("Note")} disabled={readOnly} />
                       {/* Both buttons post this same row. As two separate
                           forms the second one sat outside the row's grid, and
                           landed on top of the note field. */}
@@ -407,27 +405,27 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
           {!readOnly && (
             <form action={saveDocument} className="adm-doc adm-doc-new">
               <input type="hidden" name="code" value={s.code} />
-              <select name="kind" defaultValue="other" aria-label="Document type">
+              <select name="kind" defaultValue="other" aria-label={t("Document type")}>
                 {DOC_KINDS.map((k) => (
                   <option key={k} value={k}>{DOC_LABEL[k as DocKind]}</option>
                 ))}
               </select>
-              <input name="reference" placeholder="Reference" aria-label="Reference" />
-              <select name="status" defaultValue="required" aria-label="Status">
+              <input name="reference" placeholder={t("Reference")} aria-label={t("Reference")} />
+              <select name="status" defaultValue="required" aria-label={t("Status")}>
                 {DOC_STATUSES.map((k) => (
                   <option key={k} value={k}>{DOC_STATUS_LABEL[k as DocStatus]}</option>
                 ))}
               </select>
               <label className="adm-doc-date">
-                <span>Issued</span>
+                <span>{t("Issued")}</span>
                 <input name="issued_on" type="date" />
               </label>
               <label className="adm-doc-date">
-                <span>Expires</span>
+                <span>{t("Expires")}</span>
                 <input name="expires_on" type="date" />
               </label>
-              <input name="note" placeholder="Note" aria-label="Note" />
-              <button className="adm-btn" type="submit">Add</button>
+              <input name="note" placeholder={t("Note")} aria-label={t("Note")} />
+              <button className="adm-btn" type="submit">{t("Add")}</button>
             </form>
           )}
         </div>

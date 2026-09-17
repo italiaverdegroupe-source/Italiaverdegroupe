@@ -8,6 +8,7 @@ import {
 } from '@/lib/procurement';
 import { getLocations } from '@/lib/inventory';
 import { fmtDay } from '@/components/admin/bits';
+import { adminUi } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,7 @@ async function createShipment(formData: FormData) {
 export default async function ShipmentsPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
+  const t = adminUi(user.locale);
   const sp = await searchParams;
 
   const [rows, permits, locations] = await Promise.all([
@@ -46,14 +48,13 @@ export default async function ShipmentsPage({ searchParams }: { searchParams: Pr
 
   return (
     <>
-      <h1>Shipments</h1>
+      <h1>{t("Shipments")}</h1>
       <p className="adm-sub">
-        Consignments from Italy, their compliance paperwork, and what each one
-        actually costs once it lands.
+        {t("Consignments from Italy, their compliance paperwork, and what each one actually costs once it lands.")}
       </p>
 
       <div className="adm-filters">
-        <Link href="/admin/shipments" className="adm-chip" data-on={String(!sp.status)}>All</Link>
+        <Link href="/admin/shipments" className="adm-chip" data-on={String(!sp.status)}>{t("All")}</Link>
         {SHIPMENT_STATUSES.map((s) => (
           <Link key={s} href={`/admin/shipments?status=${s}`} className="adm-chip"
                 data-on={String(sp.status === s)}>{s.replace('_', ' ')}</Link>
@@ -62,14 +63,14 @@ export default async function ShipmentsPage({ searchParams }: { searchParams: Pr
 
       <div className="adm-panel" style={{ marginBottom: 28 }}>
         {rows.length === 0 ? (
-          <p className="adm-empty">No shipments recorded yet.</p>
+          <p className="adm-empty">{t("No shipments recorded yet.")}</p>
         ) : (
           <table className="adm-t">
             <thead>
               <tr>
-                <th>Code</th><th>Status</th><th>Incoterm</th><th>Supplier</th>
-                <th>Container</th><th>BL</th><th>ETD</th><th>ETA</th>
-                <th>Items</th><th>Qty</th><th>Permit</th>
+                <th>{t("Code")}</th><th>{t("Status")}</th><th>{t("Incoterm")}</th><th>{t("Supplier")}</th>
+                <th>{t("Container")}</th><th>BL</th><th>ETD</th><th>ETA</th>
+                <th>{t("Items")}</th><th>{t("Qty")}</th><th>{t("Permit")}</th>
               </tr>
             </thead>
             <tbody>
@@ -104,28 +105,28 @@ export default async function ShipmentsPage({ searchParams }: { searchParams: Pr
 
       {user.role !== 'viewer' && (
         <div className="adm-panel adm-pad">
-          <h2>New shipment</h2>
+          <h2>{t("New shipment")}</h2>
           <form action={createShipment}>
             <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))' }}>
-              <label className="adm-field"><span>Status</span>
+              <label className="adm-field"><span>{t("Status")}</span>
                 <select name="status" defaultValue="planned">
                   {SHIPMENT_STATUSES.map((s) => <option key={s}>{s}</option>)}
                 </select>
               </label>
-              <label className="adm-field"><span>Incoterm</span>
+              <label className="adm-field"><span>{t("Incoterm")}</span>
                 <select name="incoterm" defaultValue="">
                   <option value="">—</option>
                   {INCOTERMS.map((s) => <option key={s}>{s}</option>)}
                 </select>
               </label>
-              <label className="adm-field"><span>Carrier</span><input name="carrier" /></label>
-              <label className="adm-field"><span>Container no.</span><input name="container_no" /></label>
-              <label className="adm-field"><span>BL number</span><input name="bl_number" /></label>
-              <label className="adm-field"><span>Origin port</span><input name="origin_port" defaultValue="Salerno" /></label>
-              <label className="adm-field"><span>Destination port</span><input name="destination_port" defaultValue="Jebel Ali" /></label>
+              <label className="adm-field"><span>{t("Carrier")}</span><input name="carrier" /></label>
+              <label className="adm-field"><span>{t("Container no.")}</span><input name="container_no" /></label>
+              <label className="adm-field"><span>{t("BL number")}</span><input name="bl_number" /></label>
+              <label className="adm-field"><span>{t("Origin port")}</span><input name="origin_port" defaultValue="Salerno" /></label>
+              <label className="adm-field"><span>{t("Destination port")}</span><input name="destination_port" defaultValue="Jebel Ali" /></label>
               <label className="adm-field"><span>ETD</span><input type="date" name="etd" /></label>
               <label className="adm-field"><span>ETA</span><input type="date" name="eta" /></label>
-              <label className="adm-field"><span>Deliver to</span>
+              <label className="adm-field"><span>{t("Deliver to")}</span>
                 <select name="to_location" defaultValue="">
                   <option value="">—</option>
                   {locations.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
@@ -142,8 +143,8 @@ export default async function ShipmentsPage({ searchParams }: { searchParams: Pr
                 </select>
               </label>
             </div>
-            <label className="adm-field"><span>Notes</span><textarea name="notes" rows={2} /></label>
-            <button className="adm-btn adm-new-shipment" type="submit">Create shipment</button>
+            <label className="adm-field"><span>{t("Notes")}</span><textarea name="notes" rows={2} /></label>
+            <button className="adm-btn adm-new-shipment" type="submit">{t("Create shipment")}</button>
           </form>
         </div>
       )}

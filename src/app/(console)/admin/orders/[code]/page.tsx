@@ -8,6 +8,7 @@ import {
   completeDelivery, nextCode,
 } from '@/lib/orders';
 import { fmtDay } from '@/components/admin/bits';
+import { adminUi, adminStatus } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -87,6 +88,8 @@ async function markDelivered(formData: FormData) {
 export default async function OrderPage({ params }: { params: Promise<{ code: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
+  const tr = adminUi(user.locale);
+  const st = adminStatus(user.locale);
   const { code } = await params;
 
   const o = await getOrder(code);
@@ -97,28 +100,28 @@ export default async function OrderPage({ params }: { params: Promise<{ code: st
 
   return (
     <>
-      <p className="adm-sub"><Link href="/admin/orders">← Orders</Link></p>
+      <p className="adm-sub"><Link href="/admin/orders">{tr("← Orders")}</Link></p>
       <h1>{o.code}</h1>
       <p className="adm-sub">
-        <span className={`pill pill-${o.status === 'delivered' || o.status === 'completed' ? 'won' : o.status === 'partially_delivered' ? 'negotiation' : 'quoted'}`}>{o.status.replace(/_/g,' ')}</span>
+        <span className={`pill pill-${o.status === 'delivered' || o.status === 'completed' ? 'won' : o.status === 'partially_delivered' ? 'negotiation' : 'quoted'}`}>{st(o.status)}</span>
         {' '}{o.customer_company ?? o.customer_name}
         {o.project_name ? ` · ${o.project_name}` : ''}
         {o.lpo_number ? ` · LPO ${o.lpo_number}` : ''}
       </p>
 
       <div className="adm-cards">
-        <div className="adm-card"><b>{t.fulfilledPct}%</b><span>Delivered by value</span></div>
-        <div className="adm-card"><b>{aed(t.total)}</b><span>Order total</span></div>
-        {Number(o.advance_pct) > 0 && <div className="adm-card"><b>{aed(t.advance)}</b><span>Advance {pct(o.advance_pct)}%</span></div>}
-        {Number(o.retention_pct) > 0 && <div className="adm-card"><b>{aed(t.retention)}</b><span>Retention {pct(o.retention_pct)}%</span></div>}
-        {user.role === 'owner' && <div className="adm-card"><b>{t.marginPct}%</b><span>Margin</span></div>}
+        <div className="adm-card"><b>{t.fulfilledPct}%</b><span>{tr("Delivered by value")}</span></div>
+        <div className="adm-card"><b>{aed(t.total)}</b><span>{tr("Order total")}</span></div>
+        {Number(o.advance_pct) > 0 && <div className="adm-card"><b>{aed(t.advance)}</b><span>{tr("Advance")} {pct(o.advance_pct)}%</span></div>}
+        {Number(o.retention_pct) > 0 && <div className="adm-card"><b>{aed(t.retention)}</b><span>{tr("Retention")} {pct(o.retention_pct)}%</span></div>}
+        {user.role === 'owner' && <div className="adm-card"><b>{t.marginPct}%</b><span>{tr("Margin")}</span></div>}
       </div>
 
-      <h2>Lines</h2>
+      <h2>{tr("Lines")}</h2>
       <div className="adm-panel" style={{ marginBottom: 28 }}>
         <table className="adm-t">
-          <thead><tr><th>#</th><th>Description</th><th>Ordered</th><th>Delivered</th>
-                     <th>Outstanding</th><th>Unit</th><th>Line total</th></tr></thead>
+          <thead><tr><th>#</th><th>{tr("Description")}</th><th>{tr("Ordered")}</th><th>{tr("Delivered")}</th>
+                     <th>{tr("Outstanding")}</th><th>{tr("Unit")}</th><th>{tr("Line total")}</th></tr></thead>
           <tbody>
             {items.map((it) => {
               const outstanding = it.quantity - it.delivered_qty;
@@ -142,17 +145,17 @@ export default async function OrderPage({ params }: { params: Promise<{ code: st
 
       <div className="adm-two">
         <div>
-          <h2>Deliveries</h2>
+          <h2>{tr("Deliveries")}</h2>
           <div className="adm-panel">
-            {deliveries.length === 0 ? <p className="adm-empty">Nothing scheduled.</p> : (
+            {deliveries.length === 0 ? <p className="adm-empty">{tr("Nothing scheduled.")}</p> : (
               <table className="adm-t">
-                <thead><tr><th>Run</th><th>Status</th><th>Scheduled</th><th>Driver</th>
-                           <th>Equipment</th><th>Lines</th><th>Received by</th></tr></thead>
+                <thead><tr><th>{tr("Run")}</th><th>{tr("Status")}</th><th>{tr("Scheduled")}</th><th>{tr("Driver")}</th>
+                           <th>{tr("Equipment")}</th><th>{tr("Lines")}</th><th>{tr("Received by")}</th></tr></thead>
                 <tbody>
                   {deliveries.map((d) => (
                     <tr key={d.code}>
                       <td>{d.code}</td>
-                      <td><span className={`pill pill-${d.status === 'delivered' ? 'won' : d.status === 'failed' || d.status === 'cancelled' ? 'lost' : 'new'}`}>{d.status.replace(/_/g,' ')}</span></td>
+                      <td><span className={`pill pill-${d.status === 'delivered' ? 'won' : d.status === 'failed' || d.status === 'cancelled' ? 'lost' : 'new'}`}>{st(d.status)}</span></td>
                       <td className="num">{d.scheduled_for ? fmtDay(d.scheduled_for) : '—'}</td>
                       <td>{d.driver ?? '—'}</td>
                       <td>{d.equipment ?? '—'}</td>
@@ -169,10 +172,9 @@ export default async function OrderPage({ params }: { params: Promise<{ code: st
         {user.role !== 'viewer' && (
           <div>
             <div className="adm-panel adm-pad" style={{ marginBottom: 20 }}>
-              <h2>Schedule a delivery</h2>
+              <h2>{tr("Schedule a delivery")}</h2>
               <p className="adm-sub">
-                Put a quantity against the lines going on this run. Trees need the
-                right gear and site access, so both are recorded before it is booked.
+                {tr("Put a quantity against the lines going on this run. Trees need the right gear and site access, so both are recorded before it is booked.")}
               </p>
               <form action={scheduleDelivery}>
                 <input type="hidden" name="code" value={o.code} />
@@ -183,20 +185,20 @@ export default async function OrderPage({ params }: { params: Promise<{ code: st
                            max={it.quantity - it.delivered_qty} placeholder="0" />
                   </label>
                 ))}
-                <label className="adm-field"><span>Date</span><input name="scheduled_for" type="date" /></label>
-                <label className="adm-field"><span>Equipment</span><input name="equipment" placeholder="Hiab 8t, crane, low-loader" /></label>
-                <label className="adm-field"><span>Vehicle</span><input name="vehicle" /></label>
-                <label className="adm-field"><span>Driver</span><input name="driver" /></label>
-                <label className="adm-field"><span>Site contact</span><input name="site_contact" /></label>
-                <label className="adm-field"><span>Access notes</span>
-                  <textarea name="access_notes" rows={2} placeholder="gate width, overhead cables, community timing rules" /></label>
-                <button className="adm-btn adm-schedule" type="submit" style={{ width:'100%' }}>Schedule</button>
+                <label className="adm-field"><span>{tr("Date")}</span><input name="scheduled_for" type="date" /></label>
+                <label className="adm-field"><span>{tr("Equipment")}</span><input name="equipment" placeholder={tr("Hiab 8t, crane, low-loader")} /></label>
+                <label className="adm-field"><span>{tr("Vehicle")}</span><input name="vehicle" /></label>
+                <label className="adm-field"><span>{tr("Driver")}</span><input name="driver" /></label>
+                <label className="adm-field"><span>{tr("Site contact")}</span><input name="site_contact" /></label>
+                <label className="adm-field"><span>{tr("Access notes")}</span>
+                  <textarea name="access_notes" rows={2} placeholder={tr("gate width, overhead cables, community timing rules")} /></label>
+                <button className="adm-btn adm-schedule" type="submit" style={{ width:'100%' }}>{tr("Schedule")}</button>
               </form>
             </div>
 
             {open.length > 0 && (
               <div className="adm-panel adm-pad">
-                <h2>Confirm a delivery</h2>
+                <h2>{tr("Confirm a delivery")}</h2>
                 <form action={markDelivered}>
                   <input type="hidden" name="code" value={o.code} />
                   <label className="adm-field"><span>Run</span>
@@ -204,15 +206,14 @@ export default async function OrderPage({ params }: { params: Promise<{ code: st
                       {open.map((d) => <option key={d.code} value={d.code}>{d.code} — {d.line_count} line(s)</option>)}
                     </select>
                   </label>
-                  <label className="adm-field"><span>Received by *</span>
-                    <input name="received_by" required placeholder="name of whoever signed for it" /></label>
-                  <label className="adm-field"><span>Proof note</span><textarea name="proof_note" rows={2} /></label>
+                  <label className="adm-field"><span>{tr("Received by *")}</span>
+                    <input name="received_by" required placeholder={tr("name of whoever signed for it")} /></label>
+                  <label className="adm-field"><span>{tr("Proof note")}</span><textarea name="proof_note" rows={2} /></label>
                   <button className="adm-btn adm-deliver" type="submit" style={{ width:'100%' }}>
-                    Mark delivered
+                    {tr("Mark delivered")}
                   </button>
                   <p className="adm-sub" style={{ margin:'10px 0 0' }}>
-                    This moves the stock, adds to the delivered quantities and re-derives
-                    the order status. Delivering more than remains is refused outright.
+                    {tr("This moves the stock, adds to the delivered quantities and re-derives the order status. Delivering more than remains is refused outright.")}
                   </p>
                 </form>
               </div>

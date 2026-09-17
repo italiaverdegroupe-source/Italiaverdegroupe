@@ -6,6 +6,7 @@ import { query } from '@/lib/db';
 import { listQuotes, nextQuoteCode, taxSnapshot, QUOTE_STATUSES, logQuoteEvent } from '@/lib/quotes';
 import { getSettings } from '@/lib/settings';
 import { fmtDay } from '@/components/admin/bits';
+import { adminUi, adminStatus } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,6 +60,8 @@ async function createQuote(formData: FormData) {
 export default async function QuotesPage({ searchParams }: { searchParams: Promise<{ status?: string; lead?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
+  const t = adminUi(user.locale);
+  const st = adminStatus(user.locale);
   const sp = await searchParams;
 
   const site = await getSettings();
@@ -66,21 +69,19 @@ export default async function QuotesPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <h1>Quotations</h1>
+      <h1>{t("Quotations")}</h1>
       <p className="adm-sub">
-        Issued quotations are never edited — repricing creates a new version and
-        supersedes the old one, so what was actually quoted stays answerable.
+        {t("Issued quotations are never edited — repricing creates a new version and supersedes the old one, so what was actually quoted stays answerable.")}
       </p>
 
       {!site.vatEnabled && (
         <p className="adm-sub">
-          VAT is off, so quotations carry no VAT line and state
-          “exclusive of VAT where applicable”. Switch it on in settings once a TRN is issued.
+          {t("VAT is off, so quotations carry no VAT line and state “exclusive of VAT where applicable”. Switch it on in settings once a TRN is issued.")}
         </p>
       )}
 
       <div className="adm-filters">
-        <Link href="/admin/quotes" className="adm-chip" data-on={String(!sp.status)}>All</Link>
+        <Link href="/admin/quotes" className="adm-chip" data-on={String(!sp.status)}>{t("All")}</Link>
         {QUOTE_STATUSES.map((s) => (
           <Link key={s} href={`/admin/quotes?status=${s}`} className="adm-chip"
                 data-on={String(sp.status === s)}>{s}</Link>
@@ -89,12 +90,12 @@ export default async function QuotesPage({ searchParams }: { searchParams: Promi
 
       <div className="adm-panel" style={{ marginBottom: 28 }}>
         {rows.length === 0 ? (
-          <p className="adm-empty">No quotations yet.</p>
+          <p className="adm-empty">{t("No quotations yet.")}</p>
         ) : (
           <table className="adm-t">
             <thead>
-              <tr><th>Quotation</th><th>v</th><th>Customer</th><th>Project</th>
-                  <th>Emirate</th><th>Lines</th><th>Status</th><th>Valid until</th><th>Created</th></tr>
+              <tr><th>{t("Quotation")}</th><th>v</th><th>{t("Customer")}</th><th>{t("Project")}</th>
+                  <th>{t("Emirate")}</th><th>{t("Lines")}</th><th>{t("Status")}</th><th>{t("Valid until")}</th><th>{t("Created")}</th></tr>
             </thead>
             <tbody>
               {rows.map((q) => (
@@ -105,7 +106,7 @@ export default async function QuotesPage({ searchParams }: { searchParams: Promi
                   <td>{q.project_name ?? '—'}</td>
                   <td>{q.emirate ?? '—'}</td>
                   <td className="num">{q.item_count}</td>
-                  <td><span className={`pill pill-${q.status === 'accepted' ? 'won' : q.status === 'rejected' || q.status === 'expired' || q.status === 'superseded' ? 'lost' : q.status === 'draft' ? 'new' : 'quoted'}`}>{q.status}</span></td>
+                  <td><span className={`pill pill-${q.status === 'accepted' ? 'won' : q.status === 'rejected' || q.status === 'expired' || q.status === 'superseded' ? 'lost' : q.status === 'draft' ? 'new' : 'quoted'}`}>{st(q.status)}</span></td>
                   <td className="num">{q.valid_until ? fmtDay(q.valid_until) : '—'}</td>
                   <td className="num">{fmtDay(q.created_at)}</td>
                 </tr>
@@ -117,29 +118,29 @@ export default async function QuotesPage({ searchParams }: { searchParams: Promi
 
       {user.role !== 'viewer' && (
         <div className="adm-panel adm-pad">
-          <h2>New quotation</h2>
+          <h2>{t("New quotation")}</h2>
           <form action={createQuote}>
             <div style={{ display:'grid', gap:14, gridTemplateColumns:'repeat(auto-fit,minmax(210px,1fr))' }}>
-              <label className="adm-field"><span>From lead reference</span>
-                <input name="lead_reference" defaultValue={sp.lead ?? ''} placeholder="VG-XXXXXXX" />
+              <label className="adm-field"><span>{t("From lead reference")}</span>
+                <input name="lead_reference" defaultValue={sp.lead ?? ''} placeholder={t("VG-XXXXXXX")} />
               </label>
-              <label className="adm-field"><span>Customer name</span><input name="customer_name" /></label>
-              <label className="adm-field"><span>Company</span><input name="customer_company" /></label>
-              <label className="adm-field"><span>Email</span><input name="customer_email" type="email" /></label>
-              <label className="adm-field"><span>Phone</span><input name="customer_phone" /></label>
-              <label className="adm-field"><span>Emirate</span>
+              <label className="adm-field"><span>{t("Customer name")}</span><input name="customer_name" /></label>
+              <label className="adm-field"><span>{t("Company")}</span><input name="customer_company" /></label>
+              <label className="adm-field"><span>{t("Email")}</span><input name="customer_email" type="email" /></label>
+              <label className="adm-field"><span>{t("Phone")}</span><input name="customer_phone" /></label>
+              <label className="adm-field"><span>{t("Emirate")}</span>
                 <select name="emirate" defaultValue=""><option value="">—</option>
                   {site.emirates.map((e) => <option key={e.slug}>{e.name}</option>)}
                 </select>
               </label>
-              <label className="adm-field"><span>Project</span><input name="project_name" /></label>
-              <label className="adm-field"><span>Payment terms</span><input name="payment_terms" /></label>
-              <label className="adm-field"><span>Delivery terms</span><input name="delivery_terms" /></label>
+              <label className="adm-field"><span>{t("Project")}</span><input name="project_name" /></label>
+              <label className="adm-field"><span>{t("Payment terms")}</span><input name="payment_terms" /></label>
+              <label className="adm-field"><span>{t("Delivery terms")}</span><input name="delivery_terms" /></label>
             </div>
             <p className="adm-sub">
-              Either give a lead reference and the details are carried across, or fill them in.
+              {t("Either give a lead reference and the details are carried across, or fill them in.")}
             </p>
-            <button className="adm-btn adm-new-quote" type="submit">Create quotation</button>
+            <button className="adm-btn adm-new-quote" type="submit">{t("Create quotation")}</button>
           </form>
         </div>
       )}

@@ -4,6 +4,7 @@ import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { getSettings, saveSettings, EDITABLE, type EditableKey } from '@/lib/settings';
 import { query } from '@/lib/db';
 import { fmtDate } from '@/components/admin/bits';
+import { adminUi } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,6 +49,7 @@ async function save(formData: FormData) {
 export default async function SettingsPage() {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
+  const t = adminUi(user.locale);
 
   const s = await getSettings();
   const history = await query<{ key: string; updated_at: string; email: string | null }>(
@@ -71,10 +73,9 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <h1>Settings</h1>
+      <h1>{t("Settings")}</h1>
       <p className="adm-sub">
-        These are the values the website and every document read at runtime.
-        Changing them here takes effect immediately — no deploy, no developer.
+        {t("These are the values the website and every document read at runtime. Changing them here takes effect immediately — no deploy, no developer.")}
       </p>
 
       {orphans.length > 0 && (
@@ -85,15 +86,12 @@ export default async function SettingsPage() {
       )}
 
       {user.role !== 'owner' && (
-        <p className="adm-err">You can see these, but only the owner can change them.</p>
+        <p className="adm-err">{t("You can see these, but only the owner can change them.")}</p>
       )}
 
       {!s.vatEnabled && (
         <p className="adm-sub">
-          <b>VAT is off.</b> Quotations and invoices state “exclusive of VAT where
-          applicable” and charge nothing. When the TRN arrives, enter it and switch
-          VAT on — documents already issued keep the position they were issued with,
-          which is the point.
+          <b>{t("VAT is off.")}</b> {t("Quotations and invoices state “exclusive of VAT where applicable” and charge nothing. When the TRN arrives, enter it and switch VAT on — documents already issued keep the position they were issued with, which is the point.")}
         </p>
       )}
 
@@ -142,17 +140,17 @@ export default async function SettingsPage() {
         ))}
 
         {user.role === 'owner' && (
-          <button className="adm-btn adm-save-settings" type="submit">Save settings</button>
+          <button className="adm-btn adm-save-settings" type="submit">{t("Save settings")}</button>
         )}
       </form>
 
-      <h2 style={{ marginTop: 32 }}>Recently changed</h2>
+      <h2 style={{ marginTop: 32 }}>{t("Recently changed")}</h2>
       <div className="adm-panel">
         {history.length === 0 ? (
-          <p className="adm-empty">Nothing overridden yet — the defaults are in use.</p>
+          <p className="adm-empty">{t("Nothing overridden yet — the defaults are in use.")}</p>
         ) : (
           <table className="adm-t">
-            <thead><tr><th>Setting</th><th>Changed</th><th>By</th></tr></thead>
+            <thead><tr><th>{t("Setting")}</th><th>{t("Changed")}</th><th>By</th></tr></thead>
             <tbody>
               {history.map((h) => (
                 <tr key={h.key}>

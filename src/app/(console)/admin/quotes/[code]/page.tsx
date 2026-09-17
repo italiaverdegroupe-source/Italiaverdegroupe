@@ -10,6 +10,7 @@ import {
 import { listSpecimens } from '@/lib/inventory';
 import { getAllProducts } from '@/lib/products';
 import { fmtDate, fmtDay } from '@/components/admin/bits';
+import { adminUi, adminStatus } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -99,6 +100,9 @@ async function setStatus(formData: FormData) {
                           updated_at = now()
         WHERE code = $1 AND version = $2`, [code, version, status]);
     await logQuoteEvent(q.id, status, user);
+    // NOT st(status). This is the audit log's action name, which is a
+    // stable identifier queried later — Italian in that column would make
+    // "find every quotation that was rejected" depend on who rejected it.
     await audit({ user, action: `quote.${status}`, entity: 'quote', entityId: `${code} v${version}`,
                   before: { status: q.status }, after: { status } });
   }
@@ -127,6 +131,8 @@ export default async function QuotePage({
 }: { params: Promise<{ code: string }>; searchParams: Promise<{ v?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
+  const tr = adminUi(user.locale);
+  const st = adminStatus(user.locale);
   const { code } = await params;
   const { v } = await searchParams;
 
@@ -143,10 +149,10 @@ export default async function QuotePage({
 
   return (
     <>
-      <p className="adm-sub"><Link href="/admin/quotes">← Quotations</Link></p>
+      <p className="adm-sub"><Link href="/admin/quotes">{tr("← Quotations")}</Link></p>
       <h1>{q.code} <span style={{ fontSize: '.55em', color: '#8A8D7D' }}>v{q.version}</span></h1>
       <p className="adm-sub">
-        <span className={`pill pill-${q.status === 'accepted' ? 'won' : q.status === 'draft' ? 'new' : ['rejected','expired','superseded'].includes(q.status) ? 'lost' : 'quoted'}`}>{q.status}</span>
+        <span className={`pill pill-${q.status === 'accepted' ? 'won' : q.status === 'draft' ? 'new' : ['rejected','expired','superseded'].includes(q.status) ? 'lost' : 'quoted'}`}>{st(q.status)}</span>
         {' '}{q.customer_name}{q.customer_company ? ` · ${q.customer_company}` : ''}
         {q.emirate ? ` · ${q.emirate}` : ''}
         {q.valid_until ? ` · valid until ${fmtDay(q.valid_until)}` : ''}
@@ -159,7 +165,7 @@ export default async function QuotePage({
             <Link key={ver.version} href={`/admin/quotes/${code}?v=${ver.version}`}
                   className="adm-chip" data-on={String(ver.version === q.version)}
                   style={{ marginRight: 6 }}>
-              v{ver.version} · {ver.status}
+              v{ver.version} · {st(ver.status)}
             </Link>
           ))}
         </p>
@@ -167,8 +173,7 @@ export default async function QuotePage({
 
       {!editable && (
         <p className="adm-sub">
-          This version has been issued, so its lines are locked. Use <b>Revise</b> to
-          create v{versions[0].version + 1} — the customer is holding this document.
+          This version has been issued, so its lines are locked. Use <b>Revise</b> to create v{versions[0].version + 1} — the customer is holding this document.
         </p>
       )}
 
@@ -177,13 +182,13 @@ export default async function QuotePage({
           <div className="adm-panel" style={{ marginBottom: 20 }}>
             <table className="adm-t">
               <thead>
-                <tr><th>#</th><th>Description</th><th>Qty</th><th>Unit</th>
-                    <th>Disc.</th><th>Line total</th>
-                    {user.role === 'owner' && <th>Landed</th>}</tr>
+                <tr><th>#</th><th>{tr("Description")}</th><th>{tr("Qty")}</th><th>{tr("Unit")}</th>
+                    <th>{tr("Disc.")}</th><th>{tr("Line total")}</th>
+                    {user.role === 'owner' && <th>{tr("Landed")}</th>}</tr>
               </thead>
               <tbody>
                 {items.length === 0 ? (
-                  <tr><td colSpan={7} className="adm-empty">No lines yet.</td></tr>
+                  <tr><td colSpan={7} className="adm-empty">{tr("No lines yet.")}</td></tr>
                 ) : items.map((it) => {
                   const gross = Number(it.unit_price) * it.quantity;
                   const line = gross * (1 - Number(it.discount_pct) / 100);
@@ -209,28 +214,27 @@ export default async function QuotePage({
           </div>
 
           <div className="adm-panel adm-pad" style={{ marginBottom: 20 }}>
-            <h2>Totals</h2>
+            <h2>{tr("Totals")}</h2>
             <dl className="adm-dl">
-              <div><dt>Subtotal</dt><dd>AED {aed(t.subtotal)}</dd></div>
-              {t.discount > 0 && <div><dt>Discount</dt><dd>− AED {aed(t.discount)}</dd></div>}
-              <div><dt>Net</dt><dd>AED {aed(t.net)}</dd></div>
+              <div><dt>{tr("Subtotal")}</dt><dd>AED {aed(t.subtotal)}</dd></div>
+              {t.discount > 0 && <div><dt>{tr("Discount")}</dt><dd>{tr("− AED")} {aed(t.discount)}</dd></div>}
+              <div><dt>{tr("Net")}</dt><dd>AED {aed(t.net)}</dd></div>
               {q.vat_enabled
                 ? <div><dt>VAT {(Number(q.vat_rate) * 100).toFixed(0)}%</dt><dd>AED {aed(t.vat)}</dd></div>
-                : <div><dt>VAT</dt><dd>Not applicable — exclusive of VAT where applicable</dd></div>}
-              <div><dt><b>Total</b></dt><dd><b>AED {aed(t.total)}</b></dd></div>
+                : <div><dt>VAT</dt><dd>{tr("Not applicable — exclusive of VAT where applicable")}</dd></div>}
+              <div><dt><b>{tr("Total")}</b></dt><dd><b>AED {aed(t.total)}</b></dd></div>
             </dl>
             {user.role === 'owner' && (
               <>
-                <h2 style={{ marginTop: 22 }}>Margin (internal)</h2>
+                <h2 style={{ marginTop: 22 }}>{tr("Margin (internal)")}</h2>
                 <dl className="adm-dl">
-                  <div><dt>Landed cost</dt><dd>AED {aed(t.cost)}</dd></div>
-                  <div><dt>Gross profit</dt><dd>AED {aed(t.profit)}</dd></div>
-                  <div><dt>Margin</dt><dd>{t.marginPct}%</dd></div>
+                  <div><dt>{tr("Landed cost")}</dt><dd>AED {aed(t.cost)}</dd></div>
+                  <div><dt>{tr("Gross profit")}</dt><dd>AED {aed(t.profit)}</dd></div>
+                  <div><dt>{tr("Margin")}</dt><dd>{t.marginPct}%</dd></div>
                 </dl>
                 {t.cost === 0 && items.length > 0 && (
                   <p className="adm-sub" style={{ margin: '10px 0 0' }}>
-                    No landed cost on these lines, so the margin shown is not real.
-                    Cost the shipment first.
+                    {tr("No landed cost on these lines, so the margin shown is not real. Cost the shipment first.")}
                   </p>
                 )}
               </>
@@ -238,8 +242,8 @@ export default async function QuotePage({
           </div>
 
           <div className="adm-panel adm-pad">
-            <h2>History</h2>
-            {events.length === 0 ? <p className="adm-sub" style={{ margin:0 }}>Nothing yet.</p>
+            <h2>{tr("History")}</h2>
+            {events.length === 0 ? <p className="adm-sub" style={{ margin:0 }}>{tr("Nothing yet.")}</p>
               : events.map((e) => (
                 <div key={e.id} className="adm-note">
                   <div className="adm-note-meta">{fmtDate(e.at)} · {e.user_email ?? 'system'} · {e.kind}</div>
@@ -252,40 +256,39 @@ export default async function QuotePage({
         {user.role !== 'viewer' && (
           <div>
             <div className="adm-panel adm-pad" style={{ marginBottom: 20 }}>
-              <h2>Actions</h2>
+              <h2>{tr("Actions")}</h2>
               <p style={{ marginBottom: 14 }}>
                 <Link href={`/admin/quotes/${code}/print?v=${q.version}`} className="adm-btn adm-btn-sec adm-print"
                       target="_blank" style={{ display:'block', textAlign:'center', textDecoration:'none' }}>
-                  Print / save as PDF
+                  {tr("Print / save as PDF")}
                 </Link>
               </p>
               <form action={setStatus} style={{ marginBottom: 14 }}>
                 <input type="hidden" name="code" value={q.code} />
                 <input type="hidden" name="version" value={q.version} />
-                <label className="adm-field"><span>Status</span>
-                  <select name="status" defaultValue={q.status}>
+                <label className="adm-field"><span>{tr("Status")}</span>
+                  <select name="status" defaultValue={st(q.status)}>
                     {QUOTE_STATUSES.filter((s) => s !== 'superseded').map((s) => <option key={s}>{s}</option>)}
                   </select>
                 </label>
                 <button className="adm-btn adm-set-status" type="submit" style={{ width:'100%' }}>
-                  Update status
+                  {tr("Update status")}
                 </button>
                 <p className="adm-sub" style={{ margin:'10px 0 0' }}>
-                  Accepting reserves every specimen and lot on the quotation, in one
-                  transaction. If a tree has gone since, the whole acceptance is refused.
+                  {tr("Accepting reserves every specimen and lot on the quotation, in one transaction. If a tree has gone since, the whole acceptance is refused.")}
                 </p>
               </form>
               <form action={reviseQuote}>
                 <input type="hidden" name="code" value={q.code} />
                 <button className="adm-btn adm-btn-sec adm-revise" type="submit" style={{ width:'100%' }}>
-                  Revise — create v{versions[0].version + 1}
+                  {tr("Revise — create v")}{versions[0].version + 1}
                 </button>
               </form>
             </div>
 
             {editable && (
               <div className="adm-panel adm-pad">
-                <h2>Add a line</h2>
+                <h2>{tr("Add a line")}</h2>
                 <form action={addLine}>
                   <input type="hidden" name="code" value={q.code} />
                   <input type="hidden" name="version" value={q.version} />
@@ -296,7 +299,7 @@ export default async function QuotePage({
                       <option value="service">service — delivery, crane, planting</option>
                     </select>
                   </label>
-                  <label className="adm-field"><span>Specimen code (for specimen lines)</span>
+                  <label className="adm-field"><span>{tr("Specimen code (for specimen lines)")}</span>
                     <select name="specimen_code" defaultValue="">
                       <option value="">—</option>
                       {sellable.filter((s) => s.is_sellable).map((s) => (
@@ -304,17 +307,17 @@ export default async function QuotePage({
                       ))}
                     </select>
                   </label>
-                  <label className="adm-field"><span>Catalogue reference (for product lines)</span>
+                  <label className="adm-field"><span>{tr("Catalogue reference (for product lines)")}</span>
                     <select name="product_ref" defaultValue="">
                       <option value="">—</option>
                       {catalogue.map((p) => <option key={p.reference} value={p.reference}>{p.reference} — {p.name}</option>)}
                     </select>
                   </label>
-                  <label className="adm-field"><span>Description</span><input name="description" /></label>
-                  <label className="adm-field"><span>Quantity</span><input name="quantity" type="number" min={1} defaultValue={1} /></label>
-                  <label className="adm-field"><span>Unit price (AED)</span><input name="unit_price" type="number" step="0.01" /></label>
-                  <label className="adm-field"><span>Discount %</span><input name="discount_pct" type="number" step="0.01" min={0} max={100} defaultValue={0} /></label>
-                  <button className="adm-btn adm-add-line" type="submit" style={{ width:'100%' }}>Add line</button>
+                  <label className="adm-field"><span>{tr("Description")}</span><input name="description" /></label>
+                  <label className="adm-field"><span>{tr("Quantity")}</span><input name="quantity" type="number" min={1} defaultValue={1} /></label>
+                  <label className="adm-field"><span>{tr("Unit price (AED)")}</span><input name="unit_price" type="number" step="0.01" /></label>
+                  <label className="adm-field"><span>{tr("Discount %")}</span><input name="discount_pct" type="number" step="0.01" min={0} max={100} defaultValue={0} /></label>
+                  <button className="adm-btn adm-add-line" type="submit" style={{ width:'100%' }}>{tr("Add line")}</button>
                 </form>
               </div>
             )}

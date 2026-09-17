@@ -9,6 +9,7 @@ import {
 } from '@/lib/alerts';
 import { drainOutbound, outboundSummary, requeueBlocked } from '@/lib/outbound';
 import { mailProvider, sendMail, mailFrom } from '@/lib/mail';
+import { adminUi } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -243,6 +244,7 @@ export default async function AlertsPage({ searchParams }: {
 }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
+  const t = adminUi(user.locale);
 
   const { show, tab } = await searchParams;
   const includeDone = show === 'all';
@@ -271,30 +273,28 @@ export default async function AlertsPage({ searchParams }: {
 
   return (
     <>
-      <h1>Alerts</h1>
+      <h1>{t("Alerts")}</h1>
       <p className="adm-sub">
-        The part of the system that speaks first. Everything else waits to be
-        asked — an invoice falls overdue in silence, a permit lapses while a
-        container is at sea. These are the conditions worth being interrupted for.
+        {t("The part of the system that speaks first. Everything else waits to be asked — an invoice falls overdue in silence, a permit lapses while a container is at sea. These are the conditions worth being interrupted for.")}
       </p>
 
       <div className="adm-cards">
-        <div className="adm-card"><b>{open.length}</b><span>Open</span></div>
-        <div className="adm-card"><b>{urgent}</b><span>Urgent</span></div>
-        <div className="adm-card"><b>{rules.filter((r) => r.is_active).length}</b><span>Active rules</span></div>
+        <div className="adm-card"><b>{open.length}</b><span>{t("Open")}</span></div>
+        <div className="adm-card"><b>{urgent}</b><span>{t("Urgent")}</span></div>
+        <div className="adm-card"><b>{rules.filter((r) => r.is_active).length}</b><span>{t("Active rules")}</span></div>
         <div className="adm-card">
-          <b>{run ? when(run.started_at) : 'never'}</b><span>Last check</span>
+          <b>{run ? when(run.started_at) : 'never'}</b><span>{t("Last check")}</span>
         </div>
       </div>
 
       <div className="adm-filters" style={{ marginBottom: 18 }}>
-        <Link className="adm-chip" data-on={view === 'inbox'} href="/admin/alerts">Inbox</Link>
-        <Link className="adm-chip" data-on={view === 'rules'} href="/admin/alerts?tab=rules">Rules</Link>
+        <Link className="adm-chip" data-on={view === 'inbox'} href="/admin/alerts">{t("Inbox")}</Link>
+        <Link className="adm-chip" data-on={view === 'rules'} href="/admin/alerts?tab=rules">{t("Rules")}</Link>
         <Link className="adm-chip" data-on={view === 'outbound'} href="/admin/alerts?tab=outbound">
-          Outbound{blocked > 0 ? ` (${blocked} blocked)` : ''}
+          {t("Outbound")}{blocked > 0 ? ` (${blocked} blocked)` : ''}
         </Link>
         <form action={scanNow} style={{ marginInlineStart: 'auto' }}>
-          <button type="submit" className="adm-btn adm-scan">Run checks now</button>
+          <button type="submit" className="adm-btn adm-scan">{t("Run checks now")}</button>
         </form>
       </div>
 
@@ -305,24 +305,23 @@ export default async function AlertsPage({ searchParams }: {
       {view === 'inbox' && (
         <>
           <div className="adm-filters" style={{ marginBottom: 12 }}>
-            <Link className="adm-chip" data-on={!includeDone} href="/admin/alerts">Open</Link>
+            <Link className="adm-chip" data-on={!includeDone} href="/admin/alerts">{t("Open")}</Link>
             <Link className="adm-chip" data-on={includeDone} href="/admin/alerts?show=all">
-              Including dealt with
+              {t("Including dealt with")}
             </Link>
           </div>
 
           {alerts.length === 0 ? (
             <div className="adm-panel adm-pad">
               <p className="adm-empty">
-                Nothing needs attention. The checks ran {run ? when(run.started_at) : 'never'} —
-                if that says never, press <b>Run checks now</b>.
+                Nothing needs attention. The checks ran {run ? when(run.started_at) : 'never'} — if that says never, press <b>Run checks now</b>.
               </p>
             </div>
           ) : (
             <div className="adm-panel">
               <table className="adm-t">
                 <thead>
-                  <tr><th>Severity</th><th>What</th><th>Raised</th><th /></tr>
+                  <tr><th>{t("Severity")}</th><th>{t("What")}</th><th>{t("Raised")}</th><th /></tr>
                 </thead>
                 <tbody>
                   {alerts.map((a) => (
@@ -340,12 +339,12 @@ export default async function AlertsPage({ searchParams }: {
                         {a.done_at ? (
                           <form action={undo}>
                             <input type="hidden" name="id" value={a.id} />
-                            <button type="submit" className="adm-btn-sec adm-undo">Reopen</button>
+                            <button type="submit" className="adm-btn-sec adm-undo">{t("Reopen")}</button>
                           </form>
                         ) : (
                           <form action={dismiss}>
                             <input type="hidden" name="id" value={a.id} />
-                            <button type="submit" className="adm-btn-sec adm-done">Dealt with</button>
+                            <button type="submit" className="adm-btn-sec adm-done">{t("Dealt with")}</button>
                           </form>
                         )}
                       </td>
@@ -356,8 +355,7 @@ export default async function AlertsPage({ searchParams }: {
             </div>
           )}
           <p className="adm-sub" style={{ fontSize: 12 }}>
-            Dealt-with alerts are kept, not deleted. “Was anyone warned before
-            that container sat at the port for a week” has to stay answerable.
+            {t("Dealt-with alerts are kept, not deleted. “Was anyone warned before that container sat at the port for a week” has to stay answerable.")}
           </p>
         </>
       )}
@@ -365,23 +363,17 @@ export default async function AlertsPage({ searchParams }: {
       {view === 'rules' && (
         <>
           <p className="adm-sub">
-            Each rule is a row, so the numbers are yours to change: warn five
-            days before an invoice falls due instead of three, or drop the low
-            stock floor to two. What stays in code is the query behind each
-            kind — a new kind of warning genuinely is development, and a screen
-            pretending otherwise would be misleading.
+            {t("Each rule is a row, so the numbers are yours to change: warn five days before an invoice falls due instead of three, or drop the low stock floor to two. What stays in code is the query behind each kind — a new kind of warning genuinely is development, and a screen pretending otherwise would be misleading.")}
           </p>
           {user.role !== 'owner' && (
-            <p className="adm-err">You can see these, but only the owner can change them.</p>
+            <p className="adm-err">{t("You can see these, but only the owner can change them.")}</p>
           )}
           {user.role === 'owner' && rules.length > 0 && (
             <div className="adm-panel adm-pad adm-rule-all">
               <p className="adm-sub" style={{ margin: 0 }}>
                 {withEmail === 0 ? (
                   <>
-                    <strong>No rule has an address on it</strong>, so nothing would be
-                    emailed even with a mail provider configured. An alert with no
-                    recipient is raised in the console and goes no further.
+                    <strong>No rule has an address on it</strong>, so nothing would be emailed even with a mail provider configured. An alert with no recipient is raised in the console and goes no further.
                   </>
                 ) : (
                   <>{withEmail} of {rules.length} rules send an email.</>
@@ -389,8 +381,8 @@ export default async function AlertsPage({ searchParams }: {
               </p>
               <form action={emailAll} className="adm-out-test">
                 <input name="email_all" type="email" className="adm-search"
-                       placeholder="Send every alert to…" defaultValue={user.email} />
-                <button type="submit" className="adm-btn">Apply to all {rules.length}</button>
+                       placeholder={t("Send every alert to…")} defaultValue={user.email} />
+                <button type="submit" className="adm-btn">{t("Apply to all")} {rules.length}</button>
               </form>
             </div>
           )}
@@ -416,11 +408,11 @@ export default async function AlertsPage({ searchParams }: {
                   <label className="adm-field" style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                     <input type="checkbox" name="is_active" defaultChecked={r.is_active}
                            style={{ width: 16, height: 16 }} disabled={user.role !== 'owner'} />
-                    <span>Active</span>
+                    <span>{t("Active")}</span>
                   </label>
 
                   <label className="adm-field">
-                    <span>Severity</span>
+                    <span>{t("Severity")}</span>
                     <select name="severity" defaultValue={r.severity} disabled={user.role !== 'owner'}>
                       {SEV.map((s) => <option key={s} value={s}>{s}</option>)}
                     </select>
@@ -435,30 +427,30 @@ export default async function AlertsPage({ searchParams }: {
                   )}
 
                   <label className="adm-field">
-                    <span>Only this role sees it</span>
+                    <span>{t("Only this role sees it")}</span>
                     <select name="to_role" defaultValue={r.to_role ?? ''} disabled={user.role !== 'owner'}>
-                      <option value="">Everyone</option>
-                      <option value="owner">Owner</option>
-                      <option value="sales">Sales</option>
-                      <option value="viewer">Viewer</option>
+                      <option value="">{t("Everyone")}</option>
+                      <option value="owner">{t("Owner")}</option>
+                      <option value="sales">{t("Sales")}</option>
+                      <option value="viewer">{t("Viewer")}</option>
                     </select>
                   </label>
 
                   <label className="adm-field">
-                    <span>Also email</span>
+                    <span>{t("Also email")}</span>
                     <input name="email_to" type="email" defaultValue={r.email_to ?? ''}
-                           placeholder="nobody" disabled={user.role !== 'owner'} />
+                           placeholder={t("nobody")} disabled={user.role !== 'owner'} />
                   </label>
 
                   <label className="adm-field">
-                    <span>Also WhatsApp</span>
+                    <span>{t("Also WhatsApp")}</span>
                     <input name="whatsapp_to" defaultValue={r.whatsapp_to ?? ''}
-                           placeholder="nobody" disabled={user.role !== 'owner'} />
+                           placeholder={t("nobody")} disabled={user.role !== 'owner'} />
                   </label>
 
                   <label className="adm-field" style={{ gridColumn: '1 / -1' }}>
                     <span>
-                      Wording — leave empty for the built-in text.
+                      {t("Wording — leave empty for the built-in text.")}
                       {k?.tokens.length ? ` Available: ${k.tokens.map((t) => `{${t}}`).join(' ')}` : ''}
                     </span>
                     <input name="template" defaultValue={r.template ?? ''}
@@ -467,17 +459,16 @@ export default async function AlertsPage({ searchParams }: {
                 </div>
 
                 {user.role === 'owner' && (
-                  <button type="submit" className="adm-btn adm-save-rule">Save</button>
+                  <button type="submit" className="adm-btn adm-save-rule">{t("Save")}</button>
                 )}
               </form>
             );
           })}
 
           <div className="adm-panel adm-pad">
-            <h2>Kinds available</h2>
+            <h2>{t("Kinds available")}</h2>
             <p className="adm-sub">
-              {ALERT_KINDS.length} in total. A kind with no rule raises nothing —
-              silence is a choice, not a fault.
+              {ALERT_KINDS.length} in total. A kind with no rule raises nothing — silence is a choice, not a fault.
             </p>
           </div>
         </>
@@ -492,19 +483,13 @@ export default async function AlertsPage({ searchParams }: {
             <p className="adm-sub">
               Anything addressed outside the console. Mail goes out over{' '}
               <strong>{provider === 'smtp' ? 'SMTP' : 'Resend'}</strong>, from{' '}
-              <strong>{safeFrom()}</strong>. Queued messages are sent on the same
-              fifteen-minute tick as the alert scan; a failure waits and is tried
-              again, up to five times, and then stops with the reason on the row.
+              <strong>{safeFrom()}</strong>. Queued messages are sent on the same fifteen-minute tick as the alert scan; a failure waits and is tried again, up to five times, and then stops with the reason on the row.
             </p>
           ) : (
             <p className="adm-sub">
-              Anything addressed outside the console. <strong>Nothing is being
-              sent</strong>, because no mail provider is configured — set{' '}
+              Anything addressed outside the console. <strong>Nothing is being sent</strong>, because no mail provider is configured — set{' '}
               <code>SMTP_URL</code> (a mailbox on the company domain) or{' '}
-              <code>RESEND_API_KEY</code>, plus <code>MAIL_FROM</code>, and these
-              rows go out on the next tick. They wait with the reason attached
-              rather than being dropped, and rather than this system claiming to
-              have sent an email it never could.
+              <code>RESEND_API_KEY</code>, plus <code>MAIL_FROM</code>, and these rows go out on the next tick. They wait with the reason attached rather than being dropped, and rather than this system claiming to have sent an email it never could.
             </p>
           )}
 
@@ -520,23 +505,23 @@ export default async function AlertsPage({ searchParams }: {
             <div className="adm-out-acts">
               <form action={sendNow}>
                 <button type="submit" className="adm-btn" disabled={!provider}>
-                  Send what is waiting
+                  {t("Send what is waiting")}
                 </button>
               </form>
               {provider && (counts.blocked ?? 0) > 0 && (
                 <form action={requeueNow}>
                   <button type="submit" className="adm-btn adm-btn-sec">
-                    Requeue the last 7 days of blocked
+                    {t("Requeue the last 7 days of blocked")}
                   </button>
                 </form>
               )}
               {user.role === 'owner' && (
                 <form action={sendTest} className="adm-out-test">
                   <input name="to" type="email" className="adm-search"
-                         placeholder="Send a test to…" defaultValue={user.email}
+                         placeholder={t("Send a test to…")} defaultValue={user.email}
                          required disabled={!provider} />
                   <button type="submit" className="adm-btn adm-btn-sec" disabled={!provider}>
-                    Test
+                    {t("Test")}
                   </button>
                 </form>
               )}
@@ -555,14 +540,14 @@ export default async function AlertsPage({ searchParams }: {
           {outbound.length === 0 ? (
             <div className="adm-panel adm-pad">
               <p className="adm-empty">
-                Nothing queued. No rule has an email address or WhatsApp number on it.
+                {t("Nothing queued. No rule has an email address or WhatsApp number on it.")}
               </p>
             </div>
           ) : (
             <div className="adm-panel">
               <table className="adm-t">
                 <thead>
-                  <tr><th>Channel</th><th>To</th><th>Subject</th><th>State</th><th>Queued</th></tr>
+                  <tr><th>{t("Channel")}</th><th>To</th><th>{t("Subject")}</th><th>{t("State")}</th><th>{t("Queued")}</th></tr>
                 </thead>
                 <tbody>
                   {outbound.map((m) => (

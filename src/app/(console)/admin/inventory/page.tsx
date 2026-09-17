@@ -3,11 +3,14 @@ import { redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth';
 import { getStockByProduct } from '@/lib/inventory';
 import { getAllProducts } from '@/lib/products';
+import { adminUi } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
 export default async function InventoryPage() {
-  if (!(await getSessionUser())) redirect('/admin/login');
+  const user = await getSessionUser();
+  if (!user) redirect('/admin/login');
+  const t = adminUi(user.locale);
 
   const [lines, catalogue] = await Promise.all([getStockByProduct(), getAllProducts()]);
   const nameOf = new Map(catalogue.map((p) => [p.reference, p.name]));
@@ -23,23 +26,21 @@ export default async function InventoryPage() {
 
   return (
     <>
-      <h1>Inventory</h1>
+      <h1>{t("Inventory")}</h1>
       <p className="adm-sub">
-        Specimens are tracked one by one; lots are tracked by quantity. Sellable
-        excludes anything still acclimatising, in poor health, or sitting somewhere
-        it cannot be sold from.
+        {t("Specimens are tracked one by one; lots are tracked by quantity. Sellable excludes anything still acclimatising, in poor health, or sitting somewhere it cannot be sold from.")}
       </p>
 
       <div className="adm-cards">
-        <div className="adm-card"><b>{totals.sellable}</b><span>Sellable now</span></div>
-        <div className="adm-card"><b>{totals.specimens}</b><span>Specimens tracked</span></div>
-        <div className="adm-card"><b>{totals.batch}</b><span>In lots</span></div>
-        <div className="adm-card"><b>{totals.acclimatising}</b><span>Acclimatising</span></div>
-        <div className="adm-card"><b>{totals.lost}</b><span>Dead / written off</span></div>
+        <div className="adm-card"><b>{totals.sellable}</b><span>{t("Sellable now")}</span></div>
+        <div className="adm-card"><b>{totals.specimens}</b><span>{t("Specimens tracked")}</span></div>
+        <div className="adm-card"><b>{totals.batch}</b><span>{t("In lots")}</span></div>
+        <div className="adm-card"><b>{totals.acclimatising}</b><span>{t("Acclimatising")}</span></div>
+        <div className="adm-card"><b>{totals.lost}</b><span>{t("Dead / written off")}</span></div>
       </div>
 
       <p className="adm-sub">
-        <Link href="/admin/inventory/specimens" className="adm-chip">All specimens →</Link>
+        <Link href="/admin/inventory/specimens" className="adm-chip">{t("All specimens →")}</Link>
       </p>
 
       <div className="adm-panel">
@@ -59,14 +60,14 @@ export default async function InventoryPage() {
                   underneath the thing it breaks down. */}
               <tr className="adm-t-group">
                 <th colSpan={3}></th>
-                <th colSpan={6}>Individually tracked</th>
-                <th colSpan={2}>Lots</th>
+                <th colSpan={6}>{t("Individually tracked")}</th>
+                <th colSpan={2}>{t("Lots")}</th>
               </tr>
               <tr>
-                <th>Reference</th><th>Catalogue name</th><th>Sellable now</th>
-                <th>Total</th><th>Sellable</th><th>Acclimatising</th>
-                <th>Reserved</th><th>Sold</th><th>Lost</th>
-                <th>Qty</th><th>Sellable</th>
+                <th>{t("Reference")}</th><th>{t("Catalogue name")}</th><th>{t("Sellable now")}</th>
+                <th>{t("Total")}</th><th>{t("Sellable")}</th><th>{t("Acclimatising")}</th>
+                <th>{t("Reserved")}</th><th>{t("Sold")}</th><th>{t("Lost")}</th>
+                <th>{t("Qty")}</th><th>{t("Sellable")}</th>
               </tr>
             </thead>
             <tbody>

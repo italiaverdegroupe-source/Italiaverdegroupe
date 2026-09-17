@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth';
 import { listUsers, ROLES, ROLE_MEANS } from '@/lib/users';
 import { addUser, saveUser, resetUserPassword, signOutUser } from '../account/actions';
+import { adminUi } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,7 @@ export default async function UsersPage({ searchParams }: {
 }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
+  const t = adminUi(user.locale);
   const { error, ok } = await searchParams;
 
   const users = await listUsers();
@@ -18,28 +20,23 @@ export default async function UsersPage({ searchParams }: {
 
   return (
     <>
-      <h1>Accounts</h1>
+      <h1>{t("Accounts")}</h1>
       <p className="adm-sub">
-        Who can sign in, and what they may do. The roles have been in the
-        database since the beginning and every page respects them — this is the
-        screen that lets you use them without a developer.
+        {t("Who can sign in, and what they may do. The roles have been in the database since the beginning and every page respects them — this is the screen that lets you use them without a developer.")}
       </p>
 
       {error && <p className="adm-err">{error}</p>}
       {ok && <p className="adm-note">{ok}</p>}
-      {readOnly && <p className="adm-err">You can see this, but only an owner can change it.</p>}
+      {readOnly && <p className="adm-err">{t("You can see this, but only an owner can change it.")}</p>}
 
       {owners.length === 1 && (
         <p className="adm-sub">
-          <b>There is one active owner.</b> It cannot be switched off or demoted
-          while it is the only one — that would leave nobody able to administer
-          the system, and nobody inside the company could undo it. Make a second
-          owner first if you want that freedom.
+          <b>{t("There is one active owner.")}</b> {t("It cannot be switched off or demoted while it is the only one — that would leave nobody able to administer the system, and nobody inside the company could undo it. Make a second owner first if you want that freedom.")}
         </p>
       )}
 
       <div className="adm-panel adm-pad" style={{ marginBottom: 20 }}>
-        <h2>What the roles mean</h2>
+        <h2>{t("What the roles mean")}</h2>
         <dl className="adm-dl">
           {ROLES.map((r) => (
             <div key={r}><dt>{r}</dt><dd>{ROLE_MEANS[r]}</dd></div>
@@ -69,11 +66,11 @@ export default async function UsersPage({ searchParams }: {
                 style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))' }}>
             <input type="hidden" name="id" value={u.id} />
             <label className="adm-field">
-              <span>Name</span>
+              <span>{t("Name")}</span>
               <input name="name" defaultValue={u.name} disabled={readOnly} />
             </label>
             <label className="adm-field">
-              <span>Role</span>
+              <span>{t("Role")}</span>
               <select name="role" defaultValue={u.role} disabled={readOnly}>
                 {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
               </select>
@@ -81,11 +78,11 @@ export default async function UsersPage({ searchParams }: {
             <label className="adm-field" style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <input type="checkbox" name="is_active" defaultChecked={u.is_active}
                      style={{ width: 16, height: 16 }} disabled={readOnly} />
-              <span>Can sign in</span>
+              <span>{t("Can sign in")}</span>
             </label>
             {!readOnly && (
               <div style={{ display: 'flex', alignItems: 'end' }}>
-                <button type="submit" className="adm-btn adm-save-user">Save</button>
+                <button type="submit" className="adm-btn adm-save-user">{t("Save")}</button>
               </div>
             )}
           </form>
@@ -97,26 +94,23 @@ export default async function UsersPage({ searchParams }: {
                     style={{ display: 'flex', gap: 10, alignItems: 'end', flexWrap: 'wrap' }}>
                 <input type="hidden" name="id" value={u.id} />
                 <label className="adm-field" style={{ minWidth: 240 }}>
-                  <span>Set a new password for this account</span>
+                  <span>{t("Set a new password for this account")}</span>
                   <input name="password" type="password" autoComplete="new-password"
-                         placeholder="at least 10 characters" />
+                         placeholder={t("at least 10 characters")} />
                 </label>
-                <button type="submit" className="adm-btn-sec adm-reset-pw">Set password</button>
+                <button type="submit" className="adm-btn-sec adm-reset-pw">{t("Set password")}</button>
               </form>
               <form action={signOutUser} style={{ display: 'flex', alignItems: 'end' }}>
                 <input type="hidden" name="id" value={u.id} />
                 <button type="submit" className="adm-btn-sec adm-signout-user">
-                  Sign out everywhere
+                  {t("Sign out everywhere")}
                 </button>
               </form>
             </div>
           )}
           {!readOnly && (
             <p className="adm-sub" style={{ fontSize: 12, marginBottom: 0 }}>
-              Setting a password here signs that account out of every device, on
-              purpose: this is the path used when a password may be known to
-              somebody else, and a cookie that kept working for another
-              fortnight would make the reset decorative.
+              {t("Setting a password here signs that account out of every device, on purpose: this is the path used when a password may be known to somebody else, and a cookie that kept working for another fortnight would make the reset decorative.")}
             </p>
           )}
         </div>
@@ -124,38 +118,36 @@ export default async function UsersPage({ searchParams }: {
 
       {!readOnly && (
         <div className="adm-panel adm-pad">
-          <h2>Add an account</h2>
+          <h2>{t("Add an account")}</h2>
           <p className="adm-sub">
-            Accounts are never deleted, because the audit log points at them —
-            “who changed this price” has to stay answerable. Switch one off
-            instead, which ends its sessions immediately.
+            {t("Accounts are never deleted, because the audit log points at them — “who changed this price” has to stay answerable. Switch one off instead, which ends its sessions immediately.")}
           </p>
           <form action={addUser}
                 style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))' }}>
             <label className="adm-field">
-              <span>Email</span>
+              <span>{t("Email")}</span>
               <input name="email" type="email" required autoComplete="off" />
             </label>
             <label className="adm-field">
-              <span>Name</span>
+              <span>{t("Name")}</span>
               <input name="name" required autoComplete="off" />
             </label>
             <label className="adm-field">
-              <span>Role</span>
+              <span>{t("Role")}</span>
               <select name="role" defaultValue="sales">
                 {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
               </select>
             </label>
             <label className="adm-field">
-              <span>Password — at least 10 characters</span>
+              <span>{t("Password — at least 10 characters")}</span>
               <input name="password" type="password" required autoComplete="new-password" />
             </label>
             <label className="adm-field">
-              <span>Password again</span>
+              <span>{t("Password again")}</span>
               <input name="again" type="password" required autoComplete="new-password" />
             </label>
             <div style={{ display: 'flex', alignItems: 'end' }}>
-              <button type="submit" className="adm-btn adm-add-user">Create account</button>
+              <button type="submit" className="adm-btn adm-add-user">{t("Create account")}</button>
             </div>
           </form>
         </div>

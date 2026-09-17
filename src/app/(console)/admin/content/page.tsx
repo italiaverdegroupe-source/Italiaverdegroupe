@@ -6,6 +6,7 @@ import {
   BLOCKS, getBlocks, blocksByLocale, listSeo, allFaqs, allTestimonials, allPosts, type BlockKey,
 } from '@/lib/content';
 import { saveBlocks, saveSeo, saveFaq, saveTestimonial, savePost } from './actions';
+import { adminUi } from '@/lib/admin-ui';
 import {
   LOCALES, LOCALE_NAMES, DEFAULT_LOCALE, isLocale, localePath, type Locale,
 } from '@/lib/i18n';
@@ -28,6 +29,7 @@ export default async function ContentPage({ searchParams }: {
 }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
+  const t = adminUi(user.locale);
 
   const { tab, loc, edit, error } = await searchParams;
   const view = TABS.some(([k]) => k === tab) ? tab! : 'copy';
@@ -52,14 +54,12 @@ export default async function ContentPage({ searchParams }: {
 
   return (
     <>
-      <h1>Content</h1>
+      <h1>{t("Content")}</h1>
       <p className="adm-sub">
-        The words on the public site, and what a search engine is told about
-        each page. Everything here has a compiled default — clear a box and the
-        original text comes back, so nothing typed here can leave a page blank.
+        {t("The words on the public site, and what a search engine is told about each page. Everything here has a compiled default — clear a box and the original text comes back, so nothing typed here can leave a page blank.")}
       </p>
 
-      {readOnly && <p className="adm-err">You can see this, but you cannot change it.</p>}
+      {readOnly && <p className="adm-err">{t("You can see this, but you cannot change it.")}</p>}
 
       {/* A refused save says why, here, instead of becoming a blank error page. */}
       {error && <p className="adm-err">{error}</p>}
@@ -70,7 +70,7 @@ export default async function ContentPage({ searchParams }: {
                 href={`/admin/content?tab=${k}`}>{label}</Link>
         ))}
         <Link className="adm-chip" href="/journal" target="_blank"
-              style={{ marginInlineStart: 'auto' }}>View the site →</Link>
+              style={{ marginInlineStart: 'auto' }}>{t("View the site →")}</Link>
       </div>
 
       {/* ── site copy ─────────────────────────────────────── */}
@@ -97,21 +97,15 @@ export default async function ContentPage({ searchParams }: {
             })}
             <Link className="adm-chip" href={localePath(lang, '/')} target="_blank"
                   style={{ marginInlineStart: 'auto' }}>
-              View this language →
+              {t("View this language →")}
             </Link>
           </div>
 
           {lang !== DEFAULT_LOCALE && (
             <p className="adm-sub">
               {translated === 0
-                ? <>Nothing is translated into <strong>{LOCALE_NAMES[lang]}</strong> yet.
-                    Every box below shows the English it currently falls back to — the
-                    site is already serving that, so a half-finished translation is not a
-                    half-finished page.</>
-                : <><strong>{translated}</strong> of {Object.keys(BLOCKS).length} blocks
-                    are written in {LOCALE_NAMES[lang]}. The rest fall back to English on
-                    the live site. Emptying a box removes the translation and returns
-                    that block to English.</>}
+                ? <>Nothing is translated into <strong>{LOCALE_NAMES[lang]}</strong> yet. Every box below shows the English it currently falls back to — the site is already serving that, so a half-finished translation is not a half-finished page.</>
+                : <><strong>{translated}</strong> of {Object.keys(BLOCKS).length} blocks are written in {LOCALE_NAMES[lang]}. The rest fall back to English on the live site. Emptying a box removes the translation and returns that block to English.</>}
             </p>
           )}
 
@@ -164,13 +158,10 @@ export default async function ContentPage({ searchParams }: {
             </div>
           ))}
           {!readOnly && <button type="submit" className="adm-btn adm-save-copy">
-              Save {LOCALE_NAMES[lang]}
+              {t("Save")} {LOCALE_NAMES[lang]}
             </button>}
           <p className="adm-sub" style={{ fontSize: 12 }}>
-            Saving publishes straight to the live site. Clearing a box restores
-            the text the site ships with rather than leaving it empty. A page
-            already being viewed may need one refresh to show the change —
-            pages are cached and rebuilt behind the first request after a save.
+            {t("Saving publishes straight to the live site. Clearing a box restores the text the site ships with rather than leaving it empty. A page already being viewed may need one refresh to show the change — pages are cached and rebuilt behind the first request after a save.")}
           </p>
         </form>
         </>
@@ -180,10 +171,7 @@ export default async function ContentPage({ searchParams }: {
       {view === 'seo' && (
         <>
           <p className="adm-sub">
-            These override what each page already generates. Leave a box empty
-            and the built-in title or description is used — which for the 68
-            catalogue pages is already written from the specimen itself, so
-            emptying a box is safe and blanking one is not possible.
+            {t("These override what each page already generates. Leave a box empty and the built-in title or description is used — which for the 68 catalogue pages is already written from the specimen itself, so emptying a box is safe and blanking one is not possible.")}
           </p>
           {SEO_PATHS.map((path) => {
             const row = seo.find((r) => r.path === path);
@@ -197,18 +185,18 @@ export default async function ContentPage({ searchParams }: {
                 </div>
                 <div style={{ display: 'grid', gap: 12 }}>
                   <label className="adm-field">
-                    <span>Title — aim for 50–60 characters</span>
+                    <span>{t("Title — aim for 50–60 characters")}</span>
                     <input name="title" defaultValue={row?.title ?? ''} maxLength={120} disabled={readOnly} />
                   </label>
                   <label className="adm-field">
-                    <span>Description — aim for 140–160 characters</span>
+                    <span>{t("Description — aim for 140–160 characters")}</span>
                     <textarea name="description" rows={2} defaultValue={row?.description ?? ''}
                               maxLength={320} disabled={readOnly} />
                   </label>
                   <label className="adm-field">
-                    <span>Sharing image — a catalogue reference</span>
+                    <span>{t("Sharing image — a catalogue reference")}</span>
                     <select name="og_ref" defaultValue={row?.og_ref ?? ''} disabled={readOnly}>
-                      <option value="">Default</option>
+                      <option value="">{t("Default")}</option>
                       {products.map((p) => (
                         <option key={p.reference} value={p.reference}>{p.reference} — {p.name}</option>
                       ))}
@@ -217,10 +205,10 @@ export default async function ContentPage({ searchParams }: {
                   <label className="adm-field" style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                     <input type="checkbox" name="noindex" defaultChecked={row?.noindex ?? false}
                            style={{ width: 16, height: 16 }} disabled={readOnly} />
-                    <span>Keep this page out of search results</span>
+                    <span>{t("Keep this page out of search results")}</span>
                   </label>
                 </div>
-                {!readOnly && <button type="submit" className="adm-btn adm-save-seo">Save</button>}
+                {!readOnly && <button type="submit" className="adm-btn adm-save-seo">{t("Save")}</button>}
               </form>
             );
           })}
@@ -231,9 +219,7 @@ export default async function ContentPage({ searchParams }: {
       {view === 'faq' && (
         <>
           <p className="adm-sub">
-            Published questions appear on the homepage and are published as
-            structured data, so they can answer the question inside a search
-            result rather than only on the page.
+            {t("Published questions appear on the homepage and are published as structured data, so they can answer the question inside a search result rather than only on the page.")}
           </p>
 
           {[...faqs, null].map((f, i) => (
@@ -247,28 +233,28 @@ export default async function ContentPage({ searchParams }: {
               </div>
               <div style={{ display: 'grid', gap: 12 }}>
                 <label className="adm-field">
-                  <span>Question</span>
+                  <span>{t("Question")}</span>
                   <input name="question" defaultValue={f?.question ?? ''} disabled={readOnly} />
                 </label>
                 <label className="adm-field">
-                  <span>Answer</span>
+                  <span>{t("Answer")}</span>
                   <textarea name="answer" rows={3} defaultValue={f?.answer ?? ''} disabled={readOnly} />
                 </label>
                 <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))' }}>
                   <label className="adm-field">
-                    <span>Topic</span>
+                    <span>{t("Topic")}</span>
                     <select name="category" defaultValue={f?.category ?? 'general'} disabled={readOnly}>
                       {FAQ_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </label>
                   <label className="adm-field">
-                    <span>Order</span>
+                    <span>{t("Order")}</span>
                     <input name="sort_order" type="number" defaultValue={f?.sort_order ?? 100} disabled={readOnly} />
                   </label>
                   <label className="adm-field" style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                     <input type="checkbox" name="is_published" defaultChecked={f?.is_published ?? false}
                            style={{ width: 16, height: 16 }} disabled={readOnly} />
-                    <span>Live on the site</span>
+                    <span>{t("Live on the site")}</span>
                   </label>
                 </div>
               </div>
@@ -277,7 +263,7 @@ export default async function ContentPage({ searchParams }: {
                   <button type="submit" className="adm-btn adm-save-faq">{f ? 'Save' : 'Add'}</button>
                   {f && (
                     <button type="submit" name="_delete" value="1" className="adm-btn-sec adm-del-faq">
-                      Delete
+                      {t("Delete")}
                     </button>
                   )}
                 </div>
@@ -291,10 +277,7 @@ export default async function ContentPage({ searchParams }: {
       {view === 'voices' && (
         <>
           <p className="adm-err" style={{ background: 'transparent', border: '1px solid var(--rule, #E4DFD2)' }}>
-            A testimonial cannot be published without the date the client agreed
-            to be quoted. Publishing praise nobody consented to is a legal and
-            reputational risk, and an anonymous testimonial reads as an invented
-            one. Record the real conversation.
+            {t("A testimonial cannot be published without the date the client agreed to be quoted. Publishing praise nobody consented to is a legal and reputational risk, and an anonymous testimonial reads as an invented one. Record the real conversation.")}
           </p>
 
           {[...voices, null].map((v) => (
@@ -308,47 +291,47 @@ export default async function ContentPage({ searchParams }: {
               </div>
               <div style={{ display: 'grid', gap: 12 }}>
                 <label className="adm-field">
-                  <span>What they said</span>
+                  <span>{t("What they said")}</span>
                   <textarea name="body" rows={3} defaultValue={v?.body ?? ''} disabled={readOnly} />
                 </label>
                 <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))' }}>
                   <label className="adm-field">
-                    <span>Name</span>
+                    <span>{t("Name")}</span>
                     <input name="author_name" defaultValue={v?.author_name ?? ''} disabled={readOnly} />
                   </label>
                   <label className="adm-field">
-                    <span>Role</span>
+                    <span>{t("Role")}</span>
                     <input name="author_role" defaultValue={v?.author_role ?? ''} disabled={readOnly} />
                   </label>
                   <label className="adm-field">
-                    <span>Company</span>
+                    <span>{t("Company")}</span>
                     <input name="company" defaultValue={v?.company ?? ''} disabled={readOnly} />
                   </label>
                   <label className="adm-field">
-                    <span>Emirate</span>
+                    <span>{t("Emirate")}</span>
                     <input name="emirate" defaultValue={v?.emirate ?? ''} disabled={readOnly} />
                   </label>
                   <label className="adm-field">
-                    <span>Project</span>
+                    <span>{t("Project")}</span>
                     <input name="project" defaultValue={v?.project ?? ''} disabled={readOnly} />
                   </label>
                   <label className="adm-field">
-                    <span>Consent given on</span>
+                    <span>{t("Consent given on")}</span>
                     <input name="consent_on" type="date" defaultValue={v?.consent_on ?? ''} disabled={readOnly} />
                   </label>
                   <label className="adm-field">
-                    <span>How consent was given</span>
+                    <span>{t("How consent was given")}</span>
                     <input name="consent_note" defaultValue={v?.consent_note ?? ''}
-                           placeholder="email of 12 March, site meeting…" disabled={readOnly} />
+                           placeholder={t("email of 12 March, site meeting…")} disabled={readOnly} />
                   </label>
                   <label className="adm-field">
-                    <span>Order</span>
+                    <span>{t("Order")}</span>
                     <input name="sort_order" type="number" defaultValue={v?.sort_order ?? 100} disabled={readOnly} />
                   </label>
                   <label className="adm-field" style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                     <input type="checkbox" name="is_published" defaultChecked={v?.is_published ?? false}
                            style={{ width: 16, height: 16 }} disabled={readOnly} />
-                    <span>Live on the site</span>
+                    <span>{t("Live on the site")}</span>
                   </label>
                 </div>
               </div>
@@ -357,7 +340,7 @@ export default async function ContentPage({ searchParams }: {
                   <button type="submit" className="adm-btn adm-save-voice">{v ? 'Save' : 'Add'}</button>
                   {v && (
                     <button type="submit" name="_delete" value="1" className="adm-btn-sec adm-del-voice">
-                      Delete
+                      {t("Delete")}
                     </button>
                   )}
                 </div>
@@ -371,24 +354,21 @@ export default async function ContentPage({ searchParams }: {
       {view === 'journal' && (
         <>
           <p className="adm-sub">
-            Articles are the part of the site that reaches people who have not
-            heard of the company — someone searching whether an olive survives
-            a Gulf summer. Formatting: <code>## heading</code>,{' '}
-            <code>- bullet</code>, <code>**bold**</code>, <code>[text](link)</code>.
-            Anything else appears as typed.
+            Articles are the part of the site that reaches people who have not heard of the company — someone searching whether an olive survives a Gulf summer. Formatting: <code>## heading</code>,{' '}
+            <code>- bullet</code>, <code>**bold**</code>, <code>[text](link)</code>. Anything else appears as typed.
           </p>
 
           <div className="adm-panel" style={{ marginBottom: 18 }}>
             <table className="adm-t">
-              <thead><tr><th>Title</th><th>Address</th><th>State</th><th>Date</th><th /></tr></thead>
+              <thead><tr><th>{t("Title")}</th><th>{t("Address")}</th><th>{t("State")}</th><th>{t("Date")}</th><th /></tr></thead>
               <tbody>
                 {posts.length === 0 && (
-                  <tr><td colSpan={5}><span className="adm-empty">No articles yet.</span></td></tr>
+                  <tr><td colSpan={5}><span className="adm-empty">{t("No articles yet.")}</span></td></tr>
                 )}
                 {posts.map((p) => (
                   <tr key={p.id}>
                     <td><b>{p.title}</b></td>
-                    <td><code style={{ fontSize: 12 }}>/journal/{p.slug}</code></td>
+                    <td><code style={{ fontSize: 12 }}>{t("/journal/")}{p.slug}</code></td>
                     <td>
                       <span className={`pill ${p.status === 'published' ? 'pill-won' : 'pill-new'}`}>
                         {p.status}
@@ -396,7 +376,7 @@ export default async function ContentPage({ searchParams }: {
                     </td>
                     <td>{p.published_at?.slice(0, 10) ?? '—'}</td>
                     <td className="num">
-                      <Link className="adm-chip" href={`/admin/content?tab=journal&edit=${p.id}`}>Edit</Link>
+                      <Link className="adm-chip" href={`/admin/content?tab=journal&edit=${p.id}`}>{t("Edit")}</Link>
                     </td>
                   </tr>
                 ))}
@@ -408,60 +388,60 @@ export default async function ContentPage({ searchParams }: {
             {editing && <input type="hidden" name="id" value={editing.id} />}
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
               <h2 style={{ margin: 0 }}>{editing ? 'Edit article' : 'New article'}</h2>
-              {editing && <Link className="adm-chip" href="/admin/content?tab=journal">Start a new one instead</Link>}
+              {editing && <Link className="adm-chip" href="/admin/content?tab=journal">{t("Start a new one instead")}</Link>}
             </div>
             <div style={{ display: 'grid', gap: 14 }}>
               <label className="adm-field">
-                <span>Title</span>
+                <span>{t("Title")}</span>
                 <input name="title" defaultValue={editing?.title ?? ''} disabled={readOnly} />
               </label>
               <label className="adm-field">
-                <span>Address — leave empty and it is made from the title</span>
-                <input name="slug" defaultValue={editing?.slug ?? ''} placeholder="olive-trees-gulf-summer"
+                <span>{t("Address — leave empty and it is made from the title")}</span>
+                <input name="slug" defaultValue={editing?.slug ?? ''} placeholder={t("olive-trees-gulf-summer")}
                        disabled={readOnly} />
               </label>
               <label className="adm-field">
-                <span>Summary — shown in the list and to search engines</span>
+                <span>{t("Summary — shown in the list and to search engines")}</span>
                 <textarea name="excerpt" rows={2} defaultValue={editing?.excerpt ?? ''} disabled={readOnly} />
               </label>
               <label className="adm-field">
-                <span>Body</span>
+                <span>{t("Body")}</span>
                 <textarea name="body" rows={16} defaultValue={editing?.body ?? ''}
                           style={{ fontFamily: 'ui-monospace, monospace', fontSize: 13 }}
                           disabled={readOnly} />
               </label>
               <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))' }}>
                 <label className="adm-field">
-                  <span>Cover photograph</span>
+                  <span>{t("Cover photograph")}</span>
                   <select name="cover_ref" defaultValue={editing?.cover_ref ?? ''} disabled={readOnly}>
-                    <option value="">None</option>
+                    <option value="">{t("None")}</option>
                     {products.map((p) => (
                       <option key={p.reference} value={p.reference}>{p.reference} — {p.name}</option>
                     ))}
                   </select>
                 </label>
                 <label className="adm-field">
-                  <span>Author</span>
+                  <span>{t("Author")}</span>
                   <input name="author" defaultValue={editing?.author ?? ''} disabled={readOnly} />
                 </label>
                 <label className="adm-field">
-                  <span>State</span>
+                  <span>{t("State")}</span>
                   <select name="status" defaultValue={editing?.status ?? 'draft'} disabled={readOnly}>
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
+                    <option value="draft">{t("Draft")}</option>
+                    <option value="published">{t("Published")}</option>
                   </select>
                 </label>
                 <label className="adm-field">
-                  <span>Publish date</span>
+                  <span>{t("Publish date")}</span>
                   <input name="published_at" type="date"
                          defaultValue={editing?.published_at?.slice(0, 10) ?? ''} disabled={readOnly} />
                 </label>
                 <label className="adm-field">
-                  <span>Search title — optional</span>
+                  <span>{t("Search title — optional")}</span>
                   <input name="seo_title" defaultValue={editing?.seo_title ?? ''} disabled={readOnly} />
                 </label>
                 <label className="adm-field">
-                  <span>Search description — optional</span>
+                  <span>{t("Search description — optional")}</span>
                   <input name="seo_description" defaultValue={editing?.seo_description ?? ''} disabled={readOnly} />
                 </label>
               </div>
@@ -473,7 +453,7 @@ export default async function ContentPage({ searchParams }: {
                 </button>
                 {editing && (
                   <button type="submit" name="_delete" value="1" className="adm-btn-sec adm-del-post">
-                    Delete
+                    {t("Delete")}
                   </button>
                 )}
               </div>

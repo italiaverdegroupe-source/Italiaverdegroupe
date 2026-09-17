@@ -6,6 +6,8 @@ import {
 } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { imageFor } from '@/lib/products';
+import { adminUi } from '@/lib/admin-ui';
+import { browserLocale } from '@/lib/i18n-server';
 
 /**
  * The avenue of palms, resolved through imageFor so a renamed photograph
@@ -41,7 +43,7 @@ async function signIn(formData: FormData) {
   // Always run a verification so a missing account and a wrong password take
   // comparable time and cannot be told apart by the response.
   const hash = user?.password_hash
-    ?? 'scrypt$16384$8$1$AAAAAAAAAAAAAAAAAAAAAA==$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+    ?? 'scrypt$16384$8$1$AAAAAAAAAAA==$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
   const ok = await verifyPassword(password, hash);
 
   if (!user || !ok) {
@@ -70,6 +72,11 @@ const MESSAGES: Record<string, string> = {
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ e?: string }> }) {
   if (await getSessionUser()) redirect('/admin');
+  // Nobody is signed in yet, so there is no stored preference to read. The
+  // browser's own preference is the only thing known about this person, and
+  // guessing from it is better than showing an Italian owner an English form
+  // before they have had a chance to say so.
+  const t = adminUi(await browserLocale());
   const { e } = await searchParams;
 
   return (
@@ -84,35 +91,35 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       <div className="lg-veil" />
 
       <div className="lg-mark">
-        <span className="lg-mark-name">Verde Garden</span>
-        <span className="lg-mark-sub">Trading — Operations</span>
+        <span className="lg-mark-name">{t("Verde Garden")}</span>
+        <span className="lg-mark-sub">{t("Trading — Operations")}</span>
       </div>
 
       <div className="adm-login-box">
-        <p className="lg-eyebrow">Sign in</p>
-        <h1>Operations</h1>
+        <p className="lg-eyebrow">{t("Sign in")}</p>
+        <h1>{t("Operations")}</h1>
         <p className="lg-lede">
-          Inventory, quotations, shipments and the money behind them.
+          {t("Inventory, quotations, shipments and the money behind them.")}
         </p>
 
         {e && <p className="adm-err">{MESSAGES[e] ?? 'Could not sign you in.'}</p>}
 
         <form action={signIn}>
           <label className="adm-field">
-            <span>Email</span>
+            <span>{t("Email")}</span>
             <input name="email" type="email" required autoComplete="username" autoFocus />
           </label>
           <label className="adm-field">
-            <span>Password</span>
+            <span>{t("Password")}</span>
             <input name="password" type="password" required autoComplete="current-password" />
           </label>
-          <button type="submit" className="adm-btn lg-submit">Sign in</button>
+          <button type="submit" className="adm-btn lg-submit">{t("Sign in")}</button>
         </form>
 
         {/* The warning is useful; the exact threshold and window are not
             something an unauthenticated page needs to hand out. */}
         <p className="lg-foot">
-          Repeated failed attempts temporarily lock the account.
+          {t("Repeated failed attempts temporarily lock the account.")}
         </p>
       </div>
     </div>

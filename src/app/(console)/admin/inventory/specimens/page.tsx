@@ -8,6 +8,7 @@ import {
 } from '@/lib/inventory';
 import { getAllProducts } from '@/lib/products';
 import { fmtDay } from '@/components/admin/bits';
+import { adminUi, adminStatus } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -71,6 +72,8 @@ async function addSpecimen(formData: FormData) {
 export default async function SpecimensPage({ searchParams }: { searchParams: Promise<{ status?: string; ref?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
+  const t = adminUi(user.locale);
+  const st = adminStatus(user.locale);
   const sp = await searchParams;
 
   const [rows, locations, catalogue] = await Promise.all([
@@ -90,14 +93,14 @@ export default async function SpecimensPage({ searchParams }: { searchParams: Pr
 
   return (
     <>
-      <p className="adm-sub"><Link href="/admin/inventory">← Inventory</Link></p>
-      <h1>Specimens</h1>
+      <p className="adm-sub"><Link href="/admin/inventory">{t("← Inventory")}</Link></p>
+      <h1>{t("Specimens")}</h1>
       <p className="adm-sub">
-        {rows.length} shown{sp.ref ? ` · ${sp.ref}` : ''}{sp.status ? ` · ${sp.status}` : ''}
+        {rows.length} shown{sp.ref ? ` · ${sp.ref}` : ''}{sp.status ? ` · ${st(sp.status)}` : ''}
       </p>
 
       <div className="adm-filters">
-        <Link href={link()} className="adm-chip" data-on={String(!sp.status)}>All</Link>
+        <Link href={link()} className="adm-chip" data-on={String(!sp.status)}>{t("All")}</Link>
         {ITEM_STATUSES.map((s) => (
           <Link key={s} href={link(s)} className="adm-chip" data-on={String(sp.status === s)}>{s}</Link>
         ))}
@@ -105,14 +108,14 @@ export default async function SpecimensPage({ searchParams }: { searchParams: Pr
 
       <div className="adm-panel" style={{ marginBottom: 28 }}>
         {rows.length === 0 ? (
-          <p className="adm-empty">No specimens match.</p>
+          <p className="adm-empty">{t("No specimens match.")}</p>
         ) : (
           <table className="adm-t">
             <thead>
               <tr>
-                <th>Code</th><th>Catalogue</th><th>Status</th><th>Sellable</th>
-                <th>Health</th><th>Location</th><th>Height</th><th>Girth</th>
-                <th>Asking</th><th>Measured</th>
+                <th>{t("Code")}</th><th>{t("Catalogue")}</th><th>{t("Status")}</th><th>{t("Sellable")}</th>
+                <th>{t("Health")}</th><th>{t("Location")}</th><th>{t("Height")}</th><th>{t("Girth")}</th>
+                <th>{t("Asking")}</th><th>{t("Measured")}</th>
               </tr>
             </thead>
             <tbody>
@@ -120,7 +123,7 @@ export default async function SpecimensPage({ searchParams }: { searchParams: Pr
                 <tr key={s.code}>
                   <td><Link href={`/admin/inventory/specimens/${s.code}`}>{s.code}</Link></td>
                   <td>{nameOf.get(s.product_ref) ?? s.product_ref}</td>
-                  <td><span className={`pill pill-${s.status === 'available' ? 'won' : s.status === 'sold' ? 'quoted' : s.status === 'dead' || s.status === 'written_off' ? 'lost' : 'new'}`}>{s.status}</span></td>
+                  <td><span className={`pill pill-${s.status === 'available' ? 'won' : s.status === 'sold' ? 'quoted' : s.status === 'dead' || s.status === 'written_off' ? 'lost' : 'new'}`}>{st(s.status)}</span></td>
                   <td>{s.is_sellable ? 'yes' : <span style={{ color: '#8A8D7D' }}>no</span>}</td>
                   <td>{s.health}</td>
                   <td>{s.location_name ?? '—'}</td>
@@ -137,26 +140,25 @@ export default async function SpecimensPage({ searchParams }: { searchParams: Pr
 
       {user.role !== 'viewer' && (
         <div className="adm-panel adm-pad">
-          <h2>Record a specimen</h2>
+          <h2>{t("Record a specimen")}</h2>
           <p className="adm-sub">
-            One tree, one row. Quantity is always one — that is the point of tracking
-            it individually.
+            {t("One tree, one row. Quantity is always one — that is the point of tracking it individually.")}
           </p>
           <form action={addSpecimen}>
             <div className="adm-two" style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))' }}>
               <label className="adm-field">
-                <span>Catalogue reference *</span>
+                <span>{t("Catalogue reference *")}</span>
                 <select name="product_ref" required defaultValue={sp.ref ?? ''}>
-                  <option value="">Select…</option>
+                  <option value="">{t("Select…")}</option>
                   {catalogue.map((p) => (
                     <option key={p.reference} value={p.reference}>{p.reference} — {p.name}</option>
                   ))}
                 </select>
               </label>
               <label className="adm-field">
-                <span>Location</span>
+                <span>{t("Location")}</span>
                 <select name="location_id" defaultValue="">
-                  <option value="">Not set</option>
+                  <option value="">{t("Not set")}</option>
                   {locations.map((l) => (
                     <option key={l.id} value={l.id}>
                       {l.name}{l.sellable ? '' : ' (cannot sell from here)'}
@@ -165,42 +167,42 @@ export default async function SpecimensPage({ searchParams }: { searchParams: Pr
                 </select>
               </label>
               <label className="adm-field">
-                <span>Status</span>
+                <span>{t("Status")}</span>
                 <select name="status" defaultValue="incoming">
                   {ITEM_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
               </label>
               <label className="adm-field">
-                <span>Health</span>
+                <span>{t("Health")}</span>
                 <select name="health" defaultValue="good">
                   {['excellent','good','stressed','critical','dead'].map((h) => <option key={h}>{h}</option>)}
                 </select>
               </label>
-              <label className="adm-field"><span>Grade</span>
+              <label className="adm-field"><span>{t("Grade")}</span>
                 <select name="grade" defaultValue=""><option value="">—</option><option>A</option><option>B</option><option>C</option></select>
               </label>
-              <label className="adm-field"><span>Height (m)</span><input name="height_m" type="number" step="0.01" /></label>
-              <label className="adm-field"><span>Trunk girth (cm)</span><input name="trunk_girth_cm" type="number" step="0.1" /></label>
-              <label className="adm-field"><span>Crown width (m)</span><input name="crown_width_m" type="number" step="0.01" /></label>
-              <label className="adm-field"><span>Pot (litres)</span><input name="pot_litres" type="number" /></label>
-              <label className="adm-field"><span>Arrived</span><input name="arrived_at" type="date" /></label>
+              <label className="adm-field"><span>{t("Height (m)")}</span><input name="height_m" type="number" step="0.01" /></label>
+              <label className="adm-field"><span>{t("Trunk girth (cm)")}</span><input name="trunk_girth_cm" type="number" step="0.1" /></label>
+              <label className="adm-field"><span>{t("Crown width (m)")}</span><input name="crown_width_m" type="number" step="0.01" /></label>
+              <label className="adm-field"><span>{t("Pot (litres)")}</span><input name="pot_litres" type="number" /></label>
+              <label className="adm-field"><span>{t("Arrived")}</span><input name="arrived_at" type="date" /></label>
               <label className="adm-field">
-                <span>Sellable from</span>
+                <span>{t("Sellable from")}</span>
                 <input name="acclimatised_until" type="date" />
               </label>
-              <label className="adm-field"><span>Purchase cost</span><input name="purchase_cost" type="number" step="0.01" /></label>
+              <label className="adm-field"><span>{t("Purchase cost")}</span><input name="purchase_cost" type="number" step="0.01" /></label>
               <label className="adm-field">
-                <span>Currency</span>
+                <span>{t("Currency")}</span>
                 <select name="purchase_currency" defaultValue="EUR"><option>EUR</option><option>AED</option><option>USD</option></select>
               </label>
               <label className="adm-field">
-                <span>FX rate to AED</span>
-                <input name="fx_rate_to_aed" type="number" step="0.000001" placeholder="locked at purchase" />
+                <span>{t("FX rate to AED")}</span>
+                <input name="fx_rate_to_aed" type="number" step="0.000001" placeholder={t("locked at purchase")} />
               </label>
-              <label className="adm-field"><span>Asking price (AED)</span><input name="asking_price_aed" type="number" step="0.01" /></label>
+              <label className="adm-field"><span>{t("Asking price (AED)")}</span><input name="asking_price_aed" type="number" step="0.01" /></label>
             </div>
-            <label className="adm-field"><span>Notes</span><textarea name="notes" rows={3} /></label>
-            <button className="adm-btn adm-add" type="submit">Record specimen</button>
+            <label className="adm-field"><span>{t("Notes")}</span><textarea name="notes" rows={3} /></label>
+            <button className="adm-btn adm-add" type="submit">{t("Record specimen")}</button>
           </form>
         </div>
       )}

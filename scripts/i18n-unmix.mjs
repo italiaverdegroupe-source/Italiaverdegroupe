@@ -29,7 +29,13 @@ for (const file of files) {
     const sf = ts.createSourceFile(file, src, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
     const undo = [];
 
-    const isTCall = (n) => ts.isJsxExpression(n) && n.expression
+    // An attribute's value is a JsxExpression too — placeholder={t("nobody")}
+    // — and reverting THAT to its bare key writes `placeholder=nobody`, which
+    // is not JSX at all. Only expressions that are CHILDREN of an element are
+    // text; the ones hanging off an attribute are values.
+    const isTCall = (n) => ts.isJsxExpression(n)
+      && n.parent && !ts.isJsxAttribute(n.parent)
+      && n.expression
       && ts.isCallExpression(n.expression)
       && n.expression.expression.getText(sf) === 't'
       && n.expression.arguments.length === 1

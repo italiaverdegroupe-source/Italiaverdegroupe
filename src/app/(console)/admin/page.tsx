@@ -4,7 +4,7 @@ import { getSessionUser } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { STATUSES, StatusPill, fmtDate } from '@/components/admin/bits';
 import { TimeArea, BarList, Funnel, Donut } from '@/components/admin/Charts';
-import { adminUi } from '@/lib/admin-ui';
+import { adminUi, adminStatus } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +41,7 @@ export default async function Overview() {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
+  const st = adminStatus(user.locale);
 
   const [counts, recent, stale, daily, byEmirate, bySource, byType] = await Promise.all([
     query<{ status: string; n: string }>(
@@ -191,7 +192,7 @@ export default async function Overview() {
                   <td>{l.enquiry_type}</td>
                   <td className="num">{l.quantity ?? '—'}</td>
                   <td>{l.emirate ?? '—'}</td>
-                  <td><StatusPill status={l.status} /></td>
+                  <td><StatusPill status={st(l.status)} /></td>
                   <td className="num">{fmtDate(l.created_at)}</td>
                 </tr>
               ))}

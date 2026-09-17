@@ -7,6 +7,7 @@ import { ageing, getOrder, getOrderItems, orderTotals, nextCode } from '@/lib/or
 import { getSettings } from '@/lib/settings';
 import { fire } from '@/lib/alerts';
 import { fmtDay } from '@/components/admin/bits';
+import { adminUi, adminStatus } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -118,6 +119,10 @@ async function recordPayment(formData: FormData) {
 export default async function FinancePage() {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
+  // `t` is the order totals in the helper above, so the translator is `tr`
+  // throughout this file — see the note there.
+  const tr = adminUi(user.locale);
+  const st = adminStatus(user.locale);
   const site = await getSettings();
 
   const [invoices, rows, totals] = await Promise.all([
@@ -150,36 +155,32 @@ export default async function FinancePage() {
 
   return (
     <>
-      <h1>Finance</h1>
+      <h1>{tr("Finance")}</h1>
       <p className="adm-sub">
-        Contractors here pay late, so what is owed and how late it is sits on the
-        front page rather than in a spreadsheet.
+        {tr("Contractors here pay late, so what is owed and how late it is sits on the front page rather than in a spreadsheet.")}
       </p>
 
       <div className="adm-cards">
-        <div className="adm-card"><b>{aed(outstanding)}</b><span>Outstanding</span></div>
-        <div className="adm-card"><b>{aed(overdue)}</b><span>Overdue</span></div>
-        <div className="adm-card"><b>{aed(byBucket['1-30'] ?? 0)}</b><span>1–30 days</span></div>
-        <div className="adm-card"><b>{aed(byBucket['31-60'] ?? 0)}</b><span>31–60 days</span></div>
-        <div className="adm-card"><b>{aed(byBucket['61-90'] ?? 0)}</b><span>61–90 days</span></div>
-        <div className="adm-card"><b>{aed(byBucket['90+'] ?? 0)}</b><span>Over 90 days</span></div>
+        <div className="adm-card"><b>{aed(outstanding)}</b><span>{tr("Outstanding")}</span></div>
+        <div className="adm-card"><b>{aed(overdue)}</b><span>{tr("Overdue")}</span></div>
+        <div className="adm-card"><b>{aed(byBucket['1-30'] ?? 0)}</b><span>{tr("1–30 days")}</span></div>
+        <div className="adm-card"><b>{aed(byBucket['31-60'] ?? 0)}</b><span>{tr("31–60 days")}</span></div>
+        <div className="adm-card"><b>{aed(byBucket['61-90'] ?? 0)}</b><span>{tr("61–90 days")}</span></div>
+        <div className="adm-card"><b>{aed(byBucket['90+'] ?? 0)}</b><span>{tr("Over 90 days")}</span></div>
       </div>
 
       {!site.vatEnabled && (
         <p className="adm-sub">
-          VAT is off and no TRN is set, so invoices carry no VAT line and are marked
-          not applicable for e-invoicing. UAE e-invoicing is Peppol PINT AE — structured
-          XML through an accredited provider, not a PDF — and the identifiers it needs are
-          already on each invoice, so switching it on is a mapping rather than a migration.
+          {tr("VAT is off and no TRN is set, so invoices carry no VAT line and are marked not applicable for e-invoicing. UAE e-invoicing is Peppol PINT AE — structured XML through an accredited provider, not a PDF — and the identifiers it needs are already on each invoice, so switching it on is a mapping rather than a migration.")}
         </p>
       )}
 
-      <h2>Ageing</h2>
+      <h2>{tr("Ageing")}</h2>
       <div className="adm-panel" style={{ marginBottom: 28 }}>
-        {rows.length === 0 ? <p className="adm-empty">Nothing outstanding.</p> : (
+        {rows.length === 0 ? <p className="adm-empty">{tr("Nothing outstanding.")}</p> : (
           <table className="adm-t">
-            <thead><tr><th>Invoice</th><th>Customer</th><th>Due</th><th>Total</th>
-                       <th>Paid</th><th>Outstanding</th><th>Days over</th><th>Bucket</th></tr></thead>
+            <thead><tr><th>{tr("Invoice")}</th><th>{tr("Customer")}</th><th>{tr("Due")}</th><th>{tr("Total")}</th>
+                       <th>{tr("Paid")}</th><th>{tr("Outstanding")}</th><th>{tr("Days over")}</th><th>{tr("Bucket")}</th></tr></thead>
             <tbody>
               {rows.map((r) => (
                 <tr key={r.invoice}>
@@ -198,26 +199,26 @@ export default async function FinancePage() {
         )}
       </div>
 
-      <h2>Invoices</h2>
+      <h2>{tr("Invoices")}</h2>
       <div className="adm-panel" style={{ marginBottom: 28 }}>
-        {invoices.length === 0 ? <p className="adm-empty">No invoices raised.</p> : (
+        {invoices.length === 0 ? <p className="adm-empty">{tr("No invoices raised.")}</p> : (
           <table className="adm-t">
-            <thead><tr><th>Invoice</th><th>Order</th><th>Kind</th><th>Status</th>
-                       <th>Issued</th><th>Due</th><th>Total</th><th>Paid</th>
-                       <th>Retention</th><th>e-invoice</th></tr></thead>
+            <thead><tr><th>{tr("Invoice")}</th><th>{tr("Order")}</th><th>{tr("Kind")}</th><th>{tr("Status")}</th>
+                       <th>{tr("Issued")}</th><th>{tr("Due")}</th><th>{tr("Total")}</th><th>{tr("Paid")}</th>
+                       <th>{tr("Retention")}</th><th>e-invoice</th></tr></thead>
             <tbody>
               {invoices.map((i) => (
                 <tr key={i.code}>
                   <td>{i.code}</td>
                   <td>{i.order_code ? <Link href={`/admin/orders/${i.order_code}`}>{i.order_code}</Link> : '—'}</td>
-                  <td>{i.kind.replace(/_/g,' ')}</td>
-                  <td><span className={`pill pill-${i.status === 'paid' ? 'won' : i.status === 'overdue' ? 'lost' : i.status === 'part_paid' ? 'negotiation' : 'quoted'}`}>{i.status.replace(/_/g,' ')}</span></td>
+                  <td>{st(i.kind)}</td>
+                  <td><span className={`pill pill-${i.status === 'paid' ? 'won' : i.status === 'overdue' ? 'lost' : i.status === 'part_paid' ? 'negotiation' : 'quoted'}`}>{st(i.status)}</span></td>
                   <td className="num">{i.issued_on ? fmtDay(i.issued_on) : '—'}</td>
                   <td className="num">{i.due_on ? fmtDay(i.due_on) : '—'}</td>
                   <td className="num">{aed(Number(i.total_aed))}</td>
                   <td className="num">{aed(Number(i.paid))}</td>
                   <td className="num">{Number(i.retention_aed) ? aed(Number(i.retention_aed)) : '—'}</td>
-                  <td>{i.pint_status.replace(/_/g,' ')}</td>
+                  <td>{st(i.pint_status)}</td>
                 </tr>
               ))}
             </tbody>
@@ -228,10 +229,10 @@ export default async function FinancePage() {
       {user.role !== 'viewer' && (
         <div className="adm-two">
           <div className="adm-panel adm-pad">
-            <h2>Raise an invoice</h2>
+            <h2>{tr("Raise an invoice")}</h2>
             <form action={raiseInvoice}>
-              <label className="adm-field"><span>Order code *</span>
-                <input name="order_code" required placeholder="ORD-000001" /></label>
+              <label className="adm-field"><span>{tr("Order code *")}</span>
+                <input name="order_code" required placeholder={tr("ORD-000001")} /></label>
               <label className="adm-field"><span>Kind</span>
                 <select name="kind" defaultValue="tax_invoice">
                   <option value="advance">advance — the agreed percentage up front</option>
@@ -240,28 +241,28 @@ export default async function FinancePage() {
                   <option value="proforma">proforma</option>
                 </select>
               </label>
-              <label className="adm-field"><span>Payment terms (days)</span>
+              <label className="adm-field"><span>{tr("Payment terms (days)")}</span>
                 <input name="terms_days" type="number" min={0} defaultValue={30} /></label>
-              <label className="adm-field"><span>Notes</span><input name="notes" /></label>
-              <button className="adm-btn adm-invoice" type="submit" style={{ width:'100%' }}>Raise</button>
+              <label className="adm-field"><span>{tr("Notes")}</span><input name="notes" /></label>
+              <button className="adm-btn adm-invoice" type="submit" style={{ width:'100%' }}>{tr("Raise")}</button>
             </form>
           </div>
 
           <div className="adm-panel adm-pad">
-            <h2>Record a payment</h2>
+            <h2>{tr("Record a payment")}</h2>
             <form action={recordPayment}>
-              <label className="adm-field"><span>Invoice code *</span>
-                <input name="invoice_code" required placeholder="INV-000001" /></label>
-              <label className="adm-field"><span>Amount (AED) *</span>
+              <label className="adm-field"><span>{tr("Invoice code *")}</span>
+                <input name="invoice_code" required placeholder={tr("INV-000001")} /></label>
+              <label className="adm-field"><span>{tr("Amount (AED) *")}</span>
                 <input name="amount_aed" type="number" step="0.01" required /></label>
-              <label className="adm-field"><span>Method</span>
+              <label className="adm-field"><span>{tr("Method")}</span>
                 <select name="method" defaultValue="bank_transfer">
                   {['bank_transfer','cheque','cash','card','other'].map((m) => <option key={m} value={m}>{m.replace('_',' ')}</option>)}
                 </select>
               </label>
-              <label className="adm-field"><span>Received on</span><input name="received_on" type="date" /></label>
-              <label className="adm-field"><span>Reference</span><input name="reference" /></label>
-              <button className="adm-btn adm-payment" type="submit" style={{ width:'100%' }}>Record</button>
+              <label className="adm-field"><span>{tr("Received on")}</span><input name="received_on" type="date" /></label>
+              <label className="adm-field"><span>{tr("Reference")}</span><input name="reference" /></label>
+              <button className="adm-btn adm-payment" type="submit" style={{ width:'100%' }}>{tr("Record")}</button>
             </form>
           </div>
         </div>

@@ -5,6 +5,7 @@ import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { STATUSES, StatusPill, fmtDate } from '@/components/admin/bits';
 import { getSettings } from '@/lib/settings';
+import { adminUi } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -94,6 +95,7 @@ async function updateLead(formData: FormData) {
 export default async function LeadPage({ params }: { params: Promise<{ reference: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
+  const t = adminUi(user.locale);
   const { reference } = await params;
   const site = await getSettings();
 
@@ -132,7 +134,7 @@ export default async function LeadPage({ params }: { params: Promise<{ reference
 
   return (
     <>
-      <p className="adm-sub"><Link href="/admin/leads">← All leads</Link></p>
+      <p className="adm-sub"><Link href="/admin/leads">{t("← All leads")}</Link></p>
       <h1>{lead.name}</h1>
       <p className="adm-sub">
         <StatusPill status={lead.status} /> &nbsp;{lead.reference}
@@ -141,18 +143,18 @@ export default async function LeadPage({ params }: { params: Promise<{ reference
 
       <div className="adm-two">
         <div className="adm-panel adm-pad">
-          <h2>Enquiry</h2>
+          <h2>{t("Enquiry")}</h2>
           <dl className="adm-dl">
             {F.filter(([, v]) => v !== null && v !== '').map(([k, v]) => (
               <div key={k}><dt>{k}</dt><dd>{String(v)}</dd></div>
             ))}
-            <div><dt>Email</dt><dd><a href={`mailto:${lead.email}`}>{lead.email}</a></dd></div>
+            <div><dt>{t("Email")}</dt><dd><a href={`mailto:${lead.email}`}>{lead.email}</a></dd></div>
             {lead.phone && (
               <div>
-                <dt>Phone</dt>
+                <dt>{t("Phone")}</dt>
                 <dd>
                   <a href={`tel:${lead.phone}`}>{lead.phone}</a>
-                  {wa && <> · <a href={wa} target="_blank" rel="noopener noreferrer">WhatsApp</a></>}
+                  {wa && <> · <a href={wa} target="_blank" rel="noopener noreferrer">{t("WhatsApp")}</a></>}
                 </dd>
               </div>
             )}
@@ -168,7 +170,7 @@ export default async function LeadPage({ params }: { params: Promise<{ reference
                 })()}
               </h2>
               <table className="adm-t adm-t-tight">
-                <thead><tr><th>Reference</th><th>Specimen</th><th>Qty</th></tr></thead>
+                <thead><tr><th>{t("Reference")}</th><th>{t("Specimen")}</th><th>{t("Qty")}</th></tr></thead>
                 <tbody>
                   {items.map((i) => (
                     <tr key={i.ref}>
@@ -188,14 +190,14 @@ export default async function LeadPage({ params }: { params: Promise<{ reference
 
           {lead.message && (
             <>
-              <h2 style={{ marginTop: 24 }}>Message</h2>
+              <h2 style={{ marginTop: 24 }}>{t("Message")}</h2>
               <p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{lead.message}</p>
             </>
           )}
 
-          <h2 style={{ marginTop: 28 }}>Activity</h2>
+          <h2 style={{ marginTop: 28 }}>{t("Activity")}</h2>
           {notes.length === 0 ? (
-            <p className="adm-sub" style={{ margin: 0 }}>Nothing logged yet.</p>
+            <p className="adm-sub" style={{ margin: 0 }}>{t("Nothing logged yet.")}</p>
           ) : notes.map((n) => (
             <div key={n.id} className="adm-note">
               <div className="adm-note-meta">
@@ -207,27 +209,27 @@ export default async function LeadPage({ params }: { params: Promise<{ reference
         </div>
 
         <div className="adm-panel adm-pad">
-          <h2>Work this lead</h2>
+          <h2>{t("Work this lead")}</h2>
           {user.role === 'viewer' ? (
-            <p className="adm-sub">You have read-only access.</p>
+            <p className="adm-sub">{t("You have read-only access.")}</p>
           ) : (
             <form action={updateLead}>
               <input type="hidden" name="reference" value={lead.reference} />
               <label className="adm-field">
-                <span>Status</span>
+                <span>{t("Status")}</span>
                 <select name="status" defaultValue={lead.status}>
                   {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
               </label>
               <label className="adm-field">
-                <span>Next follow-up</span>
+                <span>{t("Next follow-up")}</span>
                 <input type="date" name="next_follow_up" defaultValue={lead.next_follow_up ?? ''} />
               </label>
               <label className="adm-field">
-                <span>Add a note</span>
-                <textarea name="note" rows={5} placeholder="What was said, what was agreed, what is next." />
+                <span>{t("Add a note")}</span>
+                <textarea name="note" rows={5} placeholder={t("What was said, what was agreed, what is next.")} />
               </label>
-              <button className="adm-btn adm-save" type="submit" style={{ width: '100%' }}>Save</button>
+              <button className="adm-btn adm-save" type="submit" style={{ width: '100%' }}>{t("Save")}</button>
             </form>
           )}
         </div>

@@ -154,7 +154,17 @@ for (const loc of ['it', 'ar']) {
   const gaps = SHELL.filter((k) => !d[k]);
   check(`${loc}: every navigation label is translated`, gaps.length === 0, gaps.join(', '));
 
-  const same = A.ADMIN_KEYS.filter((k) => d[k] && d[k] === k && !['Console', 'Menu', 'Social', 'Report', 'Backup'].includes(k));
+  // Identical is not the same as untranslated. These are the same word in
+  // the target language on purpose: a proper noun, a format example shown to
+  // teach a code's shape, a path, or an international trade term that Italian
+  // uses in English (an Incoterm is an Incoterm; a container is a container).
+  const SAME_ON_PURPOSE = new Set([
+    'Console', 'Menu', 'Social', 'Report', 'Backup', 'Verde Garden', 'WhatsApp',
+    'Bucket', 'Container', 'Incoterm', 'Password', 'Pipeline AED', 'Version',
+    '/journal/', 'INV-000001', 'ORD-000001', 'QT-000001', 'VG-XXXXXXX',
+    'olive-trees-gulf-summer', '· AED', '− AED',
+  ]);
+  const same = A.ADMIN_KEYS.filter((k) => d[k] && d[k] === k && !SAME_ON_PURPOSE.has(k));
   check(`${loc}: no console string was left sitting in English`,
     same.length === 0, same.join(', '));
 }

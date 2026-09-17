@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { changeOwnPassword, changeOwnName, signOutEverywhereElse } from './actions';
+import { adminUi } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,18 +15,26 @@ export const dynamic = 'force-dynamic';
  * "~". Printing both the same way would quietly turn a claim into a fact on
  * the one page somebody looks at when they think an account is compromised.
  */
-function Addr({ value }: { value: string | null }) {
+/**
+ * The IP beside a sign-in attempt.
+ *
+ * It takes the translator as a prop rather than reaching for one. This is a
+ * module-level helper: there is no signed-in user in its scope, and the
+ * language belongs to the person looking at the screen, so it has to come
+ * from the component that knows who that is.
+ */
+function Addr({ value, t }: { value: string | null; t: ReturnType<typeof adminUi> }) {
   if (!value) return <>&mdash;</>;
   if (!value.startsWith('~')) return <>{value}</>;
   return (
     <>
       {value.slice(1)}{' '}
       <abbr
-        title="Not verified. This request did not come through Cloudflare, so the address is only what the caller claimed."
+        title={t("Not verified. This request did not come through Cloudflare, so the address is only what the caller claimed.")}
         style={{ fontSize: 11, letterSpacing: '.04em', textTransform: 'uppercase',
                  color: 'var(--adm-mute, #8a8d7f)', textDecoration: 'none', cursor: 'help' }}
       >
-        unverified
+        {t("unverified")}
       </abbr>
     </>
   );
@@ -36,6 +45,7 @@ export default async function AccountPage({ searchParams }: {
 }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
+  const t = adminUi(user.locale);
   const { error, ok } = await searchParams;
 
   const [sessions, recent] = await Promise.all([
@@ -50,7 +60,7 @@ export default async function AccountPage({ searchParams }: {
 
   return (
     <>
-      <h1>Your account</h1>
+      <h1>{t("Your account")}</h1>
       <p className="adm-sub">
         {user.email} · {user.role}
       </p>
@@ -59,64 +69,58 @@ export default async function AccountPage({ searchParams }: {
       {ok && <p className="adm-note">{ok}</p>}
 
       <div className="adm-panel adm-pad" style={{ marginBottom: 18 }}>
-        <h2>Change your password</h2>
+        <h2>{t("Change your password")}</h2>
         <p className="adm-sub">
-          The current password is asked for even though you are already signed
-          in: an unattended screen is the ordinary case, and this is the one
-          action that can lock you out of your own system. Changing it signs
-          out every other device signed in as you, and leaves this one alone.
+          {t("The current password is asked for even though you are already signed in: an unattended screen is the ordinary case, and this is the one action that can lock you out of your own system. Changing it signs out every other device signed in as you, and leaves this one alone.")}
         </p>
         <form action={changeOwnPassword}
               style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))' }}>
           <label className="adm-field">
-            <span>Current password</span>
+            <span>{t("Current password")}</span>
             <input name="current" type="password" autoComplete="current-password" required />
           </label>
           <label className="adm-field">
-            <span>New password — at least 10 characters</span>
+            <span>{t("New password — at least 10 characters")}</span>
             <input name="next" type="password" autoComplete="new-password" required />
           </label>
           <label className="adm-field">
-            <span>New password again</span>
+            <span>{t("New password again")}</span>
             <input name="again" type="password" autoComplete="new-password" required />
           </label>
           <div style={{ display: 'flex', alignItems: 'end' }}>
-            <button type="submit" className="adm-btn adm-change-pw">Change password</button>
+            <button type="submit" className="adm-btn adm-change-pw">{t("Change password")}</button>
           </div>
         </form>
         <p className="adm-sub" style={{ fontSize: 12 }}>
-          A long phrase you can remember beats a short puzzle you cannot. There
-          are no rules here about symbols or capitals — they push people towards
-          predictable passwords without making them harder to guess.
+          {t("A long phrase you can remember beats a short puzzle you cannot. There are no rules here about symbols or capitals — they push people towards predictable passwords without making them harder to guess.")}
         </p>
       </div>
 
       <div className="adm-panel adm-pad" style={{ marginBottom: 18 }}>
-        <h2>Your name</h2>
-        <p className="adm-sub">This is what the audit log records beside everything you change.</p>
+        <h2>{t("Your name")}</h2>
+        <p className="adm-sub">{t("This is what the audit log records beside everything you change.")}</p>
         <form action={changeOwnName} style={{ display: 'flex', gap: 12, alignItems: 'end', flexWrap: 'wrap' }}>
           <label className="adm-field" style={{ minWidth: 260 }}>
-            <span>Name</span>
+            <span>{t("Name")}</span>
             <input name="name" defaultValue={user.name} required />
           </label>
-          <button type="submit" className="adm-btn adm-change-name">Save</button>
+          <button type="submit" className="adm-btn adm-change-name">{t("Save")}</button>
         </form>
       </div>
 
       <div className="adm-panel adm-pad" style={{ marginBottom: 18 }}>
-        <h2>Where you are signed in</h2>
+        <h2>{t("Where you are signed in")}</h2>
         <p className="adm-sub">
-          {sessions.length} live session{sessions.length === 1 ? '' : 's'}, including this one.
-          A session lasts fourteen days.
+          {sessions.length} live session{sessions.length === 1 ? '' : 's'}, including this one. A session lasts fourteen days.
         </p>
         {sessions.length > 0 && (
           <table className="adm-t">
-            <thead><tr><th>Signed in</th><th>From</th><th>Device</th><th>Expires</th></tr></thead>
+            <thead><tr><th>{t("Signed in")}</th><th>{t("From")}</th><th>{t("Device")}</th><th>{t("Expires")}</th></tr></thead>
             <tbody>
               {sessions.map((s, i) => (
                 <tr key={i}>
                   <td>{s.created_at.slice(0, 16).replace('T', ' ')}</td>
-                  <td><Addr value={s.ip} /></td>
+                  <td><Addr value={s.ip} t={t} /></td>
                   <td style={{ maxWidth: 380, fontSize: 12 }}>{s.user_agent ?? '—'}</td>
                   <td>{s.expires_at.slice(0, 10)}</td>
                 </tr>
@@ -126,31 +130,26 @@ export default async function AccountPage({ searchParams }: {
         )}
         <form action={signOutEverywhereElse}>
           <button type="submit" className="adm-btn-sec adm-signout-others">
-            Sign out everywhere else
+            {t("Sign out everywhere else")}
           </button>
         </form>
       </div>
 
       <div className="adm-panel adm-pad">
-        <h2>Recent sign-in attempts</h2>
+        <h2>{t("Recent sign-in attempts")}</h2>
         <p className="adm-sub">
-          Failed attempts on your email, whoever made them. Six failures within
-          fifteen minutes lock the address they came from. Thirty across
-          different addresses lock the email — but never an address you have
-          signed in from before, so somebody else guessing can no longer shut
-          you out of your own console. When this rule counted your email alone,
-          six wrong guesses from anywhere did exactly that.
+          {t("Failed attempts on your email, whoever made them. Six failures within fifteen minutes lock the address they came from. Thirty across different addresses lock the email — but never an address you have signed in from before, so somebody else guessing can no longer shut you out of your own console. When this rule counted your email alone, six wrong guesses from anywhere did exactly that.")}
         </p>
         <table className="adm-t">
-          <thead><tr><th>When</th><th>From</th><th>Result</th></tr></thead>
+          <thead><tr><th>{t("When")}</th><th>{t("From")}</th><th>{t("Result")}</th></tr></thead>
           <tbody>
             {recent.length === 0 && (
-              <tr><td colSpan={3}><span className="adm-empty">Nothing recorded.</span></td></tr>
+              <tr><td colSpan={3}><span className="adm-empty">{t("Nothing recorded.")}</span></td></tr>
             )}
             {recent.map((a, i) => (
               <tr key={i}>
                 <td>{a.at.slice(0, 16).replace('T', ' ')}</td>
-                <td><Addr value={a.ip} /></td>
+                <td><Addr value={a.ip} t={t} /></td>
                 <td>
                   <span className={`pill ${a.successful ? 'pill-won' : 'pill-lost'}`}>
                     {a.successful ? 'signed in' : 'refused'}
