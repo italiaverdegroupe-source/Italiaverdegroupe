@@ -463,3 +463,4 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 .adm-pad { padding: 18px 20px 20px; }
 .adm-who.on { background: rgb(166 136 73 / .17); box-shadow: inset 2px 0 0 #C9A85C; }
 .adm-who.on .adm-whotxt strong { color: #fff; }
+.adm-t-tight th, .adm-t-tight td { padding-block: 7px; }

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import ShortlistButton from '@/components/ShortlistButton';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import ProductCard from '@/components/ProductCard';
@@ -97,6 +98,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
             <div className="det-cta">
               <Link href={`/quote?ref=${p.reference}`} className="btn btn-primary">Request this specimen</Link>
+              <ShortlistButton item={{ ref: p.reference, name: p.name, slug: p.slug }} />
               <Link href={`/quote?type=bulk&ref=${p.reference}`} className="btn btn-ghost">Bulk pricing</Link>
             </div>
 

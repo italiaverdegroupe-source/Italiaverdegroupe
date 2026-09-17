@@ -13,8 +13,41 @@ process.env.DATABASE_URL = SRC;
 const B = require('../.test-build/backup.cjs');
 
 const src = new pg.Client({ connectionString: SRC });
-const dstPool = new pg.Pool({ connectionString: DST });
 await src.connect();
+
+/**
+ * The restore target is REBUILT from db/migrations on every run.
+ *
+ * It used to be a database created once, by hand, from the migrations as they
+ * stood that day — and then reused. Which meant the sentence at the top of
+ * this file ("an empty one built from the migrations alone") described how it
+ * had been made months ago, not what was being tested now. A column added by a
+ * later migration was simply missing, and the restore blew up on it: the test
+ * did catch that, but only by accident and only once the drift was large
+ * enough to break something.
+ *
+ * Rebuilding here is also the only way the claim further down — that the whole
+ * schema comes back from the migrations — means anything at all.
+ */
+{
+  const admin = new pg.Client({ connectionString: 'postgresql://postgres@127.0.0.1:5433/postgres' });
+  await admin.connect();
+  await admin.query(`SELECT pg_terminate_backend(pid) FROM pg_stat_activity
+                      WHERE datname = 'vg_restore_test' AND pid <> pg_backend_pid()`);
+  await admin.query('DROP DATABASE IF EXISTS vg_restore_test');
+  await admin.query('CREATE DATABASE vg_restore_test');
+  await admin.end();
+
+  const fs = await import('node:fs');
+  const files = fs.readdirSync('db/migrations').filter((f) => f.endsWith('.sql')).sort();
+  const fresh = new pg.Client({ connectionString: DST });
+  await fresh.connect();
+  for (const f of files) await fresh.query(fs.readFileSync(`db/migrations/${f}`, 'utf8'));
+  await fresh.end();
+  console.log(`  ---   restore target rebuilt from ${files.length} migrations`);
+}
+
+const dstPool = new pg.Pool({ connectionString: DST });
 
 let failed = 0;
 const check = (n, ok, x = '') => {

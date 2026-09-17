@@ -122,6 +122,8 @@ export type LeadInput = {
   source?: string;
   userAgent?: string;
   consent: boolean;
+  /** Snapshot of the specimens the visitor shortlisted. See migration 012. */
+  items?: { ref: string; name: string; slug: string; qty: number }[];
 };
 
 export function newLeadReference(): string {
@@ -140,13 +142,14 @@ export async function saveLead(input: LeadInput): Promise<{ reference: string; p
     await p.query(
       `INSERT INTO leads (reference, enquiry_type, name, company, email, phone, emirate,
          project_type, service_scope, product_ref, quantity, required_date, message,
-         source, user_agent, consent)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
+         source, user_agent, consent, items)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
       [reference, input.enquiryType, input.name, input.company ?? null, input.email,
        input.phone ?? null, input.emirate ?? null, input.projectType ?? null,
        input.serviceScope ?? null, input.productRef ?? null, input.quantity ?? null,
        input.requiredDate ?? null, input.message ?? null, input.source ?? null,
-       input.userAgent ?? null, input.consent],
+       input.userAgent ?? null, input.consent,
+       input.items && input.items.length ? JSON.stringify(input.items) : null],
     );
     // After the insert, never inside it: the enquiry is the thing that must
     // survive, and an alert that cannot be raised must not lose it.
@@ -157,8 +160,16 @@ export async function saveLead(input: LeadInput): Promise<{ reference: string; p
     }, {
       subject: reference,
       title: `New enquiry from ${input.name}${input.company ? ` — ${input.company}` : ''}`,
-      body: [input.emirate, input.projectType, input.message].filter(Boolean).join(' · ')
-            || 'No further detail given.',
+      // The notification is the one place the list is written out in words: it
+      // may be all somebody sees, and it must not need the console open to be
+      // understood. The lead row keeps the structured version.
+      body: [
+        [input.emirate, input.projectType].filter(Boolean).join(' · '),
+        input.items?.length
+          ? input.items.map((i) => `${i.qty} × ${i.name} (${i.ref})`).join('\n')
+          : '',
+        input.message,
+      ].filter(Boolean).join('\n') || 'No further detail given.',
       entity: 'lead', entityId: reference, href: `/admin/leads/${reference}`,
     });
 

@@ -14,9 +14,35 @@ type Lead = {
   emirate: string | null; project_type: string | null; service_scope: string | null;
   product_ref: string | null; quantity: number | null; required_date: string | null;
   message: string | null; source: string | null; status: string;
+  items: LeadItem[] | null;
   next_follow_up: string | null; last_contacted: string | null; consent: boolean;
 };
 type Note = { id: string; at: string; user_email: string | null; kind: string; body: string };
+
+/**
+ * What the visitor shortlisted, as they shortlisted it.
+ *
+ * A snapshot, not a join — see migration 012. It is read back out of jsonb, so
+ * it is whatever was written months ago and must be treated as untrusted
+ * shape: an older row has no items at all, and nothing guarantees a field.
+ */
+type LeadItem = { ref?: unknown; name?: unknown; slug?: unknown; qty?: unknown };
+
+function readItems(raw: LeadItem[] | null): { ref: string; name: string; slug: string; qty: number }[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.flatMap((x) => {
+    if (!x || typeof x !== 'object') return [];
+    const ref = typeof x.ref === 'string' ? x.ref : '';
+    if (!ref) return [];
+    const n = Number(x.qty);
+    return [{
+      ref,
+      name: typeof x.name === 'string' && x.name ? x.name : ref,
+      slug: typeof x.slug === 'string' ? x.slug : '',
+      qty: Number.isFinite(n) && n > 0 ? Math.round(n) : 1,
+    }];
+  });
+}
 
 async function updateLead(formData: FormData) {
   'use server';
@@ -74,6 +100,8 @@ export default async function LeadPage({ params }: { params: Promise<{ reference
   const lead = (await query<Lead>('SELECT * FROM leads WHERE reference = $1', [reference]))[0];
   if (!lead) notFound();
 
+  const items = readItems(lead.items);
+
   const notes = await query<Note>(
     `SELECT id, at, user_email, kind, body FROM lead_notes
       WHERE lead_id = $1 ORDER BY at DESC`, [lead.id]);
@@ -91,8 +119,11 @@ export default async function LeadPage({ params }: { params: Promise<{ reference
     ['Emirate', lead.emirate],
     ['Project type', lead.project_type],
     ['Scope required', lead.service_scope],
-    ['Specimen', lead.product_ref],
-    ['Quantity', lead.quantity],
+    // Suppressed when there is a shortlist: product_ref then holds only the
+    // FIRST reference, and showing one specimen beside a list of eight is how
+    // somebody quotes for one tree by mistake.
+    ['Specimen', items.length > 1 ? null : lead.product_ref],
+    ['Quantity', items.length > 1 ? null : lead.quantity],
     ['Required on site by', lead.required_date],
     ['Source', lead.source],
     ['Consent recorded', lead.consent ? 'Yes' : 'No'],
@@ -126,6 +157,34 @@ export default async function LeadPage({ params }: { params: Promise<{ reference
               </div>
             )}
           </dl>
+
+          {items.length > 0 && (
+            <>
+              <h2 style={{ marginTop: 26 }}>
+                Shortlist — {items.length} specimen{items.length === 1 ? '' : 's'}
+                {(() => {
+                  const total = items.reduce((t, i) => t + i.qty, 0);
+                  return total !== items.length ? `, ${total} plants` : '';
+                })()}
+              </h2>
+              <table className="adm-t adm-t-tight">
+                <thead><tr><th>Reference</th><th>Specimen</th><th>Qty</th></tr></thead>
+                <tbody>
+                  {items.map((i) => (
+                    <tr key={i.ref}>
+                      <td>
+                        {i.slug
+                          ? <a href={`/catalog/${i.slug}`} target="_blank" rel="noopener noreferrer">{i.ref}</a>
+                          : i.ref}
+                      </td>
+                      <td>{i.name}</td>
+                      <td className="num">{i.qty}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
 
           {lead.message && (
             <>

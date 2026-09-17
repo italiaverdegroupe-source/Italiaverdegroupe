@@ -22,6 +22,15 @@ const Schema = z.object({
   requiredDate: z.string().trim().max(40).optional().or(z.literal('')),
   message: z.string().trim().max(4000).optional().or(z.literal('')),
   source: z.string().trim().max(120).optional().or(z.literal('')),
+  /* The shortlist, as the visitor's browser held it. Bounded on every axis —
+     this arrives from a public endpoint, so the only safe assumption is that
+     somebody has edited it by hand. */
+  items: z.array(z.object({
+    ref: z.string().trim().min(1).max(40),
+    name: z.string().trim().min(1).max(160),
+    slug: z.string().trim().min(1).max(160),
+    qty: z.coerce.number().int().min(1).max(9999),
+  })).max(40).optional(),
   consent: z.literal(true, { errorMap: () => ({ message: 'Consent is required.' }) }),
   // honeypot: accepted by the schema on purpose, then discarded below, so a
   // bot gets a success response instead of a hint that it was detected.
@@ -96,8 +105,11 @@ export async function POST(req: Request) {
       emirate: d.emirate || undefined,
       projectType: d.projectType || undefined,
       serviceScope: d.serviceScope || undefined,
-      productRef: d.productRef || undefined,
-      quantity: d.quantity,
+      // The first reference still goes in product_ref, so every console link,
+      // filter and report that existed before this keeps working untouched.
+      productRef: d.productRef || d.items?.[0]?.ref || undefined,
+      quantity: d.quantity ?? (d.items?.length === 1 ? d.items[0].qty : undefined),
+      items: d.items?.length ? d.items : undefined,
       requiredDate: d.requiredDate || undefined,
       message: d.message || undefined,
       source: d.source || undefined,

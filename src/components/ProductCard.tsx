@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Product } from '@/lib/products';
+import ShortlistButton from '@/components/ShortlistButton';
 
 /**
  * Editorial specimen card: tall portrait frame, the reference used as a
@@ -41,7 +42,16 @@ export default function ProductCard({ p, priority = false }: { p: Product; prior
         </div>
       </Link>
 
+      {/* Outside the anchor on purpose: a button nested inside a link is
+          invalid HTML, and a keyboard user landing on it would be told they
+          are on a link to the specimen rather than on a control. */}
+      <div className="spec-add">
+        <ShortlistButton item={{ ref: p.reference, name: p.name, slug: p.slug }} compact />
+      </div>
+
       <style>{`
+        .spec { display: flex; flex-direction: column; }
+        .spec-add { margin-top: 12px; }
         .spec-link { display: grid; gap: 16px; text-decoration: none; color: inherit; }
 
         .spec-frame {
