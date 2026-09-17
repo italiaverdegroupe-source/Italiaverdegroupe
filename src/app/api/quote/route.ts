@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { saveLead } from '@/lib/db';
+import { clientIpOf } from '@/lib/client-ip';
+import { Limiter } from '@/lib/rate-limit';
 import { getSettings, fallbackContactFrom } from '@/lib/settings';
 
 export const runtime = 'nodejs';
@@ -26,25 +28,31 @@ const Schema = z.object({
   website: z.string().max(200).optional(),
 });
 
-const hits = new Map<string, { n: number; t: number }>();
-const WINDOW = 10 * 60_000;
-const LIMIT = 6;
-
-function limited(ip: string): boolean {
-  const now = Date.now();
-  const cur = hits.get(ip);
-  if (!cur || now - cur.t > WINDOW) { hits.set(ip, { n: 1, t: now }); return false; }
-  cur.n += 1;
-  if (hits.size > 5000) hits.clear();
-  return cur.n > LIMIT;
-}
+/**
+ * Six enquiries per caller per ten minutes, and a ceiling of 240 across
+ * everyone — roughly thirty thousand a day, which no real week of this
+ * business could approach. The reasoning behind the two numbers, and behind
+ * treating verified and unverified callers differently, is in lib/rate-limit.
+ */
+const limiter = new Limiter({
+  windowMs: 10 * 60_000,
+  perCaller: 6,
+  global: 240,
+  onGlobalLimit: (n) => {
+    // Loud, because this should never happen and it means enquiries are being
+    // refused — the one thing this site exists to collect.
+    console.warn('[QUOTE:GLOBAL-LIMIT] refusing enquiries, %d in this window', n);
+  },
+});
 
 export async function POST(req: Request) {
-  const ip =
-    req.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
-    req.headers.get('x-real-ip') ?? 'unknown';
+  // Cloudflare's own header where it is present, so the allowance is not
+  // keyed on whatever the caller typed into x-forwarded-for. Where it is
+  // absent the address is passed through as unverified and the limiter
+  // decides what that is worth. See lib/client-ip.ts.
+  const who = clientIpOf(req.headers);
 
-  if (limited(ip)) {
+  if (limiter.limited({ id: who.ip, verified: who.trusted })) {
     return NextResponse.json(
       { ok: false, error: 'Too many enquiries from this connection. Please try again shortly.' },
       { status: 429 },

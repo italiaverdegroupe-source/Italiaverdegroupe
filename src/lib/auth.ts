@@ -2,6 +2,7 @@ import { randomBytes, scrypt as _scrypt, timingSafeEqual, createHash } from 'nod
 import { promisify } from 'node:util';
 import { cookies, headers } from 'next/headers';
 import { query } from '@/lib/db';
+import { clientIpForRecord } from '@/lib/client-ip';
 
 const scrypt = promisify(_scrypt) as (
   pw: string | Buffer, salt: string | Buffer, len: number, opts: object,
@@ -51,7 +52,7 @@ export async function createSession(userId: number): Promise<string> {
     `INSERT INTO sessions (token_hash, user_id, expires_at, user_agent, ip)
      VALUES ($1, $2, now() + ($3 || ' days')::interval, $4, $5)`,
     [hashToken(token), userId, String(SESSION_DAYS),
-     h.get('user-agent')?.slice(0, 400) ?? null, clientIp(h)],
+     h.get('user-agent')?.slice(0, 400) ?? null, clientIpForRecord(h)],
   );
   const jar = await cookies();
   jar.set(SESSION_COOKIE, token, {
@@ -99,28 +100,50 @@ export async function destroySession(): Promise<void> {
 }
 
 /* ── brute-force throttling ────────────────────────────────────
-   Counted per email as well as per IP: rotating IPs is cheap, so an
-   IP-only counter protects nothing. */
-const MAX_FAILURES = 6;
+   The comment that used to sit here claimed failures were counted "per email
+   as well as per IP". They were not: the query filtered on email alone and the
+   ip column it stored was never read. That is not a small gap in a company
+   this size. The owner's address is on the contact page, so anyone at all
+   could lock the only person who can reach the console out of it for fifteen
+   minutes, from anywhere, with six wrong guesses — and repeat that all day.
+   Locking the real operator out was easier than guessing the password.
+
+   Now the hard lock is keyed on the pair. Six failures from ONE address lock
+   that address; the owner sitting somewhere else is unaffected. A much higher
+   count across all addresses still locks the email, because that pattern is
+   distributed guessing rather than somebody mistyping.
+
+   This only became worth doing once the address itself became trustworthy —
+   see client-ip.ts. A lock keyed on a value the attacker chooses is theatre. */
+const MAX_PER_ADDRESS = 6;
+const MAX_PER_EMAIL = 30;
 const WINDOW_MIN = 15;
 
 export async function isLocked(email: string): Promise<boolean> {
-  const rows = await query<{ n: string }>(
-    `SELECT count(*) AS n FROM login_attempts
-      WHERE email = $1 AND NOT successful AND at > now() - ($2 || ' minutes')::interval`,
-    [email.toLowerCase(), String(WINDOW_MIN)],
+  const h = await headers();
+  const ip = clientIpForRecord(h);
+  const rows = await query<{ here: string; anywhere: string }>(
+    `SELECT count(*) FILTER (WHERE $2::text IS NOT NULL AND ip = $2) AS here,
+            count(*) AS anywhere
+       FROM login_attempts
+      WHERE email = $1 AND NOT successful
+        AND at > now() - ($3 || ' minutes')::interval`,
+    [email.toLowerCase(), ip, String(WINDOW_MIN)],
   );
-  return Number(rows[0]?.n ?? 0) >= MAX_FAILURES;
+  const here = Number(rows[0]?.here ?? 0);
+  const anywhere = Number(rows[0]?.anywhere ?? 0);
+
+  // Nothing identified the caller at all: there is no pair to key on, so fall
+  // back to the old email-only rule rather than letting it through unlimited.
+  if (!ip) return anywhere >= MAX_PER_ADDRESS;
+
+  return here >= MAX_PER_ADDRESS || anywhere >= MAX_PER_EMAIL;
 }
 
 export async function recordAttempt(email: string, successful: boolean): Promise<void> {
   const h = await headers();
   await query('INSERT INTO login_attempts (email, ip, successful) VALUES ($1, $2, $3)',
-              [email.toLowerCase(), clientIp(h), successful]);
-}
-
-export function clientIp(h: Headers): string | null {
-  return h.get('x-forwarded-for')?.split(',')[0].trim() ?? h.get('x-real-ip') ?? null;
+              [email.toLowerCase(), clientIpForRecord(h), successful]);
 }
 
 /* ── audit ─────────────────────────────────────────────────────
@@ -138,15 +161,50 @@ export async function audit(opts: {
      opts.entityId != null ? String(opts.entityId) : null,
      opts.before ? JSON.stringify(opts.before) : null,
      opts.after ? JSON.stringify(opts.after) : null,
-     clientIp(h)],
+     clientIpForRecord(h)],
   );
 }
 
-/** Reject cross-site form posts: SameSite=Lax is the primary defence, this is the belt. */
+/**
+ * Reject cross-site form posts: SameSite=Lax is the primary defence, this is
+ * the belt.
+ *
+ * It used to compare Origin against the `host` header alone. Next's own Server
+ * Action check reads `x-forwarded-host ?? host`, and behind two proxies those
+ * two can differ — at which point this guard rejects the operator's own login
+ * and the console is simply unusable, with an error that says the opposite of
+ * what happened. So the comparison is against the set of names this request
+ * could legitimately have been addressed to, including the configured
+ * canonical one.
+ *
+ * Widening it does not weaken it. The attack is a form on somebody else's site
+ * posting here, and a browser will not let that page set `x-forwarded-host`
+ * (or any other header) on a cross-site form POST — a fetch that tried would
+ * need a preflight, and the preflight would fail. What the attacker controls
+ * is Origin, which is exactly what is being checked, and their own domain is
+ * in none of these sets.
+ */
 export async function assertSameOrigin(): Promise<void> {
   const h = await headers();
   const origin = h.get('origin');
   if (!origin) return;                       // same-origin navigations may omit it
-  const host = h.get('host');
-  if (!host || new URL(origin).host !== host) throw new Error('Cross-origin request rejected.');
+
+  let originHost: string;
+  try { originHost = new URL(origin).host.toLowerCase(); }
+  catch { throw new Error('Cross-origin request rejected.'); }
+
+  const allowed = new Set<string>();
+  const add = (v?: string | null) => {
+    const one = v?.split(',')[0]?.trim().toLowerCase();
+    if (one) allowed.add(one);
+  };
+  add(h.get('host'));
+  add(h.get('x-forwarded-host'));
+  try {
+    if (process.env.NEXT_PUBLIC_SITE_URL) {
+      add(new URL(process.env.NEXT_PUBLIC_SITE_URL).host);
+    }
+  } catch { /* a malformed setting must not decide an auth question */ }
+
+  if (!allowed.has(originHost)) throw new Error('Cross-origin request rejected.');
 }

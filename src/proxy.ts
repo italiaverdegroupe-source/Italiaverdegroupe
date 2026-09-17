@@ -15,12 +15,13 @@ import { NextResponse, type NextRequest } from 'next/server';
  *   1. NOW — any host that is not the canonical one still serves the site, but
  *      carries X-Robots-Tag: noindex. Nothing breaks, and nothing gets indexed
  *      at the wrong address.
- *   2. ONCE DNS RESOLVES AND THE CERTIFICATE IS ISSUED — set
- *      CANONICAL_REDIRECT=1 and those hosts 301 to the canonical one instead.
+ *   2. LATER — set CANONICAL_REDIRECT=1 and the known alternates 308 to the
+ *      canonical host instead.
  *
- * Redirecting before the domain actually answers would send every visitor to a
- * hostname that does not resolve, so the redirect is a deliberate second step
- * rather than something switched on with the domain.
+ * (This file was `middleware.ts`. Next 16 deprecated that convention and
+ * renamed it to `proxy`; the file and the exported function are renamed, the
+ * matcher below is unchanged. Both files must never exist at once — that is a
+ * build error, not a warning.)
  */
 
 function canonicalHost(): string | null {
@@ -44,7 +45,27 @@ function canonicalHost(): string | null {
  */
 const PASS_THROUGH = new Set(['healthcheck.railway.app']);
 
-export function middleware(req: NextRequest) {
+/**
+ * The hosts stage two redirects AWAY FROM. An allowlist, deliberately, rather
+ * than "everything that is not the canonical host".
+ *
+ * The difference is what happens when this code is wrong about what the
+ * browser actually asked for. There are two proxies in front of this app now —
+ * Cloudflare, then Railway — and the header it reads is whatever the last one
+ * decided to send. If that ever disagrees with the address bar, or if
+ * NEXT_PUBLIC_SITE_URL is set to something slightly off, the old rule sent a
+ * 308 to a host that resolves straight back here, which sends another 308, and
+ * the browser gives up after about twenty hops. Every page, every visitor,
+ * total outage — from a variable, with no deploy.
+ *
+ * An allowlist cannot fail that way. An unrecognised host is served as it is,
+ * with noindex, exactly as stage one does; only an address we know to be this
+ * same deployment is ever bounced. That is the whole of the duplicate-content
+ * problem this was written for, because the temporary address IS that address.
+ */
+const REDIRECT_FROM: RegExp[] = [/(^|\.)up\.railway\.app$/];
+
+export function proxy(req: NextRequest) {
   const canonical = canonicalHost();
 
   // The console is never indexed at any host, and never redirected — moving a
@@ -59,7 +80,7 @@ export function middleware(req: NextRequest) {
     .split(',')[0].trim().toLowerCase();
   if (!seen || seen === canonical || PASS_THROUGH.has(seen)) return NextResponse.next();
 
-  if (process.env.CANONICAL_REDIRECT === '1') {
+  if (process.env.CANONICAL_REDIRECT === '1' && REDIRECT_FROM.some((re) => re.test(seen))) {
     const url = req.nextUrl.clone();
     url.host = canonical;
     url.port = '';

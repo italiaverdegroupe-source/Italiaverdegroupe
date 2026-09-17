@@ -7,7 +7,13 @@
   --ink-900: #14150F;
   --ink-800: #1F2118;
   --ink-600: #4C4F41;
-  --ink-400: #74776A;
+  /* Darkened from #74776A. That value gave 4.06:1 on the site's own panels —
+     under AA for anything at body size — and it is the token behind --fg-mute,
+     so every muted label inherited the failure. Measured from rendered pixels,
+     not from the stylesheet: #686B5F clears 4.83:1 on sand-100, 5.22 on
+     sand-50 and 5.44 on white, and the shift is small enough that nothing
+     using it for a rule or an icon changes character. */
+  --ink-400: #686B5F;
   --ink-300: #9A9C90;
 
   /* ── olive ── */

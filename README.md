@@ -67,8 +67,20 @@ src/app/(console)/*           the operations console, its own root layout —
   with each hash so they can be raised without invalidating existing passwords.
 - Only the SHA-256 of a session token is stored: a database dump cannot be
   replayed as a login.
-- Failed logins are counted **per email**, not only per IP — rotating IPs is
-  cheap, so an IP-only counter protects nothing.
+- The client's address is read from `CF-Connecting-IP`, which Cloudflare
+  overwrites on every request it proxies. `x-forwarded-for` is a list every
+  proxy **appends** to, so its first entry is whatever the caller typed before
+  sending — reading it, as this did, filed an attacker-chosen string in
+  `audit_log` as evidence and handed the rate limiter a key the caller picks.
+  Where the header is absent the address is still recorded, prefixed `~`, and
+  the console prints it as **unverified** rather than as a fact.
+- Failed logins lock the **(email, address) pair** at six in fifteen minutes,
+  and the email itself at thirty. The rule before counted the email alone, so
+  anyone who knew the owner's address — it is on the contact page — could lock
+  the only account that reaches the console, from anywhere, with six wrong
+  guesses, and repeat it all day. Locking the real operator out was easier than
+  guessing the password. The pair is only worth keying on because the address
+  itself is now trustworthy.
 - A login for an unknown account still runs a full password verification, so
   timing does not reveal which emails exist.
 - Every operator state change is written to `audit_log` with before/after.
@@ -163,6 +175,11 @@ says so plainly when it has lapsed.
 ```bash
 node tests/landed-cost.test.mjs   # after: npx esbuild src/lib/landed-cost.ts \
                                   #   --format=esm --outfile=.test-build/landed-cost.mjs
+
+npx esbuild src/lib/client-ip.ts  --format=cjs --outfile=.test-build/client-ip.cjs
+npx esbuild src/lib/rate-limit.ts --format=cjs --outfile=.test-build/rate-limit.cjs
+node tests/auth-hardening.test.mjs   # address trust + the lockout, against real rows
+node tests/rate-limit.test.mjs       # 400 invented addresses do not buy 400 allowances
 ```
 
 ## Phase 2d — quotations

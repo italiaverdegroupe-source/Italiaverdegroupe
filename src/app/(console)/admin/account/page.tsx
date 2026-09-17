@@ -5,6 +5,32 @@ import { changeOwnPassword, changeOwnName, signOutEverywhereElse } from './actio
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * An address, and whether anybody checked it.
+ *
+ * Requests that reach us through Cloudflare carry CF-Connecting-IP, which the
+ * edge overwrites, so the address is evidence. Requests that arrive any other
+ * way carry only what the caller typed, and those are stored with a leading
+ * "~". Printing both the same way would quietly turn a claim into a fact on
+ * the one page somebody looks at when they think an account is compromised.
+ */
+function Addr({ value }: { value: string | null }) {
+  if (!value) return <>&mdash;</>;
+  if (!value.startsWith('~')) return <>{value}</>;
+  return (
+    <>
+      {value.slice(1)}{' '}
+      <abbr
+        title="Not verified. This request did not come through Cloudflare, so the address is only what the caller claimed."
+        style={{ fontSize: 11, letterSpacing: '.04em', textTransform: 'uppercase',
+                 color: 'var(--adm-mute, #8a8d7f)', textDecoration: 'none', cursor: 'help' }}
+      >
+        unverified
+      </abbr>
+    </>
+  );
+}
+
 export default async function AccountPage({ searchParams }: {
   searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
@@ -90,7 +116,7 @@ export default async function AccountPage({ searchParams }: {
               {sessions.map((s, i) => (
                 <tr key={i}>
                   <td>{s.created_at.slice(0, 16).replace('T', ' ')}</td>
-                  <td>{s.ip ?? '—'}</td>
+                  <td><Addr value={s.ip} /></td>
                   <td style={{ maxWidth: 380, fontSize: 12 }}>{s.user_agent ?? '—'}</td>
                   <td>{s.expires_at.slice(0, 10)}</td>
                 </tr>
@@ -109,8 +135,11 @@ export default async function AccountPage({ searchParams }: {
         <h2>Recent sign-in attempts</h2>
         <p className="adm-sub">
           Failed attempts on your email, whoever made them. Six failures within
-          fifteen minutes locks the email, not the address they came from —
-          rotating addresses is cheap.
+          fifteen minutes lock the address they came from; thirty across
+          different addresses lock the email itself. That way somebody guessing
+          from one place cannot lock you out of your own console from another —
+          which, when the rule counted your email alone, took six wrong guesses
+          from anywhere.
         </p>
         <table className="adm-t">
           <thead><tr><th>When</th><th>From</th><th>Result</th></tr></thead>
@@ -121,7 +150,7 @@ export default async function AccountPage({ searchParams }: {
             {recent.map((a, i) => (
               <tr key={i}>
                 <td>{a.at.slice(0, 16).replace('T', ' ')}</td>
-                <td>{a.ip ?? '—'}</td>
+                <td><Addr value={a.ip} /></td>
                 <td>
                   <span className={`pill ${a.successful ? 'pill-won' : 'pill-lost'}`}>
                     {a.successful ? 'signed in' : 'refused'}
