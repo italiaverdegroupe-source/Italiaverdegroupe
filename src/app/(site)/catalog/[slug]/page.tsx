@@ -51,7 +51,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   };
 
   return (
-    <div className="section">
+    <div className="section section-tight det-top">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="wrap">
         <nav aria-label="Breadcrumb" className="crumbs">
@@ -77,7 +77,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
           <div className="det-body">
             <p className="eyebrow">{p.family}</p>
-            <h1>{p.name}</h1>
+            <h1 className="det-h1">{p.name}</h1>
             <p className="det-ref">Reference {p.reference}</p>
             <p className="det-desc">{p.description}</p>
 
@@ -127,12 +127,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         .crumbs a { text-decoration: none; }
         .crumbs a:hover { color: var(--olive-700); text-decoration: underline; text-underline-offset: 3px; }
 
+        /* Less air above than a marketing page: this is arrived at from a
+           search or a link, already knowing what is wanted. */
+        .det-top { padding-top: 0; }
         .detail { display: grid; gap: clamp(28px, 4vw, 56px); align-items: start; }
+        .det-h1 { font-size: clamp(2.1rem, 3.6vw, 3.1rem); line-height: 1.04; }
         .det-img {
           margin: 0; border-radius: var(--radius-lg); overflow: hidden;
           border: 1px solid var(--line); background: var(--sand-100);
         }
-        .det-img img { width: 100%; height: auto; }
+        .det-img img { width: 100%; height: auto; display: block; }
         .img-note {
           padding: .7em 1em; font-size: .8rem; line-height: 1.5;
           background: var(--sand-100); color: var(--fg-soft);
@@ -159,7 +163,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         .related h2 { margin-bottom: 28px; }
 
         @media (min-width: 900px) {
-          .detail { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); }
+          .detail { grid-template-columns: minmax(0, 1.28fr) minmax(0, 1fr); }
+          /* The photograph holds its place while the specifications scroll past
+             it. On the page where somebody decides, the thing they are deciding
+             about should not leave the screen first — and it stops the column
+             of white that opened up under a short image beside a long table. */
+          .det-img { position: sticky; top: calc(var(--hdr-h) + 18px); }
         }
       `}</style>
     </div>

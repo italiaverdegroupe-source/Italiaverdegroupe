@@ -10,3 +10,7 @@ next-env.d.ts
 .vercel
 tsconfig.tsbuildinfo
 .test-build/
+
+# Convenience copies made by scripts/trim-product-photos.mjs.
+# The real originals are in git history.
+.photo-originals/

@@ -15,7 +15,7 @@
     "page": 30,
     "slug": "agave-americana",
     "image": "VG-AG-001-agave-americana.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1372x841",
     "photoVerified": true
   },
   {
@@ -34,7 +34,7 @@
     "page": 30,
     "slug": "agave-americana-large",
     "image": "VG-AG-002-agave-americana-large.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x840",
     "photoVerified": true
   },
   {
@@ -53,7 +53,7 @@
     "page": 31,
     "slug": "agave-americana-mature",
     "image": "VG-AG-003-agave-americana-mature.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1366x838",
     "photoVerified": true
   },
   {
@@ -72,7 +72,7 @@
     "page": 31,
     "slug": "agave-americana-marginata",
     "image": "VG-AG-004-agave-americana-marginata.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1376x840",
     "photoVerified": true
   },
   {
@@ -91,7 +91,7 @@
     "page": 32,
     "slug": "agave-marginata-large",
     "image": "VG-AG-005-agave-marginata-large.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1374x840",
     "photoVerified": true
   },
   {
@@ -110,7 +110,7 @@
     "page": 32,
     "slug": "agave-mediopicta",
     "image": "VG-AG-006-agave-mediopicta.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x840",
     "photoVerified": true
   },
   {
@@ -129,7 +129,7 @@
     "page": 33,
     "slug": "agave-mediopicta-alba",
     "image": "VG-AG-007-agave-mediopicta-alba.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1369x837",
     "photoVerified": true
   },
   {
@@ -148,7 +148,7 @@
     "page": 33,
     "slug": "agave-attenuata",
     "image": "VG-AG-008-agave-attenuata.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1376x838",
     "photoVerified": true
   },
   {
@@ -167,7 +167,7 @@
     "page": 34,
     "slug": "agave-attenuata-large",
     "image": "VG-AG-009-agave-attenuata-large.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1371x838",
     "photoVerified": true
   },
   {
@@ -186,7 +186,7 @@
     "page": 34,
     "slug": "agave-attenuata-variegata",
     "image": "VG-AG-010-agave-attenuata-variegata.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1376x838",
     "photoVerified": true
   },
   {
@@ -205,7 +205,7 @@
     "page": 35,
     "slug": "agave-filifera",
     "image": "VG-AG-011-agave-filifera.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1367x836",
     "photoVerified": true
   },
   {
@@ -224,7 +224,7 @@
     "page": 35,
     "slug": "agave-filifera-compact",
     "image": "VG-AG-012-agave-filifera-compact.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x839",
     "photoVerified": true
   },
   {
@@ -243,7 +243,7 @@
     "page": 37,
     "slug": "columnar-cactus",
     "image": "VG-CA-001-columnar-cactus.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1371x838",
     "photoVerified": true
   },
   {
@@ -262,7 +262,7 @@
     "page": 37,
     "slug": "columnar-cactus-tall",
     "image": "VG-CA-002-columnar-cactus-tall.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1371x838",
     "photoVerified": true
   },
   {
@@ -281,7 +281,7 @@
     "page": 38,
     "slug": "barrel-cactus",
     "image": "VG-CA-003-barrel-cactus.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1371x840",
     "photoVerified": true
   },
   {
@@ -300,7 +300,7 @@
     "page": 38,
     "slug": "barrel-cactus-large",
     "image": "VG-CA-004-barrel-cactus-large.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x840",
     "photoVerified": true
   },
   {
@@ -319,7 +319,7 @@
     "page": 39,
     "slug": "prickly-pear-cactus",
     "image": "VG-CA-005-prickly-pear-cactus.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1369x840",
     "photoVerified": true
   },
   {
@@ -338,7 +338,7 @@
     "page": 39,
     "slug": "prickly-pear-large",
     "image": "VG-CA-006-prickly-pear-large.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1376x838",
     "photoVerified": true
   },
   {
@@ -357,7 +357,7 @@
     "page": 40,
     "slug": "organ-pipe-cactus",
     "image": "VG-CA-007-organ-pipe-cactus.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1370x838",
     "photoVerified": true
   },
   {
@@ -376,7 +376,7 @@
     "page": 40,
     "slug": "organ-pipe-cactus-large",
     "image": "VG-CA-008-organ-pipe-cactus-large.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x839",
     "photoVerified": true
   },
   {
@@ -395,7 +395,7 @@
     "page": 41,
     "slug": "golden-barrel-cactus",
     "image": "VG-CA-009-golden-barrel-cactus.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1367x838",
     "photoVerified": false
   },
   {
@@ -414,7 +414,7 @@
     "page": 41,
     "slug": "golden-barrel-large",
     "image": "VG-CA-010-golden-barrel-large.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x840",
     "photoVerified": false
   },
   {
@@ -433,7 +433,7 @@
     "page": 42,
     "slug": "mixed-cactus-group",
     "image": "VG-CA-011-mixed-cactus-group.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1369x839",
     "photoVerified": true
   },
   {
@@ -452,7 +452,7 @@
     "page": 42,
     "slug": "rhapis-excelsa",
     "image": "VG-IN-001-rhapis-excelsa.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1369x839",
     "photoVerified": true
   },
   {
@@ -471,7 +471,7 @@
     "page": 6,
     "slug": "olive-tree-premium",
     "image": "VG-OL-001-olive-tree-premium.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1373x838",
     "photoVerified": true
   },
   {
@@ -490,7 +490,7 @@
     "page": 6,
     "slug": "olive-tree-cloud-style",
     "image": "VG-OL-002-olive-tree-cloud-style.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x837",
     "photoVerified": true
   },
   {
@@ -509,7 +509,7 @@
     "page": 6,
     "slug": "olive-tree-multi-stem",
     "image": "VG-OL-003-olive-tree-multi-stem.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1369x839",
     "photoVerified": true
   },
   {
@@ -528,7 +528,7 @@
     "page": 6,
     "slug": "olive-tree-specimen",
     "image": "VG-OL-004-olive-tree-specimen.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x839",
     "photoVerified": true
   },
   {
@@ -547,7 +547,7 @@
     "page": 7,
     "slug": "olive-tree-pom-pom",
     "image": "VG-OL-005-olive-tree-pom-pom.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1369x839",
     "photoVerified": true
   },
   {
@@ -566,7 +566,7 @@
     "page": 7,
     "slug": "olive-tree-bonsai-style",
     "image": "VG-OL-006-olive-tree-bonsai-style.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1374x839",
     "photoVerified": true
   },
   {
@@ -585,7 +585,7 @@
     "page": 8,
     "slug": "olive-tree-ancient",
     "image": "VG-OL-007-olive-tree-ancient.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1370x840",
     "photoVerified": true
   },
   {
@@ -604,7 +604,7 @@
     "page": 8,
     "slug": "olive-tree-standard",
     "image": "VG-OL-008-olive-tree-standard.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1374x838",
     "photoVerified": true
   },
   {
@@ -623,7 +623,7 @@
     "page": 9,
     "slug": "olive-tree-tall-form",
     "image": "VG-OL-009-olive-tree-tall-form.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1373x837",
     "photoVerified": true
   },
   {
@@ -642,7 +642,7 @@
     "page": 9,
     "slug": "olive-tree-weeping",
     "image": "VG-OL-010-olive-tree-weeping.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1376x838",
     "photoVerified": true
   },
   {
@@ -661,7 +661,7 @@
     "page": 10,
     "slug": "olive-tree-group-planting",
     "image": "VG-OL-011-olive-tree-group-planting.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1373x837",
     "photoVerified": true
   },
   {
@@ -680,7 +680,7 @@
     "page": 10,
     "slug": "olive-tree-dwarf",
     "image": "VG-OL-012-olive-tree-dwarf.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x837",
     "photoVerified": true
   },
   {
@@ -699,7 +699,7 @@
     "page": 11,
     "slug": "olive-tree-sculptural",
     "image": "VG-OL-013-olive-tree-sculptural.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1368x838",
     "photoVerified": true
   },
   {
@@ -718,7 +718,7 @@
     "page": 11,
     "slug": "olive-tree-columnar",
     "image": "VG-OL-014-olive-tree-columnar.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1372x837",
     "photoVerified": true
   },
   {
@@ -737,7 +737,7 @@
     "page": 12,
     "slug": "olive-tree-mature",
     "image": "VG-OL-015-olive-tree-mature.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1371x840",
     "photoVerified": true
   },
   {
@@ -756,7 +756,7 @@
     "page": 12,
     "slug": "olive-tree-young",
     "image": "VG-OL-016-olive-tree-young.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x838",
     "photoVerified": true
   },
   {
@@ -775,7 +775,7 @@
     "page": 14,
     "slug": "cycas-revoluta",
     "image": "VG-PL-001-cycas-revoluta.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1371x840",
     "photoVerified": true
   },
   {
@@ -794,7 +794,7 @@
     "page": 14,
     "slug": "cycas-revoluta-large",
     "image": "VG-PL-002-cycas-revoluta-large.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x840",
     "photoVerified": true
   },
   {
@@ -813,7 +813,7 @@
     "page": 15,
     "slug": "cycas-revoluta-specimen",
     "image": "VG-PL-003-cycas-revoluta-specimen.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1369x841",
     "photoVerified": true
   },
   {
@@ -832,7 +832,7 @@
     "page": 15,
     "slug": "cycas-revoluta-multi-head",
     "image": "VG-PL-004-cycas-revoluta-multi-head.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x844",
     "photoVerified": true
   },
   {
@@ -851,7 +851,7 @@
     "page": 16,
     "slug": "archontophoenix-alexandrae",
     "image": "VG-PL-005-archontophoenix-alexandrae.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1373x836",
     "photoVerified": true
   },
   {
@@ -870,7 +870,7 @@
     "page": 16,
     "slug": "archontophoenix-tall",
     "image": "VG-PL-006-archontophoenix-tall.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x840",
     "photoVerified": true
   },
   {
@@ -889,7 +889,7 @@
     "page": 17,
     "slug": "archontophoenix-specimen",
     "image": "VG-PL-007-archontophoenix-specimen.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1369x840",
     "photoVerified": true
   },
   {
@@ -908,7 +908,7 @@
     "page": 17,
     "slug": "archontophoenix-young",
     "image": "VG-PL-008-archontophoenix-young.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x839",
     "photoVerified": true
   },
   {
@@ -927,7 +927,7 @@
     "page": 18,
     "slug": "brahea-armata",
     "image": "VG-PL-009-brahea-armata.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1370x839",
     "photoVerified": true
   },
   {
@@ -946,7 +946,7 @@
     "page": 18,
     "slug": "brahea-armata-large",
     "image": "VG-PL-010-brahea-armata-large.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1375x839",
     "photoVerified": true
   },
   {
@@ -965,7 +965,7 @@
     "page": 19,
     "slug": "butia-capitata",
     "image": "VG-PL-011-butia-capitata.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1371x839",
     "photoVerified": true
   },
   {
@@ -984,7 +984,7 @@
     "page": 19,
     "slug": "butia-capitata-specimen",
     "image": "VG-PL-012-butia-capitata-specimen.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x841",
     "photoVerified": true
   },
   {
@@ -1003,7 +1003,7 @@
     "page": 20,
     "slug": "chamaerops-humilis",
     "image": "VG-PL-013-chamaerops-humilis.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1374x840",
     "photoVerified": true
   },
   {
@@ -1022,7 +1022,7 @@
     "page": 20,
     "slug": "chamaerops-humilis-large",
     "image": "VG-PL-014-chamaerops-humilis-large.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x838",
     "photoVerified": true
   },
   {
@@ -1041,7 +1041,7 @@
     "page": 21,
     "slug": "chamaerops-excelsa",
     "image": "VG-PL-015-chamaerops-excelsa.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1373x840",
     "photoVerified": true
   },
   {
@@ -1060,7 +1060,7 @@
     "page": 21,
     "slug": "chamaerops-excelsa-specimen",
     "image": "VG-PL-016-chamaerops-excelsa-specimen.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x841",
     "photoVerified": true
   },
   {
@@ -1079,7 +1079,7 @@
     "page": 22,
     "slug": "phoenix-canariensis",
     "image": "VG-PL-017-phoenix-canariensis.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1368x838",
     "photoVerified": true
   },
   {
@@ -1098,7 +1098,7 @@
     "page": 22,
     "slug": "phoenix-canariensis-large",
     "image": "VG-PL-018-phoenix-canariensis-large.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x840",
     "photoVerified": true
   },
   {
@@ -1117,7 +1117,7 @@
     "page": 23,
     "slug": "washingtonia-robusta",
     "image": "VG-PL-019-washingtonia-robusta.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1371x839",
     "photoVerified": true
   },
   {
@@ -1136,7 +1136,7 @@
     "page": 23,
     "slug": "washingtonia-robusta-tall",
     "image": "VG-PL-020-washingtonia-robusta-tall.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x840",
     "photoVerified": true
   },
   {
@@ -1155,7 +1155,7 @@
     "page": 25,
     "slug": "ficus-microcarpa",
     "image": "VG-TR-001-ficus-microcarpa.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1374x840",
     "photoVerified": true
   },
   {
@@ -1174,7 +1174,7 @@
     "page": 25,
     "slug": "ficus-microcarpa-large",
     "image": "VG-TR-002-ficus-microcarpa-large.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x841",
     "photoVerified": true
   },
   {
@@ -1193,7 +1193,7 @@
     "page": 26,
     "slug": "ficus-microcarpa-standard",
     "image": "VG-TR-003-ficus-microcarpa-standard.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1302x840",
     "photoVerified": true
   },
   {
@@ -1212,7 +1212,7 @@
     "page": 26,
     "slug": "yucca-rostrata",
     "image": "VG-TR-004-yucca-rostrata.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x840",
     "photoVerified": true
   },
   {
@@ -1231,7 +1231,7 @@
     "page": 27,
     "slug": "yucca-rostrata-large",
     "image": "VG-TR-005-yucca-rostrata-large.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1369x837",
     "photoVerified": true
   },
   {
@@ -1250,7 +1250,7 @@
     "page": 27,
     "slug": "yucca-rostrata-specimen",
     "image": "VG-TR-006-yucca-rostrata-specimen.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x840",
     "photoVerified": true
   },
   {
@@ -1269,7 +1269,7 @@
     "page": 28,
     "slug": "yucca-rostrata-multi-head",
     "image": "VG-TR-007-yucca-rostrata-multi-head.jpg",
-    "imageSize": "1388x861",
+    "imageSize": "1370x840",
     "photoVerified": true
   },
   {
@@ -1288,7 +1288,7 @@
     "page": 28,
     "slug": "yucca-rostrata-young",
     "image": "VG-TR-008-yucca-rostrata-young.jpg",
-    "imageSize": "1377x861",
+    "imageSize": "1377x838",
     "photoVerified": true
   }
 ]
