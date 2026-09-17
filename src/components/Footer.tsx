@@ -77,7 +77,13 @@ export default async function Footer() {
       </div>
 
       <style>{`
-        .ftr { background: var(--olive-950); color: rgb(251 249 244 / .72); padding-block: 64px 32px; margin-top: 0; }
+        .ftr {
+          background: var(--olive-950); color: rgb(251 249 244 / .72);
+          /* The bottom value clears the floating WhatsApp button, so the last
+             line of the footer never comes to REST underneath it. Overlapping
+             copy while you scroll past is the nature of a floating button;
+             permanently covering the bottom of the page is a defect. */
+          padding-block: 64px 96px; margin-top: 0; }
         .ftr-grid {
           display: grid; gap: 40px 32px;
           grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));

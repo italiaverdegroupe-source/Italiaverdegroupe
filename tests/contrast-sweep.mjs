@@ -33,6 +33,14 @@ const all = [];
 for (const path of PAGES) {
   await page.goto(B + path, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(1200);
+  // A position:fixed overlay — the WhatsApp button, a cookie bar, a sticky
+  // toolbar — floats IN FRONT of the copy. Left in, it becomes "the pixel
+  // behind the glyph" wherever it happens to sit and reports perfectly good
+  // text as unreadable. It is a covering, which is a layout question, not a
+  // contrast one; hide it so this measures what the text is actually on.
+  await page.addStyleTag({ content: `
+    .wa, [data-fixed-overlay] { display: none !important; }
+  ` });
   const bad = await page.evaluate(() => {
     const lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
     const L = (r, g, b) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);

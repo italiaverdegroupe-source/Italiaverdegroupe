@@ -14,8 +14,27 @@ import { site as defaults, type Site } from '@/lib/site';
  * `cache()` keeps it to one query per request rather than one per component.
  */
 
+/**
+ * Widens the literal types that `as const` gives the defaults.
+ *
+ * src/lib/site.ts is `as const` so the defaults are self-documenting, which
+ * makes `whatsapp` the type `""` and `vatEnabled` the type `false`. For a
+ * frozen constant that is right. For SETTINGS it is precisely backwards:
+ * these are the fields the console exists to write, so the type was telling
+ * every consumer that the one thing they can never hold is a real value.
+ * `if (s.vatEnabled)` narrowed to never; `site.whatsapp.replace(...)` type-
+ * checked only because it was provably the empty string.
+ */
+type Widen<T> =
+  T extends string ? string :
+  T extends number ? number :
+  T extends boolean ? boolean :
+  T extends readonly (infer U)[] ? readonly Widen<U>[] :
+  T extends object ? { -readonly [K in keyof T]: Widen<T[K]> } :
+  T;
+
 export type Settings = {
-  [K in keyof Site]: Site[K];
+  -readonly [K in keyof Site]: Widen<Site[K]>;
 };
 
 /** Fields the console is allowed to write, and how to coerce what comes back. */

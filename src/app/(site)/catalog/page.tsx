@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { metadataFor } from '@/lib/content';
 import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
-import { getAllProducts, getFamilies, familySlug, sizeBand, SIZE_BANDS, heightMidpoint } from '@/lib/products';
+import { getAllProducts, getFamilies, familySlug, sizeBand, SIZE_BANDS, heightMidpoint, searchProducts, rankBySearch } from '@/lib/products';
 
 /**
  * Revalidated on a timer as well as on demand.
@@ -21,20 +21,25 @@ export const generateMetadata = (): Promise<Metadata> => metadataFor('/catalog',
     'Browse specimen olive trees, palms, agaves, cacti and ornamental trees imported from Italy and supplied across the United Arab Emirates. All prices on request.',
 });
 
-type Search = { family?: string; size?: string; sort?: string };
+type Search = { family?: string; size?: string; sort?: string; q?: string };
 
 export default async function CatalogPage({ searchParams }: { searchParams: Promise<Search> }) {
   const sp = await searchParams;
   const families = getFamilies();
 
+  const q = (sp.q ?? '').trim();
+
   let list = getAllProducts();
+  if (q) list = searchProducts(list, q);
   if (sp.family) list = list.filter((p) => familySlug(p.family) === sp.family);
   if (sp.size) list = list.filter((p) => sizeBand(p) === sp.size);
 
-  list = [...list].sort((a, b) =>
-    sp.sort === 'tallest' ? heightMidpoint(b) - heightMidpoint(a)
-    : sp.sort === 'smallest' ? heightMidpoint(a) - heightMidpoint(b)
-    : a.reference.localeCompare(b.reference));
+  list = sp.sort === 'tallest' ? [...list].sort((a, b) => heightMidpoint(b) - heightMidpoint(a))
+    : sp.sort === 'smallest' ? [...list].sort((a, b) => heightMidpoint(a) - heightMidpoint(b))
+    // With a search term and no explicit sort, relevance beats reference
+    // order: somebody who typed a reference should not have to look for it.
+    : q ? rankBySearch(list, q)
+    : [...list].sort((a, b) => a.reference.localeCompare(b.reference));
 
   const qs = (patch: Partial<Search>) => {
     const next = { ...sp, ...patch };
@@ -53,6 +58,26 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
           Every specimen is quoted individually — availability, size and price depend on the
           season and the consignment. Tell us what the project needs and we will price it.
         </p>
+
+        {/* A box, not a live filter. The whole catalogue is sixty-eight items and
+            it is rendered on the server, so a GET with the term in the URL is
+            searchable, shareable, back-button-able and works with JavaScript
+            off — all of which a keystroke handler would have cost for no gain
+            at this size. */}
+        <form className="cat-search" role="search" action="/catalog">
+          {sp.family && <input type="hidden" name="family" value={sp.family} />}
+          {sp.size && <input type="hidden" name="size" value={sp.size} />}
+          {sp.sort && <input type="hidden" name="sort" value={sp.sort} />}
+          <label htmlFor="cat-q" className="visually-hidden">Search the catalogue</label>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+               strokeWidth="1.7" strokeLinecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+          </svg>
+          <input id="cat-q" type="search" name="q" defaultValue={q}
+                 placeholder="Reference, botanical or common name — VG-OL-012, Olea, palm" />
+          <button type="submit" className="btn btn-primary">Search</button>
+          {q && <Link href={qs({ q: undefined })} className="cat-clear">Clear</Link>}
+        </form>
 
         <div className="filters">
           <div className="fgroup">
@@ -92,10 +117,26 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
           </div>
         </div>
 
-        <p className="count">{list.length} {list.length === 1 ? 'specimen' : 'specimens'}</p>
+        <p className="count">
+          {list.length} {list.length === 1 ? 'specimen' : 'specimens'}
+          {q && <> matching <strong>&ldquo;{q}&rdquo;</strong></>}
+        </p>
 
         {list.length === 0 ? (
-          <p className="empty">Nothing matches that combination yet. <Link href="/quote?type=sourcing">Ask us to source it</Link>.</p>
+          <p className="empty">
+            {q
+              // A search that found nothing is a different situation from a
+              // filter combination that found nothing, and the way out is
+              // different too: widen the words, or tell us what you need. The
+              // catalogue is what we hold, not what we can get.
+              ? <>Nothing in the catalogue matches <strong>&ldquo;{q}&rdquo;</strong>.{' '}
+                  <Link href={qs({ q: undefined })}>Clear the search</Link>, or{' '}
+                  <Link href={`/quote?type=sourcing&ref=${encodeURIComponent(q)}`}>
+                    ask us to source it
+                  </Link> — we import to order as well as from stock.</>
+              : <>Nothing matches that combination yet.{' '}
+                  <Link href="/quote?type=sourcing">Ask us to source it</Link>.</>}
+          </p>
         ) : (
           <div className="grid cols-4">
             {list.map((p, i) => <ProductCard key={p.reference} p={p} priority={i < 4} />)}
@@ -105,6 +146,29 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
 
       <style>{`
         .cat-h1 { margin-bottom: .6rem; }
+        .cat-search {
+          display: flex; align-items: center; gap: 10px;
+          margin: 34px 0 0; padding: 8px 8px 8px 16px;
+          background: var(--bg); border: 1px solid var(--line);
+          border-radius: var(--radius-lg);
+          color: var(--ink-400);
+        }
+        .cat-search:focus-within { border-color: var(--olive-700); color: var(--olive-700); }
+        .cat-search svg { flex: none; }
+        .cat-search input {
+          flex: 1 1 auto; min-width: 0;
+          font: inherit; font-size: .95rem; color: var(--fg);
+          background: none; border: 0; padding: .55em 0;
+        }
+        .cat-search input:focus { outline: none; }
+        .cat-search input::placeholder { color: var(--ink-400); }
+        .cat-search .btn { flex: none; padding: .7em 1.4em; font-size: .88rem; }
+        .cat-clear { flex: none; font-size: .84rem; color: var(--ink-600); padding-inline: 6px; }
+        @media (max-width: 560px) {
+          .cat-search { flex-wrap: wrap; padding-inline: 12px; }
+          .cat-search input { flex-basis: 100%; order: -1; }
+          .cat-search .btn { flex: 1 1 auto; }
+        }
         .filters {
           display: grid; gap: 20px; margin: 40px 0 28px;
           padding: 24px; background: var(--sand-100);

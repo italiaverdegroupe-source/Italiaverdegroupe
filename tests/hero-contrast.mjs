@@ -42,6 +42,14 @@ for (const [w, h] of [[2560, 1100], [1600, 1000], [1280, 800], [1024, 768], [860
   // glyphs read as a background far darker than anything on the page. Stop
   // every transition before measuring anything.
   await page.addStyleTag({ content: '*,*::before,*::after{transition:none !important;animation:none !important}' });
+  // A position:fixed overlay — the WhatsApp button, a cookie bar, a sticky
+  // toolbar — floats IN FRONT of the copy. Left in, it becomes "the pixel
+  // behind the glyph" wherever it happens to sit and reports perfectly good
+  // text as unreadable. It is a covering, which is a layout question, not a
+  // contrast one; hide it so this measures what the text is actually on.
+  await page.addStyleTag({ content: `
+    .wa, [data-fixed-overlay] { display: none !important; }
+  ` });
   await page.waitForTimeout(700);
   console.log(`\n── ${w}×${h} ───────────────────────────────`);
   for (const [sel, need] of TARGETS) {

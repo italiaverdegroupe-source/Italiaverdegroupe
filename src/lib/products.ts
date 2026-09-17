@@ -106,3 +106,57 @@ export function sizeBand(p: Product): string {
   const h = heightMidpoint(p);
   return SIZE_BANDS.find((b) => b.test(h))?.slug ?? 'medium';
 }
+
+/**
+ * Catalogue search.
+ *
+ * Deliberately not a fuzzy matcher. A buyer arriving at this box is typing one
+ * of three things — a reference off a quotation, a botanical name they were
+ * given by a landscape architect, or a common word like "olive" — and all
+ * three are exact-ish. Fuzzy matching would return a Ficus for "Phoenix" and
+ * cost more trust than the occasional near-miss it rescues.
+ *
+ * Every term must match somewhere, so "olive 4m" narrows rather than widens,
+ * which is how a filter is expected to behave.
+ */
+export function searchProducts(list: Product[], q: string): Product[] {
+  const terms = q.toLowerCase().split(/\s+/).map((t) => t.trim()).filter(Boolean);
+  if (terms.length === 0) return list;
+
+  const haystack = (p: Product) => [
+    p.reference, p.name, p.family, p.description,
+    ...Object.entries(p.attributes).flatMap(([k, v]) => [k, v]),
+  ].join(' ').toLowerCase();
+
+  return list.filter((p) => {
+    const hay = haystack(p);
+    return terms.every((t) => hay.includes(t));
+  });
+}
+
+/**
+ * Ranks a matched set so the obvious answer is first.
+ *
+ * Someone typing "VG-OL-012" wants that specimen at the top, not alphabetically
+ * among the other olives; someone typing "olive" wants the olives before a
+ * palm whose description happens to mention one.
+ */
+export function rankBySearch(list: Product[], q: string): Product[] {
+  const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+  if (terms.length === 0) return list;
+  const score = (p: Product) => {
+    const ref = p.reference.toLowerCase();
+    const name = p.name.toLowerCase();
+    const fam = p.family.toLowerCase();
+    let s = 0;
+    for (const t of terms) {
+      if (ref === t) s += 100;
+      else if (ref.includes(t)) s += 40;
+      if (name.startsWith(t)) s += 30;
+      else if (name.includes(t)) s += 18;
+      if (fam.includes(t)) s += 8;
+    }
+    return s;
+  };
+  return [...list].sort((a, b) => score(b) - score(a) || a.reference.localeCompare(b.reference));
+}
