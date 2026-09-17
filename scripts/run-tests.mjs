@@ -29,6 +29,7 @@ const NEEDS = {
   'compliance.test.mjs': ['db'],
   'concurrency.test.mjs': ['db'],
   'partial-delivery.test.mjs': ['db'],
+  'reports.test.mjs': ['db'],
   'shortlist.test.mjs': ['db', 'server'],
   'collections.test.mjs': ['server'],
   'hero-contrast.mjs': ['server'],

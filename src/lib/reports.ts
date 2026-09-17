@@ -37,7 +37,13 @@ export const byProduct = () => query<{
 export const byCustomer = () => query<{
   customer: string; orders: string; revenue: string; first_order: string; last_order: string;
 }>(`
-  SELECT COALESCE(o.customer_company, o.customer_name) AS customer,
+  -- Grouped on the folded name, labelled with a real spelling of it. Somebody
+  -- typing "Mansoori Landscaping LLC" on one order and "mansoori landscaping
+  -- llc" on the next was two customers here, each with half the revenue and
+  -- neither marked as repeat. Not initcap'd for display, because that turns
+  -- LLC into Llc.
+  SELECT min(COALESCE(NULLIF(btrim(o.customer_company), ''),
+                      NULLIF(btrim(o.customer_name), ''), 'Unnamed')) AS customer,
          count(*)::text AS orders,
          sum(t.net)::numeric(14,2)::text AS revenue,
          min(o.confirmed_on)::text AS first_order,
@@ -48,11 +54,15 @@ export const byCustomer = () => query<{
         FROM order_items WHERE order_id = o.id
     ) t ON true
    WHERE o.status <> 'cancelled'
-   GROUP BY 1 ORDER BY 3 DESC`);
+   GROUP BY lower(COALESCE(NULLIF(btrim(o.customer_company), ''),
+                           NULLIF(btrim(o.customer_name), ''), 'unnamed'))
+   ORDER BY 3 DESC`);
 
 /** Where the money comes from, geographically. */
 export const byEmirate = () => query<{ emirate: string; orders: string; revenue: string }>(`
-  SELECT COALESCE(o.emirate, 'Not recorded') AS emirate,
+  -- An empty string is not NULL, so "" was its own row next to "Not recorded",
+  -- and "dubai" was a different emirate from "Dubai". Both come off a form.
+  SELECT initcap(lower(COALESCE(NULLIF(btrim(o.emirate), ''), 'Not recorded'))) AS emirate,
          count(*)::text AS orders,
          sum(t.net)::numeric(14,2)::text AS revenue
     FROM orders o
@@ -74,7 +84,11 @@ export const bySource = () => query<{
 }>(`
   WITH lead_orders AS (
     SELECT l.id AS lead_id,
-           COALESCE(NULLIF(trim(l.source), ''), 'direct') AS source,
+           -- Folded the same way the overview folds it. Without this,
+           -- "direct" and "Direct" were two channels splitting one channel's
+           -- revenue between them — which is the bug this page exists to
+           -- avoid making somebody believe.
+           initcap(lower(COALESCE(NULLIF(btrim(l.source), ''), 'direct'))) AS source,
            q.id AS quote_id, o.id AS order_id,
            COALESCE((SELECT sum(unit_price * quantity * (1 - discount_pct/100))
                        FROM order_items WHERE order_id = o.id), 0) AS revenue

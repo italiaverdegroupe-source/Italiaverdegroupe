@@ -522,3 +522,17 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
   .adm-doc, .adm-doc-new { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .adm-doc-name { grid-column: 1 / -1; }
 }
+
+/* A header row above the header row, naming what the columns underneath are
+   counting. Without it "Sellable" and "Sellable" sat side by side meaning two
+   different things. */
+.adm-t-group th {
+  padding-bottom: 2px; border-bottom: 0;
+  font-size: .6rem; letter-spacing: .16em; text-transform: uppercase;
+  color: #8A8D7D; font-weight: 600; text-align: center;
+}
+.adm-t-group th:empty { border-bottom: 0; }
+.adm-t-group + tr th { border-top: 1px solid #EFECE3; }
+/* Zero of something you were hoping to sell should not read like any other
+   number on the row. */
+.adm-none { color: #9A9C90; font-weight: 400; }

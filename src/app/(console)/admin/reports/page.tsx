@@ -13,7 +13,22 @@ export const dynamic = 'force-dynamic';
 const aed = (v: string | number) =>
   new Intl.NumberFormat('en-AE', { maximumFractionDigits: 0 }).format(Number(v));
 
-/** A table that answers one question, with a line saying which question. */
+/**
+ * Is there anything here to show?
+ *
+ * Every section on this page is written as `{rows.length > 0 && <table/>}`,
+ * which is `false` when there are no rows — and `false ?? fallback` is `false`,
+ * because ?? only catches null and undefined. React renders false as nothing,
+ * so each `empty=` message below had never once been on the screen: an empty
+ * report was a heading, a subtitle and a blank panel, with no way to tell a
+ * question nobody has data for from one that is broken.
+ */
+function isBlank(node: React.ReactNode): boolean {
+  if (node === null || node === undefined || node === false || node === true) return true;
+  if (Array.isArray(node)) return node.length === 0 || node.every(isBlank);
+  return node === '';
+}
+
 function Report({ title, question, empty, children }: {
   title: string; question: string; empty: string; children: React.ReactNode;
 }) {
@@ -21,7 +36,9 @@ function Report({ title, question, empty, children }: {
     <section style={{ marginBottom: 34 }}>
       <h2>{title}</h2>
       <p className="adm-sub">{question}</p>
-      <div className="adm-panel">{children ?? <p className="adm-empty">{empty}</p>}</div>
+      <div className="adm-panel">
+        {isBlank(children) ? <p className="adm-empty">{empty}</p> : children}
+      </div>
     </section>
   );
 }

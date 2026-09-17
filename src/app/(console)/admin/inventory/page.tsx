@@ -51,32 +51,49 @@ export default async function InventoryPage() {
         ) : (
           <table className="adm-t">
             <thead>
+              {/* Two columns were called "Sellable" and "Lot sellable", both in
+                  bold, and a product with nothing tracked individually but two
+                  in a lot read 0 in the column headed Sellable. The question
+                  somebody opens this page with is "can I sell this today", so
+                  that is one number, first — and the breakdown is grouped
+                  underneath the thing it breaks down. */}
+              <tr className="adm-t-group">
+                <th colSpan={3}></th>
+                <th colSpan={6}>Individually tracked</th>
+                <th colSpan={2}>Lots</th>
+              </tr>
               <tr>
-                <th>Reference</th><th>Catalogue name</th>
-                <th>Specimens</th><th>Sellable</th><th>Acclimatising</th>
+                <th>Reference</th><th>Catalogue name</th><th>Sellable now</th>
+                <th>Total</th><th>Sellable</th><th>Acclimatising</th>
                 <th>Reserved</th><th>Sold</th><th>Lost</th>
-                <th>Lot qty</th><th>Lot sellable</th>
+                <th>Qty</th><th>Sellable</th>
               </tr>
             </thead>
             <tbody>
-              {lines.map((l) => (
-                <tr key={l.product_ref}>
-                  <td>
-                    <Link href={`/admin/inventory/specimens?ref=${l.product_ref}`}>
-                      {l.product_ref}
-                    </Link>
-                  </td>
-                  <td>{nameOf.get(l.product_ref) ?? <em>not in catalogue</em>}</td>
-                  <td className="num">{l.specimens_total}</td>
-                  <td className="num"><b>{l.specimens_sellable}</b></td>
-                  <td className="num">{l.specimens_acclimatising}</td>
-                  <td className="num">{l.specimens_reserved}</td>
-                  <td className="num">{l.specimens_sold}</td>
-                  <td className="num">{l.specimens_lost}</td>
-                  <td className="num">{l.batch_qty}</td>
-                  <td className="num"><b>{l.batch_sellable}</b></td>
-                </tr>
-              ))}
+              {lines.map((l) => {
+                const ready = n(l.specimens_sellable) + n(l.batch_sellable);
+                return (
+                  <tr key={l.product_ref}>
+                    <td>
+                      <Link href={`/admin/inventory/specimens?ref=${l.product_ref}`}>
+                        {l.product_ref}
+                      </Link>
+                    </td>
+                    <td>{nameOf.get(l.product_ref) ?? <em>not in catalogue</em>}</td>
+                    <td className="num">
+                      <b className={ready === 0 ? 'adm-none' : undefined}>{ready}</b>
+                    </td>
+                    <td className="num">{l.specimens_total}</td>
+                    <td className="num">{l.specimens_sellable}</td>
+                    <td className="num">{l.specimens_acclimatising}</td>
+                    <td className="num">{l.specimens_reserved}</td>
+                    <td className="num">{l.specimens_sold}</td>
+                    <td className="num">{l.specimens_lost}</td>
+                    <td className="num">{l.batch_qty}</td>
+                    <td className="num">{l.batch_sellable}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
