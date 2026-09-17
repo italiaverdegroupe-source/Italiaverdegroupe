@@ -325,8 +325,14 @@ export const recentBackups = (limit = 20) =>
         FROM backup_runs ORDER BY started_at DESC LIMIT $1`, [limit]);
 
 export const lastGoodBackup = () =>
-  query<{ finished_at: string; object_key: string; bytes: string; row_count: string }>(
-    `SELECT finished_at::text, object_key, bytes::text, row_count::text
+  query<{ finished_at: string; object_key: string; bytes: string; row_count: string;
+          age_hours: string }>(
+    // The age comes back with the row, measured against the clock that wrote
+    // the timestamp. Subtracting it from the web server's clock instead made
+    // the answer depend on two machines agreeing, and read the time during a
+    // render to do it.
+    `SELECT finished_at::text, object_key, bytes::text, row_count::text,
+            (EXTRACT(EPOCH FROM (now() - finished_at)) / 3600)::text AS age_hours
        FROM backup_runs WHERE status='ok' ORDER BY finished_at DESC LIMIT 1`);
 
 /**

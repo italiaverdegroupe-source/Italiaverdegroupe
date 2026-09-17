@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { listOrders, orderFromQuote, ORDER_STATUSES } from '@/lib/orders';
-import { fmtDate } from '@/components/admin/bits';
+import { fmtDay } from '@/components/admin/bits';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,8 +70,8 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
                   <td><span className={`pill pill-${o.status === 'completed' || o.status === 'delivered' ? 'won' : o.status === 'cancelled' ? 'lost' : o.status === 'partially_delivered' ? 'negotiation' : 'quoted'}`}>{o.status.replace(/_/g,' ')}</span></td>
                   <td className="num">{o.item_count}</td>
                   <td className="num">{o.delivered_lines}/{o.item_count}</td>
-                  <td className="num">{o.required_by ? fmtDate(o.required_by).slice(0,11) : '—'}</td>
-                  <td className="num">{fmtDate(o.confirmed_on).slice(0,11)}</td>
+                  <td className="num">{o.required_by ? fmtDay(o.required_by) : '—'}</td>
+                  <td className="num">{fmtDay(o.confirmed_on)}</td>
                 </tr>
               ))}
             </tbody>

@@ -7,7 +7,7 @@ import {
   listSpecimens, getLocations, nextCode, ITEM_STATUSES,
 } from '@/lib/inventory';
 import { getAllProducts } from '@/lib/products';
-import { fmtDate } from '@/components/admin/bits';
+import { fmtDay } from '@/components/admin/bits';
 
 export const dynamic = 'force-dynamic';
 
@@ -127,7 +127,7 @@ export default async function SpecimensPage({ searchParams }: { searchParams: Pr
                   <td className="num">{s.height_m ? `${s.height_m} m` : '—'}</td>
                   <td className="num">{s.trunk_girth_cm ? `${s.trunk_girth_cm} cm` : '—'}</td>
                   <td className="num">{s.asking_price_aed ? `AED ${s.asking_price_aed}` : '—'}</td>
-                  <td className="num">{s.measured_at ? fmtDate(s.measured_at).slice(0, 11) : '—'}</td>
+                  <td className="num">{s.measured_at ? fmtDay(s.measured_at) : '—'}</td>
                 </tr>
               ))}
             </tbody>

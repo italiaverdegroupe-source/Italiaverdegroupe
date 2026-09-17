@@ -5,7 +5,7 @@ import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { listQuotes, nextQuoteCode, taxSnapshot, QUOTE_STATUSES, logQuoteEvent } from '@/lib/quotes';
 import { getSettings } from '@/lib/settings';
-import { fmtDate } from '@/components/admin/bits';
+import { fmtDay } from '@/components/admin/bits';
 
 export const dynamic = 'force-dynamic';
 
@@ -106,8 +106,8 @@ export default async function QuotesPage({ searchParams }: { searchParams: Promi
                   <td>{q.emirate ?? '—'}</td>
                   <td className="num">{q.item_count}</td>
                   <td><span className={`pill pill-${q.status === 'accepted' ? 'won' : q.status === 'rejected' || q.status === 'expired' || q.status === 'superseded' ? 'lost' : q.status === 'draft' ? 'new' : 'quoted'}`}>{q.status}</span></td>
-                  <td className="num">{q.valid_until ? fmtDate(q.valid_until).slice(0,11) : '—'}</td>
-                  <td className="num">{fmtDate(q.created_at).slice(0,11)}</td>
+                  <td className="num">{q.valid_until ? fmtDay(q.valid_until) : '—'}</td>
+                  <td className="num">{fmtDay(q.created_at)}</td>
                 </tr>
               ))}
             </tbody>

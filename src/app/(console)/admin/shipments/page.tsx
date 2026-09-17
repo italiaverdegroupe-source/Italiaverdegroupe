@@ -7,7 +7,7 @@ import {
   listShipments, listPermits, nextShipmentCode, SHIPMENT_STATUSES, INCOTERMS,
 } from '@/lib/procurement';
 import { getLocations } from '@/lib/inventory';
-import { fmtDate } from '@/components/admin/bits';
+import { fmtDay } from '@/components/admin/bits';
 
 export const dynamic = 'force-dynamic';
 
@@ -83,8 +83,8 @@ export default async function ShipmentsPage({ searchParams }: { searchParams: Pr
                     <td>{s.supplier_name ?? '—'}</td>
                     <td>{s.container_no ?? '—'}</td>
                     <td>{s.bl_number ?? '—'}</td>
-                    <td className="num">{s.etd ? fmtDate(s.etd).slice(0,11) : '—'}</td>
-                    <td className="num">{s.eta ? fmtDate(s.eta).slice(0,11) : '—'}</td>
+                    <td className="num">{s.etd ? fmtDay(s.etd) : '—'}</td>
+                    <td className="num">{s.eta ? fmtDay(s.eta) : '—'}</td>
                     <td className="num">{s.item_count}</td>
                     <td className="num">{s.total_qty}</td>
                     <td>

@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { site } from '@/lib/site';
 
 const NAV = [
   { href: '/catalog', label: 'Catalogue' },

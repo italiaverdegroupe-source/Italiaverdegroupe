@@ -7,7 +7,7 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 
 process.env.DATABASE_URL = 'postgresql://postgres@127.0.0.1:5433/verdegarden';
-const { runScan, seedDefaultRules, raise } = require('../.test-build/alerts.cjs');
+const { runScan, seedDefaultRules, raise, ALERT_KINDS } = require('../.test-build/alerts.cjs');
 
 const db = new pg.Client({ connectionString: process.env.DATABASE_URL });
 await db.connect();
@@ -40,7 +40,13 @@ const yard = await db.query(`SELECT id FROM inventory_locations WHERE code = 'YR
 check('the fixtures have a sellable location to stand in', yard.rows.length === 1);
 
 const n = await seedDefaultRules();
-check('the defaults install once', n === 16, `installed ${n}`);
+// Counted from the list rather than typed as a number. It was typed as 16,
+// and the seventeenth kind — backup.stale — was added without anybody
+// noticing, because the suite was loading a compiled copy of this library
+// built before it existed. A test that hard-codes the size of a list it does
+// not own goes stale the first time the list grows.
+check('every kind of alert gets a rule', n === ALERT_KINDS.length,
+      `installed ${n} of ${ALERT_KINDS.length}`);
 check('installing again is a no-op', (await seedDefaultRules()) === 0);
 
 // ── conditions a manager would want to hear about ────────────

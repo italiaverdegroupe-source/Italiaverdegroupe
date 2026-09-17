@@ -20,5 +20,8 @@ export default defineConfig([
     // Test harnesses are plain scripts run by hand, not part of the bundle.
     'tests/**',
     'scripts/**',
+    // Generated: esbuild's CJS of the library modules, so the suites can
+    // require them. Linting a build output tells you about esbuild.
+    '.test-build/**',
   ]),
 ]);

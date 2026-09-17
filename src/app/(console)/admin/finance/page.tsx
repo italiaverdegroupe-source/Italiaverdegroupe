@@ -6,7 +6,7 @@ import { query } from '@/lib/db';
 import { ageing, getOrder, getOrderItems, orderTotals, nextCode } from '@/lib/orders';
 import { getSettings } from '@/lib/settings';
 import { fire } from '@/lib/alerts';
-import { fmtDate } from '@/components/admin/bits';
+import { fmtDay } from '@/components/admin/bits';
 
 export const dynamic = 'force-dynamic';
 
@@ -185,7 +185,7 @@ export default async function FinancePage() {
                 <tr key={r.invoice}>
                   <td>{r.invoice}</td>
                   <td>{r.customer ?? '—'}</td>
-                  <td className="num">{r.due_on ? fmtDate(r.due_on).slice(0,11) : '—'}</td>
+                  <td className="num">{r.due_on ? fmtDay(r.due_on) : '—'}</td>
                   <td className="num">{aed(Number(r.total))}</td>
                   <td className="num">{aed(Number(r.paid))}</td>
                   <td className="num"><b>{aed(Number(r.outstanding))}</b></td>
@@ -212,8 +212,8 @@ export default async function FinancePage() {
                   <td>{i.order_code ? <Link href={`/admin/orders/${i.order_code}`}>{i.order_code}</Link> : '—'}</td>
                   <td>{i.kind.replace(/_/g,' ')}</td>
                   <td><span className={`pill pill-${i.status === 'paid' ? 'won' : i.status === 'overdue' ? 'lost' : i.status === 'part_paid' ? 'negotiation' : 'quoted'}`}>{i.status.replace(/_/g,' ')}</span></td>
-                  <td className="num">{i.issued_on ? fmtDate(i.issued_on).slice(0,11) : '—'}</td>
-                  <td className="num">{i.due_on ? fmtDate(i.due_on).slice(0,11) : '—'}</td>
+                  <td className="num">{i.issued_on ? fmtDay(i.issued_on) : '—'}</td>
+                  <td className="num">{i.due_on ? fmtDay(i.due_on) : '—'}</td>
                   <td className="num">{aed(Number(i.total_aed))}</td>
                   <td className="num">{aed(Number(i.paid))}</td>
                   <td className="num">{Number(i.retention_aed) ? aed(Number(i.retention_aed)) : '—'}</td>

@@ -5,9 +5,9 @@ import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { query } from '@/lib/db';
 import {
   getOrder, getOrderItems, getDeliveries, orderTotals,
-  completeDelivery, nextCode, DELIVERY_STATUSES,
+  completeDelivery, nextCode,
 } from '@/lib/orders';
-import { fmtDate } from '@/components/admin/bits';
+import { fmtDay } from '@/components/admin/bits';
 
 export const dynamic = 'force-dynamic';
 
@@ -153,7 +153,7 @@ export default async function OrderPage({ params }: { params: Promise<{ code: st
                     <tr key={d.code}>
                       <td>{d.code}</td>
                       <td><span className={`pill pill-${d.status === 'delivered' ? 'won' : d.status === 'failed' || d.status === 'cancelled' ? 'lost' : 'new'}`}>{d.status.replace(/_/g,' ')}</span></td>
-                      <td className="num">{d.scheduled_for ? fmtDate(d.scheduled_for).slice(0,11) : '—'}</td>
+                      <td className="num">{d.scheduled_for ? fmtDay(d.scheduled_for) : '—'}</td>
                       <td>{d.driver ?? '—'}</td>
                       <td>{d.equipment ?? '—'}</td>
                       <td className="num">{d.line_count}</td>

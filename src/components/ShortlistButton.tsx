@@ -1,19 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import {
-  addToShortlist, removeFromShortlist, readShortlist,
-  SHORTLIST_EVENT, type ShortlistItem,
-} from '@/lib/shortlist';
+import { addToShortlist, removeFromShortlist, type ShortlistItem } from '@/lib/shortlist';
+import { useShortlist } from '@/lib/use-shortlist';
 
 /**
  * Add or remove one specimen.
  *
- * Rendered on the server as "not on the list" and corrected on mount. The
- * alternative — rendering nothing until the browser has read localStorage —
- * makes the button appear a moment after the card, which on a grid of
- * twenty-four specimens is a page that twitches. Being briefly wrong in a way
- * nobody can act on is better than being briefly absent.
+ * Rendered on the server as "not on the list" and corrected as soon as the
+ * browser takes over. The alternative — rendering nothing until localStorage
+ * has been read — makes the button appear a moment after the card, which on a
+ * grid of twenty-four specimens is a page that twitches. Being briefly wrong
+ * in a way nobody can act on is better than being briefly absent.
  */
 export default function ShortlistButton({
   item, compact = false,
@@ -21,20 +18,7 @@ export default function ShortlistButton({
   item: Omit<ShortlistItem, 'qty'>;
   compact?: boolean;
 }) {
-  const [on, setOn] = useState(false);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    const sync = () => setOn(readShortlist().some((i) => i.ref === item.ref));
-    sync();
-    setReady(true);
-    window.addEventListener(SHORTLIST_EVENT, sync);
-    window.addEventListener('storage', sync);   // the same list in another tab
-    return () => {
-      window.removeEventListener(SHORTLIST_EVENT, sync);
-      window.removeEventListener('storage', sync);
-    };
-  }, [item.ref]);
+  const on = useShortlist().some((i) => i.ref === item.ref);
 
   const toggle = (e: React.MouseEvent) => {
     // These sit inside the card's link on the catalogue grid. Without this,
@@ -50,7 +34,7 @@ export default function ShortlistButton({
       type="button"
       onClick={toggle}
       className={`sl-btn${compact ? ' sl-btn-compact' : ''}${on ? ' on' : ''}`}
-      aria-pressed={ready ? on : undefined}
+      aria-pressed={on}
       title={on ? 'Remove from your shortlist' : 'Add to your shortlist'}
     >
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"

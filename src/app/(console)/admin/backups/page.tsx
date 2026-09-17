@@ -49,7 +49,7 @@ export default async function BackupsPage({ searchParams }: {
   const [runs, good] = await Promise.all([recentBackups(20), lastGoodBackup()]);
   const last = good[0];
   const configured = s3Config() !== null;
-  const ageHours = last ? (Date.now() - Date.parse(last.finished_at)) / 3600_000 : Infinity;
+  const ageHours = last ? Number(last.age_hours) : Infinity;
 
   return (
     <>

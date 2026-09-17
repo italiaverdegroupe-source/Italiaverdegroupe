@@ -160,7 +160,17 @@ export function Donut({
 
   const r = size / 2 - 11;
   const c = 2 * Math.PI * r;
-  let acc = 0;
+
+  // Each arc starts where the previous one ended. Worked out up front rather
+  // than by adding to a variable inside the map: a render that mutates as it
+  // goes gives a different answer the second time React calls it.
+  const arcs: { k: string; frac: number; start: number }[] = [];
+  let start = 0;
+  for (const row of rows) {
+    const frac = row.v / total;
+    arcs.push({ k: row.k, frac, start });
+    start += frac;
+  }
 
   return (
     <div className="adm-donut">
@@ -168,17 +178,12 @@ export function Donut({
            aria-label={`${label}: ${rows.map((x) => `${x.k} ${x.v}`).join(', ')}`}>
         <g transform={`translate(${size / 2} ${size / 2}) rotate(-90)`}>
           <circle r={r} fill="none" stroke={LINE} strokeWidth="11" />
-          {rows.map((row, i) => {
-            const frac = row.v / total;
-            const dash = `${(c * frac).toFixed(2)} ${(c * (1 - frac)).toFixed(2)}`;
-            const off = -c * acc;
-            acc += frac;
-            return (
-              <circle key={row.k} r={r} fill="none" strokeWidth="11"
-                      stroke={SERIES[i % SERIES.length]}
-                      strokeDasharray={dash} strokeDashoffset={off.toFixed(2)} />
-            );
-          })}
+          {arcs.map((a, i) => (
+            <circle key={a.k} r={r} fill="none" strokeWidth="11"
+                    stroke={SERIES[i % SERIES.length]}
+                    strokeDasharray={`${(c * a.frac).toFixed(2)} ${(c * (1 - a.frac)).toFixed(2)}`}
+                    strokeDashoffset={(-c * a.start).toFixed(2)} />
+          ))}
         </g>
         <text x={size / 2} y={size / 2 - 1} textAnchor="middle" fontSize="19"
               fontWeight="500" fill={INK}>{total}</text>

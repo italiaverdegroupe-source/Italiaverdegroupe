@@ -3,10 +3,14 @@ import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { query } from '@/lib/db';
-import { getShipment, costOf, getShipmentDocuments, COST_KINDS, DOC_KINDS, DOC_STATUSES } from '@/lib/procurement';
-import { DEFAULT_ALLOCATION, margin } from '@/lib/landed-cost';
+import {
+  getShipment, costOf, getShipmentDocuments, COST_KINDS,
+  DOC_KINDS, DOC_STATUSES, DOC_LABEL, DOC_STATUS_LABEL,
+  saveShipmentDocument, removeShipmentDocument, seedShipmentChecklist,
+  type DocKind, type DocStatus,
+} from '@/lib/procurement';
 import { getAllProducts } from '@/lib/products';
-import { fmtDate } from '@/components/admin/bits';
+import { fmtDay } from '@/components/admin/bits';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,6 +73,82 @@ async function addCost(formData: FormData) {
   revalidatePath(`/admin/shipments/${code}`);
 }
 
+/**
+ * The compliance checklist, which until now could only be read.
+ *
+ * The table, the query and the panel all existed; nothing in the application
+ * could put a row in it, so every shipment said "No document checklist" for
+ * ever. These are the missing half.
+ */
+async function saveDocument(formData: FormData) {
+  'use server';
+  await assertSameOrigin();
+  const user = await getSessionUser();
+  if (!user) redirect('/admin/login');
+  if (user.role === 'viewer') throw new Error('Viewers cannot change shipments.');
+
+  const code = String(formData.get('code'));
+  const s = await getShipment(code);
+  if (!s) notFound();
+
+  const id = String(formData.get('id') ?? '').trim() || null;
+  const kind = String(formData.get('kind') ?? '');
+  await saveShipmentDocument({
+    shipmentId: s.id,
+    id,
+    kind,
+    reference: String(formData.get('reference') ?? ''),
+    status: String(formData.get('status') ?? 'required'),
+    issuedOn: String(formData.get('issued_on') ?? ''),
+    expiresOn: String(formData.get('expires_on') ?? ''),
+    note: String(formData.get('note') ?? ''),
+  });
+
+  await audit({
+    user, action: id ? 'shipment.document_updated' : 'shipment.document_added',
+    entity: 'shipment', entityId: code,
+    after: { kind, status: String(formData.get('status') ?? '') },
+  });
+  revalidatePath(`/admin/shipments/${code}`);
+}
+
+async function deleteDocument(formData: FormData) {
+  'use server';
+  await assertSameOrigin();
+  const user = await getSessionUser();
+  if (!user) redirect('/admin/login');
+  if (user.role === 'viewer') throw new Error('Viewers cannot change shipments.');
+
+  const code = String(formData.get('code'));
+  const s = await getShipment(code);
+  if (!s) notFound();
+
+  const id = String(formData.get('id') ?? '').trim();
+  if (!id) throw new Error('No document named.');
+  await removeShipmentDocument(s.id, id);
+
+  await audit({ user, action: 'shipment.document_removed', entity: 'shipment', entityId: code,
+                before: { id } });
+  revalidatePath(`/admin/shipments/${code}`);
+}
+
+async function startChecklist(formData: FormData) {
+  'use server';
+  await assertSameOrigin();
+  const user = await getSessionUser();
+  if (!user) redirect('/admin/login');
+  if (user.role === 'viewer') throw new Error('Viewers cannot change shipments.');
+
+  const code = String(formData.get('code'));
+  const s = await getShipment(code);
+  if (!s) notFound();
+
+  const added = await seedShipmentChecklist(s.id);
+  await audit({ user, action: 'shipment.checklist_started', entity: 'shipment', entityId: code,
+                after: { added } });
+  revalidatePath(`/admin/shipments/${code}`);
+}
+
 export default async function ShipmentPage({ params }: { params: Promise<{ code: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
@@ -78,6 +158,18 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
   if (!s) notFound();
 
   const [costed, docs] = await Promise.all([costOf(s.id), getShipmentDocuments(s.id)]);
+
+  const readOnly = user.role === 'viewer';
+  const days = (d: { days_to_expiry: string | null }) =>
+    d.days_to_expiry === null ? null : Number(d.days_to_expiry);
+  // A certificate that has been verified and has since expired is not
+  // finished with — it is the most urgent row on the page, and dimming it for
+  // being "verified" is exactly how a container ends up sitting at the port.
+  const settled = (d: { status: string; days_to_expiry: string | null }) =>
+    (d.status === 'verified' || d.status === 'not_applicable') && (days(d) ?? 1) >= 0;
+  const outstanding = docs.filter((d) => !settled(d)).length;
+  const expired = docs.filter((d) => (days(d) ?? 1) < 0);
+  const expiring = docs.filter((d) => { const n = days(d); return n !== null && n >= 0 && n <= 30; });
   const catalogue = getAllProducts();
   const nameOf = new Map(catalogue.map((p) => [p.reference, p.name]));
 
@@ -91,12 +183,12 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
         {s.status.replace('_', ' ')}
         {s.incoterm ? ` · ${s.incoterm}` : ''}
         {s.container_no ? ` · ${s.container_no}` : ''}
-        {s.eta ? ` · ETA ${fmtDate(s.eta).slice(0, 11)}` : ''}
+        {s.eta ? ` · ETA ${fmtDay(s.eta)}` : ''}
       </p>
 
       {permitDead && (
         <p className="adm-err">
-          Import permit {s.permit_number} expired on {fmtDate(s.permit_expires_on!).slice(0, 11)}.
+          Import permit {s.permit_number} expired on {fmtDay(s.permit_expires_on!)}.
           A consignment of live plants cannot clear on an expired permit — it will sit at
           the port accruing storage. Renew before arrival.
         </p>
@@ -171,26 +263,6 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
             </table>
           </div>
 
-          <h2>Compliance</h2>
-          <div className="adm-panel">
-            {docs.length === 0 ? (
-              <p className="adm-empty">No document checklist on this shipment.</p>
-            ) : (
-              <table className="adm-t">
-                <thead><tr><th>Document</th><th>Reference</th><th>Status</th><th>Expires</th></tr></thead>
-                <tbody>
-                  {docs.map((d) => (
-                    <tr key={d.id}>
-                      <td>{d.kind.replace(/_/g, ' ')}</td>
-                      <td>{d.reference ?? '—'}</td>
-                      <td>{d.status}</td>
-                      <td className="num">{d.expires_on ? fmtDate(d.expires_on).slice(0,11) : '—'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
         </div>
 
         {user.role !== 'viewer' && (
@@ -251,6 +323,114 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
           </div>
         )}
       </div>
+
+        <h2>Compliance</h2>
+        <div className="adm-panel adm-pad">
+          {outstanding > 0 && (
+            <p className="adm-doc-lead">
+              <strong>{outstanding}</strong> of {docs.length} still outstanding
+              {expired.length > 0 && <> · <span className="adm-doc-bad">{expired.length} expired</span></>}
+              {expiring.length > 0 && <> · {expiring.length} expiring within 30 days</>}.
+              A container does not clear on the strength of the ones that are done.
+            </p>
+          )}
+          {docs.length > 0 && outstanding === 0 && expired.length === 0 && (
+            <p className="adm-doc-lead">Every document on this checklist is in and verified.</p>
+          )}
+
+          {docs.length === 0 ? (
+            <>
+              <p className="adm-empty">No document checklist on this shipment yet.</p>
+              {!readOnly && (
+                <form action={startChecklist}>
+                  <input type="hidden" name="code" value={s.code} />
+                  <button className="adm-btn" type="submit">Start the standard checklist</button>
+                </form>
+              )}
+            </>
+          ) : (
+            <ul className="adm-docs">
+              {docs.map((d) => {
+                const due = days(d);
+                return (
+                  <li key={d.id} className={settled(d) ? 'is-done' : ''}>
+                    <form action={saveDocument} className="adm-doc">
+                      <input type="hidden" name="code" value={s.code} />
+                      <input type="hidden" name="id" value={d.id} />
+                      <input type="hidden" name="kind" value={d.kind} />
+
+                      <span className="adm-doc-name">
+                        {DOC_LABEL[d.kind as DocKind] ?? d.kind.replace(/_/g, ' ')}
+                        {due !== null && due < 0 && <b className="adm-doc-bad"> expired</b>}
+                        {due !== null && due >= 0 && due <= 30 && <b> {due}d left</b>}
+                      </span>
+
+                      <input name="reference" defaultValue={d.reference ?? ''}
+                             placeholder="Reference" aria-label="Reference" disabled={readOnly} />
+                      <select name="status" defaultValue={d.status} aria-label="Status" disabled={readOnly}>
+                        {DOC_STATUSES.map((k) => (
+                          <option key={k} value={k}>{DOC_STATUS_LABEL[k as DocStatus]}</option>
+                        ))}
+                      </select>
+                      <label className="adm-doc-date">
+                        <span>Issued</span>
+                        <input name="issued_on" type="date" defaultValue={d.issued_on ?? ''}
+                               disabled={readOnly} />
+                      </label>
+                      <label className="adm-doc-date">
+                        <span>Expires</span>
+                        <input name="expires_on" type="date" defaultValue={d.expires_on ?? ''}
+                               disabled={readOnly} />
+                      </label>
+                      <input name="note" defaultValue={d.note ?? ''}
+                             placeholder="Note" aria-label="Note" disabled={readOnly} />
+                      {/* Both buttons post this same row. As two separate
+                          forms the second one sat outside the row's grid, and
+                          landed on top of the note field. */}
+                      {!readOnly && (
+                        <span className="adm-doc-acts">
+                          <button className="adm-btn" type="submit">Save</button>
+                          <button className="adm-btn adm-btn-quiet" type="submit"
+                                  formAction={deleteDocument}
+                                  aria-label={`Remove ${DOC_LABEL[d.kind as DocKind] ?? d.kind}`}>
+                            Remove
+                          </button>
+                        </span>
+                      )}
+                    </form>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
+          {!readOnly && (
+            <form action={saveDocument} className="adm-doc adm-doc-new">
+              <input type="hidden" name="code" value={s.code} />
+              <select name="kind" defaultValue="other" aria-label="Document type">
+                {DOC_KINDS.map((k) => (
+                  <option key={k} value={k}>{DOC_LABEL[k as DocKind]}</option>
+                ))}
+              </select>
+              <input name="reference" placeholder="Reference" aria-label="Reference" />
+              <select name="status" defaultValue="required" aria-label="Status">
+                {DOC_STATUSES.map((k) => (
+                  <option key={k} value={k}>{DOC_STATUS_LABEL[k as DocStatus]}</option>
+                ))}
+              </select>
+              <label className="adm-doc-date">
+                <span>Issued</span>
+                <input name="issued_on" type="date" />
+              </label>
+              <label className="adm-doc-date">
+                <span>Expires</span>
+                <input name="expires_on" type="date" />
+              </label>
+              <input name="note" placeholder="Note" aria-label="Note" />
+              <button className="adm-btn" type="submit">Add</button>
+            </form>
+          )}
+        </div>
     </>
   );
 }

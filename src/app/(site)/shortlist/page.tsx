@@ -1,11 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import {
-  readShortlist, removeFromShortlist, setShortlistQty, clearShortlist,
-  SHORTLIST_EVENT, type ShortlistItem,
-} from '@/lib/shortlist';
+import { useState } from 'react';
+import { removeFromShortlist, setShortlistQty, clearShortlist } from '@/lib/shortlist';
+import { useShortlist, useHydrated } from '@/lib/use-shortlist';
 
 /**
  * The shortlist, and one enquiry for all of it.
@@ -21,23 +19,11 @@ import {
  * meet a twelve-field form.
  */
 export default function ShortlistPage() {
-  const [items, setItems] = useState<ShortlistItem[]>([]);
-  const [ready, setReady] = useState(false);
+  const items = useShortlist();
+  const ready = useHydrated();
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const sync = () => setItems(readShortlist());
-    sync();
-    setReady(true);
-    window.addEventListener(SHORTLIST_EVENT, sync);
-    window.addEventListener('storage', sync);
-    return () => {
-      window.removeEventListener(SHORTLIST_EVENT, sync);
-      window.removeEventListener('storage', sync);
-    };
-  }, []);
 
   const total = items.reduce((s, i) => s + i.qty, 0);
 

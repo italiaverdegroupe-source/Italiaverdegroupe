@@ -6,7 +6,7 @@ import {
   stuckStock, cashInStock, incoming, pipeline,
 } from '@/lib/reports';
 import { getAllProducts } from '@/lib/products';
-import { fmtDate } from '@/components/admin/bits';
+import { fmtDay } from '@/components/admin/bits';
 
 export const dynamic = 'force-dynamic';
 
@@ -119,8 +119,8 @@ export default async function ReportsPage() {
                   <td>{r.customer}</td>
                   <td className="num">{r.orders}</td>
                   <td className="num">{aed(r.revenue)}</td>
-                  <td className="num">{fmtDate(r.first_order).slice(0,11)}</td>
-                  <td className="num">{fmtDate(r.last_order).slice(0,11)}</td>
+                  <td className="num">{fmtDay(r.first_order)}</td>
+                  <td className="num">{fmtDay(r.last_order)}</td>
                   <td>{Number(r.orders) > 1 && <span className="pill pill-won">repeat</span>}</td>
                 </tr>
               ))}
@@ -205,7 +205,7 @@ export default async function ReportsPage() {
                   <tr key={r.code}>
                     <td><Link href={`/admin/shipments/${r.code}`}>{r.code}</Link></td>
                     <td>{r.status.replace(/_/g,' ')}</td>
-                    <td className="num">{r.eta ? fmtDate(r.eta).slice(0,11) : '—'}</td>
+                    <td className="num">{r.eta ? fmtDay(r.eta) : '—'}</td>
                     <td>{r.container_no ?? '—'}</td>
                     <td>{r.supplier ?? '—'}</td>
                     <td className="num">{r.units}</td>

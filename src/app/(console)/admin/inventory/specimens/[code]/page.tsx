@@ -8,7 +8,7 @@ import {
   ITEM_STATUSES, HEALTH,
 } from '@/lib/inventory';
 import { getAllProducts } from '@/lib/products';
-import { fmtDate } from '@/components/admin/bits';
+import { fmtDate, fmtDay } from '@/components/admin/bits';
 
 export const dynamic = 'force-dynamic';
 
@@ -117,7 +117,7 @@ export default async function SpecimenPage({ params }: { params: Promise<{ code:
   if (s.status !== 'available') blockers.push(`status is ${s.status}`);
   if (s.health === 'critical' || s.health === 'dead') blockers.push(`health is ${s.health}`);
   if (s.acclimatised_until && new Date(s.acclimatised_until) > new Date())
-    blockers.push(`still acclimatising until ${fmtDate(s.acclimatised_until).slice(0, 11)}`);
+    blockers.push(`still acclimatising until ${fmtDay(s.acclimatised_until)}`);
   if (s.location_sellable === false) blockers.push(`cannot sell from ${s.location_name}`);
 
   return (
@@ -148,8 +148,8 @@ export default async function SpecimenPage({ params }: { params: Promise<{ code:
               <div><dt>Grade</dt><dd>{s.grade ?? '—'}</dd></div>
               <div><dt>Location</dt><dd>{s.location_name ?? '—'}</dd></div>
               <div><dt>Supplier</dt><dd>{s.supplier_name ?? '—'}</dd></div>
-              <div><dt>Arrived</dt><dd>{s.arrived_at ? fmtDate(s.arrived_at).slice(0,11) : '—'}</dd></div>
-              <div><dt>Sellable from</dt><dd>{s.acclimatised_until ? fmtDate(s.acclimatised_until).slice(0,11) : '—'}</dd></div>
+              <div><dt>Arrived</dt><dd>{s.arrived_at ? fmtDay(s.arrived_at) : '—'}</dd></div>
+              <div><dt>Sellable from</dt><dd>{s.acclimatised_until ? fmtDay(s.acclimatised_until) : '—'}</dd></div>
               <div><dt>Purchase cost</dt><dd>{s.purchase_cost ? `${s.purchase_currency} ${s.purchase_cost}` : '—'}</dd></div>
               <div><dt>FX at purchase</dt><dd>{s.fx_rate_to_aed ?? '—'}</dd></div>
               <div><dt>Landed cost</dt><dd>{s.landed_cost_aed ? `AED ${s.landed_cost_aed}` : '—'}</dd></div>
@@ -171,7 +171,7 @@ export default async function SpecimenPage({ params }: { params: Promise<{ code:
                 <tbody>
                   {measurements.map((m) => (
                     <tr key={m.id}>
-                      <td className="num">{fmtDate(m.measured_at).slice(0,11)}</td>
+                      <td className="num">{fmtDay(m.measured_at)}</td>
                       <td className="num">{m.height_m ? `${m.height_m} m` : '—'}</td>
                       <td className="num">{m.trunk_girth_cm ? `${m.trunk_girth_cm} cm` : '—'}</td>
                       <td className="num">{m.crown_width_m ? `${m.crown_width_m} m` : '—'}</td>

@@ -2,8 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { readShortlist, SHORTLIST_EVENT } from '@/lib/shortlist';
+import { useShortlist } from '@/lib/use-shortlist';
 
 /**
  * A running count, so a shortlist somebody is building never disappears.
@@ -15,23 +14,9 @@ import { readShortlist, SHORTLIST_EVENT } from '@/lib/shortlist';
  */
 export default function ShortlistBar() {
   const path = usePathname();
-  const [count, setCount] = useState(0);
-  const [items, setItems] = useState(0);
-
-  useEffect(() => {
-    const sync = () => {
-      const list = readShortlist();
-      setItems(list.length);
-      setCount(list.reduce((s, i) => s + i.qty, 0));
-    };
-    sync();
-    window.addEventListener(SHORTLIST_EVENT, sync);
-    window.addEventListener('storage', sync);
-    return () => {
-      window.removeEventListener(SHORTLIST_EVENT, sync);
-      window.removeEventListener('storage', sync);
-    };
-  }, [path]);
+  const list = useShortlist();
+  const items = list.length;
+  const count = list.reduce((s, i) => s + i.qty, 0);
 
   if (items === 0 || path.startsWith('/shortlist')) return null;
 

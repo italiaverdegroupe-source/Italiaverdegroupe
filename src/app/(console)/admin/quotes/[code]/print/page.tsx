@@ -2,7 +2,7 @@ import { notFound, redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth';
 import { getQuote, getQuoteItems, totalsOf } from '@/lib/quotes';
 import { getSettings } from '@/lib/settings';
-import { fmtDate } from '@/components/admin/bits';
+import { fmtDay } from '@/components/admin/bits';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,8 +42,8 @@ export default async function PrintQuote({
         <div className="sh-right">
           <h1>Quotation</h1>
           <p className="sh-meta">{q.code} &nbsp;·&nbsp; version {q.version}</p>
-          <p className="sh-meta">Issued {q.issued_on ? fmtDate(q.issued_on).slice(0, 11) : '—'}</p>
-          <p className="sh-meta">Valid until {q.valid_until ? fmtDate(q.valid_until).slice(0, 11) : '—'}</p>
+          <p className="sh-meta">Issued {q.issued_on ? fmtDay(q.issued_on) : '—'}</p>
+          <p className="sh-meta">Valid until {q.valid_until ? fmtDay(q.valid_until) : '—'}</p>
         </div>
       </header>
 

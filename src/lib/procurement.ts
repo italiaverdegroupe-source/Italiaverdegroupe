@@ -15,6 +15,45 @@ export const DOC_KINDS = [
 ] as const;
 export const DOC_STATUSES = ['required', 'requested', 'received', 'verified', 'not_applicable'] as const;
 
+export type DocKind = (typeof DOC_KINDS)[number];
+export type DocStatus = (typeof DOC_STATUSES)[number];
+
+/** What each document is called by the people who chase it. */
+export const DOC_LABEL: Record<DocKind, string> = {
+  import_permit: 'Import permit (MOCCAE)',
+  phytosanitary: 'Phytosanitary certificate',
+  cites: 'CITES certificate',
+  invoice: 'Commercial invoice',
+  packing_list: 'Packing list',
+  bill_of_lading: 'Bill of lading / airway bill',
+  certificate_of_origin: 'Certificate of origin',
+  customs_declaration: 'Customs declaration',
+  other: 'Other',
+};
+
+export const DOC_STATUS_LABEL: Record<DocStatus, string> = {
+  required: 'Required',
+  requested: 'Requested',
+  received: 'Received',
+  verified: 'Verified',
+  not_applicable: 'Not applicable',
+};
+
+/**
+ * What a consignment of live plants from Italy needs before it moves.
+ *
+ * CITES is left off: it applies to a minority of species and putting it on
+ * every shipment would train whoever works the list to ignore rows. It is in
+ * DOC_KINDS and one click away when a consignment actually needs one.
+ */
+export const STANDARD_CHECKLIST: DocKind[] = [
+  'import_permit', 'phytosanitary', 'invoice', 'packing_list',
+  'bill_of_lading', 'certificate_of_origin', 'customs_declaration',
+];
+
+export const isDocKind = (v: string): v is DocKind => (DOC_KINDS as readonly string[]).includes(v);
+export const isDocStatus = (v: string): v is DocStatus => (DOC_STATUSES as readonly string[]).includes(v);
+
 export type Shipment = {
   id: string; code: string; status: string; incoterm: string | null;
   supplier_name: string | null; carrier: string | null; container_no: string | null;
@@ -69,9 +108,89 @@ export const getShipmentCosts = (shipmentId: string) =>
 
 export const getShipmentDocuments = (shipmentId: string) =>
   query<{ id: string; kind: string; reference: string | null; status: string;
-          issued_on: string | null; expires_on: string | null; note: string | null }>(
-    `SELECT id, kind, reference, status, issued_on, expires_on, note
-       FROM shipment_documents WHERE shipment_id = $1 ORDER BY kind`, [shipmentId]);
+          issued_on: string | null; expires_on: string | null; note: string | null;
+          days_to_expiry: string | null }>(
+    // The countdown is measured against the clock that stored the date, not
+    // the web server's — and it means the page never has to read the time
+    // while it renders.
+    `SELECT id, kind, reference, status, issued_on::text, expires_on::text, note,
+            (expires_on - current_date)::text AS days_to_expiry
+       FROM shipment_documents
+      WHERE shipment_id = $1
+      -- Outstanding first, and inside that the soonest deadline: the order
+      -- somebody chasing paperwork actually works in.
+      ORDER BY (status IN ('verified','not_applicable')),
+               expires_on NULLS LAST, kind`, [shipmentId]);
+
+/**
+ * Create, update and remove one compliance document.
+ *
+ * The table has CHECK constraints on kind and status, so an unexpected value
+ * arrives as a Postgres error and a 500 rather than a message. Validated here
+ * instead: a form posts strings, and a string from a form is an assertion, not
+ * a fact.
+ */
+export async function saveShipmentDocument(input: {
+  shipmentId: string;
+  id?: string | null;
+  kind: string;
+  reference?: string | null;
+  status: string;
+  issuedOn?: string | null;
+  expiresOn?: string | null;
+  note?: string | null;
+}): Promise<void> {
+  if (!isDocKind(input.kind)) throw new Error(`Unknown document type: ${input.kind}`);
+  if (!isDocStatus(input.status)) throw new Error(`Unknown document status: ${input.status}`);
+
+  const blank = (v: string | null | undefined) => {
+    const t = (v ?? '').trim();
+    return t === '' ? null : t;
+  };
+  const vals = [
+    input.kind, blank(input.reference), input.status,
+    blank(input.issuedOn), blank(input.expiresOn), blank(input.note),
+  ];
+
+  if (input.id) {
+    await query(
+      `UPDATE shipment_documents
+          SET kind=$1, reference=$2, status=$3, issued_on=$4, expires_on=$5,
+              note=$6, updated_at=now()
+        WHERE id=$7 AND shipment_id=$8`,
+      [...vals, input.id, input.shipmentId]);
+    return;
+  }
+  await query(
+    `INSERT INTO shipment_documents
+       (shipment_id, kind, reference, status, issued_on, expires_on, note)
+     VALUES ($7,$1,$2,$3,$4,$5,$6)`,
+    [...vals, input.shipmentId]);
+}
+
+export async function removeShipmentDocument(shipmentId: string, id: string): Promise<void> {
+  await query(`DELETE FROM shipment_documents WHERE id = $1 AND shipment_id = $2`,
+    [id, shipmentId]);
+}
+
+/**
+ * Put the standard checklist on a shipment that has none.
+ *
+ * Skips anything already there, so pressing it twice does not produce two
+ * phytosanitary rows, and returns how many it actually added.
+ */
+export async function seedShipmentChecklist(shipmentId: string): Promise<number> {
+  const rows = await query<{ n: string }>(
+    `INSERT INTO shipment_documents (shipment_id, kind, status)
+     SELECT $1, k, 'required'
+       FROM unnest($2::text[]) AS k
+      WHERE NOT EXISTS (
+        SELECT 1 FROM shipment_documents d
+         WHERE d.shipment_id = $1 AND d.kind = k)
+     RETURNING 1 AS n`,
+    [shipmentId, STANDARD_CHECKLIST]);
+  return rows.length;
+}
 
 /** Items + costs, run through the allocation engine. */
 export async function costOf(shipmentId: string): Promise<CostedShipment & { items: ItemRow[] }> {

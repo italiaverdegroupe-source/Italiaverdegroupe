@@ -5,12 +5,11 @@ import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { query } from '@/lib/db';
 import {
   getQuote, getQuoteItems, getQuoteEvents, getQuoteVersions, totalsOf,
-  acceptQuote, newVersion, logQuoteEvent, ISSUED, QUOTE_STATUSES,
+  acceptQuote, newVersion, logQuoteEvent, QUOTE_STATUSES,
 } from '@/lib/quotes';
 import { listSpecimens } from '@/lib/inventory';
 import { getAllProducts } from '@/lib/products';
-import { getSettings } from '@/lib/settings';
-import { fmtDate } from '@/components/admin/bits';
+import { fmtDate, fmtDay } from '@/components/admin/bits';
 
 export const dynamic = 'force-dynamic';
 
@@ -130,7 +129,6 @@ export default async function QuotePage({
   if (!user) redirect('/admin/login');
   const { code } = await params;
   const { v } = await searchParams;
-  const site = await getSettings();
 
   const q = await getQuote(code, v ? Number(v) : undefined);
   if (!q) notFound();
@@ -151,7 +149,7 @@ export default async function QuotePage({
         <span className={`pill pill-${q.status === 'accepted' ? 'won' : q.status === 'draft' ? 'new' : ['rejected','expired','superseded'].includes(q.status) ? 'lost' : 'quoted'}`}>{q.status}</span>
         {' '}{q.customer_name}{q.customer_company ? ` · ${q.customer_company}` : ''}
         {q.emirate ? ` · ${q.emirate}` : ''}
-        {q.valid_until ? ` · valid until ${fmtDate(q.valid_until).slice(0,11)}` : ''}
+        {q.valid_until ? ` · valid until ${fmtDay(q.valid_until)}` : ''}
       </p>
 
       {versions.length > 1 && (

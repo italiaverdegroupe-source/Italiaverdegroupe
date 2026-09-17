@@ -219,7 +219,7 @@ export default async function ContentPage({ searchParams }: {
             one. Record the real conversation.
           </p>
 
-          {[...voices, null].map((v, i) => (
+          {[...voices, null].map((v) => (
             <form key={v?.id ?? 'new'} action={saveTestimonial} className="adm-panel adm-pad"
                   style={{ marginBottom: 14, opacity: v && !v.is_published ? 0.72 : 1 }}>
               {v && <input type="hidden" name="id" value={v.id} />}
