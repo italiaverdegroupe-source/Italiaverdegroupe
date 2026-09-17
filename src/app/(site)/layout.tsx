@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Fraunces, Inter } from 'next/font/google';
-import { site } from '@/lib/site';
+import { ogImage, site } from '@/lib/site';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import '../globals.css';
@@ -33,6 +33,7 @@ export const metadata: Metadata = {
     title: `${site.legalName} — ${site.tagline}`,
     description: site.description,
     locale: 'en_AE',
+    images: [ogImage],
   },
   twitter: { card: 'summary_large_image' },
   robots: { index: true, follow: true },

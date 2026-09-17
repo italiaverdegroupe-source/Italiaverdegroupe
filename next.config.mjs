@@ -11,6 +11,11 @@ const nextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [360, 480, 640, 828, 1080, 1280, 1600, 1920],
+    // Next only serves the quality levels named here, so asking for 88 without
+    // listing it returns a 400 rather than a sharper picture. 75 stays for
+    // everything else; the hero is the one image on the site that fills the
+    // window, and it is the one that shows the difference.
+    qualities: [75, 88],
   },
   async headers() {
     return [{

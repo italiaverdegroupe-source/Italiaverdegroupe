@@ -70,3 +70,19 @@ export function fallbackContact(): string {
   if (site.email) return `Please email ${site.email}.`;
   return 'Please try again in a moment.';
 }
+
+/**
+ * The card that appears when someone pastes a link into WhatsApp, LinkedIn or
+ * X — which, for a UAE trade supplier, is how most links actually travel.
+ *
+ * Named here rather than dropped in as app/opengraph-image.jpg because Next
+ * merges openGraph shallowly: any page that sets a title of its own replaces
+ * the whole object, image included, and the convention file then reaches only
+ * the pages that never set one. Every page states it instead.
+ */
+export const ogImage = {
+  url: '/brand/og-cover.jpg',
+  width: 1200,
+  height: 630,
+  alt: 'An ancient Italian olive tree on a Dubai terrace at sunrise, with the city skyline behind it.',
+} as const;

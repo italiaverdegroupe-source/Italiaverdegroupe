@@ -1,5 +1,6 @@
 import { cache } from 'react';
 import { query } from '@/lib/db';
+import { ogImage } from '@/lib/site';
 
 /**
  * Editable site content.
@@ -293,7 +294,7 @@ export async function metadataFor(
   title: string; description: string;
   alternates: { canonical: string };
   robots?: { index: boolean; follow: boolean };
-  openGraph: { title: string; description: string };
+  openGraph: { title: string; description: string; images: [typeof ogImage] };
 }> {
   const seo = await getSeo(path);
   const title = seo?.title ?? base.title;
@@ -302,6 +303,8 @@ export async function metadataFor(
     title, description,
     alternates: { canonical: path },
     ...(seo?.noindex ? { robots: { index: false, follow: true } } : {}),
-    openGraph: { title, description },
+    // The image has to be repeated here. openGraph is merged shallowly, so a
+    // page that names its own title drops everything the layout set.
+    openGraph: { title, description, images: [ogImage] },
   };
 }

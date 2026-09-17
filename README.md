@@ -301,3 +301,45 @@ the ancient olive sells for AED 38,000, costs AED 35,054 landed, and returns
 ```bash
 # figures are checked against independently computed SQL, not eyeballed
 ```
+
+## The homepage photograph
+
+The hero is one picture the owner chose, full bleed, with the copy on it —
+`public/brand/hero-terrace.webp`. It sits in `public/brand`, never
+`public/products`, so it cannot be reached through `imageFor()` or turn up in
+the catalogue as something a customer can ask a price for.
+
+Two things follow from putting words on a photograph rather than on a panel.
+
+**The wash is measured, not guessed.** Behind the headline the sky runs at
+0.46–0.82 relative luminance, so near-black type is already about 9:1 there and
+a heavy scrim would only hide a picture that does not need hiding. The wash is
+held flat at .46 for the first two fifths and let down slowly after that, which
+costs the sunrise nothing and still has something left where the last word of
+the headline reaches the crown of the tree — the one dark thing any of the copy
+crosses. That word measured 1.6:1 before and 3.9:1 after at 1280px.
+
+**A phone gets the picture, not a rumour of one.** A portrait window onto a
+2.1:1 photograph throws away nine tenths of the width, and the tenth left has
+to sit under a wash heavy enough to read four paragraphs through. Below 860px
+the picture stops being a backdrop and becomes a band at the top, at its own
+shape, with the words underneath.
+
+```bash
+BASE=http://127.0.0.1:3000 node tests/hero-contrast.mjs
+```
+
+It screenshots each piece of copy, sets it to `color: transparent`, screenshots
+again, and compares the declared colour against the worst pixel actually behind
+the glyphs, at eight widths from 320 to 2560. Ratios off a stylesheet would say
+nothing here: the same headline crosses open sky at one width and a tree at
+another.
+
+### Link previews
+
+`site.ogImage` is a 1200×630 crop of the same photograph, named by every page
+rather than dropped in as `app/opengraph-image.jpg`. Next merges `openGraph`
+shallowly, so any page that sets a title of its own replaces the whole object —
+image included — and the convention file reaches only the pages that never set
+one. Product pages override it with the specimen's own photograph, which is
+what someone sharing a tree means to send.

@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import Prose from '@/components/Prose';
 import { getPost, publishedPosts } from '@/lib/content';
+import { ogImage } from '@/lib/site';
 import { imageFor } from '@/lib/products';
 import { getSettings } from '@/lib/settings';
 
@@ -42,6 +43,7 @@ export async function generateMetadata(
       title: post.seo_title || post.title,
       description: post.seo_description || post.excerpt || undefined,
       publishedTime: post.published_at ?? undefined,
+      images: [ogImage],
     },
   };
 }

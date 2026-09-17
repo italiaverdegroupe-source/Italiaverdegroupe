@@ -64,9 +64,26 @@ export default function Header() {
            the page below it looks like without threading a prop through the
            layout — the hero's own travertine wash keeps the navigation legible. */
         body:has(.hero-veil) .hdr {
-          background: linear-gradient(to bottom, rgb(250 247 240 / .86), rgb(250 247 240 / 0));
+          background: none;
           -webkit-backdrop-filter: none; backdrop-filter: none;
           border-bottom-color: transparent;
+        }
+        /* The scrim is a pseudo-element half again as tall as the bar, not the
+           bar's own background, for two reasons. A gradient on the bar is
+           sized to its padding box and then tiled, so the 1px border strip
+           below it gets the gradient's first, near-opaque stop — a bright
+           hairline straight across the photograph. And a fade that has to
+           finish inside 78px is either too weak to carry the navigation over
+           the crown of the tree or steep enough to read as a band. Running it
+           past the bar and out to nothing solves both. */
+        body:has(.hero-veil) .hdr::before {
+          content: ''; position: absolute; z-index: -1; pointer-events: none;
+          inset: 0 0 auto 0; height: 190%;
+          background: linear-gradient(to bottom,
+            rgb(250 247 240 / .93) 0%,
+            rgb(250 247 240 / .66) 42%,
+            rgb(250 247 240 / .22) 74%,
+            rgb(250 247 240 / 0) 100%);
         }
         @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
           .hdr { background: var(--sand-50); }
@@ -85,14 +102,16 @@ export default function Header() {
         }
         .brand-txt em {
           font-style: normal; font-size: .6rem; letter-spacing: .3em;
-          text-transform: uppercase; color: var(--ink-400);
+          /* ink-400 gives 4.35:1 on travertine — under AA before a photograph
+             is anywhere near it. This word is half the company's name. */
+          text-transform: uppercase; color: var(--ink-600);
         }
 
         .brand-line {
           display: none; margin: 0 auto 0 0;
           padding-inline-start: 22px; border-inline-start: 1px solid var(--line);
           font-size: .62rem; line-height: 1.5; letter-spacing: .18em;
-          text-transform: uppercase; color: var(--ink-400);
+          text-transform: uppercase; color: var(--ink-600);
         }
 
         .nav { display: none; gap: 26px; list-style: none; margin: 0; padding: 0; }

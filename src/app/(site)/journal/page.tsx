@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getBlocks, publishedPosts, getSeo } from '@/lib/content';
+import { ogImage } from '@/lib/site';
 import { imageFor } from '@/lib/products';
 import { getSettings } from '@/lib/settings';
 
@@ -17,7 +18,10 @@ export async function generateMetadata(): Promise<Metadata> {
     description: seo?.description ?? c['journal.intro'],
     alternates: { canonical: '/journal' },
     robots: seo?.noindex ? { index: false, follow: true } : undefined,
-    openGraph: { title: seo?.title ?? `${c['journal.title']} — ${site.legalName}` },
+    openGraph: {
+      title: seo?.title ?? `${c['journal.title']} — ${site.legalName}`,
+      images: [ogImage],
+    },
   };
 }
 

@@ -4,19 +4,21 @@ import Image from 'next/image';
 import RouteMap from '@/components/RouteMap';
 import ProductCard from '@/components/ProductCard';
 import { getSettings } from '@/lib/settings';
+import { ogImage } from '@/lib/site';
 import { getBlocks, fill, publishedFaqs, publishedTestimonials, getSeo } from '@/lib/content';
 import { getAllProducts, getShowcaseProducts, getFamilies, imageFor } from '@/lib/products';
 
-// Chosen by looking at all forty-four verified tree photographs cropped to
-// this column, not by picking one from a filename: a sculptural olive as the
-// centrepiece of a finished garden — a pool, lawn, white gravel — which is the
-// thing the company actually sells. Most of the catalogue is nursery rows and
-// warehouse floors, and a landscape frame cropped tall becomes a wall of
-// leaves.
-const HERO_REF = 'VG-OL-012';
+// The picture the owner chose, and the reason the rest of this section is
+// built the way it is. It lives in public/brand, never public/products: it is
+// a scene, not a specimen, so it must not be reachable through imageFor() or
+// appear in the catalogue as something a customer can ask a price for.
+//
+// 1824 x 862, so it is served at its own size up to a 1920 viewport and
+// upscaled beyond that. Nothing here can raise that — a larger original is
+// the only thing that would.
+const HERO = '/brand/hero-terrace.webp';
 const SPOT_REF = 'VG-OL-002';
 const BAND_REF = 'VG-PL-017';
-const HERO = imageFor(HERO_REF);
 const SPOT = imageFor(SPOT_REF);
 const BAND = imageFor(BAND_REF);
 
@@ -44,7 +46,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title, description,
     alternates: { canonical: '/' },
     ...(seo?.noindex ? { robots: { index: false, follow: true } } : {}),
-    openGraph: { title, description },
+    openGraph: { title, description, images: [ogImage] },
   };
 }
 
@@ -76,7 +78,8 @@ export default async function HomePage() {
           the copy sits on a surface that belongs to the same picture. */}
       <section className="hero">
         <div className="hero-media">
-          <Image src={HERO} alt="" fill priority sizes="100vw" className="hero-img" />
+          <Image src={HERO} alt="" fill priority sizes="100vw" quality={88}
+                 className="hero-img" />
         </div>
         <div className="hero-veil" />
 
@@ -400,33 +403,50 @@ export default async function HomePage() {
         }
         .hero-media { position: absolute; inset: 0; z-index: -2; }
         .hero-img {
-          object-fit: cover; object-position: 62% 48%;
-          /* The catalogue photographs are supplier snapshots in flat light.
-             A little warmth and contrast is grading, not deception — the tree
-             is the tree. */
-          filter: saturate(1.06) contrast(1.06) brightness(1.02);
+          /* 50% keeps the sun, the skyline and the whole tree in frame at every
+             desktop width: the picture is wider than the opening, so the
+             browser trims the sides, and the two things it must not trim are
+             at the far left and the far right. */
+          object-fit: cover; object-position: 50% 50%;
+          /* No grading. This photograph is already lit; saturating it further
+             would only push the sky. */
         }
-        @media (prefers-reduced-motion: no-preference) {
-          .hero-img { animation: kenburns 38s ease-out both; }
-          @keyframes kenburns { from { transform: scale(1.03); } to { transform: scale(1.1); } }
-        }
+        /* No slow zoom either. The original is 1824px across, and a 1.1 scale
+           on top of the upscale a wide screen already applies is the
+           difference between sharp and soft. */
 
+        /* The wash, and the whole argument of this rebuild.
+           The old one was 98% opaque across the left half, which turned the
+           better part of the photograph back into the cream rectangle it was
+           supposed to replace. It had to be, because the picture underneath it
+           was dark there. This one is not: measured off the file, the sky
+           behind the headline sits at 0.50–0.82 relative luminance, and near
+           black type on 0.50 is already about 9:1. So the wash only has two
+           jobs left — take the glare off the sun, and carry the foot of the
+           picture into the bar of assurances — and it does them at a third of
+           the old strength. An ellipse rather than a band, so there is no edge
+           anywhere for the eye to read as a seam. */
         .hero-veil {
           position: absolute; inset: 0; z-index: -1;
           background:
-            /* The wash. Opaque where the words are, gone by two thirds across,
-               with no hard edge anywhere — the seam is what made the first
-               attempt look like a template. */
-            linear-gradient(97deg,
-              rgb(250 247 240 / .985) 0%,
-              rgb(250 247 240 / .96) 26%,
-              rgb(250 247 240 / .78) 42%,
-              rgb(250 247 240 / .26) 58%,
-              rgb(250 247 240 / .04) 72%,
-              rgb(250 247 240 / 0) 84%),
-            /* a breath of warmth into the sky, which is blown out in the source */
-            linear-gradient(to bottom, rgb(239 226 198 / .34) 0%, rgb(239 226 198 / 0) 34%),
-            linear-gradient(to top, rgb(250 247 240 / .5) 0%, rgb(250 247 240 / 0) 26%);
+            /* Held flat at .46 for the first two fifths and then let down
+               slowly, rather than falling away from the left edge. Same
+               strength over the sunrise as a steeper curve — so the sky costs
+               nothing — but it still has something left where the last word of
+               the headline reaches the crown of the tree, which is the one
+               dark thing any of this copy crosses. Measured: that word went
+               from 1.6:1 to 3.9:1 at 1280 and 4.5:1 at 2560. */
+            radial-gradient(128% 104% at 0% 46%,
+              rgb(250 247 240 / .46) 0%,
+              rgb(250 247 240 / .46) 40%,
+              rgb(250 247 240 / .40) 56%,
+              rgb(250 247 240 / .26) 68%,
+              rgb(250 247 240 / .10) 80%,
+              rgb(250 247 240 / 0) 94%),
+            linear-gradient(to top,
+              rgb(250 247 240 / .58) 0%,
+              rgb(250 247 240 / .20) 13%,
+              rgb(250 247 240 / 0) 28%);
         }
 
         .hero-in { position: relative; z-index: 2; width: 100%; }
@@ -439,11 +459,27 @@ export default async function HomePage() {
           font-style: italic; color: var(--olive-800);
           font-variation-settings: 'SOFT' 40, 'WONK' 1;
         }
+        /* Every small piece of copy here is darker than it is elsewhere on the
+           site. On a page of travertine, ink-400 and ink-600 read comfortably;
+           on a photograph at half the strength of wash they do not, and the
+           faintest of the three — the eyebrow — is the one that fails first. */
+        .hero .eyebrow { color: var(--olive-700); }
         .hero-lede {
           font-size: clamp(1.02rem, 1.3vw, 1.18rem); line-height: 1.62;
-          color: var(--fg-soft); max-width: 44ch; margin: 0 0 2.4rem;
+          color: var(--olive-900); max-width: 44ch; margin: 0 0 2.4rem;
         }
         .hero-cta { display: flex; flex-wrap: wrap; gap: 14px; }
+        /* The outline button has no surface of its own, so over a picture its
+           hairline border disappears and takes 1.4.11 with it. Give it a pane
+           of the same travertine the rest of the page is made of. */
+        .hero-cta .btn-ghost {
+          background: rgb(252 250 245 / .88);
+          -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+          border-color: rgb(46 68 32 / .38); color: var(--olive-900);
+        }
+        .hero-cta .btn-ghost:hover {
+          background: rgb(252 250 245 / .98); border-color: var(--olive-700);
+        }
 
         /* the seal */
         .hero-seal {
@@ -481,7 +517,7 @@ export default async function HomePage() {
           display: flex; align-items: center; gap: 16px;
           max-width: min(430px, calc(100% - 32px));
           padding: 12px 18px 12px 12px; border-radius: 4px; text-decoration: none;
-          background: rgb(252 250 245 / .94);
+          background: rgb(252 250 245 / .97);
           -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
           box-shadow: 0 24px 60px -26px rgb(10 14 8 / .7);
           transition: transform .3s var(--ease);
@@ -494,7 +530,9 @@ export default async function HomePage() {
         .hero-feat-img img { object-fit: cover; }
         .hero-feat-txt { display: grid; gap: 3px; min-width: 0; }
         .hero-feat-eyebrow {
-          font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-400);
+          /* ink-400 tops out at 4.35:1 on travertine and this card is not even
+             solid travertine, so the label was never quite readable. */
+          font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-600);
         }
         .hero-feat-name {
           font-family: var(--font-fraunces), serif; font-size: 1.06rem; color: var(--olive-950);
@@ -527,20 +565,71 @@ export default async function HomePage() {
         @media (max-width: 1100px) {
           .hero-feat { display: none; }
         }
+
+        /* ── phones ──
+           Below this the overlay stops being worth it. A portrait window onto
+           a 2.1:1 photograph throws away nine tenths of the width, and the
+           tenth that is left has to sit under a wash heavy enough to read
+           four paragraphs through — which leaves a beige page with a rumour
+           of a tree on it. So the picture stops being a backdrop and becomes
+           a picture: a full-bleed band at the top, at its own shape, with the
+           words underneath it on travertine. Same photograph, actually
+           visible. */
         @media (max-width: 860px) {
-          .hero { min-height: auto; padding-bottom: clamp(150px, 22vh, 210px); }
-          .hero h1 { max-width: 16ch; }
+          .hero {
+            display: block; min-height: 0;
+            padding-top: 0; padding-bottom: 0;
+            background: var(--bg-warm);
+          }
+          .hero-media {
+            position: relative; inset: auto; z-index: 0;
+            height: clamp(300px, 46vh, 430px);
+          }
+          /* The trunk and the crown — the part that still says olive tree at
+             390px. The sun and the skyline cannot survive this crop at any
+             offset, so they are not fought for. */
+          .hero-img { object-position: 66% 44%; }
+          /* All the veil has left to do is keep the brand mark legible where
+             the header floats over the top of the band. */
           .hero-veil {
-            background:
-              linear-gradient(to right, rgb(250 247 240 / .985) 0%, rgb(250 247 240 / .93) 55%, rgb(250 247 240 / .62) 100%),
-              linear-gradient(to top, rgb(250 247 240 / .7) 0%, rgb(250 247 240 / 0) 34%);
+            inset: 0 0 auto 0; z-index: 1;
+            height: calc(var(--hdr-h) + 54px);
+            background: linear-gradient(to bottom,
+              rgb(250 247 240 / .88) 0%,
+              rgb(250 247 240 / .58) 46%,
+              rgb(250 247 240 / 0) 100%);
+          }
+          .hero-in {
+            padding-top: clamp(30px, 5.5vh, 44px);
+            padding-bottom: clamp(30px, 5vh, 42px);
+          }
+          .hero h1 { max-width: 16ch; }
+          .hero-lede { margin-bottom: 1.9rem; }
+          .hero-cta .btn-ghost {
+            background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none;
+            border-color: var(--line);
+          }
+          /* Bigger here than it was, not smaller. At 84px the three lines
+             inside were touching the brass ring, and a letter half on the ring
+             and half on the disc is a letter on two backgrounds — measured at
+             2.9:1 against the ring. The disc has room over the canopy. */
+          .hero-seal {
+            top: calc(var(--hdr-h) + 16px); bottom: auto;
+            right: clamp(14px, 4vw, 26px); width: 108px;
+          }
+          /* In the flow now, under the copy, rather than floating over the
+             foot of a picture that is no longer behind it. */
+          .hero-assure-bar {
+            position: static; background: transparent;
+            -webkit-backdrop-filter: none; backdrop-filter: none;
+            border-top: 1px solid var(--line-soft);
           }
           .hero-assure { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-          .hero-seal { width: 88px; top: auto; bottom: calc(100% - 100vh + 260px); }
         }
         @media (max-width: 560px) {
+          .hero h1 { font-size: clamp(2.3rem, 9.4vw, 3.4rem); }
           .hero-cta .btn { width: 100%; }
-          .hero-seal { display: none; }
+          .hero-seal { width: 96px; }
         }
 
         /* ── what we can prove ── */
