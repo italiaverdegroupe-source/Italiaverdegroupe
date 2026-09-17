@@ -18,6 +18,7 @@ export async function register() {
 
   const minutes = Number(process.env.ALERT_SCAN_MINUTES ?? 15);
   const { runScan, seedDefaultRules } = await import('@/lib/alerts');
+  const { dueForBackup, runBackup } = await import('@/lib/backup');
 
   const once = async (trigger: 'startup' | 'schedule') => {
     try {
@@ -27,6 +28,19 @@ export async function register() {
     } catch (err) {
       // A failing scan must never take the web server down with it.
       console.error('[alerts] scan failed:', err);
+    }
+
+    // The backup rides on the same tick rather than a timer of its own. It
+    // decides for itself whether it is due, so nothing is lost to a restart.
+    try {
+      if (await dueForBackup()) {
+        const b = await runBackup(trigger);
+        console.log(b.ok
+          ? `[backup] ${b.key} — ${b.rows} rows, ${b.bytes} bytes, verified${b.pruned ? `, pruned ${b.pruned}` : ''}`
+          : `[backup] FAILED: ${b.error}`);
+      }
+    } catch (err) {
+      console.error('[backup] failed:', err);
     }
   };
 

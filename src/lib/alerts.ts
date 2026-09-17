@@ -113,6 +113,11 @@ export const ALERT_KINDS: AlertKind[] = [
     why: 'A stressed tree can be saved; a dead one is a written-off asset. This is the alert that pays for itself first.',
     defaultSeverity: 'urgent', tokens: ['code', 'product', 'health', 'location'] },
 
+  { key: 'backup.stale', label: 'No recent backup', trigger: 'scan',
+    why: 'A backup system fails silently — nothing breaks when it stops, and the discovery happens on the one day it was needed. This is the alert that makes the silence audible.',
+    thresholdLabel: 'Hours since the last good backup', defaultThreshold: 30,
+    defaultSeverity: 'urgent', tokens: ['hours', 'last'] },
+
   { key: 'customer.credit', label: 'Customer over credit limit', trigger: 'scan',
     why: 'The limit exists to stop one contractor quietly becoming the whole receivables book. Crossing it should be a decision, not a discovery.',
     defaultSeverity: 'urgent', tokens: ['customer', 'outstanding', 'limit'] },
@@ -405,6 +410,37 @@ const SCANS: Record<string, (rule: Rule) => Promise<Candidate[]>> = {
       entity: 'stock_item', entityId: s.code, href: `/admin/inventory/specimens/${s.code}`,
       tokens: { code: s.code, product: s.product_ref, health: s.health, location: s.location ?? '' },
     }));
+  },
+
+  'backup.stale': async (r) => {
+    const hours = num(r, 30);
+    const rows = await query<{ last: string | null; hours: string | null }>(
+      `SELECT max(finished_at)::text AS last,
+              round(extract(epoch FROM now() - max(finished_at)) / 3600)::text AS hours
+         FROM backup_runs WHERE status = 'ok'`);
+    const last = rows[0]?.last ?? null;
+    const age = Number(rows[0]?.hours ?? 0);
+
+    // Never having taken one is the worse case, not the excusable one.
+    if (!last) {
+      return [{
+        subject: 'never',
+        title: 'The database has never been backed up',
+        body: 'No successful backup has ever been recorded. Until one runs, the only recovery is Neon\u2019s six-hour history.',
+        entity: 'backup', entityId: 'never', href: '/admin/backups',
+        tokens: { hours: '', last: 'never' },
+      }];
+    }
+    if (age < hours) return [];
+    return [{
+      // Bucketed by day, so a backup that stays broken is raised again each
+      // day rather than once and then forgotten.
+      subject: 'stale', bucket: String(Math.floor(age / 24)),
+      title: `No successful backup for ${age} hours`,
+      body: `The last good backup finished ${last}. Every hour past that is data that cannot be recovered.`,
+      entity: 'backup', entityId: 'stale', href: '/admin/backups',
+      tokens: { hours: String(age), last },
+    }];
   },
 
   'customer.credit': async () => {
