@@ -681,7 +681,7 @@ export default async function HomePage() {
         }
         .voice {
           margin: 0; padding: 30px 28px; background: #fff;
-          border: 1px solid var(--rule); border-radius: 3px;
+          border: 1px solid var(--line); border-radius: 3px;
           display: flex; flex-direction: column; gap: 18px;
         }
         .voice blockquote {
@@ -694,22 +694,6 @@ export default async function HomePage() {
         .voice-who  { font-weight: 600; font-size: .9rem; }
         .voice-org  { font-size: .82rem; color: var(--fg-soft); }
         .voice-proj { font-size: .76rem; color: var(--fg-soft); letter-spacing: .04em; }
-
-        /* ── faqs ── */
-        .faqs { display: grid; gap: 0; border-top: 1px solid var(--rule); }
-        .faq { border-bottom: 1px solid var(--rule); }
-        .faq summary {
-          cursor: pointer; padding: 20px 40px 20px 0; position: relative;
-          font-family: var(--font-display); font-size: 1.04rem; list-style: none;
-        }
-        .faq summary::-webkit-details-marker { display: none; }
-        .faq summary::after {
-          content: '+'; position: absolute; right: 8px; top: 50%;
-          transform: translateY(-50%); font-size: 1.3rem; color: var(--brass-600);
-          transition: transform .18s ease;
-        }
-        .faq[open] summary::after { content: '–'; }
-        .faq p { margin: 0 0 22px; max-width: 68ch; color: var(--fg-soft); }
 
         /* ── route ── */
         .route-sec { background: var(--bg-warm); }

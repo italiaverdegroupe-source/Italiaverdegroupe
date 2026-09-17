@@ -210,7 +210,7 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
         .row { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
         .fld { display: grid; gap: 6px; }
         .fld > span { font-size: .85rem; font-weight: 500; }
-        .fld i { color: var(--brass-600); font-style: normal; }
+        .fld i { color: var(--brass-700); font-style: normal; }
         .fld input, .fld select, .fld textarea {
           font: inherit; font-size: .95rem; padding: .7em .85em;
           background: var(--bg-raised); color: var(--fg);

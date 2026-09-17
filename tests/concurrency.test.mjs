@@ -12,6 +12,14 @@ const check = (n, ok, x = '') => {
 const admin = new pg.Client({ connectionString: URL });
 await admin.connect();
 
+// The yard these fixtures stand in. Resolved by subquery below, which returns
+// NULL on a database built from the migrations alone — so create it here
+// rather than depend on whatever happens to be seeded.
+await admin.query(
+  `INSERT INTO inventory_locations (code, name, kind, emirate, sellable)
+   VALUES ('YRD-DXB', 'Dubai yard', 'warehouse', 'Dubai', true)
+   ON CONFLICT (code) DO UPDATE SET sellable = true, is_active = true`);
+
 // a clean specimen, available, in a sellable location
 await admin.query(`DELETE FROM quote_events; DELETE FROM quote_items; DELETE FROM quotes;`);
 await admin.query(`DELETE FROM inventory_movements WHERE ref_type = 'quote';`);

@@ -95,10 +95,10 @@ export default async function JournalPage() {
         .jr-body { display: grid; gap: 8px; }
         .jr-date {
           font-size: .74rem; letter-spacing: .12em; text-transform: uppercase;
-          color: var(--brass-600);
+          color: var(--brass-700);
         }
         .jr-title { font-family: var(--font-display); font-size: 1.24rem; line-height: 1.3; }
-        .jr-link:hover .jr-title { color: var(--brass-600); }
+        .jr-link:hover .jr-title { color: var(--brass-700); }
         .jr-ex { color: var(--fg-soft); font-size: .93rem; line-height: 1.6; }
       `}</style>
     </section>

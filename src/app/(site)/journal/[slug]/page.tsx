@@ -109,7 +109,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         .post-h1 { margin-bottom: .3em; }
         .post-meta {
           font-size: .8rem; letter-spacing: .1em; text-transform: uppercase;
-          color: var(--brass-600); margin-bottom: 36px;
+          color: var(--brass-700); margin-bottom: 36px;
         }
         .post-img {
           position: relative; aspect-ratio: 16 / 9; margin: 0 0 44px;
@@ -127,19 +127,19 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           border-inline-start: 2px solid var(--brass-300);
           font-family: var(--font-display); font-size: 1.1rem; color: var(--fg);
         }
-        .post-body a { color: var(--brass-600); }
+        .post-body a { color: var(--brass-700); }
         .post-cta {
           margin: 52px 0; padding: 30px; background: var(--bg-warm);
-          border: 1px solid var(--rule); border-radius: 3px;
+          border: 1px solid var(--line); border-radius: 3px;
           display: flex; flex-wrap: wrap; gap: 18px;
           align-items: center; justify-content: space-between;
         }
         .post-cta p { margin: 0; font-family: var(--font-display); font-size: 1.1rem; }
-        .post-more { border-top: 1px solid var(--rule); padding-top: 28px; }
+        .post-more { border-top: 1px solid var(--line); padding-top: 28px; }
         .post-more h2 { font-size: 1rem; letter-spacing: .04em; margin-bottom: 14px; }
         .post-more ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
         .post-more a { color: var(--fg); }
-        .post-more a:hover { color: var(--brass-600); }
+        .post-more a:hover { color: var(--brass-700); }
       `}</style>
     </article>
   );

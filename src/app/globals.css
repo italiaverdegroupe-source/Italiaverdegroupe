@@ -23,6 +23,10 @@
   --olive-700: #2E4420;
   --olive-600: #3F5C2D;
   --olive-500: #557640;
+  /* Sits between 300 and 500. Added because three components already asked
+     for it: `var(--olive-400)` with nothing behind it makes the whole
+     border-color declaration invalid, so those hovers were doing nothing. */
+  --olive-400: #7E9869;
   --olive-300: #A7BA93;
   --olive-100: #DCE5D0;
 
@@ -44,6 +48,11 @@
 
   /* ── roles ── */
   --bg:        #FFFFFF;
+  /* A surface that sits above the page rather than on it. Same as --bg today,
+     and named separately so a card keeps its own background if the page's
+     ever warms up. It was in use before it existed, which left those cards
+     transparent. */
+  --bg-raised: #FFFFFF;
   --bg-warm:   var(--sand-50);
   --bg-panel:  var(--sand-100);
   --fg:        var(--ink-900);
@@ -133,6 +142,27 @@ img, svg { max-width: 100%; display: block; }
 }
 
 :focus-visible { outline: 2px solid var(--terra-500); outline-offset: 3px; border-radius: 2px; }
+
+/* ── an answered question ──────────────────────────────────────
+   Lived in the home page's own <style> until the services page needed the
+   same thing. A page-level <style> block is global anyway, so the rules only
+   existed on whichever page happened to be mounted — which is a trap, not a
+   scope. */
+.faqs { display: grid; gap: 0; border-top: 1px solid var(--line); }
+.faq { border-bottom: 1px solid var(--line); }
+.faq summary {
+  cursor: pointer; padding: 20px 40px 20px 0; position: relative;
+  font-family: var(--font-display); font-size: 1.04rem; list-style: none;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: '+'; position: absolute; right: 8px; top: 50%;
+  transform: translateY(-50%); font-size: 1.3rem; color: var(--brass-700);
+  transition: transform .18s ease;
+}
+.faq[open] summary::after { content: '–'; }
+.faq p { margin: 0 0 22px; max-width: 68ch; color: var(--fg-soft); }
+@media (prefers-reduced-motion: reduce) { .faq summary::after { transition: none; } }
 
 /* ── layout ────────────────────────────────────────────────── */
 .wrap { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gutter); }

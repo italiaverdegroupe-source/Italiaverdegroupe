@@ -21,6 +21,8 @@ export type Family = {
   blurb: string;
   count: number;
   cover: string;
+  /** "0.4 – 2.5 m" across the whole family, or '' if no specimen states a height. */
+  heights: string;
 };
 
 const products = raw as unknown as Product[];
@@ -38,6 +40,21 @@ export const FAMILY_BLURB: Record<string, string> = {
     'Shade, canopy and evergreen presence for courtyards, avenues and entrances.',
   'Indoor Plants':
     'Interior specimens for lobbies, atriums and shaded terraces.',
+};
+
+/**
+ * The photograph that fronts a collection.
+ *
+ * Left to itself the cover was "the first specimen in the file that is not
+ * flagged", which put a potted cycad on the Palms card and a single flowering
+ * barrel on a collection of eleven cacti. A shop window is chosen, not
+ * defaulted. Each of these has been looked at against the specimen it belongs
+ * to; anything not listed falls back to the old rule.
+ */
+const FAMILY_COVER: Record<string, string> = {
+  Palms: 'VG-PL-020',                 // Washingtonia, full height, against a building
+  'Ornamental Trees': 'VG-TR-002',    // a row of sculpted ficus under open sky
+  'Cacti & Succulents': 'VG-CA-004',  // a field of golden barrels rather than one pot
 };
 
 export const familySlug = (name: string) =>
@@ -67,6 +84,30 @@ export function imageFor(reference: string): string {
   return `/products/${p.image}`;
 }
 
+/**
+ * The tallest and shortest a family goes, read off the specimens themselves.
+ *
+ * This is the first thing a landscape architect wants from a collection: not
+ * the prose, but whether it contains anything five metres tall. Derived rather
+ * than written down, so it cannot drift away from the stock it describes.
+ */
+function heightRange(list: Product[]): string {
+  let lo = Infinity;
+  let hi = -Infinity;
+  for (const p of list) {
+    const m = (p.attributes.Height ?? '').match(/([\d.]+)\s*-\s*([\d.]+)/);
+    const nums = m ? [parseFloat(m[1]), parseFloat(m[2])] : [];
+    for (const n of nums) {
+      if (!Number.isFinite(n)) continue;
+      lo = Math.min(lo, n);
+      hi = Math.max(hi, n);
+    }
+  }
+  if (!Number.isFinite(lo) || !Number.isFinite(hi)) return '';
+  const f = (n: number) => n.toFixed(1);
+  return lo === hi ? `${f(lo)} m` : `${f(lo)} – ${f(hi)} m`;
+}
+
 export function getFamilies(): Family[] {
   const seen = new Map<string, Product[]>();
   for (const p of products) {
@@ -74,13 +115,22 @@ export function getFamilies(): Family[] {
     list.push(p);
     seen.set(p.family, list);
   }
-  return [...seen.entries()].map(([name, list]) => ({
-    slug: familySlug(name),
-    name,
-    blurb: FAMILY_BLURB[name] ?? '',
-    count: list.length,
-    cover: (list.find((p) => p.photoVerified) ?? list[0]).image,
-  }));
+  return [...seen.entries()]
+    .map(([name, list]) => ({
+      slug: familySlug(name),
+      name,
+      blurb: FAMILY_BLURB[name] ?? '',
+      count: list.length,
+      cover: (list.find((p) => p.reference === FAMILY_COVER[name])
+        ?? list.find((p) => p.photoVerified) ?? list[0]).image,
+      heights: heightRange(list),
+    }))
+    // Deepest collection first. The file order put a family holding one plant
+    // in the top row of the collections page, above the sixteen olives and the
+    // twenty palms this business is actually built on — a stock list's order
+    // is not a shop window's. Ties fall back to the name so the sequence is
+    // stable rather than dependent on how the JSON happens to be sorted.
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 }
 
 export function getByFamilySlug(slug: string): Product[] {

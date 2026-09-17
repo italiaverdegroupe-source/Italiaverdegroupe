@@ -26,6 +26,19 @@ await db.query(`DELETE FROM stock_batches WHERE code = 'LOT-ALERT';`);
 await db.query(`DELETE FROM stock_items WHERE code = 'TREE-ALERT';`);
 await db.query(`DELETE FROM import_permits WHERE permit_number = 'PRM-ALERT';`);
 
+// The yard these fixtures live in. It used to be assumed: the inserts below
+// resolve the location with a subquery, and on a database built from the
+// migrations alone that subquery returns NULL — which the low-stock scanner
+// reads as "not sellable" and silently skips, so the test measured nothing
+// while still reporting a clean slate. A fixture a test depends on is the
+// test's to create.
+await db.query(
+  `INSERT INTO inventory_locations (code, name, kind, emirate, sellable)
+   VALUES ('YRD-DXB', 'Dubai yard', 'warehouse', 'Dubai', true)
+   ON CONFLICT (code) DO UPDATE SET sellable = true, is_active = true`);
+const yard = await db.query(`SELECT id FROM inventory_locations WHERE code = 'YRD-DXB'`);
+check('the fixtures have a sellable location to stand in', yard.rows.length === 1);
+
 const n = await seedDefaultRules();
 check('the defaults install once', n === 16, `installed ${n}`);
 check('installing again is a no-op', (await seedDefaultRules()) === 0);

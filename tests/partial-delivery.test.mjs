@@ -20,6 +20,14 @@ const user = { id: 1, email: 'dhmohamed970@gmail.com' };
 await db.query(`DELETE FROM delivery_items; DELETE FROM deliveries;
                 DELETE FROM order_items; DELETE FROM orders WHERE code LIKE 'ORD-P%';`);
 await db.query(`DELETE FROM stock_batches WHERE code = 'LOT-PARTIAL';`);
+
+// The yard these fixtures stand in. Resolved by subquery below, which returns
+// NULL on a database built from the migrations alone — so create it here
+// rather than depend on whatever happens to be seeded.
+await db.query(
+  `INSERT INTO inventory_locations (code, name, kind, emirate, sellable)
+   VALUES ('YRD-DXB', 'Dubai yard', 'warehouse', 'Dubai', true)
+   ON CONFLICT (code) DO UPDATE SET sellable = true, is_active = true`);
 const { rows: [lot] } = await db.query(
   `INSERT INTO stock_batches (code, product_ref, quantity, reserved, status, location_id)
    VALUES ('LOT-PARTIAL','VG-OL-006',200,200,'available',

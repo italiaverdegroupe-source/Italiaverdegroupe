@@ -25,7 +25,8 @@ const L2 = (r, g, b) => 0.2126 * lin2(r) + 0.7152 * lin2(g) + 0.0722 * lin2(b);
 const ratio2 = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 const B = process.env.BASE ?? 'http://127.0.0.1:3520';
 const PAGES = process.env.PAGES?.split(',') ?? [
-  '/', '/catalog', '/collections', '/services', '/about', '/quote', '/journal', '/locations/dubai',
+  '/', '/catalog', '/collections', '/collections/olive-trees', '/services', '/about',
+  '/quote', '/journal', '/contact', '/shortlist', '/locations/dubai',
 ];
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
 const page = await browser.newPage({ viewport: { width: 1280, height: 900 }, deviceScaleFactor: 1 });

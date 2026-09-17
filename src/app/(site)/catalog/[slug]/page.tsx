@@ -146,7 +146,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         }
         .det-ref {
           font-size: .72rem; letter-spacing: .13em; text-transform: uppercase;
-          color: var(--brass-600); margin-bottom: 1.25rem;
+          color: var(--brass-700); margin-bottom: 1.25rem;
         }
         .det-desc { font-size: 1.05rem; color: var(--fg-soft); margin-bottom: 2rem; }
 
