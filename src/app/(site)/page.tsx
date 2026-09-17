@@ -84,16 +84,25 @@ export default async function HomePage() {
         <div className="hero-veil" />
 
         <div className="wrap hero-in">
-          <p className="eyebrow">{c['home.hero.eyebrow']}</p>
-          <h1>{c['home.hero.title']}<br /><em>{c['home.hero.title.em']}</em></h1>
-          <p className="hero-lede">
-            {fill(c['home.hero.lede'], { regions: site.sourcingRegions.join(', ') })}
-          </p>
-          <div className="hero-cta">
-            <Link href="/catalog" className="btn btn-primary btn-lg">
-              {c['home.hero.cta']} <span aria-hidden="true">&rarr;</span>
-            </Link>
-            <Link href="/quote" className="btn btn-ghost btn-lg">{c['home.hero.cta.two']}</Link>
+          {/* The copy sits on a pane of frosted glass rather than on a wash
+              spread across half the picture. The wash was the mistake: it lit
+              the sunrise, the skyline and the haze all the same flat cream and
+              handed back a photograph that had been drained. A pane is the
+              opposite trade — everything outside it is the photograph at full
+              strength, and the only part that gives way is the rectangle the
+              words actually occupy. */}
+          <div className="hero-card">
+            <p className="eyebrow">{c['home.hero.eyebrow']}</p>
+            <h1>{c['home.hero.title']}<br /><em>{c['home.hero.title.em']}</em></h1>
+            <p className="hero-lede">
+              {fill(c['home.hero.lede'], { regions: site.sourcingRegions.join(', ') })}
+            </p>
+            <div className="hero-cta">
+              <Link href="/catalog" className="btn btn-primary btn-lg">
+                {c['home.hero.cta']} <span aria-hidden="true">&rarr;</span>
+              </Link>
+              <Link href="/quote" className="btn btn-ghost btn-lg">{c['home.hero.cta.two']}</Link>
+            </div>
           </div>
         </div>
 
@@ -415,38 +424,43 @@ export default async function HomePage() {
            on top of the upscale a wide screen already applies is the
            difference between sharp and soft. */
 
-        /* The wash, and the whole argument of this rebuild.
-           The old one was 98% opaque across the left half, which turned the
-           better part of the photograph back into the cream rectangle it was
-           supposed to replace. It had to be, because the picture underneath it
-           was dark there. This one is not: measured off the file, the sky
-           behind the headline sits at 0.50–0.82 relative luminance, and near
-           black type on 0.50 is already about 9:1. So the wash only has two
-           jobs left — take the glare off the sun, and carry the foot of the
-           picture into the bar of assurances — and it does them at a third of
-           the old strength. An ellipse rather than a band, so there is no edge
-           anywhere for the eye to read as a seam. */
+        /* What is left of the wash.
+           The version before this held a flat cream at .46 across the first
+           two fifths of the picture. It passed every contrast measurement and
+           it was still wrong: the owner's photograph came back drained, the
+           sunrise flattened into beige, and the thing he had actually asked
+           for — the picture — was the thing it spent. The copy has a pane of
+           its own now, so all that is needed here is to keep the foot of the
+           frame from fighting the bar of assurances across it. */
         .hero-veil {
           position: absolute; inset: 0; z-index: -1;
-          background:
-            /* Held flat at .46 for the first two fifths and then let down
-               slowly, rather than falling away from the left edge. Same
-               strength over the sunrise as a steeper curve — so the sky costs
-               nothing — but it still has something left where the last word of
-               the headline reaches the crown of the tree, which is the one
-               dark thing any of this copy crosses. Measured: that word went
-               from 1.6:1 to 3.9:1 at 1280 and 4.5:1 at 2560. */
-            radial-gradient(128% 104% at 0% 46%,
-              rgb(250 247 240 / .46) 0%,
-              rgb(250 247 240 / .46) 40%,
-              rgb(250 247 240 / .40) 56%,
-              rgb(250 247 240 / .26) 68%,
-              rgb(250 247 240 / .10) 80%,
-              rgb(250 247 240 / 0) 94%),
-            linear-gradient(to top,
-              rgb(250 247 240 / .58) 0%,
-              rgb(250 247 240 / .20) 13%,
-              rgb(250 247 240 / 0) 28%);
+          background: linear-gradient(to top,
+            rgb(250 247 240 / .46) 0%,
+            rgb(250 247 240 / .14) 12%,
+            rgb(250 247 240 / 0) 26%);
+        }
+
+        /* the pane */
+        .hero-card {
+          max-width: min(620px, 100%);
+          padding: clamp(26px, 3.1vw, 44px) clamp(24px, 2.9vw, 42px) clamp(28px, 3.3vw, 46px);
+          border-radius: 3px;
+          background: linear-gradient(142deg,
+            rgb(253 251 247 / .50), rgb(253 251 247 / .34) 62%, rgb(253 251 247 / .30));
+          -webkit-backdrop-filter: blur(26px) saturate(1.18);
+          backdrop-filter: blur(26px) saturate(1.18);
+          border: 1px solid rgb(255 255 255 / .46);
+          box-shadow: 0 34px 90px -46px rgb(10 14 8 / .62),
+                      inset 0 1px 0 rgb(255 255 255 / .34);
+        }
+        /* Firefox with backdrop-filter disabled, and anything older: there is
+           no blur to lift the text off the photograph, so the pane has to be a
+           surface on its own or the words land straight on the tree. */
+        @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+          .hero-card {
+            background: rgb(252 250 245 / .93);
+            border-color: rgb(255 255 255 / .8);
+          }
         }
 
         .hero-in { position: relative; z-index: 2; width: 100%; }
@@ -473,12 +487,11 @@ export default async function HomePage() {
            hairline border disappears and takes 1.4.11 with it. Give it a pane
            of the same travertine the rest of the page is made of. */
         .hero-cta .btn-ghost {
-          background: rgb(252 250 245 / .88);
-          -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-          border-color: rgb(46 68 32 / .38); color: var(--olive-900);
+          background: rgb(252 250 245 / .62);
+          border-color: rgb(46 68 32 / .34); color: var(--olive-900);
         }
         .hero-cta .btn-ghost:hover {
-          background: rgb(252 250 245 / .98); border-color: var(--olive-700);
+          background: rgb(252 250 245 / .92); border-color: var(--olive-700);
         }
 
         /* the seal */
@@ -602,6 +615,13 @@ export default async function HomePage() {
           .hero-in {
             padding-top: clamp(30px, 5.5vh, 44px);
             padding-bottom: clamp(30px, 5vh, 42px);
+          }
+          /* The words are on travertine here, under the picture rather than on
+             it, so a pane would be a box drawn around nothing. */
+          .hero-card {
+            max-width: none; padding: 0; border: 0; border-radius: 0;
+            background: none; box-shadow: none;
+            -webkit-backdrop-filter: none; backdrop-filter: none;
           }
           .hero h1 { max-width: 16ch; }
           .hero-lede { margin-bottom: 1.9rem; }
