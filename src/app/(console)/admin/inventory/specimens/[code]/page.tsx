@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { adminUi, adminStatus } from '@/lib/admin-ui';
 import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
@@ -17,7 +18,8 @@ async function moveSpecimen(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot change stock.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot change stock.'));
 
   const code = String(formData.get('code'));
   const before = await getSpecimen(code);
@@ -25,8 +27,8 @@ async function moveSpecimen(formData: FormData) {
 
   const status = String(formData.get('status'));
   const health = String(formData.get('health'));
-  if (!ITEM_STATUSES.includes(status as never)) throw new Error('Unknown status.');
-  if (!HEALTH.includes(health as never)) throw new Error('Unknown health.');
+  if (!ITEM_STATUSES.includes(status as never)) throw new Error(t('Unknown status.'));
+  if (!HEALTH.includes(health as never)) throw new Error(t('Unknown health.'));
 
   const locationId = String(formData.get('location_id') ?? '').trim() || null;
   const sellableFrom = String(formData.get('acclimatised_until') ?? '').trim() || null;
@@ -77,7 +79,8 @@ async function addMeasurement(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot record measurements.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot record measurements.'));
 
   const code = String(formData.get('code'));
   const s = await getSpecimen(code);
@@ -102,6 +105,11 @@ async function addMeasurement(formData: FormData) {
 export default async function SpecimenPage({ params }: { params: Promise<{ code: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
+  const t = adminUi(user.locale);
+  // Statuses are English IN THE DATABASE and must stay that way — every filter
+  // and every total reads them. They are translated here, on the way to the
+  // screen, and nowhere else.
+  const st = adminStatus(user.locale);
   const { code } = await params;
 
   const s = await getSpecimen(code);
@@ -114,60 +122,60 @@ export default async function SpecimenPage({ params }: { params: Promise<{ code:
 
   // Why it cannot be sold, stated rather than left for someone to work out.
   const blockers: string[] = [];
-  if (s.status !== 'available') blockers.push(`status is ${s.status}`);
-  if (s.health === 'critical' || s.health === 'dead') blockers.push(`health is ${s.health}`);
+  if (s.status !== 'available') blockers.push(`${t('status is')} ${st(s.status)}`);
+  if (s.health === 'critical' || s.health === 'dead') blockers.push(`${t('health is')} ${st(s.health)}`);
   if (s.acclimatised_until && new Date(s.acclimatised_until) > new Date())
-    blockers.push(`still acclimatising until ${fmtDay(s.acclimatised_until)}`);
-  if (s.location_sellable === false) blockers.push(`cannot sell from ${s.location_name}`);
+    blockers.push(`${t('still acclimatising until')} ${fmtDay(s.acclimatised_until)}`);
+  if (s.location_sellable === false) blockers.push(`${t('cannot sell from')} ${s.location_name}`);
 
   return (
     <>
       <p className="adm-sub">
-        <Link href="/admin/inventory/specimens">← Specimens</Link>
+        <Link href="/admin/inventory/specimens">← {t('Specimens')}</Link>
       </p>
       <h1>{s.code}</h1>
       <p className="adm-sub">
         {product ? `${product.name} · ` : ''}{s.product_ref}
         {' · '}
         {s.is_sellable
-          ? <span className="pill pill-won">sellable</span>
-          : <span className="pill pill-lost">not sellable</span>}
+          ? <span className="pill pill-won">{t('sellable')}</span>
+          : <span className="pill pill-lost">{t('not sellable')}</span>}
       </p>
 
       {!s.is_sellable && blockers.length > 0 && (
-        <p className="adm-err">Not sellable because: {blockers.join('; ')}.</p>
+        <p className="adm-err">{t('Not sellable because:')} {blockers.join('; ')}.</p>
       )}
 
       <div className="adm-two">
         <div>
           <div className="adm-panel adm-pad" style={{ marginBottom: 20 }}>
-            <h2>Specimen</h2>
+            <h2>{t('Specimen')}</h2>
             <dl className="adm-dl">
-              <div><dt>Status</dt><dd>{s.status}</dd></div>
-              <div><dt>Health</dt><dd>{s.health}</dd></div>
-              <div><dt>Grade</dt><dd>{s.grade ?? '—'}</dd></div>
-              <div><dt>Location</dt><dd>{s.location_name ?? '—'}</dd></div>
-              <div><dt>Supplier</dt><dd>{s.supplier_name ?? '—'}</dd></div>
-              <div><dt>Arrived</dt><dd>{s.arrived_at ? fmtDay(s.arrived_at) : '—'}</dd></div>
-              <div><dt>Sellable from</dt><dd>{s.acclimatised_until ? fmtDay(s.acclimatised_until) : '—'}</dd></div>
-              <div><dt>Purchase cost</dt><dd>{s.purchase_cost ? `${s.purchase_currency} ${s.purchase_cost}` : '—'}</dd></div>
-              <div><dt>FX at purchase</dt><dd>{s.fx_rate_to_aed ?? '—'}</dd></div>
-              <div><dt>Landed cost</dt><dd>{s.landed_cost_aed ? `AED ${s.landed_cost_aed}` : '—'}</dd></div>
-              <div><dt>Asking price</dt><dd>{s.asking_price_aed ? `AED ${s.asking_price_aed}` : '—'}</dd></div>
+              <div><dt>{t('Status')}</dt><dd>{st(s.status)}</dd></div>
+              <div><dt>{t('Health')}</dt><dd>{st(s.health)}</dd></div>
+              <div><dt>{t('Grade')}</dt><dd>{s.grade ?? '—'}</dd></div>
+              <div><dt>{t('Location')}</dt><dd>{s.location_name ?? '—'}</dd></div>
+              <div><dt>{t('Supplier')}</dt><dd>{s.supplier_name ?? '—'}</dd></div>
+              <div><dt>{t('Arrived')}</dt><dd>{s.arrived_at ? fmtDay(s.arrived_at) : '—'}</dd></div>
+              <div><dt>{t('Sellable from')}</dt><dd>{s.acclimatised_until ? fmtDay(s.acclimatised_until) : '—'}</dd></div>
+              <div><dt>{t('Purchase cost')}</dt><dd>{s.purchase_cost ? `${s.purchase_currency} ${s.purchase_cost}` : '—'}</dd></div>
+              <div><dt>{t('FX at purchase')}</dt><dd>{s.fx_rate_to_aed ?? '—'}</dd></div>
+              <div><dt>{t('Landed cost')}</dt><dd>{s.landed_cost_aed ? `AED ${s.landed_cost_aed}` : '—'}</dd></div>
+              <div><dt>{t('Asking price')}</dt><dd>{s.asking_price_aed ? `AED ${s.asking_price_aed}` : '—'}</dd></div>
             </dl>
             {s.notes && <p style={{ whiteSpace: 'pre-wrap', marginTop: 16 }}>{s.notes}</p>}
           </div>
 
           <div className="adm-panel adm-pad" style={{ marginBottom: 20 }}>
-            <h2>Measurements</h2>
+            <h2>{t('Measurements')}</h2>
             <p className="adm-sub">
-              A tree grows. Each row is an observation on a date, not a fixed attribute.
+              {t('A tree grows. Each row is an observation on a date, not a fixed attribute.')}
             </p>
             {measurements.length === 0 ? (
-              <p className="adm-sub" style={{ margin: 0 }}>None recorded.</p>
+              <p className="adm-sub" style={{ margin: 0 }}>{t('None recorded.')}</p>
             ) : (
               <table className="adm-t">
-                <thead><tr><th>Date</th><th>Height</th><th>Girth</th><th>Crown</th><th>Pot</th><th>Note</th></tr></thead>
+                <thead><tr><th>{t('Date')}</th><th>{t('Height')}</th><th>{t('Girth')}</th><th>{t('Crown')}</th><th>{t('Pot')}</th><th>{t('Note')}</th></tr></thead>
                 <tbody>
                   {measurements.map((m) => (
                     <tr key={m.id}>
@@ -185,19 +193,19 @@ export default async function SpecimenPage({ params }: { params: Promise<{ code:
           </div>
 
           <div className="adm-panel adm-pad">
-            <h2>Movement history</h2>
+            <h2>{t('Movement history')}</h2>
             {movements.length === 0 ? (
-              <p className="adm-sub" style={{ margin: 0 }}>Nothing recorded.</p>
+              <p className="adm-sub" style={{ margin: 0 }}>{t('Nothing recorded.')}</p>
             ) : movements.map((m) => (
               <div key={m.id} className="adm-note">
                 <div className="adm-note-meta">
-                  {fmtDate(m.at)} · {m.user_email ?? 'system'} · {m.kind}
+                  {fmtDate(m.at)} · {m.user_email ?? t('system')} · {st(m.kind)}
                 </div>
                 <div>
                   {m.from_status && m.to_status && m.from_status !== m.to_status
-                    && <>status {m.from_status} → {m.to_status}. </>}
+                    && <>{t('Status')}: {st(m.from_status)} → {st(m.to_status)}. </>}
                   {m.to_name && m.from_name !== m.to_name
-                    && <>moved {m.from_name ? `${m.from_name} → ` : 'to '}{m.to_name}. </>}
+                    && <>{t('moved')} {m.from_name ? `${m.from_name} → ` : '→ '}{m.to_name}. </>}
                   {m.reason}
                 </div>
               </div>
@@ -209,59 +217,59 @@ export default async function SpecimenPage({ params }: { params: Promise<{ code:
           {user.role !== 'viewer' && (
             <>
               <div className="adm-panel adm-pad" style={{ marginBottom: 20 }}>
-                <h2>Update</h2>
+                <h2>{t('Update')}</h2>
                 <form action={moveSpecimen}>
                   <input type="hidden" name="code" value={s.code} />
                   <label className="adm-field">
-                    <span>Status</span>
+                    <span>{t('Status')}</span>
                     <select name="status" defaultValue={s.status}>
-                      {ITEM_STATUSES.map((v) => <option key={v}>{v}</option>)}
+                      {ITEM_STATUSES.map((v) => <option key={v} value={v}>{st(v)}</option>)}
                     </select>
                   </label>
                   <label className="adm-field">
-                    <span>Health</span>
+                    <span>{t('Health')}</span>
                     <select name="health" defaultValue={s.health}>
-                      {HEALTH.map((v) => <option key={v}>{v}</option>)}
+                      {HEALTH.map((v) => <option key={v} value={v}>{st(v)}</option>)}
                     </select>
                   </label>
                   <label className="adm-field">
-                    <span>Location</span>
+                    <span>{t('Location')}</span>
                     <select name="location_id" defaultValue={s.location_id ?? ''}>
-                      <option value="">Not set</option>
+                      <option value="">{t('Not set')}</option>
                       {locations.map((l) => (
                         <option key={l.id} value={l.id}>
-                          {l.name}{l.sellable ? '' : ' (cannot sell from here)'}
+                          {l.name}{l.sellable ? '' : ` ${t('(cannot sell from here)')}`}
                         </option>
                       ))}
                     </select>
                   </label>
                   <label className="adm-field">
-                    <span>Sellable from</span>
+                    <span>{t('Sellable from')}</span>
                     <input type="date" name="acclimatised_until" defaultValue={s.acclimatised_until ?? ''} />
                   </label>
                   <label className="adm-field">
-                    <span>Asking price (AED)</span>
+                    <span>{t('Asking price (AED)')}</span>
                     <input type="number" step="0.01" name="asking_price_aed" defaultValue={s.asking_price_aed ?? ''} />
                   </label>
                   <label className="adm-field">
-                    <span>Reason</span>
-                    <input name="reason" placeholder="why this changed" />
+                    <span>{t('Reason')}</span>
+                    <input name="reason" placeholder={t('why this changed')} />
                   </label>
-                  <button className="adm-btn adm-move" type="submit" style={{ width: '100%' }}>Save change</button>
+                  <button className="adm-btn adm-move" type="submit" style={{ width: '100%' }}>{t('Save change')}</button>
                 </form>
               </div>
 
               <div className="adm-panel adm-pad">
-                <h2>Record a measurement</h2>
+                <h2>{t('Record a measurement')}</h2>
                 <form action={addMeasurement}>
                   <input type="hidden" name="code" value={s.code} />
-                  <label className="adm-field"><span>Date</span><input type="date" name="measured_at" /></label>
-                  <label className="adm-field"><span>Height (m)</span><input type="number" step="0.01" name="height_m" /></label>
-                  <label className="adm-field"><span>Trunk girth (cm)</span><input type="number" step="0.1" name="trunk_girth_cm" /></label>
-                  <label className="adm-field"><span>Crown width (m)</span><input type="number" step="0.01" name="crown_width_m" /></label>
-                  <label className="adm-field"><span>Pot (litres)</span><input type="number" name="pot_litres" /></label>
-                  <label className="adm-field"><span>Note</span><input name="note" /></label>
-                  <button className="adm-btn adm-measure" type="submit" style={{ width: '100%' }}>Record</button>
+                  <label className="adm-field"><span>{t('Date')}</span><input type="date" name="measured_at" /></label>
+                  <label className="adm-field"><span>{t('Height (m)')}</span><input type="number" step="0.01" name="height_m" /></label>
+                  <label className="adm-field"><span>{t('Trunk girth (cm)')}</span><input type="number" step="0.1" name="trunk_girth_cm" /></label>
+                  <label className="adm-field"><span>{t('Crown width (m)')}</span><input type="number" step="0.01" name="crown_width_m" /></label>
+                  <label className="adm-field"><span>{t('Pot (litres)')}</span><input type="number" name="pot_litres" /></label>
+                  <label className="adm-field"><span>{t('Note')}</span><input name="note" /></label>
+                  <button className="adm-btn adm-measure" type="submit" style={{ width: '100%' }}>{t('Record')}</button>
                 </form>
               </div>
             </>

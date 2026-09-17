@@ -44,7 +44,8 @@ async function requireEditor() {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot change alerts.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot change alerts.'));
   return user;
 }
 
@@ -79,10 +80,11 @@ async function sendTest(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role !== 'owner') throw new Error('Only the owner can send a test.');
+  const t = adminUi(user.locale);
+  if (user.role !== 'owner') throw new Error(t('Only the owner can send a test.'));
 
   const to = String(formData.get('to') ?? '').trim();
-  if (!to.includes('@')) throw new Error('Enter an email address to send the test to.');
+  if (!to.includes('@')) throw new Error(t('Enter an email address to send the test to.'));
 
   // The outcome is recorded rather than thrown.
   //
@@ -143,12 +145,13 @@ async function emailAll(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role !== 'owner') throw new Error('Only the owner can change rules.');
+  const t = adminUi(user.locale);
+  if (user.role !== 'owner') throw new Error(t('Only the owner can change rules.'));
 
   const to = String(formData.get('email_all') ?? '').trim();
   // Empty clears them — deliberately possible, because turning it off should
   // be as easy as turning it on and not a matter of emptying sixteen fields.
-  if (to && !to.includes('@')) throw new Error('That is not an email address.');
+  if (to && !to.includes('@')) throw new Error(t('That is not an email address.'));
 
   const rows = await query<{ id: string }>(
     `UPDATE alert_rules SET email_to = $1, updated_at = now(), updated_by = $2
@@ -204,18 +207,19 @@ async function saveRule(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role !== 'owner') throw new Error('Only the owner can change alert rules.');
+  const t = adminUi(user.locale);
+  if (user.role !== 'owner') throw new Error(t('Only the owner can change alert rules.'));
 
   const id = String(formData.get('id') ?? '');
   const severity = String(formData.get('severity') ?? 'info');
-  if (!SEV.includes(severity as Severity)) throw new Error('Unknown severity.');
+  if (!SEV.includes(severity as Severity)) throw new Error(t('Unknown severity.'));
 
   const rawThreshold = String(formData.get('threshold') ?? '').trim();
   const threshold = rawThreshold === '' ? null : Number(rawThreshold);
   if (threshold !== null && !Number.isInteger(threshold)) {
-    throw new Error('The number is a count of days, hours or units — it has to be whole.');
+    throw new Error(t('The number is a count of days, hours or units — it has to be whole.'));
   }
-  if (threshold !== null && threshold < 0) throw new Error('The number cannot be negative.');
+  if (threshold !== null && threshold < 0) throw new Error(t('The number cannot be negative.'));
 
   const role = String(formData.get('to_role') ?? '').trim();
 
@@ -373,10 +377,11 @@ export default async function AlertsPage({ searchParams }: {
               <p className="adm-sub" style={{ margin: 0 }}>
                 {withEmail === 0 ? (
                   <>
-                    <strong>No rule has an address on it</strong>, so nothing would be emailed even with a mail provider configured. An alert with no recipient is raised in the console and goes no further.
+                    <strong>{t('No rule has an address on it.')}</strong>{' '}
+                    {t('Nothing would be emailed even with a mail provider configured. An alert with no recipient is raised in the console and goes no further.')}
                   </>
                 ) : (
-                  <>{withEmail} of {rules.length} rules send an email.</>
+                  <>{t('{n} of {total} rules send an email.', { n: withEmail, total: rules.length })}</>
                 )}
               </p>
               <form action={emailAll} className="adm-out-test">
@@ -388,7 +393,7 @@ export default async function AlertsPage({ searchParams }: {
           )}
           {rules.length === 0 && (
             <div className="adm-panel adm-pad">
-              <p className="adm-empty">No rules yet. Press <b>Run checks now</b> to install the defaults.</p>
+              <p className="adm-empty">{t('No rules yet. Press “Run checks now” to install the defaults.')}</p>
             </div>
           )}
 
@@ -487,9 +492,9 @@ export default async function AlertsPage({ searchParams }: {
             </p>
           ) : (
             <p className="adm-sub">
-              Anything addressed outside the console. <strong>Nothing is being sent</strong>, because no mail provider is configured — set{' '}
-              <code>SMTP_URL</code> (a mailbox on the company domain) or{' '}
-              <code>RESEND_API_KEY</code>, plus <code>MAIL_FROM</code>, and these rows go out on the next tick. They wait with the reason attached rather than being dropped, and rather than this system claiming to have sent an email it never could.
+              {t('Anything addressed outside the console.')}{' '}
+              <strong>{t('Nothing is being sent, because no mail provider is configured.')}</strong>{' '}
+              {t('Set SMTP_URL (a mailbox on the company domain) or RESEND_API_KEY, plus MAIL_FROM, and these rows go out on the next tick. They wait with the reason attached rather than being dropped, and rather than this system claiming to have sent an email it never could.')}
             </p>
           )}
 

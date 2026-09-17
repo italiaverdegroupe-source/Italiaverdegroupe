@@ -19,11 +19,12 @@ async function raiseInvoice(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot raise invoices.');
+  const tr = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(tr('Viewers cannot raise invoices.'));
 
   const orderCode = String(formData.get('order_code') ?? '').trim();
   const o = await getOrder(orderCode);
-  if (!o) throw new Error(`No order ${orderCode}.`);
+  if (!o) throw new Error(tr('No order {code}.', { code: orderCode }));
   const items = await getOrderItems(o.id);
   const t = orderTotals(o, items);
 
@@ -67,15 +68,16 @@ async function recordPayment(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot record payments.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot record payments.'));
 
   const invoiceCode = String(formData.get('invoice_code') ?? '').trim();
   const amount = Number(String(formData.get('amount_aed') ?? '0'));
-  if (!amount) throw new Error('Enter an amount.');
+  if (!amount) throw new Error(t('Enter an amount.'));
 
   const inv = (await query<{ id: string; total_aed: string }>(
     `SELECT id, total_aed FROM invoices WHERE code = $1`, [invoiceCode]))[0];
-  if (!inv) throw new Error(`No invoice ${invoiceCode}.`);
+  if (!inv) throw new Error(t('No invoice {code}.', { code: invoiceCode }));
 
   await query(
     `INSERT INTO payments (invoice_id, amount_aed, method, received_on, reference, note, recorded_by)
@@ -233,12 +235,12 @@ export default async function FinancePage() {
             <form action={raiseInvoice}>
               <label className="adm-field"><span>{tr("Order code *")}</span>
                 <input name="order_code" required placeholder={tr("ORD-000001")} /></label>
-              <label className="adm-field"><span>Kind</span>
+              <label className="adm-field"><span>{tr('Kind')}</span>
                 <select name="kind" defaultValue="tax_invoice">
-                  <option value="advance">advance — the agreed percentage up front</option>
-                  <option value="tax_invoice">tax invoice — the order</option>
-                  <option value="retention">retention — released after the holding period</option>
-                  <option value="proforma">proforma</option>
+                  <option value="advance">{tr('advance — the agreed percentage up front')}</option>
+                  <option value="tax_invoice">{tr('tax invoice — the order')}</option>
+                  <option value="retention">{tr('retention — released after the holding period')}</option>
+                  <option value="proforma">{tr('proforma')}</option>
                 </select>
               </label>
               <label className="adm-field"><span>{tr("Payment terms (days)")}</span>

@@ -40,3 +40,31 @@ export async function browserLocale(): Promise<Locale> {
   }
   return DEFAULT_LOCALE;
 }
+
+/**
+ * The locale of the request being rendered, for the pages the router hands no
+ * params to.
+ *
+ * Exactly one page needs this: not-found.tsx. Next gives a not-found no params
+ * — there is no matched route to take them from — and `next/root-params` is
+ * unavailable here because it requires `[lang]` above EVERY root layout, which
+ * the console's own root layout rules out by design.
+ *
+ * So src/proxy.ts sets `x-locale` on every request it handles and this reads
+ * it. The value is validated rather than trusted: a header can be sent by
+ * anybody, and while the worst a forged one could do is render a 404 in the
+ * wrong language, `isLocale` costs nothing and means this function can never
+ * return something that is not a locale.
+ *
+ * NOT for anything else. A page that has params must read its locale from
+ * them: params are what the URL says, and a header is what a proxy said about
+ * it, and when those two ever disagree the URL is right.
+ */
+export async function requestLocale(): Promise<Locale> {
+  try {
+    const got = (await headers()).get('x-locale');
+    return got && isLocale(got) ? got : DEFAULT_LOCALE;
+  } catch {
+    return DEFAULT_LOCALE;
+  }
+}

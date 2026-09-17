@@ -17,14 +17,15 @@ async function addSpecimen(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot add stock.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot add stock.'));
 
   const productRef = String(formData.get('product_ref') ?? '').trim();
-  if (!productRef) throw new Error('Pick a catalogue reference.');
+  if (!productRef) throw new Error(t('Pick a catalogue reference.'));
 
   const locationId = String(formData.get('location_id') ?? '').trim() || null;
   const status = String(formData.get('status') ?? 'incoming');
-  if (!ITEM_STATUSES.includes(status as never)) throw new Error('Unknown status.');
+  if (!ITEM_STATUSES.includes(status as never)) throw new Error(t('Unknown status.'));
 
   const num = (k: string) => {
     const v = String(formData.get(k) ?? '').trim();

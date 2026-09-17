@@ -149,10 +149,12 @@ export function Funnel({ stages }: { stages: { k: string; v: number; href?: stri
    about six a ring is a colour-matching exercise, so the caller gets a bar
    list instead — see the overview. */
 export function Donut({
-  rows, label, size = 132,
+  rows, label, totalLabel = 'TOTAL', size = 132,
 }: {
   rows: { k: string; v: number }[];
   label: string;
+  /** The caption under the number in the middle, already in the reader's language. */
+  totalLabel?: string;
   size?: number;
 }) {
   const total = rows.reduce((s, r) => s + r.v, 0);
@@ -188,7 +190,7 @@ export function Donut({
         <text x={size / 2} y={size / 2 - 1} textAnchor="middle" fontSize="19"
               fontWeight="500" fill={INK}>{total}</text>
         <text x={size / 2} y={size / 2 + 13} textAnchor="middle" fontSize="8.5"
-              fill={MUTED} letterSpacing=".14em">TOTAL</text>
+              fill={MUTED} letterSpacing=".14em">{totalLabel}</text>
       </svg>
       <ul className="adm-legend">
         {rows.map((row, i) => (

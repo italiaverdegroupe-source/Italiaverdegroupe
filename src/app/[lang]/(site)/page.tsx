@@ -194,7 +194,7 @@ export default async function HomePage(
           </header>
 
           <div className="map-panel reveal">
-            <RouteMap />
+            <RouteMap locale={lang} />
             <ul className="legend">
               <li><i className="sw sw-it" />{t("Growing regions")}</li>
               <li><i className="sw sw-ae" />{t("Delivery market")}</li>

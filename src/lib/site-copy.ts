@@ -69,6 +69,7 @@ export const COPY_EN = [
   'Trees are living stock. Lifting season in Italy and the UAE summer both limit when a specimen can safely move and establish, and no amount of logistics gets around either. We will tell you the realistic window for a species rather than accept a delivery date that would cost you the tree.',
   'Trees are not freight. They need the right lifting season, correct root-ball handling, documentation for import, a period to acclimatise on arrival, and the right equipment at the point of delivery. Where a timeline or a species is not realistic, we say so before the order rather than after the tree fails.',
   'View all', 'View this specimen', 'We confirm availability', 'We price the scope',
+  'You get a written quotation',
   'We will come back with availability, lead time and a priced quotation. Very large or out-of-season specimens can take longer to confirm with the nursery.',
   'Website', 'What do you need?', 'What happens next', 'What to send',
   'When it has to be on site', 'Where should the price go?', 'Where we deliver',
@@ -282,6 +283,8 @@ const ar: Record<CopyKey, string> = {
     "نؤكّد التوافر",
   "We price the scope":
     "نُسعّر نطاق العمل",
+  "You get a written quotation":
+    "تحصل على عرض سعر مكتوب",
   "We will come back with availability, lead time and a priced quotation. Very large or out-of-season specimens can take longer to confirm with the nursery.":
     "سنعود إليك بالتوافر ومدة التوريد وعرض سعر مفصّل. والأشجار الكبيرة جدًا أو خارج الموسم قد تستغرق وقتًا أطول لتأكيدها مع المشتل.",
   "Website":
@@ -520,6 +523,8 @@ const it: Record<CopyKey, string> = {
     "Confermiamo la disponibilità",
   "We price the scope":
     "Quotiamo le prestazioni",
+  "You get a written quotation":
+    "Ricevete un preventivo scritto",
   "We will come back with availability, lead time and a priced quotation. Very large or out-of-season specimens can take longer to confirm with the nursery.":
     "Vi risponderemo con disponibilità, tempi di consegna e un preventivo quotato. Per esemplari molto grandi o fuori stagione la conferma con il vivaio può richiedere più tempo.",
   "Website":

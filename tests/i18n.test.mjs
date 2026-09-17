@@ -166,6 +166,9 @@ for (const loc of ['it', 'ar']) {
     'Bucket', 'Container', 'Incoterm', 'Password', 'Pipeline AED', 'Version',
     '/journal/', 'INV-000001', 'ORD-000001', 'QT-000001', 'VG-XXXXXXX',
     'olive-trees-gulf-summer', '· AED', '− AED',
+    // 'proforma' is a Latin word Italian and English both took whole. An
+    // Italian invoice says proforma; translating it would be inventing a word.
+    'proforma',
   ]);
   const same = A.ADMIN_KEYS.filter((k) => d[k] && d[k] === k && !SAME_ON_PURPOSE.has(k));
   check(`${loc}: no console string was left sitting in English`,

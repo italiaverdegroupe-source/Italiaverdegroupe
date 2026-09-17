@@ -22,14 +22,15 @@ async function addLine(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot change quotations.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot change quotations.'));
 
   const code = String(formData.get('code'));
   const version = Number(formData.get('version'));
   const q = await getQuote(code, version);
   if (!q) notFound();
   if (q.status !== 'draft') {
-    throw new Error('This version has been issued. Create a new version to change it.');
+    throw new Error(t('This version has been issued. Create a new version to change it.'));
   }
 
   const kind = String(formData.get('kind') ?? 'product') as 'specimen' | 'product' | 'service';
@@ -47,7 +48,7 @@ async function addLine(formData: FormData) {
     const specCode = String(formData.get('specimen_code') ?? '').trim();
     const rows = await query<{ id: string; product_ref: string; landed_cost_aed: string | null }>(
       `SELECT id, product_ref, landed_cost_aed FROM stock_items WHERE code = $1`, [specCode]);
-    if (!rows[0]) throw new Error('That specimen does not exist.');
+    if (!rows[0]) throw new Error(t('That specimen does not exist.'));
     stockItemId = rows[0].id;
     productRef = rows[0].product_ref;
     landed = rows[0].landed_cost_aed ? Number(rows[0].landed_cost_aed) : null;
@@ -56,7 +57,7 @@ async function addLine(formData: FormData) {
     productRef = String(formData.get('product_ref') ?? '').trim() || null;
     if (!label && productRef) label = productRef;
   }
-  if (!label) throw new Error('A line needs a description.');
+  if (!label) throw new Error(t('A line needs a description.'));
 
   const { rows: [n] } = { rows: await query<{ next: string }>(
     `SELECT COALESCE(max(line_no), 0) + 1 AS next FROM quote_items WHERE quote_id = $1`, [q.id]) };
@@ -78,12 +79,13 @@ async function setStatus(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot change quotations.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot change quotations.'));
 
   const code = String(formData.get('code'));
   const version = Number(formData.get('version'));
   const status = String(formData.get('status'));
-  if (!QUOTE_STATUSES.includes(status as never)) throw new Error('Unknown status.');
+  if (!QUOTE_STATUSES.includes(status as never)) throw new Error(t('Unknown status.'));
 
   const q = await getQuote(code, version);
   if (!q) notFound();
@@ -116,7 +118,8 @@ async function reviseQuote(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot revise quotations.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot revise quotations.'));
 
   const code = String(formData.get('code'));
   const { version } = await newVersion(code, user);
@@ -173,7 +176,8 @@ export default async function QuotePage({
 
       {!editable && (
         <p className="adm-sub">
-          This version has been issued, so its lines are locked. Use <b>Revise</b> to create v{versions[0].version + 1} — the customer is holding this document.
+          {tr('This version has been issued, so its lines are locked. Use “Revise” to create v{next} — the customer is holding this document.',
+            { next: versions[0].version + 1 })}
         </p>
       )}
 
@@ -292,11 +296,11 @@ export default async function QuotePage({
                 <form action={addLine}>
                   <input type="hidden" name="code" value={q.code} />
                   <input type="hidden" name="version" value={q.version} />
-                  <label className="adm-field"><span>Kind</span>
+                  <label className="adm-field"><span>{tr('Kind')}</span>
                     <select name="kind" defaultValue="product">
-                      <option value="specimen">specimen — one named tree</option>
-                      <option value="product">product — from the catalogue</option>
-                      <option value="service">service — delivery, crane, planting</option>
+                      <option value="specimen">{tr('specimen — one named tree')}</option>
+                      <option value="product">{tr('product — from the catalogue')}</option>
+                      <option value="service">{tr('service — delivery, crane, planting')}</option>
                     </select>
                   </label>
                   <label className="adm-field"><span>{tr("Specimen code (for specimen lines)")}</span>

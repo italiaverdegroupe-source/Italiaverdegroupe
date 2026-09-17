@@ -5,6 +5,10 @@ import L from '@/components/L';
 import ProductCard from '@/components/ProductCard';
 import { getFamilies, getByFamilySlug, heightMidpoint } from '@/lib/products';
 import { site } from '@/lib/site';
+import { ui } from '@/lib/ui';
+
+// Six collections, fixed in the code. Anything else is not a route.
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   return getFamilies().map((f) => ({ family: f.slug }));
@@ -27,6 +31,7 @@ export default async function CollectionPage(
   { params }: { params: Promise<{ lang: Locale; family: string }> },
 ) {
   const { lang, family } = await params;
+  const t = ui(lang);
   const slug = family;
   const families = getFamilies();
   const f = families.find((x) => x.slug === slug);
@@ -40,7 +45,7 @@ export default async function CollectionPage(
   return (
     <div className="section">
       <div className="wrap">
-        <nav aria-label="Breadcrumb" className="crumbs">
+        <nav aria-label={t('det.breadcrumb')} className="crumbs">
           {/* This used to point at /catalog and call itself the parent. It is
               not: /collections is. A breadcrumb that lies about where you are
               is worse than none. */}
@@ -80,8 +85,8 @@ export default async function CollectionPage(
         {/* Somebody who has read one collection is choosing between them, and
             sending them back up to the index to pick the next one is a step
             that need not exist. */}
-        <nav className="fam-more" aria-label="Other collections">
-          <h2>The other collections</h2>
+        <nav className="fam-more" aria-label={t('col.othersAria')}>
+          <h2>{t('col.others')}</h2>
           <ul>
             {others.map((o) => (
               <li key={o.slug}>

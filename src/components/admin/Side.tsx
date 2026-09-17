@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { adminUi } from '@/lib/admin-ui';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import AdminNav from './Nav';
@@ -32,6 +33,7 @@ export default function AdminSide({ open, urgent, user }: {
   open: number; urgent: boolean;
   user: { name: string; role: string; locale?: string | null };
 }) {
+  const t = adminUi(user.locale);
   const path = usePathname();
   const drawer = useRef<HTMLElement>(null);
 
@@ -59,14 +61,14 @@ export default function AdminSide({ open, urgent, user }: {
       <div className="adm-bar">
         <Link href="/admin" className="adm-bar-brand">
           <Mark />
-          <span>Operations</span>
+          <span>{t('Operations')}</span>
         </Link>
         <button
           type="button"
           className="adm-bar-btn"
           aria-expanded={isOpen}
           aria-controls="adm-drawer"
-          aria-label={isOpen ? 'Close the menu' : 'Open the menu'}
+          aria-label={isOpen ? t('Close the menu') : t('Open the menu')}
           onClick={() => setOpenedAt(isOpen ? null : path)}
         >
           <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor"
@@ -85,13 +87,13 @@ export default function AdminSide({ open, urgent, user }: {
         id="adm-drawer"
         ref={drawer}
         className={`adm-side${isOpen ? ' on' : ''}`}
-        {...(isOpen ? { role: 'dialog', 'aria-modal': true, 'aria-label': 'Menu' } : {})}
+        {...(isOpen ? { role: 'dialog', 'aria-modal': true, 'aria-label': t('Menu') } : {})}
       >
         <Link href="/admin" className="adm-brand">
           <Mark />
           <span className="adm-brandtxt">
             <strong>Verde Garden</strong>
-            <em>Operations</em>
+            <em>{t('Operations')}</em>
           </span>
         </Link>
 

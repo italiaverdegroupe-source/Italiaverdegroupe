@@ -1,8 +1,12 @@
 import type { Metadata, Viewport } from 'next';
-import Link from 'next/link';
-import { Fraunces, Inter } from 'next/font/google';
+import { Fraunces, Inter, Amiri, IBM_Plex_Sans_Arabic } from 'next/font/google';
+import L from '@/components/L';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import LocaleProvider from '@/components/LocaleProvider';
+import { LOCALE_TAG, dir } from '@/lib/i18n';
+import { requestLocale } from '@/lib/i18n-server';
+import { ui } from '@/lib/ui';
 import './globals.css';
 
 /**
@@ -20,6 +24,17 @@ import './globals.css';
  * so the classes land on <html> beside :root where --font-display can resolve
  * against them, and lang is set on the element that actually carries the
  * page's language. It needs experimental.globalNotFound in next.config.mjs.
+ *
+ * IT USED TO BE ENGLISH, always, and said in a comment that this was fine
+ * because "there is no language to render it in". That was true of /nonsense
+ * and plainly false of /ar/nonsense, which says its language in the URL — and
+ * because globalNotFound makes this file own every unmatched path, it meant
+ * the 404 was English on the Arabic and Italian sites too. The one page where
+ * a reader is already lost was the one page that would not speak to them.
+ *
+ * It reads the locale from the header src/proxy.ts sets, because a not-found
+ * is handed no params and `next/root-params` needs `[lang]` above every root
+ * layout, which the console's own layout rules out.
  */
 
 const fraunces = Fraunces({
@@ -30,6 +45,16 @@ const fraunces = Fraunces({
 });
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
+
+const amiri = Amiri({
+  subsets: ['arabic'], weight: ['400', '700'], display: 'swap',
+  variable: '--font-arabic-display',
+});
+
+const plexArabic = IBM_Plex_Sans_Arabic({
+  subsets: ['arabic'], weight: ['400', '500', '600'], display: 'swap',
+  variable: '--font-arabic-body',
+});
 
 export const metadata: Metadata = {
   title: 'Not found — Verde Garden Trading',
@@ -42,28 +67,39 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function GlobalNotFound() {
+export default async function GlobalNotFound() {
+  const lang = await requestLocale();
+  const t = ui(lang);
+
+  // Arabic faces are attached only when the page is Arabic, so a reader of the
+  // English 404 never downloads them.
+  const latin = `${fraunces.variable} ${inter.variable}`;
+  const fonts = lang === 'ar' ? `${latin} ${amiri.variable} ${plexArabic.variable}` : latin;
+
   return (
-    <html lang="en" className={`${fraunces.variable} ${inter.variable}`}>
+    <html lang={LOCALE_TAG[lang]} dir={dir(lang)} className={fonts}>
       <body className="grain">
-        <a href="#main" className="visually-hidden">Skip to content</a>
-        <Header locale="en" />
-        <main id="main">
-          <div className="section">
-            <div className="wrap nf">
-              <p className="eyebrow">404</p>
-              <h1>That page has been replanted.</h1>
-              <p className="lede">The page you asked for is not here. The catalogue is.</p>
-              <p className="nf-cta">
-                <Link href="/catalog" className="btn btn-primary">Browse the catalogue</Link>
-                <Link href="/quote" className="btn btn-ghost">Request a quote</Link>
-              </p>
+        {/* L and the header both read the locale from here, so every link on
+            this page keeps the reader in the language they arrived in rather
+            than dropping them back onto the English site. */}
+        <LocaleProvider locale={lang}>
+          <a href="#main" className="visually-hidden">{t('nav.skip')}</a>
+          <Header locale={lang} />
+          <main id="main">
+            <div className="section">
+              <div className="wrap nf">
+                <p className="eyebrow">404</p>
+                <h1>{t('nf.title')}</h1>
+                <p className="lede">{t('nf.lede')}</p>
+                <p className="nf-cta">
+                  <L href="/catalog" className="btn btn-primary">{t('nf.browse')}</L>
+                  <L href="/quote" className="btn btn-ghost">{t('cta.quote')}</L>
+                </p>
+              </div>
             </div>
-          </div>
-        </main>
-        {/* The 404 shell is English: it is served for a path that matched no
-            locale at all, so there is no language to render it in. */}
-        <Footer locale="en" />
+          </main>
+          <Footer locale={lang} />
+        </LocaleProvider>
         <style>{`
           .nf { max-width: 60ch; padding-block: clamp(32px, 6vw, 72px); }
           .nf-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 2rem; }

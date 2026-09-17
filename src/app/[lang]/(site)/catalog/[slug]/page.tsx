@@ -11,6 +11,10 @@ import { breadcrumbs, ldJson } from '@/lib/schema';
 import { localePath } from '@/lib/i18n';
 import { ui } from '@/lib/ui';
 
+// The catalogue is a fixed set. A slug that is not in it is not a route, so
+// it never matches and global-not-found.tsx serves it — see the note there.
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return getAllProducts().map((p) => ({ slug: p.slug }));
 }
@@ -101,8 +105,8 @@ export default async function ProductPage(
                 { name: p.name, path: `/catalog/${p.slug}` },
               ]))} />
       <div className="wrap">
-        <nav aria-label="Breadcrumb" className="crumbs">
-          <L href="/catalog">Catalogue</L>
+        <nav aria-label={t('det.breadcrumb')} className="crumbs">
+          <L href="/catalog">{t('nav.catalog')}</L>
           <span aria-hidden="true">/</span>
           <L href={`/collections/${familySlug(p.family)}`}>{p.family}</L>
           <span aria-hidden="true">/</span>
@@ -115,17 +119,14 @@ export default async function ProductPage(
                    width={w || 1388} height={h || 861}
                    sizes="(max-width: 900px) 100vw, 620px" priority />
             {!p.photoVerified && (
-              <figcaption className="img-note">
-                Catalogue photograph under review — it may not represent this specimen.
-                Current photographs are supplied with the quotation.
-              </figcaption>
+              <figcaption className="img-note">{t('det.photoNote')}</figcaption>
             )}
           </figure>
 
           <div className="det-body">
             <p className="eyebrow">{p.family}</p>
             <h1 className="det-h1">{p.name}</h1>
-            <p className="det-ref">Reference {p.reference}</p>
+            <p className="det-ref">{t('det.reference', { ref: p.reference })}</p>
             <p className="det-desc">{p.description}</p>
 
             <dl className="specs">
@@ -135,31 +136,30 @@ export default async function ProductPage(
                 </div>
               ))}
               <div className="spec-row">
-                <dt>Availability</dt><dd>{p.availability || 'On Request'}</dd>
+                <dt>{t('det.availability')}</dt><dd>{p.availability || t('det.onRequest')}</dd>
               </div>
               <div className="spec-row">
-                <dt>Price</dt><dd>{p.price || 'On Request'}</dd>
+                <dt>{t('det.price')}</dt><dd>{p.price || t('det.onRequest')}</dd>
               </div>
             </dl>
 
             <div className="det-cta">
-              <L href={`/quote?ref=${p.reference}`} className="btn btn-primary">Request this specimen</L>
+              <L href={`/quote?ref=${p.reference}`} className="btn btn-primary">{t('det.request')}</L>
               <ShortlistButton item={{ ref: p.reference, name: p.name, slug: p.slug }} />
-              <L href={`/quote?type=bulk&ref=${p.reference}`} className="btn btn-ghost">Bulk pricing</L>
+              <L href={`/quote?type=bulk&ref=${p.reference}`} className="btn btn-ghost">{t('det.bulk')}</L>
             </div>
 
             <p className="det-note">
-              Living stock: dimensions are indicative and vary between individual specimens.
-              Final size, form and price are confirmed on the quotation.
-              Typical lead time {site.leadTimeWeeks.min}–{site.leadTimeWeeks.max} weeks from
-              order confirmation to delivery on site.
+              {t('det.livingStock', {
+                min: site.leadTimeWeeks.min, max: site.leadTimeWeeks.max,
+              })}
             </p>
           </div>
         </div>
 
         {related.length > 0 && (
           <section className="related">
-            <h2>More from {p.family}</h2>
+            <h2>{t('det.more', { family: p.family })}</h2>
             <div className="grid cols-4">
               {related.map((r) => <ProductCard key={r.reference} p={r} locale={lang} />)}
             </div>

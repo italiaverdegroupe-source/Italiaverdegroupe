@@ -23,7 +23,8 @@ async function addItem(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot change shipments.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot change shipments.'));
 
   const code = String(formData.get('code'));
   const s = await getShipment(code);
@@ -52,14 +53,15 @@ async function addCost(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot change shipments.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot change shipments.'));
 
   const code = String(formData.get('code'));
   const s = await getShipment(code);
   if (!s) notFound();
 
   const amount = Number(String(formData.get('amount') ?? '0'));
-  if (!Number.isFinite(amount)) throw new Error('Amount must be a number.');
+  if (!Number.isFinite(amount)) throw new Error(t('Amount must be a number.'));
 
   await query(
     `INSERT INTO shipment_costs (shipment_id, kind, description, amount, currency, fx_rate_to_aed, allocation)
@@ -86,7 +88,8 @@ async function saveDocument(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot change shipments.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot change shipments.'));
 
   const code = String(formData.get('code'));
   const s = await getShipment(code);
@@ -118,14 +121,15 @@ async function deleteDocument(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot change shipments.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot change shipments.'));
 
   const code = String(formData.get('code'));
   const s = await getShipment(code);
   if (!s) notFound();
 
   const id = String(formData.get('id') ?? '').trim();
-  if (!id) throw new Error('No document named.');
+  if (!id) throw new Error(t('No document named.'));
   await removeShipmentDocument(s.id, id);
 
   await audit({ user, action: 'shipment.document_removed', entity: 'shipment', entityId: code,
@@ -138,7 +142,8 @@ async function startChecklist(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot change shipments.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot change shipments.'));
 
   const code = String(formData.get('code'));
   const s = await getShipment(code);

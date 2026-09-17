@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { adminUi } from '@/lib/admin-ui';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { query } from '@/lib/db';
@@ -29,7 +30,8 @@ async function editor() {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot edit content.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot edit content.'));
   return user;
 }
 
@@ -56,7 +58,7 @@ export async function saveBlocks(formData: FormData) {
   // Which language is being edited. One form edits one language, so a typo in
   // the hidden field cannot write Arabic into the English rows.
   const raw = String(formData.get('locale') ?? DEFAULT_LOCALE);
-  if (!isLocale(raw)) refuse('copy', 'Unknown language.');
+  if (!isLocale(raw)) refuse('copy', adminUi(user.locale)('Unknown language.'));
   const locale = raw as Locale;
   const isDefaultLocale = locale === DEFAULT_LOCALE;
 
@@ -112,7 +114,7 @@ export async function saveBlocks(formData: FormData) {
 export async function saveSeo(formData: FormData) {
   const user = await editor();
   const path = String(formData.get('path') ?? '').trim();
-  if (!path.startsWith('/')) refuse('seo', 'A path must start with a slash.');
+  if (!path.startsWith('/')) refuse('seo', adminUi(user.locale)('A path must start with a slash.'));
 
   const title = String(formData.get('title') ?? '').trim();
   const description = String(formData.get('description') ?? '').trim();
@@ -154,7 +156,7 @@ export async function saveFaq(formData: FormData) {
     return;
   }
 
-  if (!question || !answer) refuse('faq', 'A question needs both a question and an answer.');
+  if (!question || !answer) refuse('faq', adminUi(user.locale)('A question needs both a question and an answer.'));
 
   const params = [question, answer, String(formData.get('category') ?? 'general'),
                   Number(formData.get('sort_order') ?? 100) || 100,
@@ -193,15 +195,15 @@ export async function saveTestimonial(formData: FormData) {
   const publish = formData.get('is_published') === 'on';
 
   if (!body || !author) {
-    refuse('voices', 'A testimonial needs the words and the person who said them.');
+    refuse('voices', adminUi(user.locale)('A testimonial needs the words and the person who said them.'));
   }
 
   // Refused in the console as well as in the schema. Publishing praise nobody
   // agreed to is a legal and reputational risk, and an anonymous testimonial
   // is indistinguishable from an invented one.
   if (publish && !consent) {
-    refuse('voices',
-      'Record the date this client agreed to be quoted before publishing. A testimonial without consent cannot go on the site.');
+    refuse('voices', adminUi(user.locale)(
+      'Record the date this client agreed to be quoted before publishing. A testimonial without consent cannot go on the site.'));
   }
 
   const params = [body, author,
@@ -248,7 +250,7 @@ export async function savePost(formData: FormData) {
 
   const title = String(formData.get('title') ?? '').trim();
   const body = String(formData.get('body') ?? '').trim();
-  if (!title || !body) refuse('journal', 'An article needs a title and a body.');
+  if (!title || !body) refuse('journal', adminUi(user.locale)('An article needs a title and a body.'));
 
   const slug = slugify(String(formData.get('slug') ?? '').trim() || title);
   const status = String(formData.get('status') ?? 'draft') === 'published' ? 'published' : 'draft';
@@ -283,8 +285,8 @@ export async function savePost(formData: FormData) {
   } catch (err) {
     // The slug is the article's public address. Two articles cannot share one.
     if (/posts_slug_key/.test((err as Error).message)) {
-      refuse('journal',
-        `Another article already uses the address /journal/${slug}. Change the title or the address.`);
+      refuse('journal', adminUi(user.locale)(
+        'Another article already uses the address /journal/{slug}. Change the title or the address.', { slug }));
     }
     throw err;
   }

@@ -50,14 +50,15 @@ async function updateLead(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot change leads.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot change leads.'));
 
   const reference = String(formData.get('reference'));
   const status = String(formData.get('status'));
   const followUp = String(formData.get('next_follow_up') ?? '').trim() || null;
   const note = String(formData.get('note') ?? '').trim();
 
-  if (!STATUSES.includes(status as never)) throw new Error('Unknown status.');
+  if (!STATUSES.includes(status as never)) throw new Error(t('Unknown status.'));
 
   const before = (await query<Lead>(
     'SELECT * FROM leads WHERE reference = $1', [reference]))[0];

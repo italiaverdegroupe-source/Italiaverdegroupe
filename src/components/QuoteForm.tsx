@@ -44,7 +44,7 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
         body: JSON.stringify(payload),
       });
       const json = await res.json();
-      if (!res.ok || !json.ok) { setError(json.error ?? 'Something went wrong.'); setState('error'); return; }
+      if (!res.ok || !json.ok) { setError(json.error ?? t('qf.error')); setState('error'); return; }
       setReference(json.reference); setState('done');
     } catch {
       setError(`Network error. ${fallbackContact()}`);
@@ -179,14 +179,14 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
       <label className="consent">
         <input type="checkbox" name="consent" required />
         <span>
-          I agree thatI agree that {site.legalName} may store these details and contact me about this enquiry. We do not sell or share your data.may store these details and contact me about this enquiry. We do not sell or share your data.
+          {t('qf.consentA')} {site.legalName} {t('qf.consentB')}
         </span>
       </label>
 
       {state === 'error' && <p role="alert" className="err">{error}</p>}
 
       <button type="submit" className="btn btn-primary submit" disabled={state === 'sending'}>
-        {state === 'sending' ? 'Sending…' : 'Send enquiry'}
+        {state === 'sending' ? t('qf.sending') : t('qf.send')}
       </button>
 
       <p className="legal">

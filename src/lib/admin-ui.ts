@@ -30,12 +30,19 @@ import { DEFAULT_LOCALE, isLocale, type Locale } from '@/lib/i18n';
 export const ADMIN_EN = [
   "% of value",
   "% of volume",
+  "(cannot sell from here)",
   "/journal/",
   "1–30 days",
   "31–60 days",
   "61–90 days",
+  "A line needs a description.",
   "A long phrase you can remember beats a short puzzle you cannot. There are no rules here about symbols or capitals — they push people towards predictable passwords without making them harder to guess.",
+  "A path must start with a slash.",
+  "A question needs both a question and an answer.",
+  "A quotation needs a customer.",
   "A testimonial cannot be published without the date the client agreed to be quoted. Publishing praise nobody consented to is a legal and reputational risk, and an anonymous testimonial reads as an invented one. Record the real conversation.",
+  "A testimonial needs the words and the person who said them.",
+  "A tree grows. Each row is an observation on a date, not a fixed attribute.",
   "Accepted",
   "Accepted AED",
   "Accepting reserves every specimen and lot on the quotation, in one transaction. If a tree has gone since, the whole acceptance is refused.",
@@ -67,11 +74,17 @@ export const ADMIN_EN = [
   "Also WhatsApp",
   "Also email",
   "Amount",
+  "Amount (AED)",
   "Amount (AED) *",
+  "Amount must be a number.",
+  "An article needs a title and a body.",
+  "Another article already uses the address /journal/{slug}. Change the title or the address.",
   "Answer",
+  "Anything addressed outside the console.",
   "Apply to all",
   "Arrived",
   "Asking",
+  "Asking price",
   "Asking price (AED)",
   "Author",
   "BL number",
@@ -97,6 +110,7 @@ export const ADMIN_EN = [
   "Changed",
   "Channel",
   "Close",
+  "Close the menu",
   "Closed",
   "Code",
   "Commercial",
@@ -124,6 +138,7 @@ export const ADMIN_EN = [
   "Create quotation",
   "Create shipment",
   "Created",
+  "Crown",
   "Crown width (m)",
   "Currency",
   "Current password",
@@ -142,6 +157,7 @@ export const ADMIN_EN = [
   "Delivered",
   "Delivered by value",
   "Deliveries",
+  "Delivery",
   "Delivery terms",
   "Description",
   "Description — aim for 140–160 characters",
@@ -151,6 +167,7 @@ export const ADMIN_EN = [
   "Discount",
   "Discount %",
   "Document type",
+  "Download the archive from the bucket and load it with the",
   "Draft",
   "Driver",
   "Due",
@@ -163,11 +180,15 @@ export const ADMIN_EN = [
   "English",
   "Enquiries, last 30 days",
   "Enquiry",
+  "Enter an amount.",
+  "Enter an email address to send the test to.",
+  "Enter the TRN before switching VAT on — VAT cannot be charged without a registration number.",
   "Equipment",
   "Every document on this checklist is in and verified.",
   "Every lead sits at one stage. The percentage is how many of the previous stage reached this one.",
   "Everyone",
   "Expires",
+  "FX at purchase",
   "FX rate to AED",
   "FX to AED",
   "Failed attempts on your email, whoever made them. Six failures within fifteen minutes lock the address they came from. Thirty across different addresses lock the email — but never an address you have signed in from before, so somebody else guessing can no longer shut you out of your own console. When this rule counted your email alone, six wrong guesses from anywhere did exactly that.",
@@ -192,6 +213,7 @@ export const ADMIN_EN = [
   "How to restore one",
   "INV-000001",
   "Import costs",
+  "Import permit",
   "In lots",
   "Inbox",
   "Including dealt with",
@@ -226,10 +248,13 @@ export const ADMIN_EN = [
   "Latest enquiries",
   "Lead → sale",
   "Leads",
+  "Leads by enquiry type",
+  "Leads by source",
   "Line total",
   "Lines",
   "Live on the site",
   "Live quotations",
+  "Living stock: dimensions are indicative and vary between individual specimens. Final size, form and availability are confirmed on despatch. This quotation is valid for {days} days from issue.",
   "Location",
   "Lost",
   "Lot units",
@@ -238,10 +263,12 @@ export const ADMIN_EN = [
   "Margin (internal)",
   "Mark delivered",
   "Measured",
+  "Measurements",
   "Menu",
   "Message",
   "Method",
   "Money",
+  "Movement history",
   "Name",
   "Net",
   "New password again",
@@ -253,22 +280,34 @@ export const ADMIN_EN = [
   "No backup has run yet.",
   "No backup storage is configured, so nothing is being backed up. The service needs BACKUP_BUCKET, BACKUP_ACCESS_KEY_ID, BACKUP_SECRET_ACCESS_KEY and BACKUP_ENDPOINT.",
   "No document checklist on this shipment yet.",
+  "No document named.",
+  "No invoice {code}.",
   "No invoices raised.",
   "No landed cost on these lines, so the margin shown is not real. Cost the shipment first.",
   "No lines on this shipment yet.",
   "No lines yet.",
+  "No order {code}.",
   "No orders yet.",
   "No quotations yet.",
+  "No rule has an address on it",
+  "No rule has an address on it.",
+  "No rules yet. Press",
+  "No rules yet. Press “Run checks now” to install the defaults.",
   "No shipments recorded yet.",
   "No specimens match.",
+  "No such record",
   "None",
+  "None recorded.",
   "Not applicable — exclusive of VAT where applicable",
+  "Not sellable because:",
   "Not set",
   "Not stated",
   "Not verified. This request did not come through Cloudflare, so the address is only what the caller claimed.",
   "Note",
   "Notes",
   "Nothing here yet",
+  "Nothing is being sent",
+  "Nothing is being sent, because no mail provider is configured.",
   "Nothing logged yet.",
   "Nothing matches.",
   "Nothing outstanding.",
@@ -276,13 +315,19 @@ export const ADMIN_EN = [
   "Nothing queued. No rule has an email address or WhatsApp number on it.",
   "Nothing recorded.",
   "Nothing scheduled.",
+  "Nothing would be emailed even with a mail provider configured. An alert with no recipient is raised in the console and goes no further.",
   "Nothing yet.",
   "ORD-000001",
   "One query per question a manager actually asks. Figures come from the snapshots stored on each document — the price quoted, the landed cost at the time — so last quarter still reads as last quarter.",
   "One tree, one row. Quantity is always one — that is the point of tracking it individually.",
+  "Only the owner can change alert rules.",
+  "Only the owner can change rules.",
+  "Only the owner can change settings.",
+  "Only the owner can send a test.",
   "Only this role sees it",
   "Open",
   "Open leads",
+  "Open the menu",
   "Open them →",
   "Operations",
   "Order",
@@ -306,10 +351,14 @@ export const ADMIN_EN = [
   "Payment terms (days)",
   "Permit",
   "Phone",
+  "Pick a catalogue reference.",
   "Pieces",
   "Pipeline",
   "Pipeline AED",
+  "Point",
+  "Pot",
   "Pot (litres)",
+  "Prices are exclusive of VAT where applicable.",
   "Prices, discounts and the landed-cost snapshot are copied exactly as quoted — nothing is re-entered and nothing is re-derived.",
   "Print / save as PDF",
   "Profit",
@@ -319,6 +368,7 @@ export const ADMIN_EN = [
   "Published",
   "Published questions appear on the homepage and are published as structured data, so they can answer the question inside a search result rather than only on the page.",
   "Purchase cost",
+  "Put a quantity against at least one line.",
   "Put a quantity against the lines going on this run. Trees need the right gear and site access, so both are recorded before it is booked.",
   "QT-000001",
   "Qty",
@@ -331,9 +381,11 @@ export const ADMIN_EN = [
   "Quotations",
   "Quotations and invoices state “exclusive of VAT where applicable” and charge nothing. When the TRN arrives, enter it and switch VAT on — documents already issued keep the position they were issued with, which is the point.",
   "Quoted",
+  "Quoted to",
   "Raise",
   "Raise an invoice",
   "Raised",
+  "Reason",
   "Received",
   "Received by",
   "Received by *",
@@ -342,11 +394,15 @@ export const ADMIN_EN = [
   "Recent sign-in attempts",
   "Recently changed",
   "Record",
+  "Record a measurement",
   "Record a payment",
   "Record a specimen",
   "Record specimen",
+  "Record the date this client agreed to be quoted before publishing. A testimonial without consent cannot go on the site.",
+  "Record who received it — that is the proof of delivery.",
   "Reference",
   "Registered address",
+  "Remove",
   "Reopen",
   "Repeated failed attempts temporarily lock the account.",
   "Reports",
@@ -367,6 +423,7 @@ export const ADMIN_EN = [
   "Run checks now",
   "Sales",
   "Save",
+  "Save change",
   "Save copy",
   "Save settings",
   "Saved",
@@ -386,6 +443,7 @@ export const ADMIN_EN = [
   "Send a test to…",
   "Send every alert to…",
   "Send what is waiting",
+  "Set SMTP_URL (a mailbox on the company domain) or RESEND_API_KEY, plus MAIL_FROM, and these rows go out on the next tick. They wait with the reason attached rather than being dropped, and rather than this system claiming to have sent an email it never could.",
   "Set a new password for this account",
   "Set password",
   "Setting",
@@ -413,6 +471,7 @@ export const ADMIN_EN = [
   "Specimens",
   "Specimens are tracked one by one; lots are tracked by quantity. Sellable excludes anything still acclimatising, in poor health, or sitting somewhere it cannot be sold from.",
   "Specimens tracked",
+  "Spread by",
   "Start a new one instead",
   "Start the standard checklist",
   "Started",
@@ -427,13 +486,19 @@ export const ADMIN_EN = [
   "Summary — shown in the list and to search engines",
   "Supplier",
   "System",
+  "TOTAL",
   "TRN",
   "Tables",
   "Test",
   "Testimonials",
+  "That code does not match anything in the system. It may have been cancelled, renumbered, or mistyped.",
+  "That is not an email address.",
+  "That specimen does not exist.",
   "The backup holds data only, not schema, so there is one source of truth for the shape of the database and it is the migrations.",
   "The current password is asked for even though you are already signed in: an unattended screen is the ordinary case, and this is the one action that can lock you out of your own system. Changing it signs out every other device signed in as you, and leaves this one alone.",
   "The database lives on Neon&rsquo;s free plan, which keeps six hours of point-in-time history and will not schedule its own snapshots. Six hours is not a backup policy — it is the window in which somebody has to notice. This takes a full copy every night, stores it off Neon, reads it back to check it arrived intact, and keeps a month of them.",
+  "The number cannot be negative.",
+  "The number is a count of days, hours or units — it has to be whole.",
   "The part of the system that speaks first. Everything else waits to be asked — an invoice falls overdue in silence, a permit lapses while a container is at sea. These are the conditions worth being interrupted for.",
   "The words on the public site, and what a search engine is told about each page. Everything here has a compiled default — clear a box and the original text comes back, so nothing typed here can leave a page blank.",
   "There is one active owner.",
@@ -441,23 +506,34 @@ export const ADMIN_EN = [
   "These override what each page already generates. Leave a box empty and the built-in title or description is used — which for the 68 catalogue pages is already written from the specimen itself, so emptying a box is safe and blanking one is not possible.",
   "This is what the audit log records beside everything you change.",
   "This moves the stock, adds to the delivered quantities and re-derives the order status. Delivering more than remains is refused outright.",
+  "This version has been issued, so its lines are locked. Use",
+  "This version has been issued, so its lines are locked. Use “Revise” to create v{next} — the customer is holding this document.",
+  "This version has been issued. Create a new version to change it.",
   "Title",
   "Title — aim for 50–60 characters",
   "To",
   "Topic",
   "Total",
+  "Total (AED)",
   "Total landed",
   "Total leads",
   "Totals",
   "Trade licence",
   "Trading — Operations",
   "Trunk girth (cm)",
+  "Try the list it should be in:",
   "Type",
   "Undo",
   "Unit",
+  "Unit (AED)",
   "Unit cost",
   "Unit price (AED)",
   "Units",
+  "Unknown health.",
+  "Unknown language.",
+  "Unknown severity.",
+  "Unknown status.",
+  "Update",
   "Update status",
   "Updated",
   "Urgent",
@@ -473,6 +549,22 @@ export const ADMIN_EN = [
   "View the site →",
   "View this language →",
   "Viewer",
+  "Viewers cannot add stock.",
+  "Viewers cannot change alerts.",
+  "Viewers cannot change leads.",
+  "Viewers cannot change quotations.",
+  "Viewers cannot change shipments.",
+  "Viewers cannot change stock.",
+  "Viewers cannot complete deliveries.",
+  "Viewers cannot create orders.",
+  "Viewers cannot create quotations.",
+  "Viewers cannot create shipments.",
+  "Viewers cannot edit content.",
+  "Viewers cannot raise invoices.",
+  "Viewers cannot record measurements.",
+  "Viewers cannot record payments.",
+  "Viewers cannot revise quotations.",
+  "Viewers cannot schedule deliveries.",
   "Volume each (m³)",
   "Warning",
   "Weight each (kg)",
@@ -504,23 +596,44 @@ export const ADMIN_EN = [
   "Your account",
   "Your name",
   "Zero because no landed cost has been recorded against stock yet — cost a shipment and this fills in.",
+  "advance — the agreed percentage up front",
   "at least 10 characters",
   "been sitting",
+  "cannot sell from",
   "edited",
   "email of 12 March, site meeting…",
   "gate width, overhead cables, community timing rules",
   "h ago",
+  "health is",
   "just now",
   "lead has",
   "leads have",
   "locked at purchase",
   "min ago",
+  "moved",
   "name of whoever signed for it",
   "nobody",
+  "not sellable",
   "olive-trees-gulf-summer",
+  "product — from the catalogue",
+  "proforma",
+  "retention — released after the holding period",
+  "sellable",
+  "service — delivery, crane, planting",
+  "specimen {code}",
+  "specimen — one named tree",
+  "status is",
+  "still acclimatising until",
+  "system",
+  "tax invoice — the order",
   "translated",
   "uncontacted for more than 24 hours.",
   "unverified",
+  "version {n}",
+  "why this changed",
+  "{emirate}, United Arab Emirates",
+  "{min}–{max} weeks from order confirmation to site.",
+  "{n} of {total} rules send an email.",
   "· AED",
   "← All leads",
   "← Inventory",
@@ -543,6 +656,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "% del valore",
   "% of volume":
     "% del volume",
+  "(cannot sell from here)":
+    "(non si può vendere da qui)",
   "/journal/":
     "/journal/",
   "1–30 days":
@@ -551,10 +666,22 @@ const it: Partial<Record<AdminKey, string>> = {
     "31–60 giorni",
   "61–90 days":
     "61–90 giorni",
+  "A line needs a description.":
+    "Una riga richiede una descrizione.",
   "A long phrase you can remember beats a short puzzle you cannot. There are no rules here about symbols or capitals — they push people towards predictable passwords without making them harder to guess.":
     "Una frase lunga che ricordate vale più di un rompicapo corto che dimenticate. Qui non ci sono regole su simboli o maiuscole: spingono verso password prevedibili senza renderle più difficili da indovinare.",
+  "A path must start with a slash.":
+    "Un percorso deve iniziare con una barra.",
+  "A question needs both a question and an answer.":
+    "Una FAQ richiede sia la domanda sia la risposta.",
+  "A quotation needs a customer.":
+    "Un preventivo richiede un cliente.",
   "A testimonial cannot be published without the date the client agreed to be quoted. Publishing praise nobody consented to is a legal and reputational risk, and an anonymous testimonial reads as an invented one. Record the real conversation.":
     "Una testimonianza non può essere pubblicata senza la data in cui il cliente ha acconsentito a essere citato. Pubblicare un elogio non autorizzato è un rischio legale e reputazionale, e una testimonianza anonima sembra inventata. Registrate la conversazione reale.",
+  "A testimonial needs the words and the person who said them.":
+    "Una testimonianza richiede le parole e chi le ha dette.",
+  "A tree grows. Each row is an observation on a date, not a fixed attribute.":
+    "Un albero cresce. Ogni riga è un'osservazione a una data, non un attributo fisso.",
   "Accepted":
     "Accettato",
   "Accepted AED":
@@ -617,16 +744,28 @@ const it: Partial<Record<AdminKey, string>> = {
     "Anche e-mail",
   "Amount":
     "Importo",
+  "Amount (AED)":
+    "Importo (AED)",
   "Amount (AED) *":
     "Importo (AED) *",
+  "Amount must be a number.":
+    "L'importo deve essere un numero.",
+  "An article needs a title and a body.":
+    "Un articolo richiede un titolo e un testo.",
+  "Another article already uses the address /journal/{slug}. Change the title or the address.":
+    "Un altro articolo usa già l'indirizzo /journal/{slug}. Cambiate il titolo o l'indirizzo.",
   "Answer":
     "Risposta",
+  "Anything addressed outside the console.":
+    "Tutto ciò che è indirizzato fuori dalla console.",
   "Apply to all":
     "Applica a tutte",
   "Arrived":
     "Arrivata",
   "Asking":
     "Richiesto",
+  "Asking price":
+    "Prezzo richiesto",
   "Asking price (AED)":
     "Prezzo richiesto (AED)",
   "Author":
@@ -677,6 +816,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Canale",
   "Close":
     "Chiudi",
+  "Close the menu":
+    "Chiudi il menu",
   "Closed":
     "Chiusi",
   "Code":
@@ -731,6 +872,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Crea spedizione",
   "Created":
     "Creato",
+  "Crown":
+    "Chioma",
   "Crown width (m)":
     "Larghezza chioma (m)",
   "Currency":
@@ -767,6 +910,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Consegnato a valore",
   "Deliveries":
     "Consegne",
+  "Delivery":
+    "Consegna",
   "Delivery terms":
     "Termini di consegna",
   "Description":
@@ -785,6 +930,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Sconto %",
   "Document type":
     "Tipo di documento",
+  "Download the archive from the bucket and load it with the":
+    "Scaricate l'archivio dal bucket e caricatelo con",
   "Draft":
     "Bozza",
   "Driver":
@@ -809,6 +956,12 @@ const it: Partial<Record<AdminKey, string>> = {
     "Richieste, ultimi 30 giorni",
   "Enquiry":
     "Richiesta",
+  "Enter an amount.":
+    "Inserite un importo.",
+  "Enter an email address to send the test to.":
+    "Inserite un indirizzo e-mail a cui inviare il test.",
+  "Enter the TRN before switching VAT on — VAT cannot be charged without a registration number.":
+    "Inserite il numero di registrazione fiscale prima di attivare l'IVA — l'IVA non può essere addebitata senza un numero di registrazione.",
   "Equipment":
     "Attrezzatura",
   "Every document on this checklist is in and verified.":
@@ -819,6 +972,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Tutti",
   "Expires":
     "Scade",
+  "FX at purchase":
+    "Cambio all'acquisto",
   "FX rate to AED":
     "Cambio in AED",
   "FX to AED":
@@ -867,6 +1022,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "INV-000001",
   "Import costs":
     "Costi di importazione",
+  "Import permit":
+    "Permesso di importazione",
   "In lots":
     "A lotti",
   "Inbox":
@@ -935,6 +1092,10 @@ const it: Partial<Record<AdminKey, string>> = {
     "Richiesta → vendita",
   "Leads":
     "Richieste",
+  "Leads by enquiry type":
+    "Contatti per tipo di richiesta",
+  "Leads by source":
+    "Contatti per origine",
   "Line total":
     "Totale riga",
   "Lines":
@@ -943,6 +1104,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Pubblicato sul sito",
   "Live quotations":
     "Preventivi attivi",
+  "Living stock: dimensions are indicative and vary between individual specimens. Final size, form and availability are confirmed on despatch. This quotation is valid for {days} days from issue.":
+    "Materiale vivo: le dimensioni sono indicative e variano da un esemplare all'altro. Misura, forma e disponibilità definitive sono confermate alla spedizione. Questo preventivo è valido {days} giorni dall'emissione.",
   "Location":
     "Ubicazione",
   "Lost":
@@ -959,6 +1122,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Segna come consegnato",
   "Measured":
     "Misurato",
+  "Measurements":
+    "Misurazioni",
   "Menu":
     "Menu",
   "Message":
@@ -967,6 +1132,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Metodo",
   "Money":
     "Contabilità",
+  "Movement history":
+    "Storico dei movimenti",
   "Name":
     "Nome",
   "Net":
@@ -989,6 +1156,10 @@ const it: Partial<Record<AdminKey, string>> = {
     "Nessuno spazio di backup è configurato, quindi non viene salvato nulla. Il servizio richiede BACKUP_BUCKET, BACKUP_ACCESS_KEY_ID, BACKUP_SECRET_ACCESS_KEY e BACKUP_ENDPOINT.",
   "No document checklist on this shipment yet.":
     "Nessuna lista documenti su questa spedizione.",
+  "No document named.":
+    "Nessun documento indicato.",
+  "No invoice {code}.":
+    "Nessuna fattura {code}.",
   "No invoices raised.":
     "Nessuna fattura emessa.",
   "No landed cost on these lines, so the margin shown is not real. Cost the shipment first.":
@@ -997,18 +1168,34 @@ const it: Partial<Record<AdminKey, string>> = {
     "Nessuna riga su questa spedizione.",
   "No lines yet.":
     "Ancora nessuna riga.",
+  "No order {code}.":
+    "Nessun ordine {code}.",
   "No orders yet.":
     "Ancora nessun ordine.",
   "No quotations yet.":
     "Ancora nessun preventivo.",
+  "No rule has an address on it":
+    "Nessuna regola ha un indirizzo",
+  "No rule has an address on it.":
+    "Nessuna regola ha un indirizzo.",
+  "No rules yet. Press":
+    "Ancora nessuna regola. Premete",
+  "No rules yet. Press “Run checks now” to install the defaults.":
+    "Ancora nessuna regola. Premete «Esegui i controlli ora» per installare quelle predefinite.",
   "No shipments recorded yet.":
     "Nessuna spedizione registrata.",
   "No specimens match.":
     "Nessun esemplare corrisponde.",
+  "No such record":
+    "Nessun record di questo tipo",
   "None":
     "Nessuno",
+  "None recorded.":
+    "Nessuna registrata.",
   "Not applicable — exclusive of VAT where applicable":
     "Non applicabile — IVA esclusa ove applicabile",
+  "Not sellable because:":
+    "Non vendibile perché:",
   "Not set":
     "Non impostato",
   "Not stated":
@@ -1021,6 +1208,10 @@ const it: Partial<Record<AdminKey, string>> = {
     "Note",
   "Nothing here yet":
     "Ancora nulla qui",
+  "Nothing is being sent":
+    "Non viene inviato nulla",
+  "Nothing is being sent, because no mail provider is configured.":
+    "Non viene inviato nulla, perché non è configurato alcun provider di posta.",
   "Nothing logged yet.":
     "Ancora nulla registrato.",
   "Nothing matches.":
@@ -1035,6 +1226,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Nulla registrato.",
   "Nothing scheduled.":
     "Nulla in programma.",
+  "Nothing would be emailed even with a mail provider configured. An alert with no recipient is raised in the console and goes no further.":
+    "Nulla verrebbe inviato per e-mail nemmeno con un provider di posta configurato. Un avviso senza destinatario compare in console e non va oltre.",
   "Nothing yet.":
     "Ancora nulla.",
   "ORD-000001":
@@ -1043,12 +1236,22 @@ const it: Partial<Record<AdminKey, string>> = {
     "Una query per ogni domanda che un responsabile si pone davvero. I numeri vengono dalle istantanee salvate su ciascun documento — il prezzo quotato, il costo sdoganato di allora — così il trimestre scorso continua a leggersi come il trimestre scorso.",
   "One tree, one row. Quantity is always one — that is the point of tracking it individually.":
     "Un albero, una riga. La quantità è sempre uno: è proprio il senso di tracciarlo singolarmente.",
+  "Only the owner can change alert rules.":
+    "Solo il titolare può modificare le regole di avviso.",
+  "Only the owner can change rules.":
+    "Solo il titolare può modificare le regole.",
+  "Only the owner can change settings.":
+    "Solo il titolare può modificare le impostazioni.",
+  "Only the owner can send a test.":
+    "Solo il titolare può inviare un test.",
   "Only this role sees it":
     "Lo vede solo questo ruolo",
   "Open":
     "Aperti",
   "Open leads":
     "Richieste aperte",
+  "Open the menu":
+    "Apri il menu",
   "Open them →":
     "Aprile →",
   "Operations":
@@ -1095,14 +1298,22 @@ const it: Partial<Record<AdminKey, string>> = {
     "Permesso",
   "Phone":
     "Telefono",
+  "Pick a catalogue reference.":
+    "Scegliete un riferimento di catalogo.",
   "Pieces":
     "Pezzi",
   "Pipeline":
     "Flusso commerciale",
   "Pipeline AED":
     "Pipeline AED",
+  "Point":
+    "Puntate",
+  "Pot":
+    "Vaso",
   "Pot (litres)":
     "Vaso (litri)",
+  "Prices are exclusive of VAT where applicable.":
+    "I prezzi sono al netto dell'IVA dove applicabile.",
   "Prices, discounts and the landed-cost snapshot are copied exactly as quoted — nothing is re-entered and nothing is re-derived.":
     "Prezzi, sconti e l’istantanea del costo sdoganato vengono copiati esattamente come quotati: nulla viene reinserito e nulla ricalcolato.",
   "Print / save as PDF":
@@ -1121,6 +1332,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Le domande pubblicate compaiono in homepage e vengono esposte come dati strutturati, così possono rispondere già dentro un risultato di ricerca e non solo sulla pagina.",
   "Purchase cost":
     "Costo di acquisto",
+  "Put a quantity against at least one line.":
+    "Indicate una quantità su almeno una riga.",
   "Put a quantity against the lines going on this run. Trees need the right gear and site access, so both are recorded before it is booked.":
     "Indicate una quantità sulle righe che vanno in questo viaggio. Gli alberi richiedono i mezzi giusti e l’accesso al cantiere, perciò entrambi si registrano prima della prenotazione.",
   "QT-000001":
@@ -1145,12 +1358,16 @@ const it: Partial<Record<AdminKey, string>> = {
     "Preventivi e fatture riportano “IVA esclusa ove applicabile” e non addebitano nulla. Quando arriva la partita IVA, inseritela e attivate l’IVA: i documenti già emessi mantengono la posizione con cui sono stati emessi, ed è proprio questo il punto.",
   "Quoted":
     "Quotato",
+  "Quoted to":
+    "Intestato a",
   "Raise":
     "Emetti",
   "Raise an invoice":
     "Emetti una fattura",
   "Raised":
     "Segnalato",
+  "Reason":
+    "Motivo",
   "Received":
     "Ricevuta",
   "Received by":
@@ -1167,16 +1384,24 @@ const it: Partial<Record<AdminKey, string>> = {
     "Modificati di recente",
   "Record":
     "Registra",
+  "Record a measurement":
+    "Registra una misurazione",
   "Record a payment":
     "Registra un pagamento",
   "Record a specimen":
     "Registra un esemplare",
   "Record specimen":
     "Registra esemplare",
+  "Record the date this client agreed to be quoted before publishing. A testimonial without consent cannot go on the site.":
+    "Registrate la data in cui questo cliente ha acconsentito a essere citato prima di pubblicare. Una testimonianza senza consenso non può andare sul sito.",
+  "Record who received it — that is the proof of delivery.":
+    "Registrate chi ha ricevuto — è quella la prova della consegna.",
   "Reference":
     "Riferimento",
   "Registered address":
     "Sede legale",
+  "Remove":
+    "Rimuovi",
   "Reopen":
     "Riapri",
   "Repeated failed attempts temporarily lock the account.":
@@ -1217,6 +1442,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Commerciale",
   "Save":
     "Salva",
+  "Save change":
+    "Salva la modifica",
   "Save copy":
     "Salva i testi",
   "Save settings":
@@ -1255,6 +1482,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Invia ogni avviso a…",
   "Send what is waiting":
     "Invia quanto è in attesa",
+  "Set SMTP_URL (a mailbox on the company domain) or RESEND_API_KEY, plus MAIL_FROM, and these rows go out on the next tick. They wait with the reason attached rather than being dropped, and rather than this system claiming to have sent an email it never could.":
+    "Impostate SMTP_URL (una casella sul dominio aziendale) oppure RESEND_API_KEY, più MAIL_FROM, e queste righe partiranno al ciclo successivo. Restano in attesa con il motivo allegato anziché essere scartate, e anziché far dire a questo sistema di aver inviato un'e-mail che non avrebbe mai potuto inviare.",
   "Set a new password for this account":
     "Imposta una nuova password per questo utente",
   "Set password":
@@ -1309,6 +1538,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Gli esemplari si tracciano uno per uno; i lotti a quantità. “Vendibile” esclude tutto ciò che è ancora in acclimatazione, in cattivo stato di salute, o si trova dove non può essere venduto.",
   "Specimens tracked":
     "Esemplari tracciati",
+  "Spread by":
+    "Ripartito per",
   "Start a new one instead":
     "Inizia invece da una nuova",
   "Start the standard checklist":
@@ -1337,6 +1568,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Fornitore",
   "System":
     "Sistema",
+  "TOTAL":
+    "TOTALE",
   "TRN":
     "Partita IVA (TRN)",
   "Tables":
@@ -1345,12 +1578,22 @@ const it: Partial<Record<AdminKey, string>> = {
     "Prova",
   "Testimonials":
     "Testimonianze",
+  "That code does not match anything in the system. It may have been cancelled, renumbered, or mistyped.":
+    "Questo codice non corrisponde a nulla nel sistema. Potrebbe essere stato annullato, rinumerato o digitato male.",
+  "That is not an email address.":
+    "Questo non è un indirizzo e-mail.",
+  "That specimen does not exist.":
+    "Quell'esemplare non esiste.",
   "The backup holds data only, not schema, so there is one source of truth for the shape of the database and it is the migrations.":
     "Il backup contiene solo i dati, non lo schema: così esiste una sola fonte di verità sulla forma del database, e sono le migrazioni.",
   "The current password is asked for even though you are already signed in: an unattended screen is the ordinary case, and this is the one action that can lock you out of your own system. Changing it signs out every other device signed in as you, and leaves this one alone.":
     "La password attuale viene chiesta anche se avete già effettuato l’accesso: uno schermo lasciato incustodito è il caso ordinario, e questa è l’unica azione che può chiudervi fuori dal vostro sistema. Cambiandola si disconnette ogni altro dispositivo collegato come voi, lasciando attivo questo.",
   "The database lives on Neon&rsquo;s free plan, which keeps six hours of point-in-time history and will not schedule its own snapshots. Six hours is not a backup policy — it is the window in which somebody has to notice. This takes a full copy every night, stores it off Neon, reads it back to check it arrived intact, and keeps a month of them.":
     "Il database è sul piano gratuito di Neon, che conserva sei ore di storico point-in-time e non pianifica snapshot propri. Sei ore non sono una politica di backup: sono la finestra entro cui qualcuno deve accorgersene. Questo prende ogni notte una copia completa, la archivia fuori da Neon, la rilegge per verificare che sia arrivata integra, e ne conserva un mese.",
+  "The number cannot be negative.":
+    "Il numero non può essere negativo.",
+  "The number is a count of days, hours or units — it has to be whole.":
+    "Il numero conta giorni, ore o unità — deve essere intero.",
   "The part of the system that speaks first. Everything else waits to be asked — an invoice falls overdue in silence, a permit lapses while a container is at sea. These are the conditions worth being interrupted for.":
     "La parte del sistema che parla per prima. Tutto il resto aspetta di essere interrogato: una fattura scade in silenzio, un permesso decade mentre un container è in mare. Queste sono le condizioni per cui vale la pena essere interrotti.",
   "The words on the public site, and what a search engine is told about each page. Everything here has a compiled default — clear a box and the original text comes back, so nothing typed here can leave a page blank.":
@@ -1365,6 +1608,12 @@ const it: Partial<Record<AdminKey, string>> = {
     "È quanto il registro di controllo annota accanto a ogni tua modifica.",
   "This moves the stock, adds to the delivered quantities and re-derives the order status. Delivering more than remains is refused outright.":
     "Questo movimenta la giacenza, incrementa le quantità consegnate e ricalcola lo stato dell’ordine. Consegnare più di quanto resta viene rifiutato senza eccezioni.",
+  "This version has been issued, so its lines are locked. Use":
+    "Questa versione è stata emessa, quindi le sue righe sono bloccate. Usate",
+  "This version has been issued, so its lines are locked. Use “Revise” to create v{next} — the customer is holding this document.":
+    "Questa versione è stata emessa, quindi le sue righe sono bloccate. Usate «Revisiona» per creare la v{next} — il cliente ha in mano questo documento.",
+  "This version has been issued. Create a new version to change it.":
+    "Questa versione è stata emessa. Createne una nuova per modificarla.",
   "Title":
     "Titolo",
   "Title — aim for 50–60 characters":
@@ -1375,6 +1624,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Argomento",
   "Total":
     "Totale",
+  "Total (AED)":
+    "Totale (AED)",
   "Total landed":
     "Totale sdoganato",
   "Total leads":
@@ -1387,18 +1638,32 @@ const it: Partial<Record<AdminKey, string>> = {
     "Trading — Operativo",
   "Trunk girth (cm)":
     "Circonferenza tronco (cm)",
+  "Try the list it should be in:":
+    "Provate l'elenco in cui dovrebbe trovarsi:",
   "Type":
     "Tipo",
   "Undo":
     "Annulla",
   "Unit":
     "Unità",
+  "Unit (AED)":
+    "Unitario (AED)",
   "Unit cost":
     "Costo unitario",
   "Unit price (AED)":
     "Prezzo unitario (AED)",
   "Units":
     "Unità",
+  "Unknown health.":
+    "Stato di salute sconosciuto.",
+  "Unknown language.":
+    "Lingua sconosciuta.",
+  "Unknown severity.":
+    "Gravità sconosciuta.",
+  "Unknown status.":
+    "Stato sconosciuto.",
+  "Update":
+    "Aggiorna",
   "Update status":
     "Aggiorna stato",
   "Updated":
@@ -1429,6 +1694,38 @@ const it: Partial<Record<AdminKey, string>> = {
     "Vedi questa lingua →",
   "Viewer":
     "Sola lettura",
+  "Viewers cannot add stock.":
+    "I visualizzatori non possono aggiungere giacenze.",
+  "Viewers cannot change alerts.":
+    "I visualizzatori non possono modificare gli avvisi.",
+  "Viewers cannot change leads.":
+    "I visualizzatori non possono modificare i contatti.",
+  "Viewers cannot change quotations.":
+    "I visualizzatori non possono modificare i preventivi.",
+  "Viewers cannot change shipments.":
+    "I visualizzatori non possono modificare le spedizioni.",
+  "Viewers cannot change stock.":
+    "I visualizzatori non possono modificare le giacenze.",
+  "Viewers cannot complete deliveries.":
+    "I visualizzatori non possono completare le consegne.",
+  "Viewers cannot create orders.":
+    "I visualizzatori non possono creare ordini.",
+  "Viewers cannot create quotations.":
+    "I visualizzatori non possono creare preventivi.",
+  "Viewers cannot create shipments.":
+    "I visualizzatori non possono creare spedizioni.",
+  "Viewers cannot edit content.":
+    "I visualizzatori non possono modificare i contenuti.",
+  "Viewers cannot raise invoices.":
+    "I visualizzatori non possono emettere fatture.",
+  "Viewers cannot record measurements.":
+    "I visualizzatori non possono registrare misurazioni.",
+  "Viewers cannot record payments.":
+    "I visualizzatori non possono registrare pagamenti.",
+  "Viewers cannot revise quotations.":
+    "I visualizzatori non possono revisionare i preventivi.",
+  "Viewers cannot schedule deliveries.":
+    "I visualizzatori non possono programmare consegne.",
   "Volume each (m³)":
     "Volume cad. (m³)",
   "Warning":
@@ -1491,10 +1788,14 @@ const it: Partial<Record<AdminKey, string>> = {
     "Il tuo nome",
   "Zero because no landed cost has been recorded against stock yet — cost a shipment and this fills in.":
     "Zero perché non è ancora stato registrato alcun costo sdoganato sulla giacenza: costificate una spedizione e questo si popola.",
+  "advance — the agreed percentage up front":
+    "acconto — la percentuale concordata in anticipo",
   "at least 10 characters":
     "almeno 10 caratteri",
   "been sitting":
     "ferma",
+  "cannot sell from":
+    "non si può vendere da",
   "edited":
     "modificato",
   "email of 12 March, site meeting…":
@@ -1503,6 +1804,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "larghezza del cancello, cavi aerei, orari del comprensorio",
   "h ago":
     "h fa",
+  "health is":
+    "lo stato di salute è",
   "just now":
     "adesso",
   "lead has":
@@ -1513,18 +1816,54 @@ const it: Partial<Record<AdminKey, string>> = {
     "bloccato all’acquisto",
   "min ago":
     "min fa",
+  "moved":
+    "spostato",
   "name of whoever signed for it":
     "nome di chi ha firmato",
   "nobody":
     "nessuno",
+  "not sellable":
+    "non vendibile",
   "olive-trees-gulf-summer":
     "olive-trees-gulf-summer",
+  "product — from the catalogue":
+    "prodotto — dal catalogo",
+  "proforma":
+    "proforma",
+  "retention — released after the holding period":
+    "ritenuta — svincolata dopo il periodo di garanzia",
+  "sellable":
+    "vendibile",
+  "service — delivery, crane, planting":
+    "servizio — consegna, gru, messa a dimora",
+  "specimen {code}":
+    "esemplare {code}",
+  "specimen — one named tree":
+    "esemplare — un albero identificato",
+  "status is":
+    "lo stato è",
+  "still acclimatising until":
+    "ancora in acclimatazione fino al",
+  "system":
+    "sistema",
+  "tax invoice — the order":
+    "fattura — l'ordine",
   "translated":
     "tradotto",
   "uncontacted for more than 24 hours.":
     "senza contatto da più di 24 ore.",
   "unverified":
     "non verificato",
+  "version {n}":
+    "versione {n}",
+  "why this changed":
+    "perché è cambiato",
+  "{emirate}, United Arab Emirates":
+    "{emirate}, Emirati Arabi Uniti",
+  "{min}–{max} weeks from order confirmation to site.":
+    "{min}–{max} settimane dalla conferma dell'ordine alla consegna in cantiere.",
+  "{n} of {total} rules send an email.":
+    "{n} regole su {total} inviano un'e-mail.",
   "· AED":
     "· AED",
   "← All leads":
@@ -1547,6 +1886,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "% من القيمة",
   "% of volume":
     "% من الحجم",
+  "(cannot sell from here)":
+    "(لا يمكن البيع من هنا)",
   "/journal/":
     "/journal/",
   "1–30 days":
@@ -1555,10 +1896,22 @@ const ar: Partial<Record<AdminKey, string>> = {
     "31–60 يومًا",
   "61–90 days":
     "61–90 يومًا",
+  "A line needs a description.":
+    "كل بند يحتاج وصفًا.",
   "A long phrase you can remember beats a short puzzle you cannot. There are no rules here about symbols or capitals — they push people towards predictable passwords without making them harder to guess.":
     "عبارة طويلة تتذكّرها خير من لغز قصير تنساه. ولا توجد هنا قواعد عن الرموز أو الأحرف الكبيرة — فهي تدفع الناس إلى كلمات مرور متوقَّعة دون أن تجعل تخمينها أصعب.",
+  "A path must start with a slash.":
+    "يجب أن يبدأ المسار بشرطة مائلة.",
+  "A question needs both a question and an answer.":
+    "السؤال يحتاج نصّ السؤال والإجابة معًا.",
+  "A quotation needs a customer.":
+    "عرض السعر يحتاج عميلًا.",
   "A testimonial cannot be published without the date the client agreed to be quoted. Publishing praise nobody consented to is a legal and reputational risk, and an anonymous testimonial reads as an invented one. Record the real conversation.":
     "لا يمكن نشر شهادة عميل دون تاريخ موافقته على الاقتباس منه. ونشر ثناء لم يوافق عليه أحد مخاطرة قانونية وسمعية، والشهادة المجهولة تُقرأ كأنها مختلقة. سجّل المحادثة الحقيقية.",
+  "A testimonial needs the words and the person who said them.":
+    "الشهادة تحتاج نصّها ومن قالها.",
+  "A tree grows. Each row is an observation on a date, not a fixed attribute.":
+    "الشجرة تنمو. كل سطر هنا ملاحظة في تاريخ معيّن، لا صفة ثابتة.",
   "Accepted":
     "مقبول",
   "Accepted AED":
@@ -1621,15 +1974,27 @@ const ar: Partial<Record<AdminKey, string>> = {
     "وأيضًا بريد إلكتروني",
   "Amount":
     "المبلغ",
+  "Amount (AED)":
+    "المبلغ (درهم)",
   "Amount (AED) *":
     "المبلغ (درهم) *",
+  "Amount must be a number.":
+    "يجب أن يكون المبلغ رقمًا.",
+  "An article needs a title and a body.":
+    "المقال يحتاج عنوانًا ونصًّا.",
+  "Another article already uses the address /journal/{slug}. Change the title or the address.":
+    "يستخدم مقال آخر العنوان /journal/{slug} بالفعل. غيّر العنوان أو المسار.",
   "Answer":
     "الإجابة",
+  "Anything addressed outside the console.":
+    "كل ما يُوجَّه خارج لوحة التشغيل.",
   "Apply to all":
     "طبّق على الكل",
   "Arrived":
     "وصلت",
   "Asking":
+    "السعر المطلوب",
+  "Asking price":
     "السعر المطلوب",
   "Asking price (AED)":
     "السعر المطلوب (درهم)",
@@ -1681,6 +2046,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "القناة",
   "Close":
     "إغلاق",
+  "Close the menu":
+    "أغلق القائمة",
   "Closed":
     "مغلقة",
   "Code":
@@ -1735,6 +2102,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "أنشئ شحنة",
   "Created":
     "أُنشئ",
+  "Crown":
+    "التاج",
   "Crown width (m)":
     "عرض التاج (م)",
   "Currency":
@@ -1771,6 +2140,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "المسلَّم بالقيمة",
   "Deliveries":
     "التسليمات",
+  "Delivery":
+    "التسليم",
   "Delivery terms":
     "شروط التسليم",
   "Description":
@@ -1789,6 +2160,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "نسبة الخصم %",
   "Document type":
     "نوع المستند",
+  "Download the archive from the bucket and load it with the":
+    "نزّل الأرشيف من المستودع وحمّله بأمر",
   "Draft":
     "مسودّة",
   "Driver":
@@ -1813,6 +2186,12 @@ const ar: Partial<Record<AdminKey, string>> = {
     "الاستفسارات، آخر 30 يومًا",
   "Enquiry":
     "الاستفسار",
+  "Enter an amount.":
+    "أدخل مبلغًا.",
+  "Enter an email address to send the test to.":
+    "أدخل بريدًا إلكترونيًّا لإرسال الاختبار إليه.",
+  "Enter the TRN before switching VAT on — VAT cannot be charged without a registration number.":
+    "أدخل رقم التسجيل الضريبي قبل تفعيل ضريبة القيمة المضافة — فلا يجوز احتسابها دون رقم تسجيل.",
   "Equipment":
     "المعدّات",
   "Every document on this checklist is in and verified.":
@@ -1823,6 +2202,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "الجميع",
   "Expires":
     "تنتهي في",
+  "FX at purchase":
+    "سعر الصرف عند الشراء",
   "FX rate to AED":
     "سعر الصرف إلى الدرهم",
   "FX to AED":
@@ -1871,6 +2252,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "INV-000001",
   "Import costs":
     "تكاليف الاستيراد",
+  "Import permit":
+    "تصريح الاستيراد",
   "In lots":
     "ضمن دفعات",
   "Inbox":
@@ -1939,6 +2322,10 @@ const ar: Partial<Record<AdminKey, string>> = {
     "من استفسار إلى بيع",
   "Leads":
     "الاستفسارات",
+  "Leads by enquiry type":
+    "الاستفسارات حسب النوع",
+  "Leads by source":
+    "الاستفسارات حسب المصدر",
   "Line total":
     "إجمالي البند",
   "Lines":
@@ -1947,6 +2334,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "منشور على الموقع",
   "Live quotations":
     "عروض أسعار سارية",
+  "Living stock: dimensions are indicative and vary between individual specimens. Final size, form and availability are confirmed on despatch. This quotation is valid for {days} days from issue.":
+    "بضاعة حيّة: الأبعاد استرشادية وتختلف من شجرة إلى أخرى. ويُؤكَّد الحجم والشكل والتوفّر النهائي عند الشحن. وهذا العرض صالح {days} يومًا من تاريخ إصداره.",
   "Location":
     "الموقع",
   "Lost":
@@ -1963,6 +2352,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "علّمها مسلَّمة",
   "Measured":
     "مقيس",
+  "Measurements":
+    "القياسات",
   "Menu":
     "القائمة",
   "Message":
@@ -1971,6 +2362,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "الطريقة",
   "Money":
     "المالية",
+  "Movement history":
+    "سجلّ الحركات",
   "Name":
     "الاسم",
   "Net":
@@ -1993,6 +2386,10 @@ const ar: Partial<Record<AdminKey, string>> = {
     "لا توجد مساحة تخزين للنسخ الاحتياطي، فلا شيء يُنسخ. تحتاج الخدمة إلى BACKUP_BUCKET وBACKUP_ACCESS_KEY_ID وBACKUP_SECRET_ACCESS_KEY وBACKUP_ENDPOINT.",
   "No document checklist on this shipment yet.":
     "لا توجد قائمة مستندات لهذه الشحنة بعد.",
+  "No document named.":
+    "لم يُذكر أي مستند.",
+  "No invoice {code}.":
+    "لا توجد فاتورة {code}.",
   "No invoices raised.":
     "لم تُصدر فواتير.",
   "No landed cost on these lines, so the margin shown is not real. Cost the shipment first.":
@@ -2001,18 +2398,34 @@ const ar: Partial<Record<AdminKey, string>> = {
     "لا بنود في هذه الشحنة بعد.",
   "No lines yet.":
     "لا بنود بعد.",
+  "No order {code}.":
+    "لا يوجد طلب {code}.",
   "No orders yet.":
     "لا طلبات بعد.",
   "No quotations yet.":
     "لا عروض أسعار بعد.",
+  "No rule has an address on it":
+    "لا توجد قاعدة عليها عنوان",
+  "No rule has an address on it.":
+    "لا توجد قاعدة عليها عنوان.",
+  "No rules yet. Press":
+    "لا قواعد بعد. اضغط",
+  "No rules yet. Press “Run checks now” to install the defaults.":
+    "لا قواعد بعد. اضغط «شغّل الفحوص الآن» لتثبيت القواعد الافتراضية.",
   "No shipments recorded yet.":
     "لم تُسجَّل شحنات بعد.",
   "No specimens match.":
     "لا أصناف مطابقة.",
+  "No such record":
+    "لا يوجد سجلّ بهذا الاسم",
   "None":
     "لا شيء",
+  "None recorded.":
+    "لا شيء مسجّل.",
   "Not applicable — exclusive of VAT where applicable":
     "غير منطبقة — غير شاملة الضريبة حيثما تنطبق",
+  "Not sellable because:":
+    "غير قابلة للبيع لأن:",
   "Not set":
     "غير محدَّد",
   "Not stated":
@@ -2025,6 +2438,10 @@ const ar: Partial<Record<AdminKey, string>> = {
     "ملاحظات",
   "Nothing here yet":
     "لا يوجد شيء هنا بعد",
+  "Nothing is being sent":
+    "لا يُرسل أي شيء",
+  "Nothing is being sent, because no mail provider is configured.":
+    "لا يُرسل أي شيء، لأنه لم تتم تهيئة أي مزوّد بريد.",
   "Nothing logged yet.":
     "لم يُسجَّل شيء بعد.",
   "Nothing matches.":
@@ -2039,6 +2456,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "لا شيء مسجَّل.",
   "Nothing scheduled.":
     "لا شيء مجدول.",
+  "Nothing would be emailed even with a mail provider configured. An alert with no recipient is raised in the console and goes no further.":
+    "لن يُرسل أي بريد حتى مع تهيئة مزوّد بريد. فالتنبيه بلا مستلِم يظهر في اللوحة ولا يتجاوزها.",
   "Nothing yet.":
     "لا شيء بعد.",
   "ORD-000001":
@@ -2047,12 +2466,22 @@ const ar: Partial<Record<AdminKey, string>> = {
     "استعلام واحد لكل سؤال يطرحه المدير فعلًا. والأرقام تأتي من اللقطات المحفوظة على كل مستند — السعر المعروض، والتكلفة النهائية وقتها — فيظل الربع الماضي يُقرأ كما كان.",
   "One tree, one row. Quantity is always one — that is the point of tracking it individually.":
     "شجرة واحدة، صفّ واحد. والكمية دائمًا واحد — وهذا هو معنى تتبّعها فرديًا.",
+  "Only the owner can change alert rules.":
+    "لا يمكن تغيير قواعد التنبيه إلا للمالك.",
+  "Only the owner can change rules.":
+    "لا يمكن تغيير القواعد إلا للمالك.",
+  "Only the owner can change settings.":
+    "لا يمكن تغيير الإعدادات إلا للمالك.",
+  "Only the owner can send a test.":
+    "لا يمكن إرسال اختبار إلا للمالك.",
   "Only this role sees it":
     "يراه هذا الدور فقط",
   "Open":
     "مفتوحة",
   "Open leads":
     "استفسارات مفتوحة",
+  "Open the menu":
+    "افتح القائمة",
   "Open them →":
     "افتحها →",
   "Operations":
@@ -2099,14 +2528,22 @@ const ar: Partial<Record<AdminKey, string>> = {
     "التصريح",
   "Phone":
     "الهاتف",
+  "Pick a catalogue reference.":
+    "اختر رقمًا مرجعيًّا من الكتالوج.",
   "Pieces":
     "القطع",
   "Pipeline":
     "مسار البيع",
   "Pipeline AED":
     "خط البيع بالدرهم",
+  "Point":
+    "وجّه",
+  "Pot":
+    "الأصيص",
   "Pot (litres)":
     "الأصيص (لتر)",
+  "Prices are exclusive of VAT where applicable.":
+    "الأسعار لا تشمل ضريبة القيمة المضافة حيث تنطبق.",
   "Prices, discounts and the landed-cost snapshot are copied exactly as quoted — nothing is re-entered and nothing is re-derived.":
     "الأسعار والخصومات ولقطة التكلفة النهائية تُنسخ كما عُرضت تمامًا — لا شيء يُدخَل من جديد ولا شيء يُعاد اشتقاقه.",
   "Print / save as PDF":
@@ -2125,6 +2562,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "الأسئلة المنشورة تظهر في الصفحة الرئيسية وتُنشر كبيانات منظَّمة، فتجيب عن السؤال داخل نتيجة البحث نفسها لا على الصفحة وحدها.",
   "Purchase cost":
     "تكلفة الشراء",
+  "Put a quantity against at least one line.":
+    "ضع كمية أمام بند واحد على الأقل.",
   "Put a quantity against the lines going on this run. Trees need the right gear and site access, so both are recorded before it is booked.":
     "حدّد كمية أمام البنود الذاهبة في هذه الرحلة. الأشجار تحتاج المعدّات الصحيحة وإمكانية الوصول للموقع، فيُسجَّل الأمران قبل الحجز.",
   "QT-000001":
@@ -2149,12 +2588,16 @@ const ar: Partial<Record<AdminKey, string>> = {
     "عروض الأسعار والفواتير تنصّ على «غير شاملة الضريبة حيثما تنطبق» ولا تحتسب شيئًا. وحين يصل الرقم الضريبي، أدخِله وفعّل الضريبة — والمستندات الصادرة سابقًا تحتفظ بالوضع الذي صدرت به، وهذا هو المقصود.",
   "Quoted":
     "مُسعَّر",
+  "Quoted to":
+    "مقدَّم إلى",
   "Raise":
     "أصدر",
   "Raise an invoice":
     "أصدر فاتورة",
   "Raised":
     "أُثير",
+  "Reason":
+    "السبب",
   "Received":
     "وردت",
   "Received by":
@@ -2171,16 +2614,24 @@ const ar: Partial<Record<AdminKey, string>> = {
     "عُدّلت مؤخرًا",
   "Record":
     "سجّل",
+  "Record a measurement":
+    "سجّل قياسًا",
   "Record a payment":
     "سجّل دفعة",
   "Record a specimen":
     "سجّل صنفًا",
   "Record specimen":
     "سجّل صنفًا",
+  "Record the date this client agreed to be quoted before publishing. A testimonial without consent cannot go on the site.":
+    "سجّل تاريخ موافقة هذا العميل على الاقتباس قبل النشر. فالشهادة بلا موافقة لا يمكن أن تُنشر على الموقع.",
+  "Record who received it — that is the proof of delivery.":
+    "سجّل من استلمها — فذلك هو إثبات التسليم.",
   "Reference":
     "المرجع",
   "Registered address":
     "العنوان المسجّل",
+  "Remove":
+    "إزالة",
   "Reopen":
     "أعد الفتح",
   "Repeated failed attempts temporarily lock the account.":
@@ -2221,6 +2672,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "المبيعات",
   "Save":
     "حفظ",
+  "Save change":
+    "احفظ التغيير",
   "Save copy":
     "حفظ النصوص",
   "Save settings":
@@ -2259,6 +2712,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "أرسل كل التنبيهات إلى…",
   "Send what is waiting":
     "أرسل ما هو منتظر",
+  "Set SMTP_URL (a mailbox on the company domain) or RESEND_API_KEY, plus MAIL_FROM, and these rows go out on the next tick. They wait with the reason attached rather than being dropped, and rather than this system claiming to have sent an email it never could.":
+    "اضبط SMTP_URL (صندوق بريد على نطاق الشركة) أو RESEND_API_KEY، إضافةً إلى MAIL_FROM، فتخرج هذه السطور في الدورة التالية. وهي تنتظر مع ذكر السبب بدل أن تُهمل، وبدل أن يدّعي هذا النظام أنه أرسل بريدًا لم يكن قادرًا على إرساله أصلًا.",
   "Set a new password for this account":
     "عيّن كلمة مرور جديدة لهذا الحساب",
   "Set password":
@@ -2313,6 +2768,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "الأصناف تُتتبَّع واحدًا واحدًا؛ والدفعات تُتتبَّع بالكمية. و«قابل للبيع» يستثني كل ما هو قيد التأقلم أو ضعيف الحالة أو موجود في مكان لا يُباع منه.",
   "Specimens tracked":
     "أصناف متتبَّعة",
+  "Spread by":
+    "التوزيع حسب",
   "Start a new one instead":
     "ابدأ واحدة جديدة بدلًا من ذلك",
   "Start the standard checklist":
@@ -2341,6 +2798,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "المورّد",
   "System":
     "النظام",
+  "TOTAL":
+    "الإجمالي",
   "TRN":
     "الرقم الضريبي",
   "Tables":
@@ -2349,12 +2808,22 @@ const ar: Partial<Record<AdminKey, string>> = {
     "اختبار",
   "Testimonials":
     "الشهادات",
+  "That code does not match anything in the system. It may have been cancelled, renumbered, or mistyped.":
+    "هذا الرمز لا يطابق أي شيء في النظام. وقد يكون أُلغي أو أُعيد ترقيمه أو كُتب خطأً.",
+  "That is not an email address.":
+    "هذا ليس بريدًا إلكترونيًّا.",
+  "That specimen does not exist.":
+    "تلك الشجرة غير موجودة.",
   "The backup holds data only, not schema, so there is one source of truth for the shape of the database and it is the migrations.":
     "النسخة الاحتياطية تحمل البيانات فقط لا البنية، فيبقى مصدر واحد للحقيقة في شكل قاعدة البيانات وهو ملفات الترحيل.",
   "The current password is asked for even though you are already signed in: an unattended screen is the ordinary case, and this is the one action that can lock you out of your own system. Changing it signs out every other device signed in as you, and leaves this one alone.":
     "تُطلب كلمة المرور الحالية رغم أنك داخل بالفعل: فالشاشة المتروكة دون رقابة هي الحالة المعتادة، وهذا هو الإجراء الوحيد الذي قد يقفل عليك نظامك أنت. وتغييرها يُخرج كل جهاز آخر داخل باسمك، ويُبقي هذا الجهاز كما هو.",
   "The database lives on Neon&rsquo;s free plan, which keeps six hours of point-in-time history and will not schedule its own snapshots. Six hours is not a backup policy — it is the window in which somebody has to notice. This takes a full copy every night, stores it off Neon, reads it back to check it arrived intact, and keeps a month of them.":
     "قاعدة البيانات على الخطة المجانية من Neon، التي تحتفظ بست ساعات من السجل الزمني ولا تجدول لقطات خاصة بها. وستّ ساعات ليست سياسة نسخ احتياطي — بل هي النافذة التي يجب أن ينتبه أحدهم خلالها. هذا يأخذ نسخة كاملة كل ليلة، ويخزّنها خارج Neon، ويقرأها مرة أخرى للتأكد من وصولها سليمة، ويحتفظ بشهر منها.",
+  "The number cannot be negative.":
+    "لا يمكن أن يكون الرقم سالبًا.",
+  "The number is a count of days, hours or units — it has to be whole.":
+    "الرقم عدّ لأيام أو ساعات أو وحدات — فيجب أن يكون صحيحًا.",
   "The part of the system that speaks first. Everything else waits to be asked — an invoice falls overdue in silence, a permit lapses while a container is at sea. These are the conditions worth being interrupted for.":
     "الجزء من النظام الذي يتكلّم أولًا. كل ما عداه ينتظر أن تسأله — فالفاتورة تتأخّر في صمت، والتصريح ينتهي وحاوية في عرض البحر. وهذه هي الحالات التي تستحق أن تُقاطَع من أجلها.",
   "The words on the public site, and what a search engine is told about each page. Everything here has a compiled default — clear a box and the original text comes back, so nothing typed here can leave a page blank.":
@@ -2369,6 +2838,12 @@ const ar: Partial<Record<AdminKey, string>> = {
     "هذا ما يسجّله سجل التدقيق بجانب كل تغيير تجريه.",
   "This moves the stock, adds to the delivered quantities and re-derives the order status. Delivering more than remains is refused outright.":
     "هذا يحرّك المخزون، ويضيف إلى الكميات المسلَّمة، ويعيد اشتقاق حالة الطلب. وتسليم أكثر من المتبقّي مرفوض رفضًا قاطعًا.",
+  "This version has been issued, so its lines are locked. Use":
+    "صدرت هذه النسخة، فبنودها مقفلة. استخدم",
+  "This version has been issued, so its lines are locked. Use “Revise” to create v{next} — the customer is holding this document.":
+    "صدرت هذه النسخة، فبنودها مقفلة. استخدم «مراجعة» لإنشاء النسخة {next} — فالعميل يحمل هذه الوثيقة الآن.",
+  "This version has been issued. Create a new version to change it.":
+    "صدرت هذه النسخة. أنشئ نسخة جديدة لتعديلها.",
   "Title":
     "العنوان",
   "Title — aim for 50–60 characters":
@@ -2379,6 +2854,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "الموضوع",
   "Total":
     "الإجمالي",
+  "Total (AED)":
+    "الإجمالي (درهم)",
   "Total landed":
     "الإجمالي النهائي",
   "Total leads":
@@ -2391,18 +2868,32 @@ const ar: Partial<Record<AdminKey, string>> = {
     "Trading — التشغيل",
   "Trunk girth (cm)":
     "محيط الجذع (سم)",
+  "Try the list it should be in:":
+    "جرّب القائمة التي يُفترض أن يكون فيها:",
   "Type":
     "النوع",
   "Undo":
     "تراجع",
   "Unit":
     "الوحدة",
+  "Unit (AED)":
+    "سعر الوحدة (درهم)",
   "Unit cost":
     "تكلفة الوحدة",
   "Unit price (AED)":
     "سعر الوحدة (درهم)",
   "Units":
     "الوحدات",
+  "Unknown health.":
+    "حالة صحية غير معروفة.",
+  "Unknown language.":
+    "لغة غير معروفة.",
+  "Unknown severity.":
+    "درجة خطورة غير معروفة.",
+  "Unknown status.":
+    "حالة غير معروفة.",
+  "Update":
+    "تحديث",
   "Update status":
     "حدّث الحالة",
   "Updated":
@@ -2433,6 +2924,38 @@ const ar: Partial<Record<AdminKey, string>> = {
     "عرض هذه اللغة →",
   "Viewer":
     "اطّلاع فقط",
+  "Viewers cannot add stock.":
+    "لا يمكن للمطّلعين إضافة مخزون.",
+  "Viewers cannot change alerts.":
+    "لا يمكن للمطّلعين تغيير التنبيهات.",
+  "Viewers cannot change leads.":
+    "لا يمكن للمطّلعين تغيير الاستفسارات.",
+  "Viewers cannot change quotations.":
+    "لا يمكن للمطّلعين تغيير عروض الأسعار.",
+  "Viewers cannot change shipments.":
+    "لا يمكن للمطّلعين تغيير الشحنات.",
+  "Viewers cannot change stock.":
+    "لا يمكن للمطّلعين تغيير المخزون.",
+  "Viewers cannot complete deliveries.":
+    "لا يمكن للمطّلعين إتمام التسليمات.",
+  "Viewers cannot create orders.":
+    "لا يمكن للمطّلعين إنشاء طلبات.",
+  "Viewers cannot create quotations.":
+    "لا يمكن للمطّلعين إنشاء عروض أسعار.",
+  "Viewers cannot create shipments.":
+    "لا يمكن للمطّلعين إنشاء شحنات.",
+  "Viewers cannot edit content.":
+    "لا يمكن للمطّلعين تعديل المحتوى.",
+  "Viewers cannot raise invoices.":
+    "لا يمكن للمطّلعين إصدار فواتير.",
+  "Viewers cannot record measurements.":
+    "لا يمكن للمطّلعين تسجيل القياسات.",
+  "Viewers cannot record payments.":
+    "لا يمكن للمطّلعين تسجيل مدفوعات.",
+  "Viewers cannot revise quotations.":
+    "لا يمكن للمطّلعين مراجعة عروض الأسعار.",
+  "Viewers cannot schedule deliveries.":
+    "لا يمكن للمطّلعين جدولة تسليمات.",
   "Volume each (m³)":
     "الحجم للوحدة (م³)",
   "Warning":
@@ -2495,10 +3018,14 @@ const ar: Partial<Record<AdminKey, string>> = {
     "اسمك",
   "Zero because no landed cost has been recorded against stock yet — cost a shipment and this fills in.":
     "صفر لأنه لم تُسجَّل تكلفة نهائية على المخزون بعد — احسب تكلفة شحنة وسيمتلئ هذا.",
+  "advance — the agreed percentage up front":
+    "دفعة مقدّمة — النسبة المتفق عليها مسبقًا",
   "at least 10 characters":
     "10 أحرف على الأقل",
   "been sitting":
     "بقي",
+  "cannot sell from":
+    "لا يمكن البيع من",
   "edited":
     "معدَّل",
   "email of 12 March, site meeting…":
@@ -2507,6 +3034,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "عرض البوابة، كابلات علوية، أوقات مسموح بها في المجمّع",
   "h ago":
     "ساعة مضت",
+  "health is":
+    "الحالة الصحية",
   "just now":
     "الآن",
   "lead has":
@@ -2517,18 +3046,54 @@ const ar: Partial<Record<AdminKey, string>> = {
     "مثبَّت عند الشراء",
   "min ago":
     "دقيقة مضت",
+  "moved":
+    "نُقل",
   "name of whoever signed for it":
     "اسم من وقّع بالاستلام",
   "nobody":
     "لا أحد",
+  "not sellable":
+    "غير قابلة للبيع",
   "olive-trees-gulf-summer":
     "olive-trees-gulf-summer",
+  "product — from the catalogue":
+    "منتج — من الكتالوج",
+  "proforma":
+    "فاتورة مبدئية",
+  "retention — released after the holding period":
+    "مبلغ محتجز — يُفرج عنه بعد مدة الاحتجاز",
+  "sellable":
+    "قابلة للبيع",
+  "service — delivery, crane, planting":
+    "خدمة — تسليم، رافعة، زراعة",
+  "specimen {code}":
+    "الشجرة {code}",
+  "specimen — one named tree":
+    "شجرة — شجرة واحدة محدَّدة",
+  "status is":
+    "الحالة",
+  "still acclimatising until":
+    "ما زالت في التأقلم حتى",
+  "system":
+    "النظام",
+  "tax invoice — the order":
+    "فاتورة ضريبية — الطلب",
   "translated":
     "مترجَم",
   "uncontacted for more than 24 hours.":
     "دون تواصل لأكثر من 24 ساعة.",
   "unverified":
     "غير مُتحقَّق منه",
+  "version {n}":
+    "النسخة {n}",
+  "why this changed":
+    "سبب هذا التغيير",
+  "{emirate}, United Arab Emirates":
+    "{emirate}، الإمارات العربية المتحدة",
+  "{min}–{max} weeks from order confirmation to site.":
+    "من {min} إلى {max} أسبوعًا من تأكيد الطلب إلى الموقع.",
+  "{n} of {total} rules send an email.":
+    "‏{n} من أصل {total} قاعدة ترسل بريدًا إلكترونيًّا.",
   "· AED":
     "· درهم",
   "← All leads":
@@ -2562,7 +3127,25 @@ export const ADMIN_DICTS: Record<Locale, Partial<Record<AdminKey, string>>> = {
 export function adminUi(locale?: string | null) {
   const l: Locale = isLocale(locale) ? locale : DEFAULT_LOCALE;
   const dict = ADMIN_DICTS[l];
-  return (key: AdminKey): string => dict[key] ?? key;
+  /**
+   * `tokens` is why several console sentences were still English.
+   *
+   * "12 of 16 rules send an email" was written as `{n} of {total} rules send`
+   * with the numbers in the markup, so the extractor saw three fragments and
+   * no sentence. Translated as fragments they come back in English word order
+   * with the numbers stranded — which in Arabic, read right to left, is not a
+   * sentence at all. With a token the whole sentence is one string and each
+   * language decides where the number goes.
+   *
+   * An unknown token is left visible rather than blanked, so a missing value
+   * shows up as `{n}` on screen instead of a silent gap nobody notices.
+   */
+  return (key: AdminKey, tokens?: Record<string, string | number>): string => {
+    const s = dict[key] ?? key;
+    return tokens
+      ? s.replace(/\{(\w+)\}/g, (all, k) => (k in tokens ? String(tokens[k]) : all))
+      : s;
+  };
 }
 
 /** What the coverage test measures. */

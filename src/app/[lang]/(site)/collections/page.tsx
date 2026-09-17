@@ -87,7 +87,7 @@ export default async function CollectionsPage(
                   </p>
                   <p className="coll-blurb">{f.blurb}</p>
                   <span className="coll-go">
-                    See the collection
+                    {t('col.see')}
                     <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
                          strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M5 12h13M12 5l7 7-7 7" />

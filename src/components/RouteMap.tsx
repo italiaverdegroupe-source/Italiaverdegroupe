@@ -1,4 +1,6 @@
 import map from '@/data/map.json';
+import type { Locale } from '@/lib/i18n';
+import { ui } from '@/lib/ui';
 
 /**
  * The Italy → UAE sourcing route, drawn on real geography.
@@ -21,7 +23,8 @@ const START = P.toscana;
 const END = P.dubai;
 const ARC = `M ${START[0]} ${START[1]} Q ${(START[0] + END[0]) / 2} ${Math.min(START[1], END[1]) - 150} ${END[0]} ${END[1]}`;
 
-export default function RouteMap() {
+export default function RouteMap({ locale }: { locale: Locale }) {
+  const t = ui(locale);
   return (
     <figure className="map">
       <svg viewBox={`0 0 ${map.width} ${map.height}`} role="img"
@@ -69,11 +72,11 @@ export default function RouteMap() {
         <g className="dest" transform={`translate(${P.dubai[0]} ${P.dubai[1]})`}>
           <circle className="halo" r="11" />
           <circle className="dot dest-dot" r="5" />
-          <text className="lbl dest-lbl" x="0" y="-20" textAnchor="middle">UNITED ARAB EMIRATES</text>
-          <text className="sub" x="0" y="-6" textAnchor="middle">all seven emirates</text>
+          <text className="lbl dest-lbl" x="0" y="-20" textAnchor="middle">{t('map.uae')}</text>
+          <text className="sub" x="0" y="-6" textAnchor="middle">{t('map.allEmirates')}</text>
         </g>
 
-        <text className="flag" x={P.toscana[0] - 6} y={P.toscana[1] - 64}>ITALY</text>
+        <text className="flag" x={P.toscana[0] - 6} y={P.toscana[1] - 64}>{t('map.italy')}</text>
       </svg>
 
       <style>{`

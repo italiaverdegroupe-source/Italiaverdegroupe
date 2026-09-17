@@ -23,7 +23,8 @@ async function scheduleDelivery(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot schedule deliveries.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot schedule deliveries.'));
 
   const orderCode = String(formData.get('code'));
   const o = await getOrder(orderCode);
@@ -56,7 +57,7 @@ async function scheduleDelivery(formData: FormData) {
   }
   if (!any) {
     await query('DELETE FROM deliveries WHERE id = $1', [rows[0].id]);
-    throw new Error('Put a quantity against at least one line.');
+    throw new Error(t('Put a quantity against at least one line.'));
   }
 
   await audit({ user, action: 'delivery.scheduled', entity: 'order', entityId: orderCode,
@@ -69,12 +70,13 @@ async function markDelivered(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot complete deliveries.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot complete deliveries.'));
 
   const deliveryCode = String(formData.get('delivery_code'));
   const orderCode = String(formData.get('code'));
   const receivedBy = String(formData.get('received_by') ?? '').trim();
-  if (!receivedBy) throw new Error('Record who received it — that is the proof of delivery.');
+  if (!receivedBy) throw new Error(t('Record who received it — that is the proof of delivery.'));
 
   await completeDelivery(deliveryCode, receivedBy,
     String(formData.get('proof_note') ?? '').trim() || null, user);

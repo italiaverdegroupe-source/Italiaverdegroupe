@@ -123,6 +123,59 @@ for (const p of [...PUBLIC, ...SAMPLE]) {
 }
 console.log(`\n   ${n} page loads`);
 
+// ── the page nobody links to and everybody eventually reaches ──
+//
+// A 404 has to do four things: return 404, render the site rather than a bare
+// error shell, be in the reader's own language, and offer a way back. All four
+// were broken at once and in different ways:
+//
+//   · the 404 was English on the Arabic and Italian sites, because
+//     global-not-found.tsx hard-coded lang="en" and said in a comment that
+//     there was "no language to render it in" — true of /nonsense and plainly
+//     false of /ar/nonsense;
+//   · a mistyped specimen, collection or emirate URL rendered an unstyled
+//     <html id="__next_error__"> with no header, no footer and no language,
+//     because notFound() from a segment has no root layout to render into
+//     when an app has two of them and one sits under a dynamic segment.
+//
+// Both are the kind of defect nobody reports, because the person who hits it
+// assumes the site is broken and leaves.
+console.log('\n── the 404, in three languages ──');
+const NOT_FOUND = ['/no-such-page', '/catalog/no-such-specimen',
+  '/collections/no-such-family', '/locations/no-such-emirate', '/journal/no-such-article'];
+let checked = 0;
+for (const p of NOT_FOUND) {
+  for (const l of LOCALES) {
+    const path = (l + p) || p;
+    // NOT networkidle. A 404 under a dynamic segment is rendered on the client
+    // from an RSC payload, and the request for it keeps the connection busy
+    // long enough that waiting for idle times out on a page that is already
+    // on screen and correct.
+    const res = await page.goto(`${B}${path}`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('h1', { timeout: 15000 }).catch(() => {});
+    const r = await page.evaluate(() => ({
+      h1: document.querySelector('h1')?.textContent?.trim() ?? '',
+      lang: document.documentElement.lang,
+      dir: document.documentElement.dir,
+      back: [...document.querySelectorAll('a[href]')]
+        .some((a) => /\/catalog$/.test(a.getAttribute('href') ?? '')),
+      chrome: Boolean(document.querySelector('header') && document.querySelector('footer')),
+    }));
+    if (res.status() !== 404) note(path, `status ${res.status()}, expected 404`);
+    if (!r.chrome) note(path, 'no header or footer — bare error shell, not the site');
+    if (!r.h1) note(path, 'no <h1>');
+    if (!r.back) note(path, 'no way back to the catalogue');
+    // The language of the URL is the language of the page. This is the check
+    // that would have caught an English 404 on /ar/.
+    const want = l === '/ar' ? 'ar-AE' : l === '/it' ? 'it-IT' : 'en-AE';
+    if (r.lang !== want) note(path, `lang is ${r.lang}, expected ${want}`);
+    if (r.dir !== (l === '/ar' ? 'rtl' : 'ltr')) note(path, `dir is ${r.dir}`);
+    checked++;
+  }
+  process.stdout.write('.');
+}
+console.log(`\n   ${checked} not-found pages`);
+
 console.log('\n── files search engines read ──');
 for (const f of ['/robots.txt', '/sitemap.xml']) {
   const r = await fetch(`${B}${f}`);

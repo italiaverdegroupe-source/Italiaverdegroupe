@@ -176,7 +176,7 @@ export default function ShortlistPage() {
                   <input id="sl-emirate" name="emirate" maxLength={60} />
                 </div>
                 <div className="sl-row">
-                  <label htmlFor="sl-when">Needed by <span>optional</span></label>
+                  <label htmlFor="sl-when">{t('sl.neededBy')} <span>{t('sl.optional')}</span></label>
                   <input id="sl-when" name="requiredDate" maxLength={40} placeholder={t("e.g. March")} />
                 </div>
               </div>

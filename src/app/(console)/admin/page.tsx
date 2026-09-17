@@ -160,11 +160,12 @@ export default async function Overview() {
         </section>
         <section className="adm-panel adm-pad">
           <h2>{t('By enquiry')}</h2>
-          <Donut rows={byType.map((r) => ({ k: r.k, v: Number(r.n) }))} label="Leads by enquiry type" />
+          <Donut rows={byType.map((r) => ({ k: r.k, v: Number(r.n) }))}
+                 label={t('Leads by enquiry type')} totalLabel={t('TOTAL')} />
         </section>
         <section className="adm-panel adm-pad">
           <h2>{t('How they found us')}</h2>
-          <BarList rows={bySource.map((r) => ({ k: r.k, v: Number(r.n) }))} label="Leads by source" />
+          <BarList rows={bySource.map((r) => ({ k: r.k, v: Number(r.n) }))} label={t('Leads by source')} />
         </section>
       </div>
 

@@ -13,7 +13,8 @@ async function convert(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot create orders.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot create orders.'));
 
   const quote = String(formData.get('quote_code') ?? '').trim();
   const version = Number(formData.get('quote_version') ?? 1);

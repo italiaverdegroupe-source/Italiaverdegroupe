@@ -41,6 +41,19 @@ const C = require('../.test-build/content.cjs');
 const SC = require('../.test-build/site-copy.cjs');
 const A = require('../.test-build/admin-ui.cjs');
 
+/**
+ * Strings that are not English, and are not translatable.
+ *
+ * An environment variable is a name the operator types into Railway; a phone
+ * placeholder is a number format. Translating either would be the bug, so they
+ * are named here rather than sitting in the total for ever as two that nobody
+ * can close — a backlog with an unreachable floor stops being read.
+ */
+const NOT_LANGUAGE = new Set([
+  'SMTP_URL', 'RESEND_API_KEY', 'MAIL_FROM', 'DATABASE_URL', 'BACKUP_BUCKET',
+  'EDGE_SECRET', 'NEXT_PUBLIC_SITE_URL', '+971…', '/journal/',
+]);
+
 const covered = new Set([
   ...Object.values(UI.UI_DICTS.en),
   ...Object.keys(UI.UI_DICTS.en),
@@ -48,7 +61,8 @@ const covered = new Set([
   ...SC.COPY_KEYS,
   ...A.ADMIN_KEYS,
 ]);
-const isCovered = (s) => covered.has(s) || [...covered].some((c) => c.includes(s) || s.includes(c));
+const isCovered = (s) => NOT_LANGUAGE.has(s) || covered.has(s)
+  || [...covered].some((c) => c.includes(s) || s.includes(c));
 
 function report(label, list) {
   const found = new Map();
@@ -69,6 +83,10 @@ function report(label, list) {
   }
   for (const [f, ss] of [...byFile].sort((a, b) => b[1].length - a[1].length).slice(0, 14)) {
     console.log(`   ${String(ss.length).padStart(4)}  ${f}`);
+    // --list prints the sentences themselves. Counting them says how much is
+    // left; only reading them says what the work actually is, and a count with
+    // no way to see behind it is how a number stops being acted on.
+    if (process.argv.includes('--list')) for (const s of ss) console.log(`           · ${s}`);
   }
   return uncovered.length;
 }
@@ -81,7 +99,7 @@ function consoleWiring() {
   const perFile = [];
   for (const f of consoleFiles) {
     const src = readFileSync(f, 'utf8');
-    const w = (src.match(/\bt\(['"`]/g) ?? []).length;
+    const w = (src.match(/\b(?:t|tr|st)\(['"`]|adminUi\([^)]*\)\(\s*['"`]/g) ?? []).length;
     const h = visibleStrings(src).length;
     wired += w; hard += Math.max(0, h - w);
     if (h - w > 0) perFile.push([f.replace('src/app/(console)/admin/', '').replace('src/components/admin/', 'nav:'), h - w]);

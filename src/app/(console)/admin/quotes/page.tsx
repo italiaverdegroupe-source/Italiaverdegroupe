@@ -15,7 +15,8 @@ async function createQuote(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot create quotations.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot create quotations.'));
 
   const leadRef = String(formData.get('lead_reference') ?? '').trim();
   let lead: { id: string; name: string; company: string | null; email: string;
@@ -26,7 +27,7 @@ async function createQuote(formData: FormData) {
   }
 
   const name = String(formData.get('customer_name') ?? '').trim() || lead?.name;
-  if (!name) throw new Error('A quotation needs a customer.');
+  if (!name) throw new Error(t('A quotation needs a customer.'));
 
   const tax = await taxSnapshot();
   const code = await nextQuoteCode();

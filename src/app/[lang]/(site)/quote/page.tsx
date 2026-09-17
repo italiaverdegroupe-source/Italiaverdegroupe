@@ -52,11 +52,13 @@ export default async function QuotePage(
             <ol className="steps">
               <li><strong>{t("We confirm availability")}</strong><span>{t("Against current stock and the next consignment from Italy.")}</span></li>
               <li><strong>{t("We price the scope")}</strong><span>{t("Supply, delivery, crane and offloading, planting — whatever you need.")}</span></li>
-              <li><strong>You get a written quotation</strong><span>Valid {site.quoteValidityDays} days, with specification and lead time.days, with specification and lead time.</span></li>
+              <li><strong>{t('You get a written quotation')}</strong><span>{t('quote.validFor', { days: site.quoteValidityDays })}</span></li>
             </ol>
             <hr className="rule" />
             <p className="aside-note">
-              Typical lead time is {site.leadTimeWeeks.min}–{site.leadTimeWeeks.max} weeks from order confirmation to delivery on a UAE site. Large or out-of-season specimens can take longer — we will tell you honestly rather than promise a date we cannot hold.
+              {t('quote.leadNote', {
+                min: site.leadTimeWeeks.min, max: site.leadTimeWeeks.max,
+              })}
             </p>
           </aside>
         </div>

@@ -126,7 +126,7 @@ export default async function CatalogPage(
 
         <p className="count">
           {list.length} {list.length === 1 ? 'specimen' : 'specimens'}
-          {q && <> matching <strong>&ldquo;&ldquo;{q}&rdquo;&rdquo;</strong></>}
+          {q && <> {t('cat.matching')} <strong>&ldquo;{q}&rdquo;</strong></>}
         </p>
 
         {list.length === 0 ? (
@@ -136,13 +136,13 @@ export default async function CatalogPage(
               // filter combination that found nothing, and the way out is
               // different too: widen the words, or tell us what you need. The
               // catalogue is what we hold, not what we can get.
-              ? <>Nothing in the catalogue matches <strong>&ldquo;&ldquo;{q}&rdquo;&rdquo;</strong>.{' '}
+              ? <>{t('cat.noMatch')} <strong>&ldquo;{q}&rdquo;</strong>.{' '}
                   <L href={qs({ q: undefined })}>Clear the search</L>, or{' '}
                   <L href={`/quote?type=sourcing&ref=${encodeURIComponent(q)}`}>
                     ask us to source it
                   </L> — we import to order as well as from stock.</>
               : <>Nothing matches that combination yet.{' '}
-                  <L href="/quote?type=sourcing">Ask us to source it</L>.</>}
+                  <L href="/quote?type=sourcing">{t('cat.askSource')}</L>.</>}
           </p>
         ) : (
           <div className="grid cols-4">

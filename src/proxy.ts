@@ -137,9 +137,23 @@ export function proxy(req: NextRequest) {
   // router resolves /en/catalog, so every URL this site has ever published
   // still answers at the address it was published at — no extra hop, no
   // re-indexing, no dead links in anybody's email.
+  //
+  // The locale also goes onto the REQUEST as a header. Almost every page reads
+  // it from `params`, which is the right way — but not-found.tsx is handed no
+  // params by the router, and `next/root-params` needs `[lang]` above every
+  // root layout, which the console's own layout rules out. Without this the
+  // 404 page is the one page on an Arabic site that is always in English,
+  // which is exactly the page where a lost reader most needs their own
+  // language. The header is set by us on every request and cannot be spoofed
+  // into anything but one of three values, because localeFromHeaders checks.
+  const locale = PREFIXED.test(pathname) ? pathname.slice(1, 3) : 'en';
+  const headers = new Headers(req.headers);
+  headers.set('x-locale', locale);
+
   const res = PREFIXED.test(pathname)
-    ? NextResponse.next()
-    : NextResponse.rewrite(new URL(`/en${pathname === '/' ? '' : pathname}`, req.url));
+    ? NextResponse.next({ request: { headers } })
+    : NextResponse.rewrite(new URL(`/en${pathname === '/' ? '' : pathname}`, req.url),
+                           { request: { headers } });
 
   if (wrongHost) res.headers.set('X-Robots-Tag', 'noindex, nofollow');
   return res;

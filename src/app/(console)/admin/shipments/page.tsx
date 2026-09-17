@@ -17,7 +17,8 @@ async function createShipment(formData: FormData) {
   await assertSameOrigin();
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
-  if (user.role === 'viewer') throw new Error('Viewers cannot create shipments.');
+  const t = adminUi(user.locale);
+  if (user.role === 'viewer') throw new Error(t('Viewers cannot create shipments.'));
 
   const str = (k: string) => String(formData.get(k) ?? '').trim() || null;
   const code = await nextShipmentCode();

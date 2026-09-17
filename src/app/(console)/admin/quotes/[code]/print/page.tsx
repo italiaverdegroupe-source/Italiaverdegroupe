@@ -3,6 +3,7 @@ import { getSessionUser } from '@/lib/auth';
 import { getQuote, getQuoteItems, totalsOf } from '@/lib/quotes';
 import { getSettings } from '@/lib/settings';
 import { fmtDay } from '@/components/admin/bits';
+import { adminUi } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +22,13 @@ const aed = (n: number) =>
 export default async function PrintQuote({
   params, searchParams,
 }: { params: Promise<{ code: string }>; searchParams: Promise<{ v?: string }> }) {
-  if (!(await getSessionUser())) redirect('/admin/login');
+  const user = await getSessionUser();
+  if (!user) redirect('/admin/login');
+  // `t` on this page is the money totals, so the translator is `tr`. The
+  // document goes out in the language the person issuing it is working in —
+  // there is no field for the customer's own, and inventing one would be
+  // guessing at it.
+  const tr = adminUi(user.locale);
   const { code } = await params;
   const { v } = await searchParams;
   const site = await getSettings();
@@ -40,31 +47,31 @@ export default async function PrintQuote({
           {q.trn_at_issue && <p className="sh-meta">TRN {q.trn_at_issue}</p>}
         </div>
         <div className="sh-right">
-          <h1>Quotation</h1>
-          <p className="sh-meta">{q.code} &nbsp;·&nbsp; version {q.version}</p>
-          <p className="sh-meta">Issued {q.issued_on ? fmtDay(q.issued_on) : '—'}</p>
-          <p className="sh-meta">Valid until {q.valid_until ? fmtDay(q.valid_until) : '—'}</p>
+          <h1>{tr('Quotation')}</h1>
+          <p className="sh-meta">{q.code} &nbsp;·&nbsp; {tr('version {n}', { n: q.version })}</p>
+          <p className="sh-meta">{tr('Issued')} {q.issued_on ? fmtDay(q.issued_on) : '—'}</p>
+          <p className="sh-meta">{tr('Valid until')} {q.valid_until ? fmtDay(q.valid_until) : '—'}</p>
         </div>
       </header>
 
       <section className="sh-to">
         <div>
-          <p className="sh-label">Quoted to</p>
+          <p className="sh-label">{tr('Quoted to')}</p>
           <p className="sh-strong">{q.customer_company ?? q.customer_name}</p>
           {q.customer_company && <p>{q.customer_name}</p>}
           {q.customer_email && <p>{q.customer_email}</p>}
           {q.customer_phone && <p>{q.customer_phone}</p>}
         </div>
         <div>
-          <p className="sh-label">Project</p>
+          <p className="sh-label">{tr('Project')}</p>
           <p className="sh-strong">{q.project_name ?? '—'}</p>
-          {q.emirate && <p>{q.emirate}, United Arab Emirates</p>}
+          {q.emirate && <p>{tr('{emirate}, United Arab Emirates', { emirate: q.emirate })}</p>}
         </div>
       </section>
 
       <table className="sh-t">
         <thead>
-          <tr><th>#</th><th>Description</th><th>Qty</th><th>Unit (AED)</th><th>Disc.</th><th>Amount (AED)</th></tr>
+          <tr><th>#</th><th>{tr('Description')}</th><th>{tr('Qty')}</th><th>{tr('Unit (AED)')}</th><th>{tr('Disc.')}</th><th>{tr('Amount (AED)')}</th></tr>
         </thead>
         <tbody>
           {items.map((it) => {
@@ -74,7 +81,7 @@ export default async function PrintQuote({
                 <td>{it.line_no}</td>
                 <td>
                   {it.description}
-                  {it.specimen_code && <span className="sh-sub"> · specimen {it.specimen_code}</span>}
+                  {it.specimen_code && <span className="sh-sub"> · {tr('specimen {code}', { code: it.specimen_code })}</span>}
                 </td>
                 <td className="r">{it.quantity}</td>
                 <td className="r">{aed(Number(it.unit_price))}</td>
@@ -87,28 +94,30 @@ export default async function PrintQuote({
       </table>
 
       <div className="sh-totals">
-        <div><span>Subtotal</span><b>{aed(t.subtotal)}</b></div>
-        {t.discount > 0 && <div><span>Discount</span><b>− {aed(t.discount)}</b></div>}
-        <div><span>Net</span><b>{aed(t.net)}</b></div>
+        <div><span>{tr('Subtotal')}</span><b>{aed(t.subtotal)}</b></div>
+        {t.discount > 0 && <div><span>{tr('Discount')}</span><b>− {aed(t.discount)}</b></div>}
+        <div><span>{tr('Net')}</span><b>{aed(t.net)}</b></div>
         {q.vat_enabled
           ? <div><span>VAT {(Number(q.vat_rate) * 100).toFixed(0)}%</span><b>{aed(t.vat)}</b></div>
-          : <div className="sh-note-line"><span>Prices are exclusive of VAT where applicable.</span></div>}
-        <div className="sh-grand"><span>Total (AED)</span><b>{aed(t.total)}</b></div>
+          : <div className="sh-note-line"><span>{tr('Prices are exclusive of VAT where applicable.')}</span></div>}
+        <div className="sh-grand"><span>{tr('Total (AED)')}</span><b>{aed(t.total)}</b></div>
       </div>
 
       <section className="sh-terms">
         <div>
-          <p className="sh-label">Payment terms</p>
+          <p className="sh-label">{tr('Payment terms')}</p>
           <p>{q.payment_terms ?? '—'}</p>
         </div>
         <div>
-          <p className="sh-label">Delivery</p>
-          <p>{q.delivery_terms ?? `${site.leadTimeWeeks.min}–${site.leadTimeWeeks.max} weeks from order confirmation to site.`}</p>
+          <p className="sh-label">{tr('Delivery')}</p>
+          <p>{q.delivery_terms ?? tr('{min}–{max} weeks from order confirmation to site.',
+            { min: site.leadTimeWeeks.min, max: site.leadTimeWeeks.max })}</p>
         </div>
       </section>
 
       <p className="sh-small">
-        {q.terms ?? `Living stock: dimensions are indicative and vary between individual specimens. Final size, form and availability are confirmed on despatch. This quotation is valid for ${site.quoteValidityDays} days from issue.`}
+        {q.terms ?? tr('Living stock: dimensions are indicative and vary between individual specimens. Final size, form and availability are confirmed on despatch. This quotation is valid for {days} days from issue.',
+          { days: site.quoteValidityDays })}
       </p>
 
       <footer className="sh-foot">

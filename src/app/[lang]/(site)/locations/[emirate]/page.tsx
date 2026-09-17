@@ -6,6 +6,10 @@ import ProductCard from '@/components/ProductCard';
 import { locations, getLocation } from '@/lib/locations';
 import { getSettings } from '@/lib/settings';
 import { getAllProducts } from '@/lib/products';
+import { ui } from '@/lib/ui';
+
+// Seven emirates, and no eighth is coming. Anything else is not a route.
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   return locations.map((l) => ({ emirate: l.slug }));
@@ -28,6 +32,7 @@ export default async function LocationPage(
   { params }: { params: Promise<{ lang: Locale; emirate: string }> },
 ) {
   const { lang, emirate } = await params;
+  const t = ui(lang);
   const l = getLocation(emirate);
   if (!l) notFound();
   const site = await getSettings();
@@ -45,22 +50,22 @@ export default async function LocationPage(
     <div className="section">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="wrap">
-        <p className="eyebrow">Coverage</p>
-        <h1>Tree supply &amp; delivery in {l.name}</h1>
+        <p className="eyebrow">{t('loc.eyebrow')}</p>
+        <h1>{t('loc.title', { name: l.name })}</h1>
         <p className="lede">{l.intro}</p>
 
-        <h2 className="sub-h">What that means on site</h2>
+        <h2 className="sub-h">{t('loc.onSite')}</h2>
         <ul className="notes">{l.notes.map((n) => <li key={n}>{n}</li>)}</ul>
 
-        <h2 className="sub-h">Commonly specified here</h2>
+        <h2 className="sub-h">{t('loc.common')}</h2>
         <div className="grid cols-4">{picks.map((p) => <ProductCard key={p.reference} p={p} locale={lang} />)}</div>
 
         <div className="loc-cta">
-          <L href={`/quote?type=bulk`} className="btn btn-primary">Request pricing for {l.name}</L>
+          <L href={`/quote?type=bulk`} className="btn btn-primary">{t('loc.requestPricing', { name: l.name })}</L>
         </div>
 
-        <nav className="others" aria-label="Other emirates">
-          <h2 className="sub-h">Also delivering to</h2>
+        <nav className="others" aria-label={t('loc.otherEmirates')}>
+          <h2 className="sub-h">{t('loc.alsoDelivering')}</h2>
           <div className="emirates">
             {locations.filter((x) => x.slug !== l.slug).map((x) => (
               <L key={x.slug} href={`/locations/${x.slug}`} className="em">{x.name}</L>

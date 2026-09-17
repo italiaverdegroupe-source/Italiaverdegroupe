@@ -127,8 +127,11 @@ export default async function ServicesPage(
                 {t("Trees are living stock. Lifting season in Italy and the UAE summer both limit when a specimen can safely move and establish, and no amount of logistics gets around either. We will tell you the realistic window for a species rather than accept a delivery date that would cost you the tree.")}
               </p>
               <p className="svc-lead">
-                Typical lead time is <strong>{site.leadTimeWeeks.min}–{site.leadTimeWeeks.max} weeks</strong>{' '}
-                from order confirmation to site delivery — selection, documentation, sailing and acclimatisation included.
+                {t('svc.leadTimeA')}{' '}
+                <strong>{t('svc.leadTimeWeeks', {
+                  min: site.leadTimeWeeks.min, max: site.leadTimeWeeks.max,
+                })}</strong>{' '}
+                {t('svc.leadTimeB')}
               </p>
               <div className="svc-acts">
                 <L href="/quote" className="btn btn-primary">{t("Discuss a project")}</L>

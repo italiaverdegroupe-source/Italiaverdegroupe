@@ -8,6 +8,7 @@ import { getPost, publishedPosts } from '@/lib/content';
 import { ogImage } from '@/lib/site';
 import { imageFor } from '@/lib/products';
 import { getSettings } from '@/lib/settings';
+import { ui } from '@/lib/ui';
 
 export const revalidate = 300;
 export const dynamicParams = true;
@@ -53,6 +54,7 @@ export default async function PostPage(
   { params }: { params: Promise<{ lang: Locale; slug: string }> },
 ) {
   const { lang, slug } = await params;
+  const t = ui(lang);
   const [post, site] = await Promise.all([getPost(slug, lang), getSettings()]);
   // A draft, a future date, or a deleted post is a 404 rather than a blank
   // page — an unpublished article must not be reachable by guessing the URL.
@@ -80,13 +82,13 @@ export default async function PostPage(
         <Prose body={post.body} className="prose post-body" />
 
         <div className="post-cta">
-          <p>Looking for a specimen like this?</p>
+          <p>{t('jrn.likeThis')}</p>
           <L href="/quote" className="btn btn-primary">Request a quote</L>
         </div>
 
         {others.length > 0 && (
           <nav className="post-more">
-            <h2>More from the journal</h2>
+            <h2>{t('jrn.more')}</h2>
             <ul>
               {others.map((o) => (
                 <li key={o.id}><L href={`/journal/${o.slug}`}>{o.title}</L></li>
