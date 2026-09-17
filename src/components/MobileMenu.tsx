@@ -3,7 +3,8 @@
 import L from '@/components/L';
 import LangSwitch from './LangSwitch';
 import { usePathname } from 'next/navigation';
-import { splitLocale } from '@/lib/i18n';
+import { splitLocale, type Locale } from '@/lib/i18n';
+import { ui } from '@/lib/ui';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useHydrated } from '@/lib/use-hydrated';
@@ -24,14 +25,16 @@ export type NavItem = { href: string; label: string };
  * anywhere. Everything a thumb touches is at least 48px.
  */
 export default function MobileMenu({
-  items, quoteHref = '/quote', contact,
+  locale, items, quoteHref = '/quote', contact,
 }: {
+  locale: Locale;
   items: NavItem[];
   quoteHref?: string;
   contact?: { email: string; phone: string; whatsapp: string; whatsappLabel: string };
 }) {
   // Unprefixed, so the 'you are here' marker still matches the hrefs — which
   // are written unprefixed — on /ar and /it as well as on English.
+  const t = ui(locale);
   const path = splitLocale(usePathname()).path;
   const panel = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
@@ -94,7 +97,7 @@ export default function MobileMenu({
         className="mnu-btn"
         aria-expanded={open}
         aria-controls="mobile-menu"
-        aria-label={open ? 'Close the menu' : 'Open the menu'}
+        aria-label={open ? t('nav.closeMenu') : t('nav.open')}
         onClick={() => setOpen(!open)}
       >
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
@@ -115,7 +118,7 @@ export default function MobileMenu({
             className={`mnu${open ? ' on' : ''}`}
             role="dialog"
             aria-modal="true"
-            aria-label="Menu"
+            aria-label={t('nav.menu')}
             // Hidden from everything, not just from view, when closed —
             // otherwise a screen reader reads a menu that is not there and
             // Tab walks into it.
@@ -129,11 +132,11 @@ export default function MobileMenu({
                      strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
                   <path d="M18 6 6 18M6 6l12 12" />
                 </svg>
-                Close
+                {t('nav.close')}
               </button>
             </div>
 
-            <nav aria-label="Main">
+            <nav aria-label={t('nav.main')}>
           <ul>
             {items.map((n) => {
               const here = n.href === '/' ? path === '/' : path.startsWith(n.href);
@@ -160,7 +163,7 @@ export default function MobileMenu({
               the site monolingual on the device most of its traffic uses. */}
           <div className="mnu-lang"><LangSwitch id="lang-mobile" /></div>
           <L href={quoteHref} className="btn btn-primary btn-lg mnu-cta">
-            Request a quote
+            {t('cta.quote')}
           </L>
           {/* Only channels that are actually configured. The rule everywhere
               else on this site applies here too. */}

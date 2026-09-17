@@ -3,10 +3,13 @@ import { getSettings } from '@/lib/settings';
 import { getFamilies, getAllProducts } from '@/lib/products';
 import { site as fallback } from '@/lib/site';
 import Social from './Social';
+import { ui } from '@/lib/ui';
+import { type Locale } from '@/lib/i18n';
 
 const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven'];
 
-export default async function Footer() {
+export default async function Footer({ locale }: { locale: Locale }) {
+  const t = ui(locale);
   const site = await getSettings();
   const families = getFamilies();
   const total = getAllProducts().length;
@@ -39,29 +42,29 @@ export default async function Footer() {
           </div>
 
           <div className="ftr-cols">
-            <nav className="ftr-col" aria-label="Catalogue">
-              <h3 className="ftr-h">Catalogue</h3>
+            <nav className="ftr-col" aria-label={t('ftr.catalogue')}>
+              <h3 className="ftr-h">{t('ftr.catalogue')}</h3>
               <ul>
-                <li><L href="/catalog">All {total} specimens</L></li>
+                <li><L href="/catalog">{t('ftr.allSpecimens', { n: total })}</L></li>
                 {families.map((f) => (
                   <li key={f.slug}><L href={`/collections/${f.slug}`}>{f.name}</L></li>
                 ))}
               </ul>
             </nav>
 
-            <nav className="ftr-col" aria-label="Company">
-              <h3 className="ftr-h">Company</h3>
+            <nav className="ftr-col" aria-label={t('ftr.company')}>
+              <h3 className="ftr-h">{t('ftr.company')}</h3>
               <ul>
-                <li><L href="/about">About us</L></li>
-                <li><L href="/services">Services</L></li>
-                <li><L href="/journal">Journal</L></li>
-                <li><L href="/contact">Contact</L></li>
-                <li><L href="/legal">Legal</L></li>
+                <li><L href="/about">{t('ftr.aboutUs')}</L></li>
+                <li><L href="/services">{t('nav.services')}</L></li>
+                <li><L href="/journal">{t('nav.journal')}</L></li>
+                <li><L href="/contact">{t('nav.contact')}</L></li>
+                <li><L href="/legal">{t('ftr.legal')}</L></li>
               </ul>
             </nav>
 
             <div className="ftr-col">
-              <h3 className="ftr-h">Enquiries</h3>
+              <h3 className="ftr-h">{t('ftr.enquiries')}</h3>
               {/* Only channels that are actually answered. An advertised
                   number nobody picks up loses the enquiry twice over. */}
               {hasChannel && (
@@ -79,9 +82,9 @@ export default async function Footer() {
                 </ul>
               )}
               <ul>
-                <li><L href="/quote">Request a quote</L></li>
-                <li><L href="/quote?type=bulk">Bulk &amp; project pricing</L></li>
-                <li><L href="/quote?type=sourcing">Source a specific tree</L></li>
+                <li><L href="/quote">{t('cta.quote')}</L></li>
+                <li><L href="/quote?type=bulk">{t('cta.bulk')}</L></li>
+                <li><L href="/quote?type=sourcing">{t('cta.sourcing')}</L></li>
               </ul>
             </div>
           </div>
@@ -90,22 +93,22 @@ export default async function Footer() {
         {/* ── the facts, one line each ───────────────────────── */}
         <dl className="ftr-facts">
           <div>
-            <dt>Delivering to</dt>
+            <dt>{t('ftr.deliveringTo')}</dt>
             <dd>
               {/* Was a column of eight links. Seven is the number, and a list
                   of them was a lot of footer for one sentence. */}
               <L href="/locations/dubai">
-                All {WORDS[site.emirates.length] ?? site.emirates.length} emirates
+                {t('ftr.allEmirates', { n: WORDS[site.emirates.length] ?? site.emirates.length })}
               </L>
             </dd>
           </div>
           <div>
-            <dt>Sourced from</dt>
+            <dt>{t('ftr.sourcedFrom')}</dt>
             <dd>{site.sourcingRegions.join(' · ')}</dd>
           </div>
           <div>
-            <dt>Lead time</dt>
-            <dd>{lead.min}–{lead.max} weeks to site</dd>
+            <dt>{t('ftr.leadTime')}</dt>
+            <dd>{t('ftr.weeksToSite', { min: lead.min, max: lead.max })}</dd>
           </div>
         </dl>
 
@@ -113,25 +116,24 @@ export default async function Footer() {
 
         {/* ── the small print ───────────────────────────────── */}
         <div className="ftr-base">
-          <nav className="ftr-legal" aria-label="Legal">
-            <L href="/privacy">Privacy</L>
-            <L href="/terms">Terms of use</L>
-            <L href="/terms-of-sale">Terms of sale</L>
-            <L href="/refunds">Replacements &amp; refunds</L>
-            <L href="/disclaimer">Disclaimer</L>
+          <nav className="ftr-legal" aria-label={t('ftr.legal')}>
+            <L href="/privacy">{t('legal.privacy')}</L>
+            <L href="/terms">{t('legal.terms')}</L>
+            <L href="/terms-of-sale">{t('legal.termsOfSale')}</L>
+            <L href="/refunds">{t('legal.refunds')}</L>
+            <L href="/disclaimer">{t('legal.disclaimer')}</L>
           </nav>
-          <p>© {new Date().getFullYear()} {site.legalName}. All prices on request.</p>
+          <p>© {new Date().getFullYear()} {site.legalName}. {t('ftr.rights')}</p>
           <p className="ftr-sm">
-            Prices exclusive of VAT where applicable. Specifications are indicative;
-            living stock varies in size and form.
+{t('ftr.vat')}
           </p>
           {(site.licenceNumber || site.trn || site.address) && (
             <p className="ftr-sm">
               {site.address && <>{site.address}, {site.city}, {site.country}</>}
               {site.address && (site.licenceNumber || site.trn) && ' · '}
-              {site.licenceNumber && <>Trade licence {site.licenceNumber}</>}
+              {site.licenceNumber && <>{t('ftr.licence', { n: site.licenceNumber })}</>}
               {site.licenceNumber && site.trn && ' · '}
-              {site.trn && <>TRN {site.trn}</>}
+              {site.trn && <>{t('ftr.trn', { n: site.trn })}</>}
             </p>
           )}
         </div>

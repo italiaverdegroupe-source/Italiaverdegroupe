@@ -33,8 +33,21 @@ async function editor() {
   return user;
 }
 
-const PUBLIC_PAGES = ['/', '/catalog', '/collections', '/services', '/about', '/quote', '/journal'];
-const refreshPublic = () => { for (const p of PUBLIC_PAGES) revalidatePath(p); };
+/**
+ * Rebuild the public site after a content change — in every language.
+ *
+ * This was a list of literal paths: '/', '/catalog', '/journal'. Those stopped
+ * being routes when the site gained languages; the route is now /[lang]/… and
+ * the pages are prerendered once per locale. Revalidating '/' matched nothing,
+ * so saving a translation appeared to do nothing at all until the five-minute
+ * timer expired on its own — the worst kind of broken, because it looks like
+ * the save failed and invites somebody to save again.
+ *
+ * The layout is invalidated rather than each page, which is both simpler and
+ * more correct: the header and footer live in it, so a settings or copy change
+ * can affect any page beneath it, in all three languages at once.
+ */
+const refreshPublic = () => { revalidatePath('/[lang]', 'layout'); };
 
 export async function saveBlocks(formData: FormData) {
   const user = await editor();
@@ -120,7 +133,10 @@ export async function saveSeo(formData: FormData) {
 
   await audit({ user, action: 'seo.updated', entity: 'page_seo', entityId: path,
                 after: { title, description, noindex } });
-  revalidatePath(path);
+  // `path` here is the unprefixed page ('/about'), which is not a route on
+  // its own any more. The page exists once per language, so the whole shell
+  // is invalidated rather than one address that no longer resolves.
+  refreshPublic();
   revalidatePath('/admin/content');
 }
 
@@ -224,7 +240,7 @@ export async function savePost(formData: FormData) {
       `DELETE FROM posts WHERE id = $1 RETURNING slug`, [id]);
     await audit({ user, action: 'post.deleted', entity: 'post', entityId: id });
     if (gone[0]) revalidatePath(`/journal/${gone[0].slug}`);
-    revalidatePath('/journal');
+    refreshPublic();
     revalidatePath('/sitemap.xml');
     revalidatePath('/admin/content');
     return;
@@ -275,7 +291,7 @@ export async function savePost(formData: FormData) {
 
   await audit({ user, action: id ? 'post.updated' : 'post.created', entity: 'post',
                 entityId: id || undefined, after: { slug, status } });
-  revalidatePath('/journal');
+  refreshPublic();
   revalidatePath(`/journal/${slug}`);
   // The sitemap is generated too. Publishing an article that search engines
   // are never told about is half a publication.

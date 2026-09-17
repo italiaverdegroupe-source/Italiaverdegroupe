@@ -2,18 +2,23 @@ import L from '@/components/L';
 import { getSettings } from '@/lib/settings';
 import MobileMenu from './MobileMenu';
 import LangSwitch from './LangSwitch';
+import { ui, type UIKey } from '@/lib/ui';
+import { type Locale } from '@/lib/i18n';
 
-const NAV = [
-  { href: '/catalog', label: 'Catalogue' },
-  { href: '/collections', label: 'Collections' },
-  { href: '/services', label: 'Services' },
-  { href: '/journal', label: 'Journal' },
-  { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Contact' },
+/** The destinations, and the key each one's label is written under. */
+const NAV: ReadonlyArray<{ href: string; key: UIKey }> = [
+  { href: '/catalog', key: 'nav.catalog' },
+  { href: '/collections', key: 'nav.collections' },
+  { href: '/services', key: 'nav.services' },
+  { href: '/journal', key: 'nav.journal' },
+  { href: '/about', key: 'nav.about' },
+  { href: '/contact', key: 'nav.contact' },
 ];
 
-export default async function Header() {
+export default async function Header({ locale }: { locale: Locale }) {
   const site = await getSettings();
+  const t = ui(locale);
+  const nav = NAV.map((n) => ({ href: n.href, label: t(n.key) }));
   return (
     <header className="hdr">
       <div className="wrap hdr-in">
@@ -35,12 +40,16 @@ export default async function Header() {
             says what the company is for. Hidden on narrow screens, where it
             would wrap into the navigation. */}
         <p className="brand-line" aria-hidden="true">
-          Italian roots<br />for a greener tomorrow
+          {/* Two lines, and the break belongs to the text rather than to the
+              markup: the Italian and the Arabic break in different places. */}
+          {t('brand.line').split('\n').map((line, i) => (
+            <span key={line}>{i > 0 && <br />}{line}</span>
+          ))}
         </p>
 
-        <nav aria-label="Main">
+        <nav aria-label={t('nav.main')}>
           <ul className="nav">
-            {NAV.map((n) => (
+            {nav.map((n) => (
               <li key={n.href}><L href={n.href}>{n.label}</L></li>
             ))}
           </ul>
@@ -52,15 +61,16 @@ export default async function Header() {
               past the call to action asks them to read the call to action. */}
           <LangSwitch />
           <L href="/quote" className="btn btn-primary hdr-quote">
-            <span className="hdr-quote-long">Request a quote</span>
-            <span className="hdr-quote-short">Quote</span>
+            <span className="hdr-quote-long">{t('cta.quote')}</span>
+            <span className="hdr-quote-short">{t('cta.quote.short')}</span>
             <span className="hdr-quote-arrow" aria-hidden="true">&rarr;</span>
           </L>
           {/* Below 900px .nav is display:none, and for a long time nothing
               stood in its place — the catalogue, the collections, the journal
               and the contact page were unreachable on a phone. */}
           <MobileMenu
-            items={NAV}
+            locale={locale}
+            items={nav}
             contact={{
               email: site.email, phone: site.phone,
               whatsapp: site.whatsapp, whatsappLabel: site.whatsappLabel,

@@ -10,6 +10,7 @@ import ShortlistBar from '@/components/ShortlistBar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import LocaleProvider from '@/components/LocaleProvider';
+import { ui } from '@/lib/ui';
 import '../globals.css';
 
 const fraunces = Fraunces({
@@ -125,10 +126,10 @@ export default async function RootLayout(
     <html lang={LOCALE_TAG[lang]} dir={dir(lang)} className={fonts}>
       <body className="grain">
         <LocaleProvider locale={lang}>
-          <a href="#main" className="visually-hidden">Skip to content</a>
-          <Header />
+          <a href="#main" className="visually-hidden">{ui(lang)('nav.skip')}</a>
+          <Header locale={lang} />
           <main id="main">{children}</main>
-          <Footer />
+          <Footer locale={lang} />
           <ShortlistBar />
           <WhatsAppButton />
         </LocaleProvider>

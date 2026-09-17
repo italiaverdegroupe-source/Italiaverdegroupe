@@ -8,6 +8,7 @@ import { getSettings } from '@/lib/settings';
 import { ogImage } from '@/lib/site';
 import { getBlocks, fill, publishedFaqs, publishedTestimonials, getSeo } from '@/lib/content';
 import { getAllProducts, getShowcaseProducts, getFamilies, imageFor } from '@/lib/products';
+import { ui } from '@/lib/ui';
 
 // The picture the owner chose, and the reason the rest of this section is
 // built the way it is. It lives in public/brand, never public/products: it is
@@ -43,7 +44,7 @@ export async function generateMetadata(
   { params }: { params: Promise<{ lang: Locale }> },
 ): Promise<Metadata> {
   const { lang } = await params;
-  const [site, seo] = await Promise.all([getSettings(), getSeo('/')]);
+  const [site, seo] = await Promise.all([getSettings(), getSeo('/', lang)]);
   const title = seo?.title ?? `${site.legalName} — ${site.tagline}`;
   const description = seo?.description ?? site.description;
   return {
@@ -58,6 +59,7 @@ export default async function HomePage(
   { params }: { params: Promise<{ lang: Locale }> },
 ) {
   const { lang } = await params;
+  const t = ui(lang);
   const site = await getSettings();
   const [c, faqs, voices] = await Promise.all([
     getBlocks(lang), publishedFaqs(lang), publishedTestimonials(lang),
@@ -169,10 +171,10 @@ export default async function HomePage(
       <section className="proof">
         <div className="wrap">
           <ul className="proof-list">
-            {[[String(all.length), 'specimens catalogued'],
-              [String(site.sourcingRegions.length), 'Italian growing regions'],
-              [String(site.emirates.length), 'emirates covered'],
-              [`${site.leadTimeWeeks.min}–${site.leadTimeWeeks.max}`, 'weeks, order to site']]
+            {[[String(all.length), t('proof.specimens')],
+              [String(site.sourcingRegions.length), t('proof.regions')],
+              [String(site.emirates.length), t('proof.emirates')],
+              [`${site.leadTimeWeeks.min}–${site.leadTimeWeeks.max}`, t('proof.weeks')]]
               .map(([n, l]) => (
               <li key={l}><strong>{n}</strong><span>{l}</span></li>
             ))}

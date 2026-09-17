@@ -47,7 +47,7 @@ export default function GlobalNotFound() {
     <html lang="en" className={`${fraunces.variable} ${inter.variable}`}>
       <body className="grain">
         <a href="#main" className="visually-hidden">Skip to content</a>
-        <Header />
+        <Header locale="en" />
         <main id="main">
           <div className="section">
             <div className="wrap nf">
@@ -61,7 +61,9 @@ export default function GlobalNotFound() {
             </div>
           </div>
         </main>
-        <Footer />
+        {/* The 404 shell is English: it is served for a path that matched no
+            locale at all, so there is no language to render it in. */}
+        <Footer locale="en" />
         <style>{`
           .nf { max-width: 60ch; padding-block: clamp(32px, 6vw, 72px); }
           .nf-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 2rem; }

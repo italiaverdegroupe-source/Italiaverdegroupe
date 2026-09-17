@@ -37,10 +37,12 @@ async function save(formData: FormData) {
     after: { vatEnabled: after.vatEnabled, trn: after.trn, whatsapp: after.whatsapp },
   });
 
-  // Public pages read these, so their caches have to go with them.
-  for (const path of ['/', '/quote', '/about', '/services', '/catalog', '/admin/settings']) {
-    revalidatePath(path);
-  }
+  // Public pages read these, so their caches have to go with them — and the
+  // public pages are now /[lang]/… , once per language. A list of literal
+  // paths ('/', '/quote') matches no route at all since the site gained
+  // languages, so the settings would have appeared not to save.
+  revalidatePath('/[lang]', 'layout');
+  revalidatePath('/admin/settings');
 }
 
 export default async function SettingsPage() {

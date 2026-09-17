@@ -28,6 +28,7 @@ const TARGETS = [
   { file: 'settings', format: 'cjs' },
   { file: 'rate-limit', format: 'cjs' },
   { file: 's3', format: 'cjs' },
+  { file: 'ui', format: 'cjs' },
   { file: 'users', format: 'cjs' },
   { file: 'i18n', format: 'cjs' },
   { file: 'landed-cost', format: 'esm', ext: 'mjs' },

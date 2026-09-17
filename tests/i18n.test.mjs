@@ -61,6 +61,47 @@ const src = readFileSync('src/components/L.tsx', 'utf8');
 check('the locale-aware link exists and wraps next/link',
   /from 'next\/link'/.test(src) && /localePath/.test(src));
 
+// ── the interface dictionary ─────────────────────────────────
+// Chrome is not content: an untranslated paragraph reads as work in progress,
+// while an English "Close" on an otherwise Arabic page reads as a bug. The
+// dictionary is typed so a missing key fails the build; this checks the two
+// things types cannot — that nothing was left as the English string, and that
+// no token was dropped in translation.
+const U = require('../.test-build/ui.cjs');
+const dicts = U.UI_DICTS;
+const enDict = dicts.en;
+
+for (const loc of ['ar', 'it']) {
+  const missing = U.UI_KEYS.filter((k) => !dicts[loc]?.[k]);
+  check(`${loc}: every interface string has a translation`,
+    missing.length === 0, missing.join(', '));
+
+  // A translation identical to the English is almost always one that was
+  // skipped. The exceptions are words that genuinely do not change.
+  const SAME_IS_FINE = new Set(['nav.menu', 'legal.privacy', 'lang.label']);
+  const untouched = U.UI_KEYS.filter(
+    (k) => dicts[loc][k] === enDict[k] && !SAME_IS_FINE.has(k));
+  check(`${loc}: nothing was left sitting in English`,
+    untouched.length === 0, untouched.join(', '));
+
+  // {n}, {min}, {max} are filled at render time. A translation that loses one
+  // renders a label with a number missing from the middle of it.
+  const tokensOf = (s) => (s.match(/\{\w+\}/g) ?? []).sort().join(',');
+  // ftr.allEmirates is exempt and says why in ui.ts: English spells the
+  // number, the other two inflect it with the noun and drop it entirely.
+  const NO_TOKEN_NEEDED = new Set(['ftr.allEmirates']);
+  const lost = U.UI_KEYS.filter(
+    (k) => !NO_TOKEN_NEEDED.has(k) && tokensOf(dicts[loc][k]) !== tokensOf(enDict[k]));
+  check(`${loc}: every {token} survived translation`,
+    lost.length === 0, lost.map((k) => `${k}: ${tokensOf(enDict[k])} -> ${tokensOf(dicts[loc][k])}`).join(' | '));
+}
+
+const t = U.ui('ar');
+check('the translator fills tokens', t('ftr.weeksToSite', { min: 4, max: 8 }).includes('4'),
+  t('ftr.weeksToSite', { min: 4, max: 8 }));
+check('and leaves an unknown token visible rather than blanking it',
+  t('ftr.licence', {}).includes('{n}'), t('ftr.licence', {}));
+
 // ── the served site ──────────────────────────────────────────
 const browser = await chromium.launch({
   executablePath: process.env.CHROME ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
@@ -162,6 +203,14 @@ check('and asks for an Arabic face rather than a Latin serif with no Arabic in i
 const href = await page.$eval('a[href*="/collections/"]', (a) => a.getAttribute('href'));
 check('THE POINT: links on an Arabic page stay in Arabic',
   (href ?? '').startsWith('/ar/'), String(href));
+
+// The page actually reads in the language it claims. Chrome comes from the
+// dictionary, the headline from the database — both have to arrive.
+for (const [path, must] of [['/ar', 'الكتالوج'], ['/it', 'Catalogo']]) {
+  await page.goto(`${B}${path}`, { waitUntil: 'domcontentloaded' });
+  const nav = await page.innerText('header');
+  check(`${path} renders its navigation translated`, nav.includes(must), nav.slice(0, 60));
+}
 
 // No horizontal scroll from mirroring — the commonest RTL defect.
 for (const w of [390, 1280]) {
