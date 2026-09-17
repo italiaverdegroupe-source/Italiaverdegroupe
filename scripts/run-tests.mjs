@@ -20,6 +20,7 @@ const NEEDS = {
   'design-tokens.test.mjs': [],
   'landed-cost.test.mjs': [],
   'legal.test.mjs': [],
+  'catalogue-i18n.test.mjs': [],
   'photos.test.mjs': [],
   'rate-limit.test.mjs': ['db'],
   'auth-hardening.test.mjs': ['db'],

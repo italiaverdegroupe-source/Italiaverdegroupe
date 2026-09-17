@@ -3,6 +3,9 @@
 import L from '@/components/L';
 import { usePathname } from 'next/navigation';
 import { splitLocale } from '@/lib/i18n';
+import { useLocale } from '@/components/LocaleProvider';
+import { specimenCount } from '@/lib/product-copy';
+import { ui } from '@/lib/ui';
 import { useShortlist } from '@/lib/use-shortlist';
 
 /**
@@ -18,6 +21,8 @@ export default function ShortlistBar() {
   // is false, so without this the floating bar would sit on top of the very
   // page it points at, in both translated languages.
   const { path } = splitLocale(usePathname());
+  const locale = useLocale();
+  const t = ui(locale);
   const list = useShortlist();
   const items = list.length;
   const count = list.reduce((s, i) => s + i.qty, 0);
@@ -30,9 +35,15 @@ export default function ShortlistBar() {
            strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
       </svg>
+      {/* The whole phrase, not a number with a noun bolted after it. English
+          and Italian put the digit first and Arabic often does not put one in
+          at all — "نموذجان" is the word for two of something and contains no
+          2 — so splitting the count from its noun to embolden one of them
+          produces a bar that reads as nonsense in one language out of three.
+          The emphasis is on the line instead. */}
       <span className="slb-txt">
-        <strong>{items}</strong> specimen{items === 1 ? '' : 's'}
-        {count !== items && <em> · {count} in total</em>}
+        <strong>{specimenCount(items, locale)}</strong>
+        {count !== items && <em> · {t('sl.plantsTotal', { n: count })}</em>}
       </span>
       <span className="slb-go" aria-hidden="true">&rarr;</span>
 

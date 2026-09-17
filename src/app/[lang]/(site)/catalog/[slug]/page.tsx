@@ -10,6 +10,7 @@ import { getAllProducts, getProduct, familySlug } from '@/lib/products';
 import { breadcrumbs, ldJson } from '@/lib/schema';
 import { localePath } from '@/lib/i18n';
 import { ui } from '@/lib/ui';
+import { productCopy, familyName, attribute } from '@/lib/product-copy';
 
 // The catalogue is a fixed set. A slug that is not in it is not a route, so
 // it never matches and global-not-found.tsx serves it — see the note there.
@@ -25,12 +26,21 @@ export async function generateMetadata(
   const { lang, slug } = await params;
   const p = getProduct(slug);
   if (!p) return { title: 'Not found' };
+  // The <title> and the description are what a reader sees in a search result,
+  // so they are in the language of the page they describe — an Arabic page
+  // listed under an English title is an Arabic page nobody clicks.
+  const t = ui(lang);
+  const copy = productCopy(p, lang);
   const size = p.attributes.Height ? ` ${p.attributes.Height}` : '';
   return {
-    title: `${p.name}${size} — imported from Italy`,
-    description: `${p.description} Reference ${p.reference}. Supplied and delivered across the UAE. Price on request.`,
+    title: t('seo.specimenTitle', { name: copy.name, size }),
+    description: t('seo.specimenDesc', { desc: copy.description, ref: p.reference }),
     alternates: alternates(lang, `/catalog/${p.slug}`),
-    openGraph: { images: [`/products/${p.image}`], title: p.name, description: p.description },
+    openGraph: {
+      images: [`/products/${p.image}`],
+      title: copy.name,
+      description: copy.description,
+    },
   };
 }
 
@@ -41,6 +51,8 @@ export default async function ProductPage(
   const t = ui(lang);
   const p = getProduct(slug);
   if (!p) notFound();
+  const copy = productCopy(p, lang);
+  const family = familyName(p.family, lang);
   const site = await getSettings();
 
   const [w, h] = p.imageSize.split('x').map(Number);
@@ -54,15 +66,15 @@ export default async function ProductPage(
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: p.name,
+    name: copy.name,
     sku: p.reference,
-    description: p.description,
+    description: copy.description,
     // ABSOLUTE. This was `/products/x.webp`, and a relative URL in structured
     // data is not a URL as far as a crawler is concerned — the image was
     // being declared and then discarded, on all sixty-eight pages.
     image: [`${origin}/products/${p.image}`],
     url: here,
-    category: p.family,
+    category: family,
     brand: { '@type': 'Brand', name: site.legalName },
     // Said on every one of the sixty-eight specimen pages, because it is the
     // single fact this business turns on and the one a search engine should
@@ -73,9 +85,10 @@ export default async function ProductPage(
     // What was actually measured on this tree, which is the whole reason a
     // specimen has a page of its own rather than a line in a list.
     additionalProperty: [
-      ...Object.entries(p.attributes ?? {}).map(([name, value]) => ({
-        '@type': 'PropertyValue', name, value: String(value),
-      })),
+      ...Object.entries(p.attributes ?? {}).map(([name, value]) => {
+        const a = attribute(name, String(value), lang);
+        return { '@type': 'PropertyValue', name: a.name, value: a.value };
+      }),
       // The catalogue's own attributes already carry Origin: Italy, so only
       // the half they do not say is added here.
       { '@type': 'PropertyValue', name: 'Imported to', value: 'United Arab Emirates' },
@@ -108,21 +121,21 @@ export default async function ProductPage(
       <script type="application/ld+json" suppressHydrationWarning
               dangerouslySetInnerHTML={ldJson(breadcrumbs(lang, [
                 { name: t('Catalogue'), path: '/catalog' },
-                { name: p.family, path: `/collections/${familySlug(p.family)}` },
-                { name: p.name, path: `/catalog/${p.slug}` },
+                { name: family, path: `/collections/${familySlug(p.family)}` },
+                { name: copy.name, path: `/catalog/${p.slug}` },
               ]))} />
       <div className="wrap">
         <nav aria-label={t('det.breadcrumb')} className="crumbs">
           <L href="/catalog">{t('nav.catalog')}</L>
           <span aria-hidden="true">/</span>
-          <L href={`/collections/${familySlug(p.family)}`}>{p.family}</L>
+          <L href={`/collections/${familySlug(p.family)}`}>{family}</L>
           <span aria-hidden="true">/</span>
           <span aria-current="page">{p.name}</span>
         </nav>
 
         <div className="detail">
           <figure className="det-img">
-            <Image src={`/products/${p.image}`} alt={p.name}
+            <Image src={`/products/${p.image}`} alt={copy.name}
                    width={w || 1388} height={h || 861}
                    sizes="(max-width: 900px) 100vw, 620px" priority />
             {!p.photoVerified && (
@@ -131,17 +144,20 @@ export default async function ProductPage(
           </figure>
 
           <div className="det-body">
-            <p className="eyebrow">{p.family}</p>
-            <h1 className="det-h1">{p.name}</h1>
+            <p className="eyebrow">{family}</p>
+            <h1 className="det-h1">{copy.name}</h1>
             <p className="det-ref">{t('det.reference', { ref: p.reference })}</p>
-            <p className="det-desc">{p.description}</p>
+            <p className="det-desc">{copy.description}</p>
 
             <dl className="specs">
-              {Object.entries(p.attributes).map(([k, v]) => (
-                <div key={k} className="spec-row">
-                  <dt>{k}</dt><dd>{v}</dd>
-                </div>
-              ))}
+              {Object.entries(p.attributes).map(([k, v]) => {
+                const a = attribute(k, String(v), lang);
+                return (
+                  <div key={k} className="spec-row">
+                    <dt>{a.name}</dt><dd>{a.value}</dd>
+                  </div>
+                );
+              })}
               <div className="spec-row">
                 <dt>{t('det.availability')}</dt><dd>{p.availability || t('det.onRequest')}</dd>
               </div>
@@ -152,7 +168,7 @@ export default async function ProductPage(
 
             <div className="det-cta">
               <L href={`/quote?ref=${p.reference}`} className="btn btn-primary">{t('det.request')}</L>
-              <ShortlistButton item={{ ref: p.reference, name: p.name, slug: p.slug }} />
+              <ShortlistButton item={{ ref: p.reference, name: copy.name, slug: p.slug }} />
               <L href={`/quote?type=bulk&ref=${p.reference}`} className="btn btn-ghost">{t('det.bulk')}</L>
             </div>
 
@@ -166,7 +182,7 @@ export default async function ProductPage(
 
         {related.length > 0 && (
           <section className="related">
-            <h2>{t('det.more', { family: p.family })}</h2>
+            <h2>{t('det.more', { family })}</h2>
             <div className="grid cols-4">
               {related.map((r) => <ProductCard key={r.reference} p={r} locale={lang} />)}
             </div>

@@ -5,23 +5,31 @@ import Image from 'next/image';
 import { getFamilies, getAllProducts } from '@/lib/products';
 import { site } from '@/lib/site';
 import { ui } from '@/lib/ui';
-
-const meta = {
-  title: 'Collections',
-  description:
-    'Olive trees, palms, agaves, cacti, ornamental and indoor specimens imported from Italy to the UAE.',
-};
+import { familyName, familyBlurb, specimenCount } from '@/lib/product-copy';
 
 export async function generateMetadata(
   { params }: { params: Promise<{ lang: Locale }> },
 ): Promise<Metadata> {
   const { lang } = await params;
-  return { ...meta, alternates: alternates(lang, '/collections') };
+  const t = ui(lang);
+  return {
+    title: t('seo.collectionsTitle'),
+    description: t('seo.collectionsDesc'),
+    alternates: alternates(lang, '/collections'),
+  };
 }
 
-/** Written out rather than "6" — a sentence reads better than a digit. */
+/**
+ * Written out rather than "6" — a sentence reads better than a digit.
+ *
+ * English only, and deliberately. Arabic and Italian inflect a spelled number
+ * with the noun it counts, so dropping one into a sentence built for English
+ * word order produces something no native reader would write; those languages
+ * take the digit, which is unambiguous in all three.
+ */
 const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
-const spell = (n: number) => (n < WORDS.length ? WORDS[n] : String(n));
+const spell = (n: number, locale: Locale) =>
+  (locale === 'en' && n < WORDS.length ? WORDS[n] : String(n));
 
 export default async function CollectionsPage(
   { params }: { params: Promise<{ lang: Locale }> },
@@ -42,7 +50,9 @@ export default async function CollectionsPage(
           </div>
           <div className="coll-intro">
             <p className="lede">
-              {spell(families.length).replace(/^./, (c) => c.toUpperCase())} families of Italian-grown stock, selected for UAE conditions.
+              {t('col.familiesLede', {
+                n: spell(families.length, lang).replace(/^./, (c) => c.toUpperCase()),
+              })}
             </p>
             <p className="coll-note">
               {t("Each listing is an individual specimen with its own reference, measured as it stands today rather than at the size it will grow into. Availability moves with each consignment, so every specimen is priced on the day you ask.")}
@@ -54,10 +64,15 @@ export default async function CollectionsPage(
         <dl className="coll-facts">
           <div><dt>{t("Specimens listed")}</dt><dd>{total}</dd></div>
           <div><dt>{t("Grown in")}</dt><dd>{regions.join(' · ')}</dd></div>
-          <div><dt>{t("Delivered to")}</dt><dd>All {spell(site.emirates.length)} emirates</dd></div>
+          <div>
+            <dt>{t("Delivered to")}</dt>
+            <dd>{t('col.allEmirates', { n: spell(site.emirates.length, lang) })}</dd>
+          </div>
           <div>
             <dt>{t("Lead time")}</dt>
-            <dd>{site.leadTimeWeeks.min}–{site.leadTimeWeeks.max} weeks</dd>
+            <dd>{t('col.weeks', {
+              min: site.leadTimeWeeks.min, max: site.leadTimeWeeks.max,
+            })}</dd>
           </div>
         </dl>
 
@@ -79,13 +94,13 @@ export default async function CollectionsPage(
                   />
                 </div>
                 <div className="coll-body">
-                  <h2>{f.name}</h2>
+                  <h2>{familyName(f.name, lang)}</h2>
                   <p className="coll-meta">
-                    {f.count} specimen{f.count === 1 ? '' : 's'}
+                    {specimenCount(f.count, lang)}
                     {f.heights && <span className="coll-sep"> · </span>}
                     {f.heights && <span className="coll-h">{f.heights}</span>}
                   </p>
-                  <p className="coll-blurb">{f.blurb}</p>
+                  <p className="coll-blurb">{familyBlurb(f.name, f.blurb, lang)}</p>
                   <span className="coll-go">
                     {t('col.see')}
                     <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
@@ -126,7 +141,7 @@ export default async function CollectionsPage(
             itemListElement: families.map((f, i) => ({
               '@type': 'ListItem',
               position: i + 1,
-              name: f.name,
+              name: familyName(f.name, lang),
               url: `/collections/${f.slug}`,
             })),
           }),

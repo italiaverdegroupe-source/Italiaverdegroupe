@@ -4,6 +4,7 @@ import type { Product } from '@/lib/products';
 import ShortlistButton from '@/components/ShortlistButton';
 import { ui } from '@/lib/ui';
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
+import { productCopy } from '@/lib/product-copy';
 
 /**
  * Editorial specimen card: tall portrait frame, the reference used as a
@@ -17,6 +18,10 @@ export default function ProductCard(
   // <Image> and a link and nothing interactive, so making it a client one to
   // read a context would ship the whole card to the browser for two words.
   const t = ui(locale);
+  // The name shown, and the name the alt text and the shortlist carry, are one
+  // value — a card whose picture is described in English on an Arabic page is
+  // the version of this bug that a sighted reader never notices.
+  const copy = productCopy(p, locale);
   const [w, h] = p.imageSize.split('x').map(Number);
   return (
     <article className="spec reveal">
@@ -24,7 +29,7 @@ export default function ProductCard(
         <div className="spec-frame">
           <Image
             src={`/products/${p.image}`}
-            alt={p.name}
+            alt={copy.name}
             width={w || 1388}
             height={h || 861}
             sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 300px"
@@ -49,19 +54,19 @@ export default function ProductCard(
         </div>
 
         <div className="spec-body">
-          <h3 className="spec-name">{p.name}</h3>
+          <h3 className="spec-name">{copy.name}</h3>
           <dl className="spec-dl">
             {p.attributes.Height && (
               <div><dt>{t("Height")}</dt><dd>{p.attributes.Height}</dd></div>
             )}
             {(p.attributes['Pot Size'] || p.attributes.Diameter) && (
               <div>
-                <dt>{p.attributes['Pot Size'] ? 'Pot' : 'Diameter'}</dt>
+                <dt>{t(p.attributes['Pot Size'] ? 'cat.pot' : 'cat.diameter')}</dt>
                 <dd>{p.attributes['Pot Size'] ?? p.attributes.Diameter}</dd>
               </div>
             )}
           </dl>
-          <span className="spec-cta">{p.price || 'On request'}</span>
+          <span className="spec-cta">{p.price ? p.price : t('cat.priceOnRequest')}</span>
         </div>
       </L>
 
@@ -69,7 +74,7 @@ export default function ProductCard(
           invalid HTML, and a keyboard user landing on it would be told they
           are on a link to the specimen rather than on a control. */}
       <div className="spec-add">
-        <ShortlistButton item={{ ref: p.reference, name: p.name, slug: p.slug }} compact />
+        <ShortlistButton item={{ ref: p.reference, name: copy.name, slug: p.slug }} compact />
       </div>
 
       <style>{`

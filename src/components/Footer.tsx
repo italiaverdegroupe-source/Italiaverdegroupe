@@ -1,6 +1,7 @@
 import L from '@/components/L';
 import { getSettings } from '@/lib/settings';
 import { getFamilies, getAllProducts } from '@/lib/products';
+import { familyName } from '@/lib/product-copy';
 import { site as fallback } from '@/lib/site';
 import Social from './Social';
 import { ui } from '@/lib/ui';
@@ -47,7 +48,7 @@ export default async function Footer({ locale }: { locale: Locale }) {
               <ul>
                 <li><L href="/catalog">{t('ftr.allSpecimens', { n: total })}</L></li>
                 {families.map((f) => (
-                  <li key={f.slug}><L href={`/collections/${f.slug}`}>{f.name}</L></li>
+                  <li key={f.slug}><L href={`/collections/${f.slug}`}>{familyName(f.name, locale)}</L></li>
                 ))}
               </ul>
             </nav>

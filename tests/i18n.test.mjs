@@ -92,7 +92,12 @@ for (const loc of ['ar', 'it']) {
   const tokensOf = (s) => (s.match(/\{\w+\}/g) ?? []).sort().join(',');
   // ftr.allEmirates is exempt and says why in ui.ts: English spells the
   // number, the other two inflect it with the noun and drop it entirely.
-  const NO_TOKEN_NEEDED = new Set(['ftr.allEmirates']);
+  // Arabic and Italian inflect a counted noun with its number, so a token
+  // cannot be dropped into the phrase without producing something no native
+  // reader would write. Both say "all the emirates" instead, which cannot
+  // drift if the list ever changed — and the count itself is guarded by
+  // footer.test.mjs and collections.test.mjs, which is where it belongs.
+  const NO_TOKEN_NEEDED = new Set(['ftr.allEmirates', 'col.allEmirates']);
   const lost = U.UI_KEYS.filter(
     (k) => !NO_TOKEN_NEEDED.has(k) && tokensOf(dicts[loc][k]) !== tokensOf(enDict[k]));
   check(`${loc}: every {token} survived translation`,

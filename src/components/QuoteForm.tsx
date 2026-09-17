@@ -4,6 +4,7 @@ import L from '@/components/L';
 import { useState } from 'react';
 import { site, fallbackContact } from '@/lib/site';
 import { ui } from '@/lib/ui';
+import { productCopy } from '@/lib/product-copy';
 import { useLocale } from '@/components/LocaleProvider';
 
 type Props = {
@@ -21,7 +22,8 @@ const TYPES = [
 export default function QuoteForm({ defaultType = 'quote', defaultRef = '', products }: Props) {
   // The locale comes from the provider in the root layout, not from the
   // path: see the note in LocaleProvider about prerender and /en.
-  const t = ui(useLocale());
+  const locale = useLocale();
+  const t = ui(locale);
   const [type, setType] = useState<string>(defaultType);
   const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
   const [reference, setReference] = useState('');
@@ -133,7 +135,9 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
             <select name="productRef" defaultValue={defaultRef}>
               <option value="">{t("Not sure / several")}</option>
               {products.map((p) => (
-                <option key={p.reference} value={p.reference}>{p.reference} — {p.name}</option>
+                <option key={p.reference} value={p.reference}>
+                    {p.reference} — {productCopy(p, locale).name}
+                  </option>
               ))}
             </select>
           </label>

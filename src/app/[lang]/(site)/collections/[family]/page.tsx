@@ -6,6 +6,7 @@ import ProductCard from '@/components/ProductCard';
 import { getFamilies, getByFamilySlug, heightMidpoint } from '@/lib/products';
 import { site } from '@/lib/site';
 import { ui } from '@/lib/ui';
+import { familyName, familyBlurb, specimenCount } from '@/lib/product-copy';
 
 // Six collections, fixed in the code. Anything else is not a route.
 export const dynamicParams = false;
@@ -20,9 +21,13 @@ export async function generateMetadata(
   const { lang, family } = await params;
   const f = getFamilies().find((x) => x.slug === family);
   if (!f) return { title: 'Not found' };
+  const t = ui(lang);
   return {
-    title: `${f.name} imported from Italy to the UAE`,
-    description: `${f.blurb} ${f.count} specimens supplied and delivered across the United Arab Emirates. Price on request.`,
+    title: t('seo.collectionTitle', { name: familyName(f.name, lang) }),
+    description: t('seo.collectionDesc', {
+      blurb: familyBlurb(f.name, f.blurb, lang),
+      count: specimenCount(f.count, lang),
+    }),
     alternates: alternates(lang, `/collections/${f.slug}`),
   };
 }
@@ -33,6 +38,7 @@ export default async function CollectionPage(
   const { lang, family } = await params;
   const t = ui(lang);
   const slug = family;
+  const nameOf = (f: { name: string }) => familyName(f.name, lang);
   const families = getFamilies();
   const f = families.find((x) => x.slug === slug);
   if (!f) notFound();
@@ -51,14 +57,14 @@ export default async function CollectionPage(
               is worse than none. */}
           <L href="/collections">Collections</L>
           <span aria-hidden="true">/</span>
-          <span aria-current="page">{f.name}</span>
+          <span aria-current="page">{nameOf(f)}</span>
         </nav>
 
         <header className="fam-head">
           <div>
             <p className="eyebrow">Collection</p>
-            <h1>{f.name}</h1>
-            <p className="lede">{f.blurb}</p>
+            <h1>{nameOf(f)}</h1>
+            <p className="lede">{familyBlurb(f.name, f.blurb, lang)}</p>
           </div>
           <dl className="fam-facts">
             <div><dt>Specimens</dt><dd>{items.length}</dd></div>
@@ -91,8 +97,8 @@ export default async function CollectionPage(
             {others.map((o) => (
               <li key={o.slug}>
                 <L href={`/collections/${o.slug}`}>
-                  <span className="fam-more-n">{o.name}</span>
-                  <span className="fam-more-c">{o.count} specimen{o.count === 1 ? '' : 's'}</span>
+                  <span className="fam-more-n">{nameOf(o)}</span>
+                  <span className="fam-more-c">{specimenCount(o.count, lang)}</span>
                 </L>
               </li>
             ))}

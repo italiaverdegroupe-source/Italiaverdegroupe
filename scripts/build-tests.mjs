@@ -34,6 +34,7 @@ const TARGETS = [
   { file: 'users', format: 'cjs' },
   { file: 'i18n', format: 'cjs' },
   { file: 'legal/index', format: 'cjs', out: 'legal' },
+  { file: 'product-copy', format: 'cjs' },
   { file: 'landed-cost', format: 'esm', ext: 'mjs' },
 ];
 

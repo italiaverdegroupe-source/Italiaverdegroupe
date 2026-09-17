@@ -7,6 +7,7 @@ import { useShortlist } from '@/lib/use-shortlist';
 import { useHydrated } from '@/lib/use-hydrated';
 import { ui } from '@/lib/ui';
 import { useLocale } from '@/components/LocaleProvider';
+import { specimenCount } from '@/lib/product-copy';
 
 /**
  * The shortlist, and one enquiry for all of it.
@@ -22,7 +23,8 @@ import { useLocale } from '@/components/LocaleProvider';
  * meet a twelve-field form.
  */
 export default function ShortlistPage() {
-  const t = ui(useLocale());
+  const locale = useLocale();
+  const t = ui(locale);
   const items = useShortlist();
   const ready = useHydrated();
   const [sending, setSending] = useState(false);
@@ -142,11 +144,11 @@ export default function ShortlistPage() {
                 ))}
               </ul>
               <p className="sl-total">
-                {items.length} specimen{items.length === 1 ? '' : 's'}
-                {total !== items.length && <> · {total} plants in total</>}
+                {specimenCount(items.length, locale)}
+                {total !== items.length && <> · {t('sl.plantsTotal', { n: total })}</>}
                 {' · '}
                 <button type="button" className="sl-clear" onClick={() => clearShortlist()}>
-                  Clear the list
+                  {t('sl.clear')}
                 </button>
               </p>
             </div>
@@ -159,7 +161,7 @@ export default function ShortlistPage() {
                 <input id="sl-name" name="name" required minLength={2} maxLength={120} autoComplete="name" />
               </div>
               <div className="sl-row">
-                <label htmlFor="sl-company">Company <span>optional</span></label>
+                <label htmlFor="sl-company">{t('sl.company')} <span>{t('sl.optional')}</span></label>
                 <input id="sl-company" name="company" maxLength={160} autoComplete="organization" />
               </div>
               <div className="sl-row">
