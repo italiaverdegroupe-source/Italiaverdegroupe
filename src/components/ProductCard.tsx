@@ -2,12 +2,21 @@ import L from '@/components/L';
 import Image from 'next/image';
 import type { Product } from '@/lib/products';
 import ShortlistButton from '@/components/ShortlistButton';
+import { ui } from '@/lib/ui';
+import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
 
 /**
  * Editorial specimen card: tall portrait frame, the reference used as a
  * typographic mark, specs as a hairline table. No boxed e-commerce tile.
  */
-export default function ProductCard({ p, priority = false }: { p: Product; priority?: boolean }) {
+export default function ProductCard(
+  { p, priority = false, locale = DEFAULT_LOCALE }:
+  { p: Product; priority?: boolean; locale?: Locale },
+) {
+  // A prop, not the context. This is a SERVER component — it renders an
+  // <Image> and a link and nothing interactive, so making it a client one to
+  // read a context would ship the whole card to the browser for two words.
+  const t = ui(locale);
   const [w, h] = p.imageSize.split('x').map(Number);
   return (
     <article className="spec reveal">
@@ -34,7 +43,7 @@ export default function ProductCard({ p, priority = false }: { p: Product; prior
                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
                 <circle cx="12" cy="13" r="4" />
               </svg>
-              New photograph coming
+              {t("New photograph coming")}
             </span>
           )}
         </div>
@@ -43,7 +52,7 @@ export default function ProductCard({ p, priority = false }: { p: Product; prior
           <h3 className="spec-name">{p.name}</h3>
           <dl className="spec-dl">
             {p.attributes.Height && (
-              <div><dt>Height</dt><dd>{p.attributes.Height}</dd></div>
+              <div><dt>{t("Height")}</dt><dd>{p.attributes.Height}</dd></div>
             )}
             {(p.attributes['Pot Size'] || p.attributes.Diameter) && (
               <div>

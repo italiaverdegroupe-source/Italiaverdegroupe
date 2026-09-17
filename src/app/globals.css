@@ -326,8 +326,22 @@ img, svg { max-width: 100%; display: block; }
   letter-spacing: 0;
 }
 [dir='rtl'] .hero h1 em { font-style: normal; }
-/* Arabic ascenders and descenders need more room than Latin at the same size. */
-[dir='rtl'] h1, [dir='rtl'] h2 { line-height: 1.35; }
+/* ── the Arabic optical scale ──
+   Amiri at 90px is not Fraunces at 90px. Arabic sits on a larger apparent
+   body for the same em, and it carries marks above and below the line that
+   Latin does not — so the same number produced a headline that dwarfed the
+   English one and whose damma on one line touched the letters on the line
+   above. Measured at 1440px: 89.6px in both, and the Arabic looked a size
+   and a half bigger.
+
+   About 0.8 of the Latin size, with more leading, brings the two to the same
+   apparent weight on the page. The ratio is applied to the display sizes
+   only; body text at 16px needs the leading but not the reduction. */
+[dir='rtl'] h1 { font-size: clamp(2.1rem, 5.1vw, 4.4rem); line-height: 1.5; }
+[dir='rtl'] h2 { font-size: clamp(1.6rem, 3.4vw, 2.7rem); line-height: 1.45; }
+[dir='rtl'] h3 { font-size: clamp(1.05rem, 1.8vw, 1.4rem); line-height: 1.5; }
+[dir='rtl'] .hero h1 { font-size: clamp(1.9rem, 2.7vw, 2.6rem); line-height: 1.5; }
+[dir='rtl'] .lede, [dir='rtl'] .hero-lede { line-height: 1.9; }
 [dir='rtl'] p, [dir='rtl'] li { line-height: 1.95; }
 
 /* An arrow drawn to point at the next thing points the other way when the

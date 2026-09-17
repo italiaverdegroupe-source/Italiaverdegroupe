@@ -5,6 +5,8 @@ import { useState } from 'react';
 import { removeFromShortlist, setShortlistQty, clearShortlist } from '@/lib/shortlist';
 import { useShortlist } from '@/lib/use-shortlist';
 import { useHydrated } from '@/lib/use-hydrated';
+import { ui } from '@/lib/ui';
+import { useLocale } from '@/components/LocaleProvider';
 
 /**
  * The shortlist, and one enquiry for all of it.
@@ -20,6 +22,7 @@ import { useHydrated } from '@/lib/use-hydrated';
  * meet a twelve-field form.
  */
 export default function ShortlistPage() {
+  const t = ui(useLocale());
   const items = useShortlist();
   const ready = useHydrated();
   const [sending, setSending] = useState(false);
@@ -79,15 +82,13 @@ export default function ShortlistPage() {
     return (
       <div className="section">
         <div className="wrap sl-narrow">
-          <p className="eyebrow">Sent</p>
-          <h1>Thank you — we have it.</h1>
+          <p className="eyebrow">{t("Sent")}</p>
+          <h1>{t("Thank you — we have it.")}</h1>
           <p className="lede">
-            Your reference is <strong>{done}</strong>. We read every enquiry the day
-            it arrives and come back with availability, sizes and a price for each
-            specimen on the list.
+            Your reference is <strong>{done}</strong>. We read every enquiry the day it arrives and come back with availability, sizes and a price for each specimen on the list.
           </p>
           <div className="sl-actions">
-            <L href="/catalog" className="btn btn-primary">Back to the catalogue</L>
+            <L href="/catalog" className="btn btn-primary">{t("Back to the catalogue")}</L>
           </div>
         </div>
       </div>
@@ -97,21 +98,18 @@ export default function ShortlistPage() {
   return (
     <div className="section">
       <div className="wrap">
-        <p className="eyebrow">Your shortlist</p>
-        <h1>Everything you picked, one enquiry.</h1>
+        <p className="eyebrow">{t("Your shortlist")}</p>
+        <h1>{t("Everything you picked, one enquiry.")}</h1>
         <p className="lede sl-lede">
-          Set the quantity against each specimen and send the whole list at once.
-          We will price them together, which is also how they ship — one
-          consignment costs less per tree than six.
+          {t("Set the quantity against each specimen and send the whole list at once. We will price them together, which is also how they ship — one consignment costs less per tree than six.")}
         </p>
 
         {!ready ? (
-          <p className="sl-empty">Reading your list…</p>
+          <p className="sl-empty">{t("Reading your list…")}</p>
         ) : items.length === 0 ? (
           <p className="sl-empty">
             Nothing on your list yet. Add specimens from the{' '}
-            <L href="/catalog">catalogue</L> — the button is on every card
-            and on every specimen page.
+            <L href="/catalog">catalogue</L> — the button is on every card and on every specimen page.
           </p>
         ) : (
           <div className="sl-grid">
@@ -125,7 +123,7 @@ export default function ShortlistPage() {
                     </span>
                     <span className="sl-qty">
                       <label htmlFor={`q-${i.ref}`} className="visually-hidden">
-                        Quantity of {i.name}
+                        {t("Quantity of")} {i.name}
                       </label>
                       <input
                         id={`q-${i.ref}`} type="number" min={1} max={9999} value={i.qty}
@@ -154,10 +152,10 @@ export default function ShortlistPage() {
             </div>
 
             <form className="sl-form" onSubmit={submit} noValidate={false}>
-              <h2>Where should the price go?</h2>
+              <h2>{t("Where should the price go?")}</h2>
 
               <div className="sl-row">
-                <label htmlFor="sl-name">Your name</label>
+                <label htmlFor="sl-name">{t("Your name")}</label>
                 <input id="sl-name" name="name" required minLength={2} maxLength={120} autoComplete="name" />
               </div>
               <div className="sl-row">
@@ -165,7 +163,7 @@ export default function ShortlistPage() {
                 <input id="sl-company" name="company" maxLength={160} autoComplete="organization" />
               </div>
               <div className="sl-row">
-                <label htmlFor="sl-email">Email</label>
+                <label htmlFor="sl-email">{t("Email")}</label>
                 <input id="sl-email" name="email" type="email" required maxLength={180} autoComplete="email" />
               </div>
               <div className="sl-row">
@@ -179,13 +177,13 @@ export default function ShortlistPage() {
                 </div>
                 <div className="sl-row">
                   <label htmlFor="sl-when">Needed by <span>optional</span></label>
-                  <input id="sl-when" name="requiredDate" maxLength={40} placeholder="e.g. March" />
+                  <input id="sl-when" name="requiredDate" maxLength={40} placeholder={t("e.g. March")} />
                 </div>
               </div>
               <div className="sl-row">
                 <label htmlFor="sl-msg">Anything else <span>optional</span></label>
                 <textarea id="sl-msg" name="message" rows={3} maxLength={4000}
-                          placeholder="Access for a crane, planting included, a drawing to send over…" />
+                          placeholder={t("Access for a crane, planting included, a drawing to send over…")} />
               </div>
 
               {error && <p className="sl-error" role="alert">{error}</p>}
@@ -194,8 +192,7 @@ export default function ShortlistPage() {
                 {sending ? 'Sending…' : `Send this list${items.length ? ` (${items.length})` : ''}`}
               </button>
               <p className="sl-fine">
-                No prices are published — every specimen is quoted individually, because
-                availability and size change with the consignment.
+                {t("No prices are published — every specimen is quoted individually, because availability and size change with the consignment.")}
               </p>
             </form>
           </div>

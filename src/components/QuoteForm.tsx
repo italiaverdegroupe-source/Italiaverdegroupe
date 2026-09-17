@@ -3,6 +3,8 @@
 import L from '@/components/L';
 import { useState } from 'react';
 import { site, fallbackContact } from '@/lib/site';
+import { ui } from '@/lib/ui';
+import { useLocale } from '@/components/LocaleProvider';
 
 type Props = {
   defaultType?: 'quote' | 'bulk' | 'sourcing';
@@ -17,6 +19,9 @@ const TYPES = [
 ] as const;
 
 export default function QuoteForm({ defaultType = 'quote', defaultRef = '', products }: Props) {
+  // The locale comes from the provider in the root layout, not from the
+  // path: see the note in LocaleProvider about prerender and /en.
+  const t = ui(useLocale());
   const [type, setType] = useState<string>(defaultType);
   const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
   const [reference, setReference] = useState('');
@@ -50,13 +55,12 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
   if (state === 'done') {
     return (
       <div className="done">
-        <h2>Enquiry received.</h2>
-        <p className="done-ref">Your reference is <strong>{reference}</strong></p>
+        <h2>{t("Enquiry received.")}</h2>
+        <p className="done-ref">{t("Your reference is")} <strong>{reference}</strong></p>
         <p>
-          We will come back with availability, lead time and a priced quotation.
-          Very large or out-of-season specimens can take longer to confirm with the nursery.
+          {t("We will come back with availability, lead time and a priced quotation. Very large or out-of-season specimens can take longer to confirm with the nursery.")}
         </p>
-        <L className="btn btn-primary" href="/catalog">Back to the catalogue</L>
+        <L className="btn btn-primary" href="/catalog">{t("Back to the catalogue")}</L>
         <style>{`
           .done { padding: 48px 0; max-width: 56ch; }
           .done-ref { font-size: 1.1rem; }
@@ -72,7 +76,7 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
   return (
     <form onSubmit={onSubmit} className="qf" noValidate>
       <fieldset className="types">
-        <legend className="flabel">What do you need?</legend>
+        <legend className="flabel">{t("What do you need?")}</legend>
         {TYPES.map((t) => (
           <label key={t.v} className={`type ${type === t.v ? 'on' : ''}`}>
             <input type="radio" name="_type" value={t.v}
@@ -85,38 +89,38 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
 
       <div className="row">
         <label className="fld">
-          <span>Name <i>*</i></span>
+          <span>{t("Name")} <i>*</i></span>
           <input name="name" required autoComplete="name" maxLength={120} />
         </label>
         <label className="fld">
-          <span>Company</span>
+          <span>{t("Company")}</span>
           <input name="company" autoComplete="organization" maxLength={160} />
         </label>
       </div>
 
       <div className="row">
         <label className="fld">
-          <span>Email <i>*</i></span>
+          <span>{t("Email")} <i>*</i></span>
           <input name="email" type="email" required autoComplete="email" maxLength={180} />
         </label>
         <label className="fld">
-          <span>Phone / WhatsApp</span>
+          <span>{t("Phone / WhatsApp")}</span>
           <input name="phone" type="tel" autoComplete="tel" maxLength={40} placeholder="+971…" />
         </label>
       </div>
 
       <div className="row">
         <label className="fld">
-          <span>Emirate</span>
+          <span>{t("Emirate")}</span>
           <select name="emirate" defaultValue="">
-            <option value="">Select…</option>
+            <option value="">{t("Select…")}</option>
             {site.emirates.map((e) => <option key={e.slug} value={e.name}>{e.name}</option>)}
           </select>
         </label>
         <label className="fld">
-          <span>Project type</span>
+          <span>{t("Project type")}</span>
           <select name="projectType" defaultValue="">
-            <option value="">Select…</option>
+            <option value="">{t("Select…")}</option>
             {site.projectTypes.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
         </label>
@@ -125,16 +129,16 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
       {!sourcing && (
         <div className="row">
           <label className="fld">
-            <span>Specimen</span>
+            <span>{t("Specimen")}</span>
             <select name="productRef" defaultValue={defaultRef}>
-              <option value="">Not sure / several</option>
+              <option value="">{t("Not sure / several")}</option>
               {products.map((p) => (
                 <option key={p.reference} value={p.reference}>{p.reference} — {p.name}</option>
               ))}
             </select>
           </label>
           <label className="fld">
-            <span>Quantity{bulk && <i> *</i>}</span>
+            <span>{t("Quantity")}{bulk && <i> *</i>}</span>
             <input name="quantity" type="number" min={1} max={100000} required={bulk} />
           </label>
         </div>
@@ -142,14 +146,14 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
 
       <div className="row">
         <label className="fld">
-          <span>Scope required</span>
+          <span>{t("Scope required")}</span>
           <select name="serviceScope" defaultValue="">
-            <option value="">Select…</option>
+            <option value="">{t("Select…")}</option>
             {site.serviceScopes.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </label>
         <label className="fld">
-          <span>Required on site by</span>
+          <span>{t("Required on site by")}</span>
           <input name="requiredDate" type="month" />
         </label>
       </div>
@@ -166,14 +170,13 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
 
       {/* honeypot */}
       <div className="hp" aria-hidden="true">
-        <label>Website<input name="website" tabIndex={-1} autoComplete="off" /></label>
+        <label>{t("Website")}<input name="website" tabIndex={-1} autoComplete="off" /></label>
       </div>
 
       <label className="consent">
         <input type="checkbox" name="consent" required />
         <span>
-          I agree that {site.legalName} may store these details and contact me about this
-          enquiry. We do not sell or share your data.
+          I agree thatI agree that {site.legalName} may store these details and contact me about this enquiry. We do not sell or share your data.may store these details and contact me about this enquiry. We do not sell or share your data.
         </span>
       </label>
 
@@ -184,8 +187,7 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
       </button>
 
       <p className="legal">
-        Prices are quoted individually and are exclusive of VAT where applicable.
-        Quotations are valid for {site.quoteValidityDays} days.
+        Prices are quoted individually and are exclusive of VAT where applicable. Quotations are valid for {site.quoteValidityDays} days.
       </p>
 
       <style>{`

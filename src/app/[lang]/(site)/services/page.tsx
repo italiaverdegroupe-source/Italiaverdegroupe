@@ -4,6 +4,7 @@ import { metadataFor, publishedFaqs } from '@/lib/content';
 import L from '@/components/L';
 import { getSettings } from '@/lib/settings';
 import { site } from '@/lib/site';
+import { ui } from '@/lib/ui';
 
 /**
  * Revalidated on a timer as well as on demand.
@@ -71,6 +72,7 @@ export default async function ServicesPage(
   { params }: { params: Promise<{ lang: Locale }> },
 ) {
   const { lang } = await params;
+  const t = ui(lang);
   const [settings, faqs] = await Promise.all([getSettings(), publishedFaqs(lang)]);
   const scopes = settings.serviceScopes;
   const serviceFaqs = faqs.filter((f) => SERVICE_TOPICS.has(f.category));
@@ -81,17 +83,15 @@ export default async function ServicesPage(
         <div className="wrap">
           <header className="svc-head">
             <div>
-              <p className="eyebrow">Services</p>
-              <h1>From the Italian nursery to the finished site.</h1>
+              <p className="eyebrow">{t("Services")}</p>
+              <h1>{t("From the Italian nursery to the finished site.")}</h1>
             </div>
             <div>
               <p className="lede">
-                One company carries the tree the whole way, so there is nobody to point at
-                when something goes wrong with it.
+                {t("One company carries the tree the whole way, so there is nobody to point at when something goes wrong with it.")}
               </p>
               <p className="svc-note">
-                Scope is quoted to what a project actually needs. Supply on its own is a
-                perfectly normal request.
+                {t("Scope is quoted to what a project actually needs. Supply on its own is a perfectly normal request.")}
               </p>
             </div>
           </header>
@@ -121,22 +121,18 @@ export default async function ServicesPage(
         <div className="wrap">
           <div className="svc-timing">
             <div>
-              <p className="eyebrow">Timing</p>
-              <h2>The calendar decides more than the budget does.</h2>
+              <p className="eyebrow">{t("Timing")}</p>
+              <h2>{t("The calendar decides more than the budget does.")}</h2>
               <p>
-                Trees are living stock. Lifting season in Italy and the UAE summer both limit
-                when a specimen can safely move and establish, and no amount of logistics
-                gets around either. We will tell you the realistic window for a species
-                rather than accept a delivery date that would cost you the tree.
+                {t("Trees are living stock. Lifting season in Italy and the UAE summer both limit when a specimen can safely move and establish, and no amount of logistics gets around either. We will tell you the realistic window for a species rather than accept a delivery date that would cost you the tree.")}
               </p>
               <p className="svc-lead">
                 Typical lead time is <strong>{site.leadTimeWeeks.min}–{site.leadTimeWeeks.max} weeks</strong>{' '}
-                from order confirmation to site delivery — selection, documentation, sailing
-                and acclimatisation included.
+                from order confirmation to site delivery — selection, documentation, sailing and acclimatisation included.
               </p>
               <div className="svc-acts">
-                <L href="/quote" className="btn btn-primary">Discuss a project</L>
-                <L href="/collections" className="btn btn-ghost">See what we carry</L>
+                <L href="/quote" className="btn btn-primary">{t("Discuss a project")}</L>
+                <L href="/collections" className="btn btn-ghost">{t("See what we carry")}</L>
               </div>
             </div>
           </div>
@@ -148,8 +144,8 @@ export default async function ServicesPage(
           <div className="wrap">
             <header className="svc-head">
               <div>
-                <p className="eyebrow">Before you enquire</p>
-                <h2>Questions we are asked about the work itself.</h2>
+                <p className="eyebrow">{t("Before you enquire")}</p>
+                <h2>{t("Questions we are asked about the work itself.")}</h2>
               </div>
             </header>
             <div className="faqs svc-faqs">

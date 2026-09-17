@@ -4,6 +4,7 @@ import { metadataFor } from '@/lib/content';
 import L from '@/components/L';
 import ProductCard from '@/components/ProductCard';
 import { getAllProducts, getFamilies, familySlug, sizeBand, SIZE_BANDS, heightMidpoint, searchProducts, rankBySearch } from '@/lib/products';
+import { ui } from '@/lib/ui';
 
 /**
  * Revalidated on a timer as well as on demand.
@@ -26,7 +27,11 @@ export const generateMetadata = async (
 
 type Search = { family?: string; size?: string; sort?: string; q?: string };
 
-export default async function CatalogPage({ searchParams }: { searchParams: Promise<Search> }) {
+export default async function CatalogPage(
+  { params, searchParams }: { params: Promise<{ lang: Locale }> } & { searchParams: Promise<Search> },
+) {
+  const { lang } = await params;
+  const t = ui(lang);
   const sp = await searchParams;
   const families = getFamilies();
 
@@ -55,11 +60,10 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
   return (
     <div className="section">
       <div className="wrap">
-        <p className="eyebrow">Catalogue</p>
-        <h1 className="cat-h1">Italian trees &amp; plants</h1>
+        <p className="eyebrow">{t("Catalogue")}</p>
+        <h1 className="cat-h1">{t("Italian trees &amp; plants")}</h1>
         <p className="lede">
-          Every specimen is quoted individually — availability, size and price depend on the
-          season and the consignment. Tell us what the project needs and we will price it.
+          {t("Every specimen is quoted individually — availability, size and price depend on the season and the consignment. Tell us what the project needs and we will price it.")}
         </p>
 
         {/* A box, not a live filter. The whole catalogue is sixty-eight items and
@@ -71,22 +75,22 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
           {sp.family && <input type="hidden" name="family" value={sp.family} />}
           {sp.size && <input type="hidden" name="size" value={sp.size} />}
           {sp.sort && <input type="hidden" name="sort" value={sp.sort} />}
-          <label htmlFor="cat-q" className="visually-hidden">Search the catalogue</label>
+          <label htmlFor="cat-q" className="visually-hidden">{t("Search the catalogue")}</label>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
                strokeWidth="1.7" strokeLinecap="round" aria-hidden="true">
             <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
           </svg>
           <input id="cat-q" type="search" name="q" defaultValue={q}
-                 placeholder="Reference, botanical or common name — VG-OL-012, Olea, palm" />
-          <button type="submit" className="btn btn-primary">Search</button>
-          {q && <L href={qs({ q: undefined })} className="cat-clear">Clear</L>}
+                 placeholder={t("Reference, botanical or common name — VG-OL-012, Olea, palm")} />
+          <button type="submit" className="btn btn-primary">{t("Search")}</button>
+          {q && <L href={qs({ q: undefined })} className="cat-clear">{t("Clear")}</L>}
         </form>
 
         <div className="filters">
           <div className="fgroup">
-            <span className="flabel">Collection</span>
+            <span className="flabel">{t("Collection")}</span>
             <div className="fchips">
-              <L href={qs({ family: undefined })} className={`chip ${!sp.family ? 'on' : ''}`}>All</L>
+              <L href={qs({ family: undefined })} className={`chip ${!sp.family ? 'on' : ''}`}>{t("All")}</L>
               {families.map((f) => (
                 <L key={f.slug} href={qs({ family: f.slug })}
                       className={`chip ${sp.family === f.slug ? 'on' : ''}`}>
@@ -97,9 +101,9 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
           </div>
 
           <div className="fgroup">
-            <span className="flabel">Size</span>
+            <span className="flabel">{t("Size")}</span>
             <div className="fchips">
-              <L href={qs({ size: undefined })} className={`chip ${!sp.size ? 'on' : ''}`}>Any</L>
+              <L href={qs({ size: undefined })} className={`chip ${!sp.size ? 'on' : ''}`}>{t("Any")}</L>
               {SIZE_BANDS.map((b) => (
                 <L key={b.slug} href={qs({ size: b.slug })}
                       className={`chip ${sp.size === b.slug ? 'on' : ''}`}>
@@ -110,7 +114,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
           </div>
 
           <div className="fgroup">
-            <span className="flabel">Sort</span>
+            <span className="flabel">{t("Sort")}</span>
             <div className="fchips">
               {[['', 'Reference'], ['tallest', 'Tallest first'], ['smallest', 'Smallest first']].map(([v, l]) => (
                 <L key={l} href={qs({ sort: v || undefined })}
@@ -122,7 +126,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
 
         <p className="count">
           {list.length} {list.length === 1 ? 'specimen' : 'specimens'}
-          {q && <> matching <strong>&ldquo;{q}&rdquo;</strong></>}
+          {q && <> matching <strong>&ldquo;&ldquo;{q}&rdquo;&rdquo;</strong></>}
         </p>
 
         {list.length === 0 ? (
@@ -132,7 +136,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
               // filter combination that found nothing, and the way out is
               // different too: widen the words, or tell us what you need. The
               // catalogue is what we hold, not what we can get.
-              ? <>Nothing in the catalogue matches <strong>&ldquo;{q}&rdquo;</strong>.{' '}
+              ? <>Nothing in the catalogue matches <strong>&ldquo;&ldquo;{q}&rdquo;&rdquo;</strong>.{' '}
                   <L href={qs({ q: undefined })}>Clear the search</L>, or{' '}
                   <L href={`/quote?type=sourcing&ref=${encodeURIComponent(q)}`}>
                     ask us to source it
@@ -142,7 +146,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
           </p>
         ) : (
           <div className="grid cols-4">
-            {list.map((p, i) => <ProductCard key={p.reference} p={p} priority={i < 4} />)}
+            {list.map((p, i) => <ProductCard key={p.reference} p={p} priority={i < 4} locale={lang} />)}
           </div>
         )}
       </div>

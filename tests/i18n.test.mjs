@@ -102,6 +102,35 @@ check('the translator fills tokens', t('ftr.weeksToSite', { min: 4, max: 8 }).in
 check('and leaves an unknown token visible rather than blanking it',
   t('ftr.licence', {}).includes('{n}'), t('ftr.licence', {}));
 
+// ── the page copy ────────────────────────────────────────────
+// The chrome being translated is what made the site LOOK multilingual while
+// every paragraph stayed English — the complaint that started this. These are
+// the sentences on the pages, and unlike the chrome they are keyed by their
+// own English, so a gap renders as English rather than as nothing.
+const SC = require('../.test-build/site-copy.cjs');
+for (const loc of ['ar', 'it']) {
+  const d = SC.COPY_DICTS[loc];
+  const missing = SC.COPY_KEYS.filter((k) => !d[k]);
+  check(`${loc}: every page sentence is translated`,
+    missing.length === 0, `${missing.length} missing: ${missing.slice(0, 3).join(' | ')}`);
+  const same = SC.COPY_KEYS.filter((k) => d[k] === k);
+  check(`${loc}: none was left sitting in English`, same.length === 0, same.join(' | '));
+}
+
+// A sentence the markup breaks in half cannot be translated as halves: Arabic
+// and Italian order the clauses differently, so the pieces come back in
+// English order with a link stranded in the middle. scripts/i18n-unmix.mjs
+// keeps those whole and English; this makes sure none slipped into the
+// dictionary, because one that did would be shipped in pieces.
+// Two are lower case on purpose and are whole on their own: a placeholder
+// inside a date field, and a link label that trails a number which reads in
+// the same order in all three languages ("68 specimens →", "68 صنفًا →").
+const NOT_A_FRAGMENT = new Set(['e.g. March', 'specimens →']);
+const partial = SC.COPY_KEYS.filter((k) => !NOT_A_FRAGMENT.has(k)
+  && (/^[a-z(,.…—]/.test(k.trim()) || /[,;:—]$/.test(k.trim()) || /^&\w+;$/.test(k.trim())));
+check('THE POINT: no half-sentence was translated as though it were whole',
+  partial.length === 0, partial.join(' | '));
+
 // ── the console's own language ───────────────────────────────
 // The person who owns this company reads Italian and runs the business from
 // these screens. The console is a different problem from the public site: the

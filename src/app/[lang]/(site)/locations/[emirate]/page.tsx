@@ -24,8 +24,11 @@ export async function generateMetadata(
   };
 }
 
-export default async function LocationPage({ params }: { params: Promise<{ emirate: string }> }) {
-  const l = getLocation((await params).emirate);
+export default async function LocationPage(
+  { params }: { params: Promise<{ lang: Locale; emirate: string }> },
+) {
+  const { lang, emirate } = await params;
+  const l = getLocation(emirate);
   if (!l) notFound();
   const site = await getSettings();
   const picks = getAllProducts().filter((p) => p.family === 'Olive Trees' || p.family === 'Palms').slice(0, 4);
@@ -50,7 +53,7 @@ export default async function LocationPage({ params }: { params: Promise<{ emira
         <ul className="notes">{l.notes.map((n) => <li key={n}>{n}</li>)}</ul>
 
         <h2 className="sub-h">Commonly specified here</h2>
-        <div className="grid cols-4">{picks.map((p) => <ProductCard key={p.reference} p={p} />)}</div>
+        <div className="grid cols-4">{picks.map((p) => <ProductCard key={p.reference} p={p} locale={lang} />)}</div>
 
         <div className="loc-cta">
           <L href={`/quote?type=bulk`} className="btn btn-primary">Request pricing for {l.name}</L>

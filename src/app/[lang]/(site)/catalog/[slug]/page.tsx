@@ -27,8 +27,11 @@ export async function generateMetadata(
   };
 }
 
-export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
-  const p = getProduct((await params).slug);
+export default async function ProductPage(
+  { params }: { params: Promise<{ lang: Locale; slug: string }> },
+) {
+  const { lang, slug } = await params;
+  const p = getProduct(slug);
   if (!p) notFound();
   const site = await getSettings();
 
@@ -119,7 +122,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <section className="related">
             <h2>More from {p.family}</h2>
             <div className="grid cols-4">
-              {related.map((r) => <ProductCard key={r.reference} p={r} />)}
+              {related.map((r) => <ProductCard key={r.reference} p={r} locale={lang} />)}
             </div>
           </section>
         )}

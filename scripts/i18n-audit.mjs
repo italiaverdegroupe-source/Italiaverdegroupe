@@ -38,8 +38,16 @@ const consoleFiles = files.filter((f) => f.includes('(console)') || f.includes('
 
 const UI = require('../.test-build/ui.cjs');
 const C = require('../.test-build/content.cjs');
+const SC = require('../.test-build/site-copy.cjs');
+const A = require('../.test-build/admin-ui.cjs');
 
-const covered = new Set([...Object.values(UI.UI_DICTS.en), ...Object.values(C.BLOCKS).map((b) => b.fallback)]);
+const covered = new Set([
+  ...Object.values(UI.UI_DICTS.en),
+  ...Object.keys(UI.UI_DICTS.en),
+  ...Object.values(C.BLOCKS).map((b) => b.fallback),
+  ...SC.COPY_KEYS,
+  ...A.ADMIN_KEYS,
+]);
 const isCovered = (s) => covered.has(s) || [...covered].some((c) => c.includes(s) || s.includes(c));
 
 function report(label, list) {

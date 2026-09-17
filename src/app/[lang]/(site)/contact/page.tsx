@@ -3,6 +3,7 @@ import { type Locale } from '@/lib/i18n';
 import L from '@/components/L';
 import { metadataFor } from '@/lib/content';
 import { getSettings } from '@/lib/settings';
+import { ui } from '@/lib/ui';
 
 export const revalidate = 300;
 
@@ -26,7 +27,11 @@ export const generateMetadata = async (
  * in the console, and what is not configured is not mentioned rather than
  * shown blank or filled with a placeholder somebody might actually dial.
  */
-export default async function ContactPage() {
+export default async function ContactPage(
+  { params }: { params: Promise<{ lang: Locale }> },
+) {
+  const { lang } = await params;
+  const t = ui(lang);
   const site = await getSettings();
 
   const channels = [
@@ -50,13 +55,10 @@ export default async function ContactPage() {
   return (
     <div className="section">
       <div className="wrap">
-        <p className="eyebrow">Contact</p>
-        <h1>Talk to us about the project.</h1>
+        <p className="eyebrow">{t("Contact")}</p>
+        <h1>{t("Talk to us about the project.")}</h1>
         <p className="lede">
-          We supply landscaping contractors, developers, hotels and private estates
-          across all {site.emirates.length} emirates. Tell us what the
-          drawing calls for and we will tell you what we hold, what we can bring in,
-          and how long it takes.
+          We supply landscaping contractors, developers, hotels and private estates across all {site.emirates.length} emirates. Tell us what the drawing calls for and we will tell you what we hold, what we can bring in, and how long it takes.
         </p>
 
         {channels.length > 0 ? (
@@ -77,39 +79,33 @@ export default async function ContactPage() {
              a heading and nothing under it reads as broken; this reads as a
              company that has not finished setting up, which is the truth. */
           <p className="ct-none">
-            Our phone and mailbox are being set up with the domain and are not
-            live yet. Until they are, the enquiry form reaches us and is read
-            every day — <L href="/quote">send it here</L> and we will come
-            back to you by email.
+            Our phone and mailbox are being set up with the domain and are not live yet. Until they are, the enquiry form reaches us and is read every day — <L href="/quote">send it here</L> and we will come back to you by email.
           </p>
         )}
 
         <div className="ct-grid">
           <section>
-            <h2>What to send</h2>
+            <h2>{t("What to send")}</h2>
             <p>
-              The more of this you have, the faster the number comes back — but
-              a photograph and a rough height are enough to start.
+              {t("The more of this you have, the faster the number comes back — but a photograph and a rough height are enough to start.")}
             </p>
             <ul className="ct-list">
-              <li>Species, or a photograph of something close to it</li>
-              <li>Height or girth, and how many</li>
-              <li>The emirate, and whether a crane can reach the planting position</li>
-              <li>When it has to be on site</li>
-              <li>Supply only, or supply with delivery and planting</li>
+              <li>{t("Species, or a photograph of something close to it")}</li>
+              <li>{t("Height or girth, and how many")}</li>
+              <li>{t("The emirate, and whether a crane can reach the planting position")}</li>
+              <li>{t("When it has to be on site")}</li>
+              <li>{t("Supply only, or supply with delivery and planting")}</li>
             </ul>
             <L href="/quote" className="btn btn-primary">
-              Start an enquiry <span aria-hidden="true">&rarr;</span>
+              {t("Start an enquiry")} <span aria-hidden="true">&rarr;</span>
             </L>
           </section>
 
           <section>
-            <h2>Where we deliver</h2>
+            <h2>{t("Where we deliver")}</h2>
             <p>
               Delivery across the United Arab Emirates. Lead time is normally{' '}
-              {site.leadTimeWeeks.min}–{site.leadTimeWeeks.max} weeks from order
-              to site for imported stock, and shorter for anything already
-              acclimatised here.
+              {site.leadTimeWeeks.min}–{site.leadTimeWeeks.max} weeks from order to site for imported stock, and shorter for anything already acclimatised here.
             </p>
             <ul className="ct-emirates">
               {site.emirates.map((e) => (
@@ -117,17 +113,16 @@ export default async function ContactPage() {
               ))}
             </ul>
 
-            <h2 className="ct-h2-second">The company</h2>
+            <h2 className="ct-h2-second">{t("The company")}</h2>
             <dl className="ct-dl">
-              <dt>Registered name</dt><dd>{site.legalName}</dd>
-              {site.licenceNumber && (<><dt>Trade licence</dt><dd>{site.licenceNumber}</dd></>)}
+              <dt>{t("Registered name")}</dt><dd>{site.legalName}</dd>
+              {site.licenceNumber && (<><dt>{t("Trade licence")}</dt><dd>{site.licenceNumber}</dd></>)}
               {site.trn && (<><dt>TRN</dt><dd>{site.trn}</dd></>)}
-              <dt>Sourcing</dt><dd>{site.sourcingRegions.join(', ')}</dd>
+              <dt>{t("Sourcing")}</dt><dd>{site.sourcingRegions.join(', ')}</dd>
             </dl>
             {!site.trn && (
               <p className="ct-fine">
-                Not yet registered for VAT, so quotations carry no VAT line.
-                They state that they are exclusive of VAT where it applies.
+                {t("Not yet registered for VAT, so quotations carry no VAT line. They state that they are exclusive of VAT where it applies.")}
               </p>
             )}
           </section>

@@ -196,9 +196,9 @@ export default async function HomePage(
           <div className="map-panel reveal">
             <RouteMap />
             <ul className="legend">
-              <li><i className="sw sw-it" />Growing regions</li>
-              <li><i className="sw sw-ae" />Delivery market</li>
-              <li><i className="sw sw-rt" />Sourcing route</li>
+              <li><i className="sw sw-it" />{t("Growing regions")}</li>
+              <li><i className="sw sw-ae" />{t("Delivery market")}</li>
+              <li><i className="sw sw-rt" />{t("Sourcing route")}</li>
             </ul>
           </div>
 
@@ -225,7 +225,7 @@ export default async function HomePage(
             <Image src={SPOT} alt={spotlight.name} fill sizes="(max-width: 900px) 100vw, 62vw" />
           </figure>
           <div className="spot-txt reveal">
-            <p className="eyebrow">Specimen</p>
+            <p className="eyebrow">{t("Specimen")}</p>
             <h2>{spotlight.name}</h2>
             <p className="spot-desc">{spotlight.description}</p>
             <dl className="spot-dl">
@@ -234,7 +234,7 @@ export default async function HomePage(
               ))}
             </dl>
             <L href={`/catalog/${spotlight.slug}`} className="btn btn-primary">
-              View this specimen
+              {t("View this specimen")}
             </L>
           </div>
         </div>
@@ -245,10 +245,10 @@ export default async function HomePage(
         <div className="wrap">
           <header className="head-row reveal">
             <div>
-              <p className="eyebrow">The catalogue</p>
-              <h2>Six collections</h2>
+              <p className="eyebrow">{t("The catalogue")}</p>
+              <h2>{t("Six collections")}</h2>
             </div>
-            <L href="/catalog" className="tlink">View all {all.length} specimens →</L>
+            <L href="/catalog" className="tlink">{t("View all")} {all.length} {t("specimens →")}</L>
           </header>
           <div className="coll-grid">
             {families.map((f, i) => (
@@ -273,13 +273,13 @@ export default async function HomePage(
         <div className="wrap">
           <header className="head-row reveal">
             <div>
-              <p className="eyebrow">Selected stock</p>
-              <h2>From the catalogue</h2>
+              <p className="eyebrow">{t("Selected stock")}</p>
+              <h2>{t("From the catalogue")}</h2>
             </div>
-            <L href="/catalog" className="tlink">See everything →</L>
+            <L href="/catalog" className="tlink">{t("See everything →")}</L>
           </header>
           <div className="grid cols-4">
-            {featured.map((p) => <ProductCard key={p.reference} p={p} />)}
+            {featured.map((p) => <ProductCard key={p.reference} p={p} locale={lang} />)}
           </div>
         </div>
       </section>
@@ -300,18 +300,18 @@ export default async function HomePage(
       <section className="section">
         <div className="wrap two-col">
           <div className="reveal">
-            <p className="eyebrow">Who we supply</p>
+            <p className="eyebrow">{t("Who we supply")}</p>
             <h2>{c['home.who.title']}</h2>
             <ul className="chips">
               {site.projectTypes.map((s) => <li key={s}>{s}</li>)}
             </ul>
             <div className="cta-row">
-              <L href="/quote?type=bulk" className="btn btn-primary">Request bulk pricing</L>
-              <L href="/quote?type=sourcing" className="btn btn-ghost">Source a specific tree</L>
+              <L href="/quote?type=bulk" className="btn btn-primary">{t("Request bulk pricing")}</L>
+              <L href="/quote?type=sourcing" className="btn btn-ghost">{t("Source a specific tree")}</L>
             </div>
           </div>
           <div className="reveal">
-            <p className="eyebrow">Coverage</p>
+            <p className="eyebrow">{t("Coverage")}</p>
             <h2>{c['home.coverage.title']}</h2>
             <ul className="em-list">
               {site.emirates.map((e, i) => (
@@ -336,7 +336,7 @@ export default async function HomePage(
           <div className="wrap">
             <header className="head-row reveal">
               <div>
-                <p className="eyebrow">Clients</p>
+                <p className="eyebrow">{t("Clients")}</p>
                 <h2>{c['testimonials.title']}</h2>
               </div>
             </header>
@@ -368,7 +368,7 @@ export default async function HomePage(
           <div className="wrap">
             <header className="head-row reveal">
               <div>
-                <p className="eyebrow">Before you enquire</p>
+                <p className="eyebrow">{t("Before you enquire")}</p>
                 <h2>{c['faq.title']}</h2>
               </div>
               <p className="route-note">{c['faq.intro']}</p>

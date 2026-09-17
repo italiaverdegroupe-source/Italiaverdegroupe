@@ -4,6 +4,7 @@ import L from '@/components/L';
 import Image from 'next/image';
 import { getFamilies, getAllProducts } from '@/lib/products';
 import { site } from '@/lib/site';
+import { ui } from '@/lib/ui';
 
 const meta = {
   title: 'Collections',
@@ -22,7 +23,11 @@ export async function generateMetadata(
 const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
 const spell = (n: number) => (n < WORDS.length ? WORDS[n] : String(n));
 
-export default function CollectionsPage() {
+export default async function CollectionsPage(
+  { params }: { params: Promise<{ lang: Locale }> },
+) {
+  const { lang } = await params;
+  const t = ui(lang);
   const families = getFamilies();
   const total = getAllProducts().length;
   const regions = site.sourcingRegions;
@@ -32,29 +37,26 @@ export default function CollectionsPage() {
       <div className="wrap">
         <header className="coll-head">
           <div>
-            <p className="eyebrow">The catalogue</p>
-            <h1>Collections</h1>
+            <p className="eyebrow">{t("The catalogue")}</p>
+            <h1>{t("Collections")}</h1>
           </div>
           <div className="coll-intro">
             <p className="lede">
-              {spell(families.length).replace(/^./, (c) => c.toUpperCase())} families of
-              Italian-grown stock, selected for UAE conditions.
+              {spell(families.length).replace(/^./, (c) => c.toUpperCase())} families of Italian-grown stock, selected for UAE conditions.
             </p>
             <p className="coll-note">
-              Each listing is an individual specimen with its own reference, measured as it
-              stands today rather than at the size it will grow into. Availability moves with
-              each consignment, so every specimen is priced on the day you ask.
+              {t("Each listing is an individual specimen with its own reference, measured as it stands today rather than at the size it will grow into. Availability moves with each consignment, so every specimen is priced on the day you ask.")}
             </p>
           </div>
         </header>
 
         {/* The facts a specifier scans for before reading a word of prose. */}
         <dl className="coll-facts">
-          <div><dt>Specimens listed</dt><dd>{total}</dd></div>
-          <div><dt>Grown in</dt><dd>{regions.join(' · ')}</dd></div>
-          <div><dt>Delivered to</dt><dd>All {spell(site.emirates.length)} emirates</dd></div>
+          <div><dt>{t("Specimens listed")}</dt><dd>{total}</dd></div>
+          <div><dt>{t("Grown in")}</dt><dd>{regions.join(' · ')}</dd></div>
+          <div><dt>{t("Delivered to")}</dt><dd>All {spell(site.emirates.length)} emirates</dd></div>
           <div>
-            <dt>Lead time</dt>
+            <dt>{t("Lead time")}</dt>
             <dd>{site.leadTimeWeeks.min}–{site.leadTimeWeeks.max} weeks</dd>
           </div>
         </dl>
@@ -99,16 +101,14 @@ export default function CollectionsPage() {
 
         <section className="coll-cta">
           <div>
-            <h2>Looking for one particular tree?</h2>
+            <h2>{t("Looking for one particular tree?")}</h2>
             <p>
-              The full catalogue is searchable by name, botanical name, reference or size —
-              and if what you need is not listed, we source it to specification from the
-              grower rather than from a stock list.
+              {t("The full catalogue is searchable by name, botanical name, reference or size — and if what you need is not listed, we source it to specification from the grower rather than from a stock list.")}
             </p>
           </div>
           <div className="coll-cta-acts">
-            <L href="/catalog" className="btn btn-primary">Search the catalogue</L>
-            <L href="/quote" className="btn btn-ghost">Send a specification</L>
+            <L href="/catalog" className="btn btn-primary">{t("Search the catalogue")}</L>
+            <L href="/quote" className="btn btn-ghost">{t("Send a specification")}</L>
           </div>
         </section>
       </div>

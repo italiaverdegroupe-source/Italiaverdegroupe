@@ -6,6 +6,7 @@ import { getBlocks, publishedPosts, getSeo } from '@/lib/content';
 import { ogImage } from '@/lib/site';
 import { imageFor } from '@/lib/products';
 import { getSettings } from '@/lib/settings';
+import { ui } from '@/lib/ui';
 
 // Served from the database, so it revalidates on a timer and immediately when
 // a post is published. Rendering it statically at build time would mean a
@@ -43,20 +44,21 @@ export default async function JournalPage(
   { params }: { params: Promise<{ lang: Locale }> },
 ) {
   const { lang } = await params;
+  const t = ui(lang);
   const [c, posts] = await Promise.all([getBlocks(lang), publishedPosts(lang)]);
 
   return (
     <section className="section">
       <div className="wrap">
         <header className="jr-head">
-          <p className="eyebrow">Journal</p>
+          <p className="eyebrow">{t("Journal")}</p>
           <h1>{c['journal.title']}</h1>
           <p className="lede">{c['journal.intro']}</p>
         </header>
 
         {posts.length === 0 ? (
           <p className="jr-empty">
-            Nothing published yet. Articles appear here as they are written.
+            {t("Nothing published yet. Articles appear here as they are written.")}
           </p>
         ) : (
           <div className="jr-grid">

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { alternates, type Locale } from '@/lib/i18n';
 import L from '@/components/L';
+import { ui } from '@/lib/ui';
 
 const meta = {
   title: 'Legal',
@@ -48,16 +49,19 @@ const PAGES = [
   },
 ];
 
-export default function LegalIndexPage() {
+export default async function LegalIndexPage(
+  { params }: { params: Promise<{ lang: Locale }> },
+) {
+  const { lang } = await params;
+  const t = ui(lang);
   return (
     <div className="section">
       <div className="wrap">
         <header className="lgx-head">
-          <p className="eyebrow">Legal</p>
-          <h1>The small print, written to be read.</h1>
+          <p className="eyebrow">{t("Legal")}</p>
+          <h1>{t("The small print, written to be read.")}</h1>
           <p className="lede">
-            Five documents, each about one thing, in plain sentences. If any of them
-            is unclear, that is a fault in the document — tell us and we will fix it.
+            {t("Five documents, each about one thing, in plain sentences. If any of them is unclear, that is a fault in the document — tell us and we will fix it.")}
           </p>
         </header>
 

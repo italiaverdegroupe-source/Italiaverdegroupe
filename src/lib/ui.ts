@@ -1,4 +1,5 @@
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
+import { COPY_DICTS, type CopyKey } from '@/lib/site-copy';
 
 /**
  * The words the interface is made of, as opposed to the words the business
@@ -247,10 +248,30 @@ const DICTS: Record<Locale, Record<UIKey, string>> = { en, ar, it };
  * is left visible rather than blanked — a label reading "{min} weeks" is a
  * bug somebody reports, while a label reading " weeks" is one nobody notices.
  */
+/**
+ * The translator for one language.
+ *
+ * It answers two kinds of key, because there are two kinds of string:
+ *
+ *   A UIKey — 'nav.catalog' — is chrome, and every language has one. Missing
+ *   it is a type error (see the note at the top of this file).
+ *
+ *   A CopyKey is a sentence from a page, keyed by its own English. Missing it
+ *   comes back as that English, which is a page that has not been translated
+ *   yet rather than a page with a hole in it.
+ *
+ * Both go through one function so a page needs one translator rather than two,
+ * and so a call site does not have to know which kind of string it is holding.
+ */
 export function ui(locale: Locale = DEFAULT_LOCALE) {
   const dict = DICTS[locale] ?? DICTS[DEFAULT_LOCALE];
-  return (key: UIKey, tokens?: Record<string, string | number>): string => {
-    const s = dict[key] ?? en[key];
+  const copy = COPY_DICTS[locale] ?? {};
+  return (key: UIKey | CopyKey, tokens?: Record<string, string | number>): string => {
+    const s = (dict as Record<string, string>)[key]
+      ?? copy[key as CopyKey]
+      ?? (en as Record<string, string>)[key]
+      // A CopyKey IS its English, so an untranslated sentence renders itself.
+      ?? key;
     return tokens
       ? s.replace(/\{(\w+)\}/g, (all, k) => (k in tokens ? String(tokens[k]) : all))
       : s;

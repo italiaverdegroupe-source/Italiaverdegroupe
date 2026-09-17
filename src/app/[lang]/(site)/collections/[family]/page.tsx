@@ -23,8 +23,11 @@ export async function generateMetadata(
   };
 }
 
-export default async function CollectionPage({ params }: { params: Promise<{ family: string }> }) {
-  const slug = (await params).family;
+export default async function CollectionPage(
+  { params }: { params: Promise<{ lang: Locale; family: string }> },
+) {
+  const { lang, family } = await params;
+  const slug = family;
   const families = getFamilies();
   const f = families.find((x) => x.slug === slug);
   if (!f) notFound();
@@ -70,7 +73,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ fam
           </p>
         ) : (
           <div className="grid cols-4 fam-grid">
-            {items.map((p, i) => <ProductCard key={p.reference} p={p} priority={i < 4} />)}
+            {items.map((p, i) => <ProductCard key={p.reference} p={p} priority={i < 4} locale={lang} />)}
           </div>
         )}
 

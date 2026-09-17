@@ -4,6 +4,7 @@ import { metadataFor } from '@/lib/content';
 import QuoteForm from '@/components/QuoteForm';
 import { getSettings } from '@/lib/settings';
 import { getAllProducts } from '@/lib/products';
+import { ui } from '@/lib/ui';
 
 /**
  * Revalidated on a timer as well as on demand.
@@ -26,7 +27,11 @@ export const generateMetadata = async (
 
 type Search = { type?: string; ref?: string };
 
-export default async function QuotePage({ searchParams }: { searchParams: Promise<Search> }) {
+export default async function QuotePage(
+  { params, searchParams }: { params: Promise<{ lang: Locale }> } & { searchParams: Promise<Search> },
+) {
+  const { lang } = await params;
+  const t = ui(lang);
   const sp = await searchParams;
   const site = await getSettings();
   const type = sp.type === 'bulk' || sp.type === 'sourcing' ? sp.type : 'quote';
@@ -35,27 +40,23 @@ export default async function QuotePage({ searchParams }: { searchParams: Promis
   return (
     <div className="section">
       <div className="wrap">
-        <p className="eyebrow">Enquiry</p>
-        <h1>Request a quote</h1>
+        <p className="eyebrow">{t("Enquiry")}</p>
+        <h1>{t("Request a quote")}</h1>
         <p className="lede">
-          There is no checkout — every specimen is priced individually against the season,
-          the consignment and the scope of work. Send us the detail and we will price it
-          properly.
+          {t("There is no checkout — every specimen is priced individually against the season, the consignment and the scope of work. Send us the detail and we will price it properly.")}
         </p>
         <div className="qgrid">
           <QuoteForm defaultType={type} defaultRef={sp.ref ?? ''} products={products} />
           <aside className="aside">
-            <h2 className="aside-h">What happens next</h2>
+            <h2 className="aside-h">{t("What happens next")}</h2>
             <ol className="steps">
-              <li><strong>We confirm availability</strong><span>Against current stock and the next consignment from Italy.</span></li>
-              <li><strong>We price the scope</strong><span>Supply, delivery, crane and offloading, planting — whatever you need.</span></li>
-              <li><strong>You get a written quotation</strong><span>Valid {site.quoteValidityDays} days, with specification and lead time.</span></li>
+              <li><strong>{t("We confirm availability")}</strong><span>{t("Against current stock and the next consignment from Italy.")}</span></li>
+              <li><strong>{t("We price the scope")}</strong><span>{t("Supply, delivery, crane and offloading, planting — whatever you need.")}</span></li>
+              <li><strong>You get a written quotation</strong><span>Valid {site.quoteValidityDays} days, with specification and lead time.days, with specification and lead time.</span></li>
             </ol>
             <hr className="rule" />
             <p className="aside-note">
-              Typical lead time is {site.leadTimeWeeks.min}–{site.leadTimeWeeks.max} weeks from
-              order confirmation to delivery on a UAE site. Large or out-of-season specimens
-              can take longer — we will tell you honestly rather than promise a date we cannot hold.
+              Typical lead time is {site.leadTimeWeeks.min}–{site.leadTimeWeeks.max} weeks from order confirmation to delivery on a UAE site. Large or out-of-season specimens can take longer — we will tell you honestly rather than promise a date we cannot hold.
             </p>
           </aside>
         </div>
