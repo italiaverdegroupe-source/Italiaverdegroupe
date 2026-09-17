@@ -33,6 +33,7 @@ const TARGETS = [
   { file: 'ui', format: 'cjs' },
   { file: 'users', format: 'cjs' },
   { file: 'i18n', format: 'cjs' },
+  { file: 'legal/index', format: 'cjs', out: 'legal' },
   { file: 'landed-cost', format: 'esm', ext: 'mjs' },
 ];
 
@@ -49,7 +50,7 @@ const jobs = [
 
 await Promise.all(jobs.map((t) => build({
   entryPoints: [t.from],
-  outfile: `${OUT}/${t.file}.${t.ext ?? (t.format === 'esm' ? 'mjs' : 'cjs')}`,
+  outfile: `${OUT}/${t.out ?? t.file}.${t.ext ?? (t.format === 'esm' ? 'mjs' : 'cjs')}`,
   bundle: true,
   format: t.format,
   platform: 'node',

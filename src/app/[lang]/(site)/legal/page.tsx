@@ -1,77 +1,48 @@
 import type { Metadata } from 'next';
 import { alternates, type Locale } from '@/lib/i18n';
 import L from '@/components/L';
+import { getLegalIndex } from '@/lib/legal';
 import { ui } from '@/lib/ui';
-
-const meta = {
-  title: 'Legal',
-  description:
-    'Privacy policy, terms of use, terms of sale, replacements and refunds, and the website disclaimer for Verde Garden Trading.',
-};
 
 export async function generateMetadata(
   { params }: { params: Promise<{ lang: Locale }> },
 ): Promise<Metadata> {
   const { lang } = await params;
-  return { ...meta, alternates: alternates(lang, '/legal') };
+  const t = ui(lang);
+  return {
+    title: t('legal.indexTitle'),
+    description: t('legal.indexDescription'),
+    alternates: alternates(lang, '/legal'),
+  };
 }
-
-const PAGES = [
-  {
-    href: '/privacy',
-    name: 'Privacy policy',
-    line: 'What we record when you send an enquiry, how long we keep it, and who sees it.',
-    note: 'No cookies, no analytics, no tracking.',
-  },
-  {
-    href: '/terms',
-    name: 'Terms of use',
-    line: 'The terms on which this website may be used, and what you may do with what is on it.',
-    note: 'About the site, not about buying.',
-  },
-  {
-    href: '/terms-of-sale',
-    name: 'Terms of sale',
-    line: 'How a quotation becomes an order: lead times, delivery, acceptance, payment, title and risk.',
-    note: 'The one to read before you sign.',
-  },
-  {
-    href: '/refunds',
-    name: 'Replacements & refunds',
-    line: 'What happens when a tree arrives wrong, arrives damaged, or fails after planting.',
-    note: 'Windows, evidence, and what we do.',
-  },
-  {
-    href: '/disclaimer',
-    name: 'Website disclaimer',
-    line: 'What the photographs, sizes and growing notes mean — and what they do not promise.',
-    note: 'Where the line is drawn.',
-  },
-];
 
 export default async function LegalIndexPage(
   { params }: { params: Promise<{ lang: Locale }> },
 ) {
   const { lang } = await params;
   const t = ui(lang);
+  // The cards are the documents' own one-liners rather than a second list that
+  // has to be kept in step with them. Rename a policy and this page follows.
+  const docs = getLegalIndex(lang);
+
   return (
     <div className="section">
       <div className="wrap">
         <header className="lgx-head">
-          <p className="eyebrow">{t("Legal")}</p>
-          <h1>{t("The small print, written to be read.")}</h1>
+          <p className="eyebrow">{t('legal.eyebrow')}</p>
+          <h1>{t('The small print, written to be read.')}</h1>
           <p className="lede">
-            {t("Five documents, each about one thing, in plain sentences. If any of them is unclear, that is a fault in the document — tell us and we will fix it.")}
+            {t('Five documents, each about one thing, in plain sentences. If any of them is unclear, that is a fault in the document — tell us and we will fix it.')}
           </p>
         </header>
 
         <ul className="lgx">
-          {PAGES.map((p) => (
-            <li key={p.href}>
-              <L href={p.href}>
-                <span className="lgx-n">{p.name}</span>
-                <span className="lgx-l">{p.line}</span>
-                <span className="lgx-note">{p.note}</span>
+          {docs.map((d) => (
+            <li key={d.slug}>
+              <L href={`/${d.slug}`}>
+                <span className="lgx-n">{d.title}</span>
+                <span className="lgx-l">{d.cardLine}</span>
+                <span className="lgx-note">{d.cardNote}</span>
               </L>
             </li>
           ))}

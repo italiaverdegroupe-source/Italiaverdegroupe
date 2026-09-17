@@ -19,6 +19,7 @@ const DB = process.env.DATABASE_URL ?? 'postgresql://postgres@127.0.0.1:5433/ver
 const NEEDS = {
   'design-tokens.test.mjs': [],
   'landed-cost.test.mjs': [],
+  'legal.test.mjs': [],
   'photos.test.mjs': [],
   'rate-limit.test.mjs': ['db'],
   'auth-hardening.test.mjs': ['db'],

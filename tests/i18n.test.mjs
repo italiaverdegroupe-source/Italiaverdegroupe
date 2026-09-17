@@ -78,7 +78,10 @@ for (const loc of ['ar', 'it']) {
 
   // A translation identical to the English is almost always one that was
   // skipped. The exceptions are words that genuinely do not change.
-  const SAME_IS_FINE = new Set(['nav.menu', 'legal.privacy', 'lang.label']);
+  // 'WhatsApp' and 'Privacy' are the same word in Italian, and 'Menu' is the
+  // same in Italian too. Translating a brand name would be the bug.
+  const SAME_IS_FINE = new Set(['nav.menu', 'legal.privacy', 'lang.label',
+    'legal.whatsapp']);
   const untouched = U.UI_KEYS.filter(
     (k) => dicts[loc][k] === enDict[k] && !SAME_IS_FINE.has(k));
   check(`${loc}: nothing was left sitting in English`,
