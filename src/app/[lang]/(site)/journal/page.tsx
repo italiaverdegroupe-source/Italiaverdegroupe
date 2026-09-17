@@ -16,7 +16,9 @@ export async function generateMetadata(
   { params }: { params: Promise<{ lang: Locale }> },
 ): Promise<Metadata> {
   const { lang } = await params;
-  const [c, seo, site] = await Promise.all([getBlocks(), getSeo('/journal'), getSettings()]);
+  const [c, seo, site] = await Promise.all([
+    getBlocks(lang), getSeo('/journal', lang), getSettings(),
+  ]);
   return {
     title: seo?.title ?? c['journal.title'],
     description: seo?.description ?? c['journal.intro'],
@@ -37,8 +39,11 @@ const cover = (ref: string | null) => {
 const fmt = (v: string | null) =>
   v ? new Date(v).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
 
-export default async function JournalPage() {
-  const [c, posts] = await Promise.all([getBlocks(), publishedPosts()]);
+export default async function JournalPage(
+  { params }: { params: Promise<{ lang: Locale }> },
+) {
+  const { lang } = await params;
+  const [c, posts] = await Promise.all([getBlocks(lang), publishedPosts(lang)]);
 
   return (
     <section className="section">

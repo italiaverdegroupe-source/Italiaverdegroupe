@@ -3,9 +3,12 @@ import { redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth';
 import { getAllProducts } from '@/lib/products';
 import {
-  BLOCKS, getBlocks, listSeo, allFaqs, allTestimonials, allPosts, type BlockKey,
+  BLOCKS, getBlocks, blocksByLocale, listSeo, allFaqs, allTestimonials, allPosts, type BlockKey,
 } from '@/lib/content';
 import { saveBlocks, saveSeo, saveFaq, saveTestimonial, savePost } from './actions';
+import {
+  LOCALES, LOCALE_NAMES, DEFAULT_LOCALE, isLocale, localePath, type Locale,
+} from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,18 +24,27 @@ const SEO_PATHS = ['/', '/catalog', '/collections', '/services', '/about', '/quo
 const FAQ_CATEGORIES = ['general', 'buying', 'delivery', 'planting', 'care', 'import', 'payment'];
 
 export default async function ContentPage({ searchParams }: {
-  searchParams: Promise<{ tab?: string; edit?: string; error?: string }>;
+  searchParams: Promise<{ tab?: string; loc?: string; edit?: string; error?: string }>;
 }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
 
-  const { tab, edit, error } = await searchParams;
+  const { tab, loc, edit, error } = await searchParams;
   const view = TABS.some(([k]) => k === tab) ? tab! : 'copy';
   const readOnly = user.role === 'viewer';
 
-  const [blocks, seo, faqs, voices, posts] = await Promise.all([
-    getBlocks(), listSeo(), allFaqs(), allTestimonials(), allPosts(),
+  // Which language's copy is on screen. English by default, because it is
+  // the one that has to be right before any translation of it can be.
+  const lang: Locale = isLocale(loc) ? loc : DEFAULT_LOCALE;
+
+  const [blocks, stored, seo, faqs, voices, posts] = await Promise.all([
+    // What the public site would actually render in this language, fallbacks
+    // and all — so the boxes show what a visitor sees, not a blank.
+    getBlocks(lang), blocksByLocale(), listSeo(), allFaqs(), allTestimonials(), allPosts(),
   ]);
+  const englishOf = (k: string) => stored[k]?.[DEFAULT_LOCALE] ?? BLOCKS[k as BlockKey].fallback;
+  const translated = (Object.keys(BLOCKS) as BlockKey[])
+    .filter((k) => (stored[k]?.[lang] ?? '').trim() !== '').length;
   const products = getAllProducts();
   const editing = edit ? posts.find((p) => p.id === edit) : undefined;
 
@@ -63,24 +75,87 @@ export default async function ContentPage({ searchParams }: {
 
       {/* ── site copy ─────────────────────────────────────── */}
       {view === 'copy' && (
+        <>
+          {/* One language at a time. A single form with three boxes per field
+              would be three times the page and would make it easy to save a
+              translation into the wrong one; a tab is unambiguous, and the
+              hidden field below is what the action actually trusts. */}
+          <div className="adm-filters adm-langs">
+            {LOCALES.map((l) => {
+              const done = (Object.keys(BLOCKS) as BlockKey[])
+                .filter((k) => (stored[k]?.[l] ?? '').trim() !== '').length;
+              const total = Object.keys(BLOCKS).length;
+              return (
+                <Link key={l} className="adm-chip" data-on={lang === l}
+                      href={`/admin/content?tab=copy&loc=${l}`}>
+                  {LOCALE_NAMES[l]}
+                  {l !== DEFAULT_LOCALE && (
+                    <span className="adm-langs-n">{done}/{total}</span>
+                  )}
+                </Link>
+              );
+            })}
+            <Link className="adm-chip" href={localePath(lang, '/')} target="_blank"
+                  style={{ marginInlineStart: 'auto' }}>
+              View this language →
+            </Link>
+          </div>
+
+          {lang !== DEFAULT_LOCALE && (
+            <p className="adm-sub">
+              {translated === 0
+                ? <>Nothing is translated into <strong>{LOCALE_NAMES[lang]}</strong> yet.
+                    Every box below shows the English it currently falls back to — the
+                    site is already serving that, so a half-finished translation is not a
+                    half-finished page.</>
+                : <><strong>{translated}</strong> of {Object.keys(BLOCKS).length} blocks
+                    are written in {LOCALE_NAMES[lang]}. The rest fall back to English on
+                    the live site. Emptying a box removes the translation and returns
+                    that block to English.</>}
+            </p>
+          )}
+
         <form action={saveBlocks}>
+          <input type="hidden" name="locale" value={lang} />
           {groups.map((group) => (
             <div key={group} className="adm-panel adm-pad" style={{ marginBottom: 18 }}>
               <h2>{group}</h2>
               <div style={{ display: 'grid', gap: 16 }}>
                 {(Object.keys(BLOCKS) as BlockKey[]).filter((k) => BLOCKS[k].group === group).map((k) => {
                   const def = BLOCKS[k];
-                  const current = blocks[k];
-                  const isDefault = current === def.fallback;
+                  const own = (stored[k]?.[lang] ?? '').trim();
+                  // English shows what the site renders; a translation tab
+                  // shows only what has actually been translated, so an empty
+                  // box reads as "not done" rather than as English that was
+                  // typed in and will now stop following the English.
+                  const current = lang === DEFAULT_LOCALE ? blocks[k] : own;
+                  const isDefault = lang === DEFAULT_LOCALE
+                    ? current === def.fallback : own === '';
+                  const rtl = lang === 'ar';
                   return (
                     <label key={k} className="adm-field">
                       <span>
                         {def.label}
-                        {!isDefault && <span className="pill pill-quoted" style={{ marginInlineStart: 8 }}>edited</span>}
+                        {lang === DEFAULT_LOCALE && !isDefault && (
+                          <span className="pill pill-quoted" style={{ marginInlineStart: 8 }}>edited</span>
+                        )}
+                        {lang !== DEFAULT_LOCALE && (
+                          <span className={`pill ${own ? 'pill-qualified' : 'pill-quoted'}`}
+                                style={{ marginInlineStart: 8 }}>
+                            {own ? 'translated' : 'English'}
+                          </span>
+                        )}
                       </span>
                       {def.kind === 'text'
-                        ? <textarea name={k} rows={3} defaultValue={current} disabled={readOnly} />
-                        : <input name={k} defaultValue={current} disabled={readOnly} />}
+                        ? <textarea name={k} rows={3} defaultValue={current} disabled={readOnly}
+                                    dir={rtl ? 'rtl' : undefined} lang={lang} />
+                        : <input name={k} defaultValue={current} disabled={readOnly}
+                                 dir={rtl ? 'rtl' : undefined} lang={lang} />}
+                      {/* The source text, to translate FROM. Without it the
+                          translator is working from memory of another tab. */}
+                      {lang !== DEFAULT_LOCALE && (
+                        <span className="adm-src" lang="en" dir="ltr">{englishOf(k)}</span>
+                      )}
                       <span className="adm-sub" style={{ margin: 0, fontSize: 12 }}>{def.where}</span>
                     </label>
                   );
@@ -88,7 +163,9 @@ export default async function ContentPage({ searchParams }: {
               </div>
             </div>
           ))}
-          {!readOnly && <button type="submit" className="adm-btn adm-save-copy">Save copy</button>}
+          {!readOnly && <button type="submit" className="adm-btn adm-save-copy">
+              Save {LOCALE_NAMES[lang]}
+            </button>}
           <p className="adm-sub" style={{ fontSize: 12 }}>
             Saving publishes straight to the live site. Clearing a box restores
             the text the site ships with rather than leaving it empty. A page
@@ -96,6 +173,7 @@ export default async function ContentPage({ searchParams }: {
             pages are cached and rebuilt behind the first request after a save.
           </p>
         </form>
+        </>
       )}
 
       {/* ── search ────────────────────────────────────────── */}

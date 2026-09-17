@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { BLOCKS, slugify, type BlockKey } from '@/lib/content';
+import { DEFAULT_LOCALE, isLocale, type Locale } from '@/lib/i18n';
 
 /**
  * Send a validation message back to the form.
@@ -39,35 +40,57 @@ export async function saveBlocks(formData: FormData) {
   const user = await editor();
   const changed: string[] = [];
 
+  // Which language is being edited. One form edits one language, so a typo in
+  // the hidden field cannot write Arabic into the English rows.
+  const raw = String(formData.get('locale') ?? DEFAULT_LOCALE);
+  if (!isLocale(raw)) refuse('copy', 'Unknown language.');
+  const locale = raw as Locale;
+  const isDefaultLocale = locale === DEFAULT_LOCALE;
+
   for (const key of Object.keys(BLOCKS) as BlockKey[]) {
     if (!formData.has(key)) continue;
     const value = String(formData.get(key) ?? '');
 
-    // An empty box means "use what ships in the code", so the row is removed
-    // rather than stored blank. There is no state in which the copy is absent.
+    // An empty box means "use what is one layer down", so the row is removed
+    // rather than stored blank. For English that layer is the text compiled
+    // into the code; for a translation it is the English. Either way there is
+    // no state in which the copy is absent.
     if (value.trim() === '') {
-      const gone = await query(`DELETE FROM content_blocks WHERE key = $1 RETURNING key`, [key]);
+      const gone = await query(
+        `DELETE FROM content_blocks WHERE key = $1 AND locale = $2 RETURNING key`,
+        [key, locale]);
       if (gone.length) changed.push(`${key} (reset)`);
       continue;
     }
-    if (value === BLOCKS[key].fallback) {
-      await query(`DELETE FROM content_blocks WHERE key = $1`, [key]);
+    // Storing a value identical to what it would fall back to anyway is a row
+    // that has to be maintained for ever and changes nothing. For English the
+    // comparison is against the compiled default; for a translation it is
+    // against the English, because an Arabic row saying exactly what the
+    // English says is the English, stored twice, that then stops following it.
+    const fallsBackTo = isDefaultLocale
+      ? BLOCKS[key].fallback
+      : (await query<{ value: string }>(
+          `SELECT value FROM content_blocks WHERE key = $1 AND locale = $2`,
+          [key, DEFAULT_LOCALE]))[0]?.value ?? BLOCKS[key].fallback;
+    if (value === fallsBackTo) {
+      await query(`DELETE FROM content_blocks WHERE key = $1 AND locale = $2`, [key, locale]);
       continue;
     }
     const before = await query<{ value: string }>(
-      `SELECT value FROM content_blocks WHERE key = $1`, [key]);
+      `SELECT value FROM content_blocks WHERE key = $1 AND locale = $2`, [key, locale]);
     if (before[0]?.value === value) continue;
 
     await query(
-      `INSERT INTO content_blocks (key, value, updated_by) VALUES ($1, $2, $3)
-       ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = now(), updated_by = $3`,
-      [key, value, user.id]);
+      `INSERT INTO content_blocks (key, locale, value, updated_by) VALUES ($1, $2, $3, $4)
+       ON CONFLICT (key, locale)
+       DO UPDATE SET value = $3, updated_at = now(), updated_by = $4`,
+      [key, locale, value, user.id]);
     changed.push(key);
   }
 
   if (changed.length) {
     await audit({ user, action: 'content.updated', entity: 'content_block',
-                  after: { changed } });
+                  after: { locale, changed } });
   }
   refreshPublic();
   revalidatePath('/admin/content');

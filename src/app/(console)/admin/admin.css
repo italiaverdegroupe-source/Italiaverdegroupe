@@ -630,3 +630,27 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
   justify-content: space-between; gap: 12px 20px; margin-bottom: 16px;
 }
 .adm-rule-all .adm-sub { flex: 1 1 260px; }
+
+/* ── the translation tabs ── */
+.adm-langs { margin-bottom: 14px; }
+.adm-langs-n {
+  margin-inline-start: 7px; padding: 1px 6px; border-radius: 999px;
+  background: rgb(20 21 15 / .08); font-size: 11px; font-variant-numeric: tabular-nums;
+}
+.adm-chip[data-on='true'] .adm-langs-n { background: rgb(255 255 255 / .22); }
+
+/* The English a translator is translating from, under the box they type in.
+   Quiet enough not to be mistaken for the value, present enough to work from. */
+.adm-src {
+  display: block; margin-top: 5px; padding: 6px 9px;
+  border-inline-start: 2px solid var(--line);
+  background: var(--sand-50, #FAF7F0);
+  font-size: 12.5px; line-height: 1.55; color: var(--fg-soft);
+  white-space: pre-wrap;
+}
+
+/* An Arabic box is typed into right to left. Without this the caret starts on
+   the wrong side and the text reads as though it had been pasted backwards. */
+.adm-field input[dir='rtl'], .adm-field textarea[dir='rtl'] {
+  direction: rtl; text-align: right; font-size: 15px; line-height: 1.9;
+}

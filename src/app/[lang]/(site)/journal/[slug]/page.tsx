@@ -33,7 +33,7 @@ export async function generateMetadata(
   { params }: { params: Promise<{ lang: Locale; slug: string }> },
 ): Promise<Metadata> {
   const { lang, slug } = await params;
-  const post = await getPost(slug);
+  const post = await getPost(slug, lang);
   if (!post) return { title: 'Not found', robots: { index: false, follow: false } };
   return {
     title: post.seo_title || post.title,
@@ -49,15 +49,17 @@ export async function generateMetadata(
   };
 }
 
-export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const [post, site] = await Promise.all([getPost(slug), getSettings()]);
+export default async function PostPage(
+  { params }: { params: Promise<{ lang: Locale; slug: string }> },
+) {
+  const { lang, slug } = await params;
+  const [post, site] = await Promise.all([getPost(slug, lang), getSettings()]);
   // A draft, a future date, or a deleted post is a 404 rather than a blank
   // page — an unpublished article must not be reachable by guessing the URL.
   if (!post) notFound();
 
   const img = cover(post.cover_ref);
-  const others = (await publishedPosts()).filter((p) => p.slug !== post.slug).slice(0, 3);
+  const others = (await publishedPosts(lang)).filter((p) => p.slug !== post.slug).slice(0, 3);
 
   return (
     <article className="section">

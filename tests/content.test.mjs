@@ -67,6 +67,55 @@ check('a database that is down still renders the whole site',
       down.title === C.BLOCKS['home.hero.title'].fallback
       && down.lede === C.BLOCKS['home.hero.lede'].fallback);
 
+// ── three languages, and what an untranslated block says ─────
+//
+// The rule the whole design rests on: a read falls back the asked-for
+// language -> English -> the default compiled into the code. The middle step
+// is the one that is easy to get wrong and impossible to notice, because the
+// symptom is an Arabic page quietly showing text the company replaced months
+// ago in English.
+await db.query(`DELETE FROM content_blocks`);
+await db.query(
+  `INSERT INTO content_blocks (key, locale, value)
+   VALUES ('home.hero.title', 'en', 'Our English headline'),
+          ('home.hero.cta',   'ar', 'استكشف أشجارنا')`);
+
+const inLocale = (locale) => JSON.parse(execFileSync(process.execPath, ['-e', `
+  process.env.DATABASE_URL = ${JSON.stringify(process.env.DATABASE_URL)};
+  const C = require('${process.cwd()}/.test-build/content.cjs');
+  C.getBlocks('${locale}').then((b) => {
+    console.log(JSON.stringify({
+      title: b['home.hero.title'], cta: b['home.hero.cta'], lede: b['home.hero.lede'],
+    }));
+    process.exit(0);
+  });
+`], { encoding: 'utf8' }));
+
+const [en, ar, it] = ['en', 'ar', 'it'].map(inLocale);
+check('an English override reaches the English site',
+      en.title === 'Our English headline', en.title);
+check('THE POINT: an untranslated block falls back to the ENGLISH ROW, not the code default',
+      ar.title === 'Our English headline' && it.title === 'Our English headline',
+      `${ar.title} | ${it.title}`);
+check('a translated block reaches its own language',
+      ar.cta === 'استكشف أشجارنا', ar.cta);
+check('and does not leak into the others',
+      en.cta === C.BLOCKS['home.hero.cta'].fallback
+      && it.cta === C.BLOCKS['home.hero.cta'].fallback, `${en.cta} | ${it.cta}`);
+check('a block stored in no language at all is still the compiled default',
+      ar.lede === C.BLOCKS['home.hero.lede'].fallback);
+
+// A language can go live before it is finished. That is the whole reason for
+// the fallback, so it is asserted rather than assumed.
+const arAll = inLocale('ar');
+check('THE POINT: no block is ever empty in any language',
+      Object.values(arAll).every((v) => typeof v === 'string' && v.trim() !== ''),
+      JSON.stringify(Object.entries(arAll).filter(([, v]) => !v?.trim())));
+check('the block list is the same in every language',
+      Object.keys(C.BLOCKS).length > 20, String(Object.keys(C.BLOCKS).length));
+
+await db.query(`DELETE FROM content_blocks`);
+
 // ── tokens ───────────────────────────────────────────────────
 check('tokens are filled', C.fill('Browse {n} specimens', { n: 68 }) === 'Browse 68 specimens');
 check('an unknown token is left visible rather than blanked',

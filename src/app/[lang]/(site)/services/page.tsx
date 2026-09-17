@@ -67,8 +67,11 @@ const STAGES: { title: string; body: string; detail: string }[] = [
  *  aftercare. The general and commercial questions stay on the home page. */
 const SERVICE_TOPICS = new Set(['delivery', 'planting', 'import', 'care']);
 
-export default async function ServicesPage() {
-  const [settings, faqs] = await Promise.all([getSettings(), publishedFaqs()]);
+export default async function ServicesPage(
+  { params }: { params: Promise<{ lang: Locale }> },
+) {
+  const { lang } = await params;
+  const [settings, faqs] = await Promise.all([getSettings(), publishedFaqs(lang)]);
   const scopes = settings.serviceScopes;
   const serviceFaqs = faqs.filter((f) => SERVICE_TOPICS.has(f.category));
 

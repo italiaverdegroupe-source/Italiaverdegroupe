@@ -1,7 +1,7 @@
 import { cache } from 'react';
 import { query } from '@/lib/db';
 import { ogImage } from '@/lib/site';
-import { alternates, type Locale } from '@/lib/i18n';
+import { alternates, DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
 
 /**
  * Editable site content.
@@ -131,10 +131,33 @@ const fallbacks = Object.fromEntries(
  * outage must not take the public site down with it — the same decision, and
  * the same reasoning, as the settings loader.
  */
-export const getBlocks = cache(async (): Promise<Record<BlockKey, string>> => {
+/**
+ * Every block, in one language, with the gaps filled in.
+ *
+ * Three layers, applied in this order, so the last one that has an answer
+ * wins:
+ *
+ *   1. the defaults compiled into this file        — always complete
+ *   2. the English rows, if any                    — what the console wrote
+ *   3. the asked-for language's rows, if any       — the translation
+ *
+ * The middle layer is the one that matters. Without it, translating the
+ * headline into Arabic would make the Arabic page show the CODE default for
+ * everything else, silently undoing whatever the company had rewritten in
+ * English. With it, an untranslated block on an Arabic page reads exactly what
+ * the English page reads — which is the honest thing for it to say, and means
+ * Arabic can go live with the homepage done and the rest following.
+ */
+export const getBlocks = cache(async (
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<Record<BlockKey, string>> => {
   try {
-    const rows = await query<{ key: string; value: string }>(
-      'SELECT key, value FROM content_blocks');
+    // Both languages in one query. Ordered so the asked-for language is
+    // applied last and therefore wins; English first so it fills the gaps.
+    const rows = await query<{ key: string; value: string; locale: string }>(
+      `SELECT key, value, locale FROM content_blocks
+        WHERE locale = $1 OR locale = $2
+        ORDER BY (locale = $1) ASC`, [locale, DEFAULT_LOCALE]);
     const merged = { ...fallbacks };
     for (const r of rows) {
       // An unknown key is ignored rather than trusted: it is either a
@@ -148,6 +171,17 @@ export const getBlocks = cache(async (): Promise<Record<BlockKey, string>> => {
     return fallbacks;
   }
 });
+
+/** Every language's value for every block. The console's editing view. */
+export const blocksByLocale = async (): Promise<Record<string, Record<string, string>>> => {
+  const rows = await query<{ key: string; value: string; locale: string }>(
+    'SELECT key, value, locale FROM content_blocks');
+  const out: Record<string, Record<string, string>> = {};
+  for (const r of rows) {
+    (out[r.key] ??= {})[r.locale] = r.value;
+  }
+  return out;
+};
 
 /** Fill {tokens} in a block. Unknown tokens are left visible rather than blanked. */
 export const fill = (s: string, tokens: Record<string, string | number>) =>
@@ -167,14 +201,45 @@ export type Seo = {
  * the code generates. An override that silently replaced a catalogue-derived
  * title with an empty string would cost rankings on 68 product pages.
  */
-export const getSeo = cache(async (path: string): Promise<Seo | undefined> => {
+/**
+ * The stored SEO for one page in one language, falling back field by field.
+ *
+ * Field by field rather than row by row: an Arabic row that sets only the
+ * title should not throw away the English description somebody wrote. COALESCE
+ * over the two rows does that in one query.
+ */
+export const getSeo = cache(async (
+  path: string, locale: Locale = DEFAULT_LOCALE,
+): Promise<Seo | undefined> => {
   try {
     const rows = await query<Seo>(
-      `SELECT path, NULLIF(trim(title), '') AS title,
-              NULLIF(trim(description), '') AS description,
-              NULLIF(trim(og_ref), '') AS og_ref, noindex
-         FROM page_seo WHERE path = $1`, [path]);
-    return rows[0];
+      `SELECT $1::text AS path,
+              NULLIF(trim(max(title)      FILTER (WHERE locale = $2)), '') AS title_l,
+              NULLIF(trim(max(title)      FILTER (WHERE locale = $3)), '') AS title_d,
+              NULLIF(trim(max(description) FILTER (WHERE locale = $2)), '') AS desc_l,
+              NULLIF(trim(max(description) FILTER (WHERE locale = $3)), '') AS desc_d,
+              NULLIF(trim(max(og_ref)     FILTER (WHERE locale = $2)), '') AS og_l,
+              NULLIF(trim(max(og_ref)     FILTER (WHERE locale = $3)), '') AS og_d,
+              bool_or(noindex) AS noindex,
+              count(*) > 0 AS present
+         FROM page_seo WHERE path = $1 AND locale IN ($2, $3)`,
+      [path, locale, DEFAULT_LOCALE]) as unknown as Array<Record<string, string | boolean | null>>;
+    const r = rows[0];
+    // Present, not "has text". A row whose only setting is noindex has every
+    // text field null, and an earlier version of this returned undefined for
+    // it — so a page somebody had asked to hide from search stayed indexed,
+    // silently, which is the one failure here that cannot be taken back.
+    if (!r || !r.present) return undefined;
+    return {
+      path,
+      title: (r.title_l ?? r.title_d) as string | null,
+      description: (r.desc_l ?? r.desc_d) as string | null,
+      og_ref: (r.og_l ?? r.og_d) as string | null,
+      // noindex is an instruction about the PAGE, not about a translation of
+      // it: hiding the English one and leaving the Arabic one indexed would
+      // publish exactly what somebody asked to take down.
+      noindex: Boolean(r.noindex),
+    };
   } catch {
     return undefined;
   }
@@ -191,11 +256,20 @@ export type Faq = {
   sort_order: number; is_published: boolean;
 };
 
-export const publishedFaqs = cache(async (): Promise<Faq[]> => {
+export const publishedFaqs = cache(async (
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<Faq[]> => {
   try {
-    return await query<Faq>(
-      `SELECT id::text, question, answer, category, sort_order, is_published
-         FROM faqs WHERE is_published ORDER BY sort_order, id`);
+    // DISTINCT ON dictates its own leading ORDER BY, which would throw away
+    // the order these are meant to be read in. The pick happens in SQL; the
+    // arranging happens outside it.
+    const rows = await query<Faq>(
+      `SELECT DISTINCT ON (COALESCE(translation_of, id))
+              id::text, question, answer, category, sort_order, is_published
+         FROM faqs
+        WHERE is_published AND locale IN ($1, $2)
+        ORDER BY COALESCE(translation_of, id), (locale = $1) DESC`, [locale, DEFAULT_LOCALE]);
+    return rows.sort((a, b) => a.sort_order - b.sort_order || Number(a.id) - Number(b.id));
   } catch {
     return [];
   }
@@ -214,12 +288,18 @@ export type Testimonial = {
   sort_order: number; is_published: boolean;
 };
 
-export const publishedTestimonials = cache(async (): Promise<Testimonial[]> => {
+export const publishedTestimonials = cache(async (
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<Testimonial[]> => {
   try {
-    return await query<Testimonial>(
-      `SELECT id::text, body, author_name, author_role, company, emirate, project,
+    const rows = await query<Testimonial>(
+      `SELECT DISTINCT ON (COALESCE(translation_of, id))
+              id::text, body, author_name, author_role, company, emirate, project,
               consent_on::text, consent_note, sort_order, is_published
-         FROM testimonials WHERE is_published ORDER BY sort_order, id`);
+         FROM testimonials
+        WHERE is_published AND locale IN ($1, $2)
+        ORDER BY COALESCE(translation_of, id), (locale = $1) DESC`, [locale, DEFAULT_LOCALE]);
+    return rows.sort((a, b) => a.sort_order - b.sort_order || Number(a.id) - Number(b.id));
   } catch {
     return [];
   }
@@ -237,28 +317,46 @@ export type Post = {
   id: string; slug: string; title: string; excerpt: string | null; body: string;
   cover_ref: string | null; author: string | null; status: string;
   published_at: string | null; seo_title: string | null; seo_description: string | null;
-  updated_at: string;
+  updated_at: string; locale: string;
 };
 
-export const publishedPosts = cache(async (): Promise<Post[]> => {
+const POST_COLS = `id::text, slug, title, excerpt, body, cover_ref, author, status,
+              published_at::text, seo_title, seo_description, updated_at::text, locale`;
+
+/**
+ * The published articles, one per slug, in the best language available.
+ *
+ * DISTINCT ON (slug) with the asked-for language ordered first: an article
+ * that has been translated appears translated, and one that has not appears
+ * in English rather than disappearing. A journal that empties itself when you
+ * switch language reads as a broken site, not as an untranslated one.
+ */
+export const publishedPosts = cache(async (
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<Post[]> => {
   try {
     return await query<Post>(
-      `SELECT id::text, slug, title, excerpt, body, cover_ref, author, status,
-              published_at::text, seo_title, seo_description, updated_at::text
+      `SELECT DISTINCT ON (slug) ${POST_COLS}
          FROM posts
         WHERE status = 'published' AND published_at <= now()
-        ORDER BY published_at DESC`);
+          AND locale IN ($1, $2)
+        ORDER BY slug, (locale = $1) DESC`, [locale, DEFAULT_LOCALE])
+      .then((rows) => rows.sort((a, b) =>
+        String(b.published_at ?? '').localeCompare(String(a.published_at ?? ''))));
   } catch {
     return [];
   }
 });
 
-export const getPost = cache(async (slug: string): Promise<Post | undefined> => {
+export const getPost = cache(async (
+  slug: string, locale: Locale = DEFAULT_LOCALE,
+): Promise<Post | undefined> => {
   try {
     const rows = await query<Post>(
-      `SELECT id::text, slug, title, excerpt, body, cover_ref, author, status,
-              published_at::text, seo_title, seo_description, updated_at::text
-         FROM posts WHERE slug = $1 AND status = 'published' AND published_at <= now()`, [slug]);
+      `SELECT ${POST_COLS} FROM posts
+        WHERE slug = $1 AND status = 'published' AND published_at <= now()
+          AND locale IN ($2, $3)
+        ORDER BY (locale = $2) DESC LIMIT 1`, [slug, locale, DEFAULT_LOCALE]);
     return rows[0];
   } catch {
     return undefined;
@@ -298,7 +396,7 @@ export async function metadataFor(
   robots?: { index: boolean; follow: boolean };
   openGraph: { title: string; description: string; images: [typeof ogImage] };
 }> {
-  const seo = await getSeo(path);
+  const seo = await getSeo(path, locale);
   const title = seo?.title ?? base.title;
   const description = seo?.description ?? base.description;
   return {

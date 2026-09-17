@@ -54,10 +54,13 @@ export async function generateMetadata(
   };
 }
 
-export default async function HomePage() {
+export default async function HomePage(
+  { params }: { params: Promise<{ lang: Locale }> },
+) {
+  const { lang } = await params;
   const site = await getSettings();
   const [c, faqs, voices] = await Promise.all([
-    getBlocks(), publishedFaqs(), publishedTestimonials(),
+    getBlocks(lang), publishedFaqs(lang), publishedTestimonials(lang),
   ]);
   const families = getFamilies();
   const all = getAllProducts();
