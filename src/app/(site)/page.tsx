@@ -7,8 +7,14 @@ import { getSettings } from '@/lib/settings';
 import { getBlocks, fill, publishedFaqs, publishedTestimonials, getSeo } from '@/lib/content';
 import { getAllProducts, getShowcaseProducts, getFamilies, imageFor } from '@/lib/products';
 
-const HERO_REF = 'VG-OL-002';
-const SPOT_REF = 'VG-OL-007';
+// Chosen by looking at all forty-four verified tree photographs cropped to
+// this column, not by picking one from a filename: a sculptural olive as the
+// centrepiece of a finished garden — a pool, lawn, white gravel — which is the
+// thing the company actually sells. Most of the catalogue is nursery rows and
+// warehouse floors, and a landscape frame cropped tall becomes a wall of
+// leaves.
+const HERO_REF = 'VG-OL-012';
+const SPOT_REF = 'VG-OL-002';
 const BAND_REF = 'VG-PL-017';
 const HERO = imageFor(HERO_REF);
 const SPOT = imageFor(SPOT_REF);
@@ -55,38 +61,101 @@ export default async function HomePage() {
     ...showcase.filter((p) => p.family === 'Olive Trees').slice(1, 3),
   ].slice(0, 8);
   const spotlight = showcase.find((p) => p.reference === SPOT_REF) ?? showcase[0];
+  // Olives are the line the company is built on. families[0] is whichever
+  // family happens to sort first, which put Agaves in the hero.
+  const heroFamily = families.find((f) => /olive/i.test(f.name)) ?? families[0];
 
   return (
     <>
-      {/* ═══════════ hero ═══════════ */}
+      {/* ═══════════ hero ═══════════
+          A split composition rather than a photograph with text laid over it:
+          the words sit on travertine where they are simply readable, and the
+          photograph keeps its full range instead of being dimmed by a scrim to
+          make room for them. */}
       <section className="hero">
-        <div className="hero-media">
-          <Image src={HERO} alt="" fill priority sizes="100vw" className="hero-img" />
-        </div>
-        <div className="hero-veil" />
+        <div className="hero-copy">
+          <div className="hero-copy-in">
+            <p className="eyebrow">{c['home.hero.eyebrow']}</p>
+            <h1>{c['home.hero.title']}<br /><em>{c['home.hero.title.em']}</em></h1>
+            <p className="hero-lede">
+              {fill(c['home.hero.lede'], { regions: site.sourcingRegions.join(', ') })}
+            </p>
 
-        <div className="wrap hero-in">
-          <p className="hero-kicker">
-            <span>{c['home.hero.kicker.from']}</span><i /><span>{c['home.hero.kicker.to']}</span>
-          </p>
-          <h1>{c['home.hero.title']}<br /><em>{c['home.hero.title.em']}</em></h1>
-          <p className="hero-lede">
-            {fill(c['home.hero.lede'], { regions: site.sourcingRegions.join(', ') })}
-          </p>
-          <div className="hero-cta">
-            <Link href="/catalog" className="btn btn-light btn-lg">
-              {fill(c['home.hero.cta'], { n: all.length })}
-            </Link>
-            <Link href="/quote" className="tlink hero-tlink">Request a quote</Link>
+            <div className="hero-cta">
+              <Link href="/catalog" className="btn btn-primary btn-lg">
+                {c['home.hero.cta']} <span aria-hidden="true">&rarr;</span>
+              </Link>
+              <Link href="/quote" className="btn btn-ghost btn-lg">{c['home.hero.cta.two']}</Link>
+            </div>
+
+            <ul className="hero-assure">
+              {([
+                [c['home.feature.1'], 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20M2 12h20M12 2c2.5 2.7 3.8 6.1 3.8 10S14.5 19.3 12 22c-2.5-2.7-3.8-6.1-3.8-10S9.5 4.7 12 2'],
+                [c['home.feature.2'], 'M12 21V11M12 12c0-4.4 3.1-8 7-8 .4 3.9-2.4 8-7 8M12 16c-3.4 0-6-2.8-6-6.2 3 .3 6 2.9 6 6.2'],
+                [c['home.feature.3'], 'M3 7h11v9H3zM14 10h4l3 3v3h-7zM7.5 19a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6M17.5 19a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6'],
+                [c['home.feature.4'], 'M12 3l7.5 3v5.3c0 4.3-3 8.3-7.5 9.7-4.5-1.4-7.5-5.4-7.5-9.7V6zM9 12l2.2 2.2L15.3 10'],
+              ] as [string, string][]).map(([label, d]) => (
+                <li key={label}>
+                  <svg viewBox="0 0 24 24" width="19" height="19" fill="none"
+                       stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+                       strokeLinejoin="round" aria-hidden="true">
+                    <path d={d} />
+                  </svg>
+                  <span>{label}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
+        <div className="hero-media">
+          <Image src={HERO} alt="" fill priority sizes="(max-width: 1000px) 100vw, 55vw"
+                 className="hero-img" />
+
+          {/* A seal, not a claim about anybody else: it says where the trees
+              come from, which is the one thing this company can vouch for. */}
+          <span className="hero-seal" aria-hidden="true">
+            <span className="hero-seal-in">
+              <b>{c['home.badge.top']}</b>
+              <strong>{c['home.badge.mid']}</strong>
+              <b>{c['home.badge.low']}</b>
+              <i className="hero-seal-flag" />
+            </span>
+          </span>
+
+          <Link href={`/collections/${heroFamily.slug}`} className="hero-feat">
+            <span className="hero-feat-img">
+              <Image src={`/products/${heroFamily.cover}`} alt="" fill sizes="120px" />
+            </span>
+            <span className="hero-feat-txt">
+              <span className="hero-feat-eyebrow">{c['home.featured.eyebrow']}</span>
+              <span className="hero-feat-name">{heroFamily.name}</span>
+              <span className="hero-feat-note">{c['home.featured.note']}</span>
+            </span>
+            <span className="hero-feat-go" aria-hidden="true">&rarr;</span>
+          </Link>
+        </div>
+      </section>
+
+      {/* ═══════════ what we can actually prove ═══════════
+          This is where a "trusted by" row of client logos would go. There are
+          no clients yet, and borrowing the logos of UAE developers the company
+          has never worked with would be a false endorsement, a trademark
+          matter, and — since those are exactly the people it wants to sell to —
+          the fastest way to lose them. These are facts instead, every one of
+          them checkable today, and three of the four count themselves. */}
+      <section className="proof">
         <div className="wrap">
-          <ul className="stats">
+          <ul className="proof-list">
             {[[String(all.length), 'specimens catalogued'],
-              ['04', 'Italian growing regions'],
-              ['07', 'emirates covered'],
-              [`${site.leadTimeWeeks.min}–${site.leadTimeWeeks.max}`, 'weeks lead time']].map(([n, l]) => (
+              [String(site.sourcingRegions.length), 'Italian growing regions'],
+              // "emirates covered" would have read 8, because the list is the
+              // seven emirates plus Al Ain — a city in Abu Dhabi, not an
+              // emirate. On a strip whose whole point is that every number can
+              // be checked, that is the one error that cannot be there.
+              [String(site.emirates.length), 'UAE delivery locations'],
+              [`${site.leadTimeWeeks.min}–${site.leadTimeWeeks.max}`, 'weeks, order to site']]
+              .map(([n, l]) => (
               <li key={l}><strong>{n}</strong><span>{l}</span></li>
             ))}
           </ul>
@@ -309,66 +378,147 @@ export default async function HomePage() {
       )}
 
       <style>{`
-        /* ── hero ── */
+        /* ── hero ──
+           Two columns on a wide screen, stacked on a narrow one. The
+           photograph runs to the right edge of the viewport rather than
+           stopping at the content gutter — that bleed is most of the effect. */
         .hero {
-          position: relative; isolation: isolate; color: #FBF9F4;
-          min-height: min(92vh, 900px);
-          display: flex; flex-direction: column; justify-content: flex-end;
-          padding-top: clamp(80px, 14vw, 170px);
+          display: grid; align-items: stretch;
+          background: var(--sand-50);
+          border-bottom: 1px solid var(--line-soft);
         }
-        .hero-media { position: absolute; inset: 0; z-index: -2; overflow: hidden; }
-        .hero-img { object-fit: cover; }
-        @media (prefers-reduced-motion: no-preference) {
-          .hero-img { animation: kenburns 26s ease-out both; }
-          @keyframes kenburns {
-            from { transform: scale(1.0) translate3d(0,0,0); }
-            to   { transform: scale(1.09) translate3d(-1.5%, -1%, 0); }
-          }
+        .hero-copy { display: flex; align-items: center; padding-block: clamp(48px, 7vw, 96px); }
+        .hero-copy-in {
+          width: 100%; max-width: 620px;
+          margin-inline-start: auto;
+          padding-inline: var(--gutter);
         }
-        .hero-veil {
-          position: absolute; inset: 0; z-index: -1;
-          background:
-            linear-gradient(97deg, rgba(10,14,8,.94) 0%, rgba(10,14,8,.80) 38%, rgba(10,14,8,.34) 68%, rgba(10,14,8,.52) 100%),
-            linear-gradient(to top, rgba(10,14,8,.94) 0%, rgba(10,14,8,.12) 40%);
+        .hero h1 {
+          font-size: clamp(2.6rem, 5.4vw, 4.3rem);
+          line-height: 1.02; letter-spacing: -.035em;
+          margin: 0 0 .5em; color: var(--olive-950);
         }
-        .hero-in { position: relative; z-index: 2; padding-bottom: clamp(48px, 7vw, 84px); }
-        .hero h1 { color: #FFFDF8; max-width: 16ch; margin-bottom: .55em; }
         .hero h1 em {
-          font-style: italic; color: var(--brass-300);
+          font-style: italic; color: var(--olive-800);
           font-variation-settings: 'SOFT' 40, 'WONK' 1;
         }
-        .hero-kicker {
-          display: flex; align-items: center; gap: .9em;
-          font-size: .72rem; font-weight: 600; letter-spacing: .26em;
-          text-transform: uppercase; color: var(--brass-300); margin-bottom: 1.8rem;
-        }
-        .hero-kicker i { width: 46px; height: 1px; background: currentColor; opacity: .6; }
         .hero-lede {
-          font-family: var(--font-display); font-size: clamp(1.08rem, 1.7vw, 1.38rem);
-          line-height: 1.5; color: rgb(251 249 244 / .9); max-width: 44ch;
-          margin-bottom: 2.4rem; text-shadow: 0 1px 16px rgb(10 14 8 / .55);
+          font-size: clamp(1rem, 1.25vw, 1.12rem); line-height: 1.65;
+          color: var(--fg-soft); max-width: 46ch; margin: 0 0 2.2rem;
         }
-        .hero-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; }
-        .hero-tlink { color: #FFFDF8; }
+        .hero-cta { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 2.6rem; }
 
-        .stats {
-          position: relative; z-index: 2;
-          display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-          list-style: none; margin: 0; padding: 0;
-          border-top: 1px solid rgb(210 179 124 / .32);
+        .hero-assure {
+          display: grid; gap: 18px 30px; list-style: none; margin: 0; padding: 26px 0 0;
+          /* Two by two. auto-fit gave three across and one stranded on its own
+             line, which reads as a mistake rather than a set. */
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          border-top: 1px solid var(--line-soft);
         }
-        .stats li {
-          display: grid; gap: 4px; padding: 26px clamp(14px, 2.4vw, 30px) 30px;
-          border-right: 1px solid rgb(210 179 124 / .16);
+        .hero-assure li { display: flex; align-items: flex-start; gap: 10px; }
+        .hero-assure svg { color: var(--olive-600); flex: none; margin-top: 1px; }
+        .hero-assure span { font-size: .82rem; line-height: 1.4; color: var(--fg-soft); }
+
+        .hero-media {
+          position: relative; min-height: clamp(360px, 52vw, 680px);
+          overflow: hidden; background: var(--olive-900);
         }
-        .stats li:first-child { padding-left: 0; }
-        .stats li:last-child { border-right: 0; }
-        .stats strong {
-          font-family: var(--font-display); font-size: clamp(2rem, 4vw, 3rem);
-          font-weight: 450; color: var(--brass-300); line-height: 1;
+        .hero-img { object-fit: cover; object-position: 56% 46%; }
+        @media (prefers-reduced-motion: no-preference) {
+          /* Barely there. A tall crop of a landscape photograph is already
+             close in; a big ken-burns push turns the subject into texture. */
+          .hero-img { animation: kenburns 34s ease-out both; }
+          @keyframes kenburns {
+            from { transform: scale(1); }
+            to   { transform: scale(1.05); }
+          }
+        }
+
+        /* the seal */
+        .hero-seal {
+          position: absolute; top: clamp(18px, 3vw, 40px); right: clamp(18px, 3vw, 40px);
+          width: clamp(96px, 11vw, 132px); aspect-ratio: 1; border-radius: 50%;
+          display: grid; place-items: center; text-align: center;
+          background: rgb(23 32 15 / .82);
+          -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+          border: 1px solid rgb(210 179 124 / .5);
+          box-shadow: 0 10px 30px -12px rgb(10 14 8 / .6);
+        }
+        .hero-seal-in { display: grid; gap: 1px; color: var(--brass-100); line-height: 1.25; }
+        .hero-seal b, .hero-seal strong {
+          font-weight: 500; font-size: clamp(.5rem, .62vw, .58rem);
+          letter-spacing: .2em; text-transform: uppercase;
+        }
+        .hero-seal strong {
+          font-family: var(--font-fraunces), serif; font-size: clamp(.72rem, .9vw, .86rem);
+          letter-spacing: .12em; color: #FFFDF8;
+        }
+        .hero-seal-flag {
+          justify-self: center; margin-top: 5px; width: 20px; height: 13px; border-radius: 1px;
+          background: linear-gradient(90deg, #167E3C 0 33.3%, #F3F1EA 33.3% 66.6%, #B4232C 66.6% 100%);
+        }
+
+        /* the floating collection card */
+        .hero-feat {
+          position: absolute; right: clamp(14px, 2.4vw, 34px); bottom: clamp(14px, 2.4vw, 34px);
+          display: flex; align-items: center; gap: 14px;
+          max-width: min(420px, calc(100% - 28px));
+          padding: 12px 16px 12px 12px; border-radius: 6px; text-decoration: none;
+          background: rgb(252 250 245 / .93);
+          -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+          border: 1px solid rgb(255 255 255 / .6);
+          box-shadow: 0 20px 48px -22px rgb(10 14 8 / .75);
+          transition: transform .25s var(--ease);
+        }
+        .hero-feat:hover { transform: translateY(-2px); }
+        .hero-feat-img {
+          position: relative; flex: none; width: 74px; height: 58px;
+          border-radius: 4px; overflow: hidden; background: var(--bg-warm);
+        }
+        .hero-feat-img img { object-fit: cover; }
+        .hero-feat-txt { display: grid; gap: 2px; min-width: 0; }
+        .hero-feat-eyebrow {
+          font-size: .6rem; letter-spacing: .18em; text-transform: uppercase;
+          color: var(--brass-700);
+        }
+        .hero-feat-name {
+          font-family: var(--font-fraunces), serif; font-size: 1rem; color: var(--olive-950);
+        }
+        .hero-feat-note {
+          font-size: .76rem; color: var(--fg-soft);
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .hero-feat-go { flex: none; color: var(--olive-700); font-size: 1.1rem; }
+
+        @media (min-width: 1000px) {
+          .hero { grid-template-columns: minmax(0, 46fr) minmax(0, 54fr); }
+        }
+        @media (max-width: 999px) {
+          .hero-copy-in { margin-inline: auto; max-width: 720px; }
+          .hero-feat { display: none; }
+        }
+        @media (max-width: 560px) {
+          .hero-cta .btn { width: 100%; }
+        }
+
+        /* ── what we can prove ── */
+        .proof { background: var(--bg); border-bottom: 1px solid var(--line-soft); }
+        .proof-list {
+          display: grid; gap: 0; list-style: none; margin: 0; padding: 0;
+          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        }
+        .proof-list li {
+          display: grid; gap: 5px; padding: 28px clamp(14px, 2.4vw, 30px) 30px;
+          border-right: 1px solid var(--line-soft);
+        }
+        .proof-list li:first-child { padding-inline-start: 0; }
+        .proof-list li:last-child { border-right: 0; }
+        .proof-list strong {
+          font-family: var(--font-display); font-size: clamp(1.9rem, 3.4vw, 2.7rem);
+          font-weight: 450; color: var(--olive-700); line-height: 1;
           font-variant-numeric: tabular-nums; letter-spacing: -.03em;
         }
-        .stats span { font-size: .78rem; letter-spacing: .05em; color: rgb(251 249 244 / .68); }
+        .proof-list span { font-size: .78rem; letter-spacing: .04em; color: var(--fg-mute); }
 
         /* ── voices ── */
         .voices {

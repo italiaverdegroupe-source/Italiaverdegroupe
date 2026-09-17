@@ -15,7 +15,7 @@ export default function Header() {
       <div className="wrap hdr-in">
         <Link href="/" className="brand">
           <span className="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.6">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M12 21V11" strokeLinecap="round" />
               <path d="M12 12c0-4.4 3.1-8 7-8 .4 3.9-2.4 8-7 8Z" strokeLinejoin="round" />
               <path d="M12 16c-3.4 0-6-2.8-6-6.2 3 .3 6 2.9 6 6.2Z" strokeLinejoin="round" />
@@ -27,6 +27,13 @@ export default function Header() {
           </span>
         </Link>
 
+        {/* The lockup from the brand sheet: a hairline rule, then the line that
+            says what the company is for. Hidden on narrow screens, where it
+            would wrap into the navigation. */}
+        <p className="brand-line" aria-hidden="true">
+          Italian roots<br />for a greener tomorrow
+        </p>
+
         <nav aria-label="Main">
           <ul className="nav">
             {NAV.map((n) => (
@@ -36,45 +43,72 @@ export default function Header() {
         </nav>
 
         <div className="hdr-cta">
-          <Link href="/quote" className="btn btn-light">Request a quote</Link>
+          <Link href="/quote" className="btn btn-primary">
+            Request a quote <span aria-hidden="true">&rarr;</span>
+          </Link>
         </div>
       </div>
 
       <style>{`
+        /* Light rather than the olive bar it used to be. Every public page
+           opens on travertine, and a dark band across the top of all of them
+           was doing the work of a frame nobody asked for. */
         .hdr {
           position: sticky; top: 0; z-index: 50;
-          background: var(--olive-950);
-          border-bottom: 1px solid rgb(251 249 244 / .09);
+          background: rgb(252 250 245 / .92);
+          -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+          border-bottom: 1px solid var(--line-soft);
         }
-        .hdr-in {
-          display: flex; align-items: center; gap: 28px;
-          min-height: 68px;
+        @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+          .hdr { background: var(--sand-50); }
         }
-        .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #FBF9F4; margin-right: auto; }
-        .brand-mark { color: var(--brass-300); display: grid; place-items: center; }
+        .hdr-in { display: flex; align-items: center; gap: 26px; min-height: 78px; }
+
+        .brand { display: flex; align-items: center; gap: 11px; text-decoration: none; color: var(--olive-900); }
+        .brand-mark { color: var(--olive-700); display: grid; place-items: center; }
         .brand-txt { display: flex; flex-direction: column; line-height: 1.05; }
         .brand-txt strong {
           font-family: var(--font-fraunces), serif;
-          font-size: 1.12rem; font-weight: 500; letter-spacing: .01em;
+          font-size: clamp(1.05rem, 3.4vw, 1.3rem); font-weight: 500; letter-spacing: -.01em;
+          /* The name is the name. Letting it wrap to "Verde / Garden" on a
+             phone turns the brandmark into two words that look unrelated. */
+          white-space: nowrap;
         }
         .brand-txt em {
-          font-style: normal; font-size: .62rem; letter-spacing: .24em;
-          text-transform: uppercase; color: rgb(251 249 244 / .55);
+          font-style: normal; font-size: .6rem; letter-spacing: .3em;
+          text-transform: uppercase; color: var(--ink-400);
+        }
+
+        .brand-line {
+          display: none; margin: 0 auto 0 0;
+          padding-inline-start: 22px; border-inline-start: 1px solid var(--line);
+          font-size: .62rem; line-height: 1.5; letter-spacing: .18em;
+          text-transform: uppercase; color: var(--ink-400);
         }
 
         .nav { display: none; gap: 26px; list-style: none; margin: 0; padding: 0; }
         .nav a {
-          color: rgb(251 249 244 / .78); text-decoration: none;
+          color: var(--ink-600); text-decoration: none;
           font-size: .9rem; padding-block: 8px;
           border-bottom: 1px solid transparent;
           transition: color .16s ease, border-color .16s ease;
         }
-        .nav a:hover { color: #FBF9F4; border-bottom-color: var(--brass-500); }
+        .nav a:hover { color: var(--olive-700); border-bottom-color: var(--brass-500); }
 
-        .hdr-cta .btn { padding: .6em 1.15em; font-size: .85rem; }
+        .hdr-cta .btn { padding: .7em 1.3em; font-size: .85rem; }
 
-        @media (min-width: 900px) { .nav { display: flex; } }
-        @media (max-width: 420px) { .hdr-cta .btn { padding: .55em .9em; font-size: .8rem; } }
+        @media (min-width: 1100px) { .brand-line { display: block; } }
+        @media (min-width: 900px) { .nav { display: flex; } .brand { margin-right: 0; } }
+        @media (max-width: 1099px) { .brand { margin-right: auto; } }
+        .hdr-cta .btn { white-space: nowrap; }
+        @media (max-width: 560px) {
+          .hdr-in { gap: 12px; min-height: 66px; }
+          .hdr-cta .btn { padding: .6em .9em; font-size: .78rem; }
+        }
+        @media (max-width: 380px) {
+          /* Below this the arrow is the first thing that can go. */
+          .hdr-cta .btn span { display: none; }
+        }
       `}</style>
     </header>
   );
