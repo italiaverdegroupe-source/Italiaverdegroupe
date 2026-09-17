@@ -395,24 +395,37 @@ export default async function HomePage() {
            bar of its own, so the picture starts at the very top of the page. */
         .hero {
           position: relative; isolation: isolate;
-          min-height: min(94vh, 940px);
+          /* The photograph is 1824 x 862 — a panorama, 2.12 to 1. Every number
+             below exists to keep this box near that shape, because object-fit:
+             cover has to enlarge the picture by whatever it takes to fill a box
+             taller than itself. The previous heading ran to four lines at 83px
+             and pushed this box to 1012px, which enlarged a 862px-tall original
+             by 1.17 and cut 126px off each side — the sunrise on the left and
+             the terrace on the right, the two things the photograph is of. It
+             did not read as a crop. It read as a zoom, which is what it was. */
+          min-height: min(82vh, 800px);
           display: flex; flex-direction: column; justify-content: center;
           /* Pulled up under the sticky header so the photograph starts at the
              top of the page. Without this the bar sits in the flow and leaves
              a band of travertine above the picture. */
           margin-top: calc(-1 * var(--hdr-h));
-          padding-top: calc(var(--hdr-h) + clamp(40px, 8vh, 92px));
-          padding-bottom: clamp(120px, 15vh, 190px);
+          padding-top: calc(var(--hdr-h) + clamp(28px, 4.5vh, 56px));
+          padding-bottom: clamp(88px, 10vh, 132px);
           background: var(--sand-50);
           overflow: hidden;
         }
         .hero-media { position: absolute; inset: 0; z-index: -2; }
         .hero-img {
-          /* 50% keeps the sun, the skyline and the whole tree in frame at every
-             desktop width: the picture is wider than the opening, so the
-             browser trims the sides, and the two things it must not trim are
-             at the far left and the far right. */
-          object-fit: cover; object-position: 50% 50%;
+          /* Horizontally 50%, because the two things that must not be trimmed
+             — the sunrise and the terrace — are at the far left and the far
+             right of the frame.
+             Vertically 66% rather than centred. A screen wider than about
+             2000px is taller than this panorama can fill, so something is
+             trimmed off the top and the bottom; centred, it took equal bites
+             out of empty sky and out of the pool and marble at the foot of the
+             tree. The sky is the part of this photograph there is most of and
+             least in, so the trim comes off the top. */
+          object-fit: cover; object-position: 50% 66%;
           /* No grading. This photograph is already lit; saturating it further
              would only push the sky. */
         }
@@ -438,7 +451,7 @@ export default async function HomePage() {
 
         /* the pane */
         .hero-card {
-          max-width: min(620px, 100%);
+          max-width: min(660px, 100%);
           padding: clamp(26px, 3.1vw, 44px) clamp(24px, 2.9vw, 42px) clamp(28px, 3.3vw, 46px);
           border-radius: 3px;
           background: linear-gradient(142deg,
@@ -460,10 +473,18 @@ export default async function HomePage() {
         }
 
         .hero-in { position: relative; z-index: 2; width: 100%; }
+        /* Two lines, not four.
+           The markup already breaks the sentence in two, so a max-width of
+           13ch was breaking each half AGAIN — "Ancient Italian / olives. /
+           Planted in the / Emirates." Four lines of 83px type is 360px of
+           headline before a word of the offer is read, and it is the thing
+           that made the box too tall for its own photograph. Sized to put each
+           half on one line inside the pane instead. */
         .hero h1 {
-          font-size: clamp(2.9rem, 6.4vw, 5.2rem);
-          line-height: .98; letter-spacing: -.04em;
-          margin: 0 0 .42em; color: var(--olive-950); max-width: 13ch;
+          font-size: clamp(2.3rem, 3.3vw, 3.15rem);
+          line-height: 1.04; letter-spacing: -.032em;
+          margin: 0 0 .5em; color: var(--olive-950); max-width: 24ch;
+          text-wrap: balance;
         }
         .hero h1 em {
           font-style: italic; color: var(--olive-800);
@@ -473,10 +494,15 @@ export default async function HomePage() {
            site. On a page of travertine, ink-400 and ink-600 read comfortably;
            on a photograph at half the strength of wash they do not, and the
            faintest of the three — the eyebrow — is the one that fails first. */
-        .hero .eyebrow { color: var(--olive-700); }
+        /* olive-800, not olive-700. Shortening the headline let the pane sit
+           further across the sunrise at around 1024px, and measured off the
+           rendered page the eyebrow came back at 4.25:1 there — under 4.5 by a
+           margin no stylesheet would have shown. It is the faintest thing on
+           the pane and so the first to go; tests/hero-contrast.mjs catches it. */
+        .hero .eyebrow { color: var(--olive-800); }
         .hero-lede {
           font-size: clamp(1.02rem, 1.3vw, 1.18rem); line-height: 1.62;
-          color: var(--olive-900); max-width: 44ch; margin: 0 0 2.4rem;
+          color: var(--olive-900); max-width: 46ch; margin: 0 0 1.9rem;
         }
         .hero-cta { display: flex; flex-wrap: wrap; gap: 14px; }
         /* The outline button has no surface of its own, so over a picture its
