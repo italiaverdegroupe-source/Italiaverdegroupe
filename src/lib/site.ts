@@ -37,11 +37,13 @@ export const site = {
   sourcingRegions: ['Toscana', 'Sicilia', 'Lombardia', 'Puglia'],
 
   /**
-   * The seven. There are seven emirates in the United Arab Emirates, and this
-   * list used to hold eight because Al Ain was in it — Al Ain is a city in the
-   * emirate of Abu Dhabi, not an eighth emirate. Two public pages counted this
-   * array and printed "all eight emirates", which is the kind of mistake a UAE
-   * reader notices in the first second and does not need to read twice.
+   * The seven emirates of the United Arab Emirates. This list is the country,
+   * not a delivery schedule: it held eight for a while because Al Ain was in
+   * it, and Al Ain is a city in the emirate of Abu Dhabi. Two public pages
+   * counted the array and printed "all eight emirates".
+   *
+   * Nothing goes in here that is not an emirate. Somewhere we deliver that is
+   * a city belongs in the copy about that place, not in this array.
    */
   emirates: [
     { slug: 'dubai', name: 'Dubai' },
@@ -51,15 +53,6 @@ export const site = {
     { slug: 'ras-al-khaimah', name: 'Ras Al Khaimah' },
     { slug: 'fujairah', name: 'Fujairah' },
     { slug: 'umm-al-quwain', name: 'Umm Al Quwain' },
-  ],
-
-  /**
-   * Places we deliver to that are not emirates. Al Ain has its own landscape
-   * market and its own page, and a buyer there searches for it by name — so it
-   * stays a destination without being promoted to an emirate.
-   */
-  otherLocations: [
-    { slug: 'al-ain', name: 'Al Ain' },
   ],
 
   /**
@@ -93,17 +86,6 @@ export const site = {
 
 export type Site = typeof site;
 
-/**
- * Everywhere we deliver: the seven emirates and the cities named separately.
- * Used for the enquiry form's list and the location pages — anything that is
- * about reaching somewhere rather than about how many emirates there are.
- */
-export function deliveryLocations(s: {
-  emirates: readonly { slug: string; name: string }[];
-  otherLocations: readonly { slug: string; name: string }[];
-}): { slug: string; name: string }[] {
-  return [...s.emirates, ...s.otherLocations];
-}
 
 /**
  * What to tell someone when the enquiry form itself fails. Never names a

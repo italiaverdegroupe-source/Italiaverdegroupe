@@ -98,8 +98,8 @@ export const BLOCKS = {
   'home.who.title': { group: 'Homepage', label: 'Who we supply, heading', kind: 'line',
     where: 'Lower half of the homepage', fallback: 'Built for projects.' },
   'home.coverage.title': { group: 'Homepage', label: 'Coverage, heading', kind: 'line',
-    where: 'Lower half of the homepage. The list beneath it holds eight places — the seven emirates and Al Ain — so the heading says so.',
-    fallback: 'Seven emirates, and Al Ain.' },
+    where: 'Lower half of the homepage, above the list of emirates.',
+    fallback: 'All seven emirates.' },
 
   'faq.title': { group: 'Questions', label: 'FAQ section heading', kind: 'line',
     where: 'Above the questions on the homepage', fallback: 'Questions we are asked' },

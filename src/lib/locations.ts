@@ -70,15 +70,6 @@ export const locations: Location[] = [
       'Smaller market served on the northern delivery route, with villa and farm planting the common requirement.',
     notes: ['Combined deliveries keep transport cost proportionate on smaller orders.'],
   },
-  {
-    slug: 'al-ain',
-    name: 'Al Ain',
-    intro:
-      'Inland oasis city with a long horticultural tradition and hotter, drier summers than the coast.',
-    notes: [
-      'Inland summer extremes narrow the safe planting window further than on the coast — timing is part of the advice, not an afterthought.',
-    ],
-  },
 ];
 
 export const getLocation = (slug: string) => locations.find((l) => l.slug === slug);

@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import ProductCard from '@/components/ProductCard';
 import { getSettings } from '@/lib/settings';
-import { deliveryLocations } from '@/lib/site';
 import { getAllProducts, getProduct, familySlug } from '@/lib/products';
 
 export function generateStaticParams() {
@@ -48,7 +47,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       priceCurrency: site.currency,
       availability: 'https://schema.org/PreOrder',
       seller: { '@type': 'Organization', name: site.legalName },
-      areaServed: deliveryLocations(site).map((e) => e.name),
+      areaServed: site.emirates.map((e) => e.name),
     },
   };
 

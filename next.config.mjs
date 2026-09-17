@@ -17,6 +17,19 @@ const nextConfig = {
     // window, and it is the one that shows the difference.
     qualities: [75, 88],
   },
+  async redirects() {
+    return [
+      {
+        // /locations/al-ain was a page here, and it was in the sitemap. Al Ain
+        // is a city in the emirate of Abu Dhabi, so the page is gone — but a
+        // URL that has been published does not get to 404 because we changed
+        // our minds about it. It goes where its content went.
+        source: '/locations/al-ain',
+        destination: '/locations/abu-dhabi',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [{
       source: '/:path*',

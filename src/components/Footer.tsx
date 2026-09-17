@@ -92,15 +92,11 @@ export default async function Footer() {
           <div>
             <dt>Delivering to</dt>
             <dd>
-              {/* Was a column of eight links, one of which was Al Ain — a city
-                  in Abu Dhabi, not an eighth emirate. Seven is the number, and
-                  a list of them was a lot of footer for one sentence. */}
+              {/* Was a column of eight links. Seven is the number, and a list
+                  of them was a lot of footer for one sentence. */}
               <Link href="/locations/dubai">
                 All {WORDS[site.emirates.length] ?? site.emirates.length} emirates
               </Link>
-              {site.otherLocations.length > 0 && (
-                <> · {site.otherLocations.map((l) => l.name).join(' · ')}</>
-              )}
             </dd>
           </div>
           <div>
@@ -228,6 +224,9 @@ export default async function Footer() {
         }
         .ftr-facts dd a { font-size: inherit; font-family: inherit; }
         .ftr-facts dd a:hover { text-decoration: underline; text-underline-offset: 3px; }
+        @media (pointer: coarse) {
+          .ftr-facts dd a { display: inline-flex; align-items: center; min-height: 44px; }
+        }
 
         .ftr .rule { background: rgb(251 249 244 / .12); border: 0; height: 1px; margin: 0; }
 

@@ -6,7 +6,8 @@
 // this codebase held eight, because Al Ain was in it — Al Ain is a city in the
 // emirate of Abu Dhabi. Two public pages counted that array and printed "all
 // eight emirates", which is the kind of mistake a reader in the UAE notices in
-// the first second and does not need to read twice.
+// the first second and does not need to read twice. Al Ain is off the site
+// entirely now; its old URL redirects to the emirate it is in.
 //
 // Also here: the social links, which are settings, which means the console can
 // put anything in them — including a relative URL that would point at a page
@@ -28,17 +29,17 @@ const check = (n, ok, x = '') => {
 
 // ── the number, in the source ────────────────────────────────
 const src = readFileSync('src/lib/site.ts', 'utf8');
-const emirates = [...src.matchAll(/\{ slug: '([a-z-]+)', name: '([^']+)' \}/g)]
-  .map((m) => m[1]);
-// The first seven entries after `emirates:` — the otherLocations list follows.
-const block = src.slice(src.indexOf('emirates: ['), src.indexOf('otherLocations'));
+const block = src.slice(src.indexOf('emirates: ['), src.indexOf('projectTypes'));
 const inEmirates = [...block.matchAll(/slug: '([a-z-]+)'/g)].map((m) => m[1]);
 
 check('THE POINT: the emirates list holds seven emirates',
   inEmirates.length === 7, `${inEmirates.length}: ${inEmirates.join(', ')}`);
 check('and Al Ain is not one of them, because it is a city in Abu Dhabi',
   !inEmirates.includes('al-ain'), inEmirates.join(', '));
-check('but it is still somewhere we deliver', emirates.includes('al-ain'));
+
+const places = readFileSync('src/lib/locations.ts', 'utf8');
+check('and it has no location page of its own either',
+  !/slug: 'al-ain'/.test(places));
 
 // ── a URL from a form is not a URL ───────────────────────────
 check('a link pasted without a scheme is not left relative',
@@ -61,20 +62,35 @@ const browser = await chromium.launch({
 });
 const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 
-const PAGES = ['/', '/collections', '/services', '/contact', '/about'];
+const PAGES = ['/', '/collections', '/services', '/contact', '/about',
+  '/quote', '/locations/dubai', '/locations/abu-dhabi'];
 const claims = [];
+const strays = [];
 for (const path of PAGES) {
   await page.goto(`${B}${path}`, { waitUntil: 'domcontentloaded' });
   const text = await page.innerText('body');
   if (/\b(eight|8)\s+emirates\b/i.test(text)) claims.push(path);
+  if (/Al Ain/.test(text)) strays.push(path);
 }
 check('THE POINT: no page claims there are eight emirates',
   claims.length === 0, claims.join(', '));
+check('and Al Ain is not listed anywhere as a place we deliver',
+  strays.length === 0, strays.join(', '));
+
+// A URL that was published does not get to 404 because the page behind it was
+// a mistake. It goes to the emirate the city is in.
+const gone = await page.goto(`${B}/locations/al-ain`, { waitUntil: 'domcontentloaded' });
+check('the old Al Ain URL redirects rather than breaking',
+  gone.status() === 200 && page.url().endsWith('/locations/abu-dhabi'),
+  `${gone.status()} ${page.url()}`);
 
 await page.goto(`${B}/about`, { waitUntil: 'networkidle' });
 const foot = await page.innerText('footer.ftr');
 check('the footer says how many emirates in one line rather than listing them',
-  /All seven emirates/.test(foot), foot.split('\n').find((l) => /emirates/i.test(l)) ?? '');
+  /All seven emirates/.test(foot),
+  foot.split('\n').find((l) => /All seven/.test(l)) ?? foot.slice(0, 80));
+check('THE POINT: Al Ain is nowhere in the footer',
+  !/Al Ain/.test(foot), foot.split('\n').find((l) => /Al Ain/.test(l)) ?? '');
 
 const legal = await page.$$eval('.ftr-legal a', (as) => as.map((a) => a.getAttribute('href')));
 check('every legal page is linked from the footer',

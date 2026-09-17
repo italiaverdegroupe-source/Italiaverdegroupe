@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { site, fallbackContact, deliveryLocations } from '@/lib/site';
+import { site, fallbackContact } from '@/lib/site';
 
 type Props = {
   defaultType?: 'quote' | 'bulk' | 'sourcing';
@@ -110,11 +110,7 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
           <span>Emirate</span>
           <select name="emirate" defaultValue="">
             <option value="">Select…</option>
-            {/* Everywhere we deliver, not only the emirates — somebody in Al
-                Ain needs to be able to say so. */}
-            {deliveryLocations(site).map((e) => (
-              <option key={e.slug} value={e.name}>{e.name}</option>
-            ))}
+            {site.emirates.map((e) => <option key={e.slug} value={e.name}>{e.name}</option>)}
           </select>
         </label>
         <label className="fld">
