@@ -15,6 +15,7 @@ const OUT = '.test-build';
 
 /** Each library a suite requires, in the format that suite asks for. */
 const TARGETS = [
+  { file: 'admin-ui', format: 'cjs' },
   { file: 'alerts', format: 'cjs' },
   { file: 'backup', format: 'cjs' },
   { file: 'client-ip', format: 'cjs' },

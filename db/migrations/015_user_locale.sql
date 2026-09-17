@@ -1,0 +1,15 @@
+-- The language the console speaks to one person in.
+--
+-- Not a URL prefix, the way the public site does it. The console lives at
+-- /admin and those addresses are bookmarked by the people who work in it; a
+-- prefix would change every one of them to gain nothing, because nobody links
+-- to an operations screen from outside and no crawler should ever see one.
+--
+-- Not a cookie either. This is a signed-in tool, and an Italian owner who sets
+-- the console to Italian on the office machine should find it in Italian on
+-- the phone as well — a preference belongs to the person, not to the browser.
+--
+-- NULL means "not chosen", which is different from 'en'. The first time
+-- somebody signs in the console reads their browser's Accept-Language and uses
+-- that; once they pick, the pick is stored and the browser stops being asked.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS locale locale_code;

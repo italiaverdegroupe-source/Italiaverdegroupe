@@ -102,6 +102,45 @@ check('the translator fills tokens', t('ftr.weeksToSite', { min: 4, max: 8 }).in
 check('and leaves an unknown token visible rather than blanking it',
   t('ftr.licence', {}).includes('{n}'), t('ftr.licence', {}));
 
+// ── the console's own language ───────────────────────────────
+// The person who owns this company reads Italian and runs the business from
+// these screens. The console is a different problem from the public site: the
+// dictionary is large, so a missing string falls back to its own English
+// rather than failing the build — which means coverage has to be measured, or
+// "the console speaks Italian" quietly becomes "the navigation does".
+const A = require('../.test-build/admin-ui.cjs');
+const total = A.ADMIN_KEYS.length;
+
+for (const loc of ['it', 'ar']) {
+  const d = A.ADMIN_DICTS[loc];
+  const done = A.ADMIN_KEYS.filter((k) => d[k]).length;
+  const pct = Math.round((done / total) * 100);
+  console.log(`  ----  ${loc}: ${done}/${total} console strings translated (${pct}%)`);
+
+  // The shell is the part that decides whether somebody can find their way
+  // around at all, so it is required rather than counted.
+  const SHELL = ['Console', 'Overview', 'Leads', 'Quotations', 'Orders', 'Inventory',
+    'Shipments', 'Finance', 'Reports', 'Alerts', 'Content', 'Settings', 'Backups',
+    'Accounts', 'Sign out', 'Pipeline', 'Stock', 'Money', 'System'];
+  const gaps = SHELL.filter((k) => !d[k]);
+  check(`${loc}: every navigation label is translated`, gaps.length === 0, gaps.join(', '));
+
+  const same = A.ADMIN_KEYS.filter((k) => d[k] && d[k] === k && !['Console', 'Menu', 'Social', 'Report', 'Backup'].includes(k));
+  check(`${loc}: no console string was left sitting in English`,
+    same.length === 0, same.join(', '));
+}
+
+// The fallback is the whole reason a partial dictionary is safe. If it ever
+// returned empty instead of the English, an untranslated screen would go blank
+// rather than staying readable.
+const ti = A.adminUi('it');
+check('a translated console string comes back translated',
+  ti('Quotations') === 'Preventivi', ti('Quotations'));
+check('THE POINT: an untranslated one comes back as English, never empty',
+  ti('Trade licence').length > 0, ti('Trade licence'));
+check('and an unknown language falls back rather than throwing',
+  A.adminUi('zz')('Orders') === 'Orders' && A.adminUi(null)('Orders') === 'Orders');
+
 // ── the served site ──────────────────────────────────────────
 const browser = await chromium.launch({
   executablePath: process.env.CHROME ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',

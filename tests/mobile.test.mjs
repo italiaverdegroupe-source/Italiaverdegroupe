@@ -21,6 +21,11 @@
 import { chromium } from 'playwright';
 
 const B = process.env.BASE ?? 'http://127.0.0.1:3000';
+// The account these sign in as. It was the owner's real address, which meant
+// the only way to run the console suites was to know the owner's real
+// password — so in practice they were skipped, which is the same as not
+// having them. VG_USER lets a throwaway account stand in.
+const USER = process.env.VG_USER ?? 'italiaverdegroupe@gmail.com';
 const SITE = ['/', '/catalog', '/collections', '/collections/palms', '/services',
   '/quote', '/contact', '/shortlist', '/journal', '/about', '/locations/dubai',
   '/legal', '/privacy', '/terms', '/terms-of-sale', '/refunds', '/disclaimer'];
@@ -152,7 +157,7 @@ if (!process.env.VG_PW) {
   console.log('  SKIP  the console — VG_PW is not set');
 } else {
   await page.goto(`${B}/admin/login`, { waitUntil: 'networkidle' });
-  await page.fill('input[name=email]', 'italiaverdegroupe@gmail.com');
+  await page.fill('input[name=email]', USER);
   await page.fill('input[name=password]', process.env.VG_PW);
   await page.click('button[type=submit]');
   await page.waitForTimeout(1800);

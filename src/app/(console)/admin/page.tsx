@@ -4,6 +4,7 @@ import { getSessionUser } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { STATUSES, StatusPill, fmtDate } from '@/components/admin/bits';
 import { TimeArea, BarList, Funnel, Donut } from '@/components/admin/Charts';
+import { adminUi } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,6 +40,7 @@ function densify(rows: { d: string; n: string }[], days: number): { t: string; v
 export default async function Overview() {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
+  const t = adminUi(user.locale);
 
   const [counts, recent, stale, daily, byEmirate, bySource, byType] = await Promise.all([
     query<{ status: string; n: string }>(
@@ -55,6 +57,10 @@ export default async function Overview() {
          FROM leads WHERE created_at > now() - ($1 || ' days')::interval
         GROUP BY 1 ORDER BY 1`, [String(DAYS)]),
     query<{ k: string; n: string }>(
+      // The sentinel stays English INSIDE the query. It is a grouping key:
+      // translated in SQL, the same lead would fall into a different bucket
+      // depending on who was looking at the screen, and two people comparing
+      // notes would see different totals. It is translated on the way out.
       `SELECT coalesce(nullif(btrim(emirate), ''), 'Not stated') AS k, count(*) AS n
          FROM leads GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 8`),
     // Grouped on the LOWERCASED value, then presented in title case. Without
@@ -90,17 +96,17 @@ export default async function Overview() {
 
   return (
     <>
-      <h1>Overview</h1>
-      <p className="adm-sub">Signed in as {user.name}</p>
+      <h1>{t('Overview')}</h1>
+      <p className="adm-sub">{t('Signed in as')} {user.name}</p>
 
       <div className="adm-cards">
         <div className="adm-card">
-          <b>{total}</b><span>Total leads</span>
+          <b>{total}</b><span>{t('Total leads')}</span>
         </div>
         <div className="adm-card">
           <b>{last7}</b>
           <span>
-            Last 7 days
+            {t('Last 7 days')}
             {trend !== null && (
               <i className="adm-trend" data-dir={trend >= 0 ? 'up' : 'down'}>
                 {trend >= 0 ? '▲' : '▼'} {Math.abs(trend)}%
@@ -108,23 +114,24 @@ export default async function Overview() {
             )}
           </span>
         </div>
-        <div className="adm-card"><b>{open}</b><span>Open</span></div>
+        <div className="adm-card"><b>{open}</b><span>{t('Open')}</span></div>
         <div className="adm-card">
           <b>{winRate === null ? '—' : `${winRate}%`}</b>
-          <span>{decided === 0 ? 'Win rate — none decided yet' : `Win rate of ${decided} decided`}</span>
+          <span>{decided === 0 ? t('Win rate — none decided yet') : `${t('Win rate — none decided yet').split('—')[0].trim()}: ${decided}`}</span>
         </div>
       </div>
 
       {uncontacted > 0 && (
         <p className="adm-err">
-          {uncontacted} {uncontacted === 1 ? 'lead has' : 'leads have'} been sitting
-          uncontacted for more than 24 hours. <Link href="/admin/leads?status=new">Open them →</Link>
+          {uncontacted} {uncontacted === 1 ? t('lead has') : t('leads have')} {t('been sitting')}{' '}
+          {t('uncontacted for more than 24 hours.')}{' '}
+          <Link href="/admin/leads?status=new">{t('Open them →')}</Link>
         </p>
       )}
 
       <div className="adm-grid-2">
         <section className="adm-panel adm-pad">
-          <h2>Enquiries, last {DAYS} days</h2>
+          <h2>{t('Enquiries, last 30 days')}</h2>
           <p className="adm-sub adm-sub-tight">
             {last7} in the last seven days
             {trend !== null && `, ${trend >= 0 ? 'up' : 'down'} ${Math.abs(trend)}% on the seven before`}
@@ -134,7 +141,7 @@ export default async function Overview() {
         </section>
 
         <section className="adm-panel adm-pad">
-          <h2>Where they are</h2>
+          <h2>{t('Where they are')}</h2>
           <p className="adm-sub adm-sub-tight">
             Every lead sits at one stage. The percentage is how many of the
             previous stage reached this one.
@@ -145,20 +152,22 @@ export default async function Overview() {
 
       <div className="adm-grid-3">
         <section className="adm-panel adm-pad">
-          <h2>By emirate</h2>
-          <BarList rows={byEmirate.map((r) => ({ k: r.k, v: Number(r.n) }))} label="Leads by emirate" />
+          <h2>{t('By emirate')}</h2>
+          <BarList rows={byEmirate.map((r) => ({
+            k: r.k === 'Not stated' ? t('Not stated') : r.k, v: Number(r.n),
+          }))} label={t('By emirate')} />
         </section>
         <section className="adm-panel adm-pad">
-          <h2>By enquiry</h2>
+          <h2>{t('By enquiry')}</h2>
           <Donut rows={byType.map((r) => ({ k: r.k, v: Number(r.n) }))} label="Leads by enquiry type" />
         </section>
         <section className="adm-panel adm-pad">
-          <h2>How they found us</h2>
+          <h2>{t('How they found us')}</h2>
           <BarList rows={bySource.map((r) => ({ k: r.k, v: Number(r.n) }))} label="Leads by source" />
         </section>
       </div>
 
-      <h2>Latest enquiries</h2>
+      <h2>{t('Latest enquiries')}</h2>
       <div className="adm-panel">
         {recent.length === 0 ? (
           <p className="adm-empty">
@@ -169,8 +178,8 @@ export default async function Overview() {
           <table className="adm-t">
             <thead>
               <tr>
-                <th>Reference</th><th>Name</th><th>Company</th><th>Type</th>
-                <th>Qty</th><th>Emirate</th><th>Status</th><th>Received</th>
+                <th>{t('Reference')}</th><th>{t('Name')}</th><th>{t('Company')}</th><th>{t('Type')}</th>
+                <th>{t('Qty')}</th><th>{t('Emirate')}</th><th>{t('Status')}</th><th>{t('Received')}</th>
               </tr>
             </thead>
             <tbody>

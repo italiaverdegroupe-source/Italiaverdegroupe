@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type React from 'react';
+import AdminLang from './AdminLang';
+import { adminUi, type AdminKey } from '@/lib/admin-ui';
 
 /**
  * The console's navigation, down the side rather than across the top.
@@ -18,7 +20,7 @@ import type React from 'react';
  * one thing the layout cannot tell it from the server.
  */
 
-type Item = { href: string; label: string; icon: React.ReactElement };
+type Item = { href: string; label: AdminKey; icon: React.ReactElement };
 
 const I = (d: string, extra?: string) => (
   <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
@@ -28,7 +30,7 @@ const I = (d: string, extra?: string) => (
   </svg>
 );
 
-const GROUPS: { title: string; items: Item[] }[] = [
+const GROUPS: { title: AdminKey; items: Item[] }[] = [
   {
     title: 'Pipeline',
     items: [
@@ -75,8 +77,11 @@ function initials(name: string): string {
 export default function AdminNav({
   open, urgent, user,
 }: {
-  open: number; urgent: boolean; user: { name: string; role: string };
+  open: number; urgent: boolean;
+  user: { name: string; role: string; locale?: string | null };
 }) {
+  // The labels are keys; the person's own choice decides what they read as.
+  const t = adminUi(user.locale);
   const path = usePathname();
   // Your own account is reached from the chip at the foot of the column, not
   // from the list — so without this the one page in the console that is not in
@@ -87,10 +92,10 @@ export default function AdminNav({
 
   return (
     <>
-    <nav className="adm-nav" aria-label="Console">
+    <nav className="adm-nav" aria-label={t('Console')}>
       {GROUPS.map((g) => (
         <div className="adm-navgroup" key={g.title}>
-          <p className="adm-navtitle">{g.title}</p>
+          <p className="adm-navtitle">{t(g.title)}</p>
           <ul>
             {g.items.map((n) => {
               // Overview is the only one that must match exactly: every other
@@ -102,7 +107,7 @@ export default function AdminNav({
                   <Link href={n.href} aria-current={active ? 'page' : undefined}
                         className={active ? 'on' : undefined}>
                     <span className="adm-navicon">{n.icon}</span>
-                    <span className="adm-navlabel">{n.label}</span>
+                    <span className="adm-navlabel">{t(n.label)}</span>
                     {n.href === '/admin/alerts' && open > 0 && (
                       <span className="adm-badge" data-urgent={urgent}>{open}</span>
                     )}
@@ -115,17 +120,21 @@ export default function AdminNav({
       ))}
     </nav>
 
+    {/* Before the account chip, because somebody who cannot read the console
+        needs this before they can read anything else in it. */}
+    <AdminLang current={user.locale} />
+
     <div className="adm-me">
       <Link href="/admin/account" className={`adm-who${onAccount ? ' on' : ''}`}
             aria-current={onAccount ? 'page' : undefined}>
         <span className="adm-avatar" aria-hidden="true">{initials(user.name)}</span>
         <span className="adm-whotxt">
           <strong>{user.name}</strong>
-          <em>{user.role}</em>
+          <em>{t(user.role === 'owner' ? 'Owner' : user.role === 'sales' ? 'Sales' : 'Viewer')}</em>
         </span>
       </Link>
       <form action="/api/admin/logout" method="post">
-        <button type="submit" className="adm-out" title="Sign out" aria-label="Sign out">
+        <button type="submit" className="adm-out" title={t('Sign out')} aria-label={t('Sign out')}>
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
                strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

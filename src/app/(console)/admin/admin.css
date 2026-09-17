@@ -654,3 +654,21 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 .adm-field input[dir='rtl'], .adm-field textarea[dir='rtl'] {
   direction: rtl; text-align: right; font-size: 15px; line-height: 1.9;
 }
+
+/* ── the console's language control ── */
+.adm-lang {
+  display: flex; gap: 4px; padding: 10px 14px 0;
+  border-top: 1px solid var(--line-soft); margin-top: 8px;
+}
+.adm-lang-b {
+  flex: 1; min-height: 32px; padding: 0 6px;
+  border: 1px solid var(--line); border-radius: 4px;
+  background: transparent; cursor: pointer;
+  font: inherit; font-size: 12px; font-weight: 600; letter-spacing: .04em;
+  color: var(--fg-mute);
+}
+.adm-lang-b:hover { color: var(--fg); border-color: var(--fg-mute); }
+.adm-lang-b[data-on='true'] {
+  background: var(--olive-800); border-color: var(--olive-800); color: #FBF9F4;
+}
+@media (pointer: coarse) { .adm-lang-b { min-height: 44px; } }

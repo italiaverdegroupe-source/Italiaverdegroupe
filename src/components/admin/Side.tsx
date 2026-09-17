@@ -29,7 +29,8 @@ const Mark = () => (
  * whole grouped list at a size a thumb can hit.
  */
 export default function AdminSide({ open, urgent, user }: {
-  open: number; urgent: boolean; user: { name: string; role: string };
+  open: number; urgent: boolean;
+  user: { name: string; role: string; locale?: string | null };
 }) {
   const path = usePathname();
   const drawer = useRef<HTMLElement>(null);

@@ -26,7 +26,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           leave the width of the screen to the tables, which is what anybody
           actually spends the day reading. */}
       <AdminSide open={badge.open} urgent={badge.urgent > 0}
-                 user={{ name: user.name, role: user.role }} />
+                 user={{ name: user.name, role: user.role, locale: user.locale }} />
       <div className="adm-body">{children}</div>
     </div>
   );

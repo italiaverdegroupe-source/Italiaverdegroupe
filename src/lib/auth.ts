@@ -43,6 +43,8 @@ const hashToken = (t: string) => createHash('sha256').update(t).digest('hex');
 
 export type SessionUser = {
   id: number; email: string; name: string; role: 'owner' | 'sales' | 'viewer';
+  /** The console language this person chose. null until they choose one. */
+  locale: string | null;
 };
 
 export async function createSession(userId: number): Promise<string> {
@@ -69,7 +71,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return null;
   const rows = await query<SessionUser & { expired: boolean }>(
-    `SELECT u.id, u.email::text AS email, u.name, u.role,
+    `SELECT u.id, u.email::text AS email, u.name, u.role, u.locale,
             (s.expires_at <= now()) AS expired
        FROM sessions s JOIN users u ON u.id = s.user_id
       WHERE s.token_hash = $1 AND u.is_active`,
@@ -77,7 +79,10 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   );
   const row = rows[0];
   if (!row || row.expired) return null;
-  return { id: Number(row.id), email: row.email, name: row.name, role: row.role };
+  return {
+    id: Number(row.id), email: row.email, name: row.name,
+    role: row.role, locale: row.locale,
+  };
 }
 
 /**

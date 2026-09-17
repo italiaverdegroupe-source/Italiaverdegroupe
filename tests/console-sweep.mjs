@@ -6,6 +6,11 @@
 //
 import { chromium } from 'playwright';
 const B = process.env.BASE ?? 'http://127.0.0.1:3000';
+// The account these sign in as. It was the owner's real address, which meant
+// the only way to run the console suites was to know the owner's real
+// password — so in practice they were skipped, which is the same as not
+// having them. VG_USER lets a throwaway account stand in.
+const USER = process.env.VG_USER ?? 'italiaverdegroupe@gmail.com';
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 let failed = 0;
@@ -43,7 +48,7 @@ const contrast = await page.evaluate(() => {
 check('the heading is near-black ink', contrast.fg < 0.05, String(contrast.fg.toFixed(4)));
 
 // signing in still works through the new shell
-await page.fill('input[name=email]', 'italiaverdegroupe@gmail.com');
+await page.fill('input[name=email]', USER);
 await page.fill('input[name=password]', process.env.VG_PW);
 await page.click('button[type=submit]');
 await page.waitForTimeout(1800);

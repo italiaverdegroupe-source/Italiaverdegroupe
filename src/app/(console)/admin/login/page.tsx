@@ -18,7 +18,10 @@ const BACKDROP = imageFor('VG-PL-009');
 
 export const dynamic = 'force-dynamic';
 
-type Row = { id: string; email: string; name: string; role: 'owner'|'sales'|'viewer'; password_hash: string };
+type Row = {
+  id: string; email: string; name: string; role: 'owner'|'sales'|'viewer';
+  locale: string | null; password_hash: string;
+};
 
 async function signIn(formData: FormData) {
   'use server';
@@ -31,7 +34,7 @@ async function signIn(formData: FormData) {
   if (await isLocked(email)) redirect('/admin/login?e=locked');
 
   const rows = await query<Row>(
-    `SELECT id, email::text AS email, name, role, password_hash
+    `SELECT id, email::text AS email, name, role, locale, password_hash
        FROM users WHERE email = $1 AND is_active`, [email]);
   const user = rows[0];
 
@@ -50,7 +53,10 @@ async function signIn(formData: FormData) {
   await query('UPDATE users SET last_login_at = now() WHERE id = $1', [user.id]);
   await createSession(Number(user.id));
   await audit({
-    user: { id: Number(user.id), email: user.email, name: user.name, role: user.role },
+    user: {
+      id: Number(user.id), email: user.email, name: user.name,
+      role: user.role, locale: user.locale ?? null,
+    },
     action: 'auth.signed_in', entity: 'user', entityId: user.id,
   });
   redirect('/admin');
