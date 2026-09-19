@@ -200,6 +200,20 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
   white-space: nowrap;
 }
 .adm-t td { padding: 12px 14px; border-bottom: 1px solid #F0EDE4; vertical-align: top; }
+/* Two ways of reaching the same person, on one line — and it has to stay one
+   line. Allowed to wrap, the two links stack again on a narrow column and the
+   cell is back to two 44px targets. The panel scrolls sideways, so the column
+   can have the width instead; the row cannot have the height. */
+.adm-contact {
+  display: flex; flex-wrap: nowrap; align-items: center;
+  gap: 0 14px; white-space: nowrap;
+}
+
+/* The first column of every table in this console is the thing's code, and a
+   code must never break: "VG-7XORR6UPZ" split across two lines is unreadable,
+   unsearchable and, on a phone, the single biggest reason a row was three
+   lines tall. It is the identifier — it gets the width it needs. */
+.adm-t td:first-child, .adm-t th:first-child { white-space: nowrap; }
 .adm-t tbody tr:hover { background: #FBFAF6; }
 .adm-t a { color: inherit; font-weight: 500; }
 .adm-t .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -725,3 +739,78 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
   justify-content: flex-end;
 }
 @media print { .adm-danger { display: none !important; } }
+
+/* ── the console on a phone ────────────────────────────────────
+ *
+ * Everything above is sized for a desk. On a 390px screen the same numbers
+ * read as shouting: the Overview needed two and a half screens to show four
+ * figures and a chart, and a list of leads ran to four thousand pixels.
+ *
+ * The cause is a mismatch, not a taste. The console sets its own base at
+ * 14.5px, but every heading and every figure is written in `rem` — and `rem`
+ * is the ROOT's 16px, not this element's 14.5. So the body text is one step
+ * down from normal while the headings are one step up from it, and the gap
+ * between them is a size and a half. Wide enough that nobody notices; narrow
+ * enough that a phone has no room for it.
+ *
+ * So this is not "make it smaller". It closes that gap and takes back the
+ * padding that a mouse needs and a thumb does not — the space BETWEEN things,
+ * never the things a thumb has to hit. Every button, link and field keeps its
+ * 44px; only type, gutters and cell padding move.
+ *
+ * 640px rather than the 900px the drawer uses: a tablet in landscape has the
+ * room and should keep the desk layout. This is for the phone.
+ */
+@media (max-width: 640px) {
+  /* The frame. 72px of bottom padding is a desk habit; a phone has a home
+     indicator doing the same job. */
+  .adm-body { padding: 16px 14px 44px; }
+
+  /* Headings, brought back onto the console's own scale. */
+  .adm h1 { font-size: 1.42rem; margin-bottom: .14em; }
+  .adm h2 { font-size: 1.04rem; margin-bottom: .5em; }
+  .adm-sub { font-size: .84rem; margin-bottom: 16px; line-height: 1.5; }
+
+  /* The figures. Four cards were one and a half screens; they are two rows of
+     two now, and the number is still the loudest thing on each. */
+  .adm-cards {
+    gap: 8px; margin-bottom: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  }
+  .adm-card { padding: 11px 12px; border-radius: 5px; }
+  .adm-card b { font-size: 1.4rem; }
+  /* The label keeps its size. .64rem saved two pixels a card and put a
+     twenty-seven-character one — "win rate — none decided yet" — at 10.2px,
+     under the floor this console holds itself to for anything that is read
+     rather than glanced at. tests/mobile.test.mjs said so. */
+  .adm-card span { margin-top: 3px; letter-spacing: .07em; }
+
+  /* Tables. The cells were padded for a pointer that hovers; the rows are
+     what a thumb scrolls past, so the padding comes off the sides where it
+     costs the most horizontal room.
+     `width: auto` is the one that matters. At 100% the browser crams ten
+     columns into 362px, every cell wraps two or three times, and a row that
+     holds one line of text is 110px tall. The panel already scrolls
+     sideways — it was built to — so the table may as well be its own width
+     and the rows be one line each. */
+  table.adm-t { font-size: .82rem; width: auto; min-width: 100%; }
+  .adm-t th { padding: 8px 10px; font-size: .64rem; }
+  /* 1.5 is right for a paragraph and loose for a cell. A company name that
+     wraps to three lines pays for the difference three times. */
+  .adm-t td { padding: 9px 10px; line-height: 1.35; }
+  .adm-empty { padding: 30px 16px; }
+
+  /* Panels and the space between them. */
+  .adm-panel { border-radius: 5px; }
+  .adm-pad { padding: 14px !important; }
+  .adm-two { gap: 16px; }
+  /* Nine filters over two rows was half a screen before any data. They keep
+     their 44px of height — a thumb still has to hit them — and give back the
+     width. */
+  .adm-filters { gap: 6px; margin-bottom: 14px; }
+  .adm-chip { padding-inline: 10px; font-size: .78rem; }
+
+  /* The drawer took three-quarters of the screen, which left no sight of the
+     page it was covering — and nothing to aim at to dismiss it. */
+  .adm-side { width: min(272px, 78vw); }
+}

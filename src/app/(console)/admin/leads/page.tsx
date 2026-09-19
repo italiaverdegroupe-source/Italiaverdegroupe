@@ -96,9 +96,15 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
                   <td><Link href={`/admin/leads/${l.reference}`}>{l.reference}</Link></td>
                   <td>{l.name}</td>
                   <td>{l.company ?? '—'}</td>
+                  {/* Side by side, not one above the other. On a phone every
+                      link in a table is given a 44px tap target, so two
+                      stacked links made an 88px cell and a row 107px tall —
+                      five leads to a screen. In a row they share one. */}
                   <td>
-                    <a href={`mailto:${l.email}`}>{l.email}</a>
-                    {l.phone && <><br /><a href={`tel:${l.phone}`}>{l.phone}</a></>}
+                    <span className="adm-contact">
+                      <a href={`mailto:${l.email}`}>{l.email}</a>
+                      {l.phone && <a href={`tel:${l.phone}`}>{l.phone}</a>}
+                    </span>
                   </td>
                   <td>{l.enquiry_type}</td>
                   <td>{l.product_ref ?? '—'}</td>
