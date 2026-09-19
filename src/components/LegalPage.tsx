@@ -250,6 +250,13 @@ export default function LegalPage({
         }
         .lgl-body dd { margin: .2rem 0 0; color: var(--fg-soft); }
 
+        /* The mailbox and the telephone number on a policy page were a 20px
+           line of text. On a phone that is not a target, and these are the
+           addresses somebody uses when they want to exercise a right the page
+           has just told them they have. */
+        .lgl-contact a { display: inline-flex; align-items: center; min-height: 34px; }
+        @media (pointer: coarse) { .lgl-contact a { min-height: 44px; } }
+
         .lgl-note {
           margin: 1.2rem 0; padding: 1rem 1.15rem;
           background: var(--sand-100); border: 1px solid var(--line);
@@ -308,7 +315,7 @@ export function LegalContact({ site, locale = DEFAULT_LOCALE }: {
         </ul>
       )}
       {hasChannel ? (
-        <ul>
+        <ul className="lgl-contact">
           {site.email && (
             <li>{t('legal.email')} <a href={`mailto:${site.email}`}>{site.email}</a></li>
           )}

@@ -47,7 +47,12 @@ export default async function WhatsAppButton() {
           position: fixed; z-index: 60;
           inset-inline-end: clamp(14px, 2.2vw, 26px); bottom: clamp(14px, 2.2vw, 26px);
           display: inline-flex; align-items: center; gap: 9px;
-          padding: 13px 18px 13px 15px; border-radius: 999px;
+          /* 44px, and not by accident. The padding alone produced 43 — one
+             pixel under the floor a thumb needs, on the one control this
+             market actually uses. It was invisible until a number was
+             configured, because until then the button never rendered at all;
+             tests/mobile.test.mjs found it the moment it did. */
+          padding: 13px 18px 13px 15px; min-height: 44px; border-radius: 999px;
           background: #1F7A44; color: #fff; text-decoration: none;
           font-size: .9rem; font-weight: 500; letter-spacing: .01em;
           box-shadow: 0 14px 34px -12px rgb(10 30 18 / .55),

@@ -10,13 +10,25 @@ export const site = {
   description:
     'We import premium trees and plants from Italian nurseries and supply landscaping companies, developers, hotels and private estates across the United Arab Emirates.',
 
-  // Contact — deliberately empty. The UAE number and the mailbox both land
-  // with the domain, and until then no page should advertise a channel that
-  // nobody is answering. `fallbackContact()` below degrades safely.
+  // Contact.
+  //
+  // These are REAL and answered, which is the only reason they are here: the
+  // rule everywhere on this site is that a channel is advertised when somebody
+  // picks it up and not before. The telephone line is still empty for exactly
+  // that reason.
+  //
+  // WhatsApp is an Italian number because the owner is Italian and answers it
+  // himself. That is a fact about this company rather than an oversight, and
+  // nothing on the site claims it is a UAE line.
+  //
+  // They live here as compiled defaults rather than only in the settings table
+  // so the footer still has a way to reach the company when the database is
+  // unreachable — a contact detail is the last thing that should disappear in
+  // an outage. The console overrides them the moment anybody edits them.
   phone: '',
-  whatsapp: '',
-  whatsappLabel: '',
-  email: '',
+  whatsapp: '393517478254',
+  whatsappLabel: '+39 351 747 8254',
+  email: 'italiaverdegroupe@gmail.com',
 
   // The registered office, for the legal pages. Empty until there is one to
   // state: an invented address on a privacy policy is the one lie that makes

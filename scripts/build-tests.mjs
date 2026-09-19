@@ -27,6 +27,7 @@ const TARGETS = [
   { file: 'quotes', format: 'cjs' },
   { file: 'reports', format: 'cjs' },
   { file: 'settings', format: 'cjs' },
+  { file: 'site', format: 'cjs' },
   { file: 'site-copy', format: 'cjs' },
   { file: 'rate-limit', format: 'cjs' },
   { file: 's3', format: 'cjs' },
@@ -39,7 +40,12 @@ const TARGETS = [
 ];
 
 /** tests/content.test.mjs renders this one to check what it lets through. */
-const COMPONENTS = [{ from: 'src/components/Prose.tsx', file: 'prose', format: 'cjs' }];
+const COMPONENTS = [
+  { from: 'src/components/Prose.tsx', file: 'prose', format: 'cjs' },
+  // The social marks. A footer that silently drops the only route to the
+  // company's Instagram is the kind of defect nobody reports.
+  { from: 'src/components/Social.tsx', file: 'social', format: 'cjs' },
+];
 
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });

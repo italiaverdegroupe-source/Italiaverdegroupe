@@ -86,7 +86,7 @@ export default function Social({ links, className = '' }: {
         <li key={m.key}>
           <a href={links[m.key]} target="_blank" rel="noopener noreferrer me"
              aria-label={m.name} title={m.name}>
-            <svg viewBox="0 0 24 24" width="19" height="19" fill="none"
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none"
                  stroke="currentColor" strokeWidth="1.5"
                  strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               {m.path}
@@ -101,7 +101,11 @@ export default function Social({ links, className = '' }: {
           display: grid; place-items: center;
           width: 42px; height: 42px; border-radius: 50%;
           color: inherit; text-decoration: none;
-          border: 1px solid currentColor; opacity: .62;
+          /* .62 was measured against the footer's olive and came out faint —
+             the mark read as a smudge at 19px rather than as a logo somebody
+             recognises. These are the only way to a company's Instagram from
+             the site, so they have to be legible, not merely present. */
+          border: 1px solid currentColor; opacity: .78;
           transition: opacity .18s ease, background .18s ease, transform .18s ease;
         }
         .soc a:hover { opacity: 1; background: rgb(255 255 255 / .08); transform: translateY(-1px); }
