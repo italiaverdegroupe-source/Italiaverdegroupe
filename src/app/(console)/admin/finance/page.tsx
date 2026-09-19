@@ -37,26 +37,55 @@ async function raiseInvoice(formData: FormData) {
   const code = await nextCode('INV', 'invoices');
 
   const rows = await query<{ id: string }>(
+    // customer_id comes off the ORDER rather than being looked up again: the
+    // order is where the relationship was established, and an invoice that
+    // resolved its own customer could bill a different row than the order it
+    // came from. Without it the invoice document had nobody to bill and the
+    // ageing report had nobody to chase.
     `INSERT INTO invoices
-       (code, order_id, kind, status, vat_enabled, vat_rate, trn_at_issue, lpo_number,
+       (code, order_id, customer_id, kind, status, vat_enabled, vat_rate,
+        trn_at_issue, lpo_number,
         issued_on, due_on, net_aed, vat_aed, total_aed, retention_aed,
         pint_status, notes)
-     VALUES ($1,$2,$3,'issued',$4,$5,$6,$7, current_date,
-             current_date + ($8 || ' days')::interval,
-             $9,$10,$11,$12,
-             CASE WHEN $4 THEN 'not_submitted' ELSE 'not_applicable' END, $13)
+     VALUES ($1,$2,$3,$4,'issued',$5,$6,$7,$8, current_date,
+             current_date + ($9 || ' days')::interval,
+             $10,$11,$12,$13,
+             CASE WHEN $5 THEN 'not_submitted' ELSE 'not_applicable' END, $14)
      RETURNING id`,
-    [code, o.id, kind, o.vat_enabled, o.vat_rate, cfg.trn || null, o.lpo_number,
+    [code, o.id, o.customer_id ?? null, kind, o.vat_enabled, o.vat_rate, cfg.trn || null, o.lpo_number,
      String(formData.get('terms_days') ?? '30'),
      Math.round(net * 100) / 100, vat, Math.round((net + vat) * 100) / 100, retention,
      String(formData.get('notes') ?? '').trim() || null]);
 
-  await query(
-    `INSERT INTO invoice_lines (invoice_id, line_no, description, quantity, unit_price)
-     VALUES ($1, 1, $2, 1, $3)`,
-    [rows[0].id,
-     kind === 'advance' ? `Advance ${o.advance_pct}% against order ${o.code}` : `Order ${o.code}`,
-     Math.round(net * 100) / 100]);
+  // ── what the invoice actually says was sold ────────────────
+  //
+  // Every invoice used to carry one line reading "Order ORD-000004". That is
+  // a reference, not a description, and it fails the document twice over: a
+  // customer cannot check an invoice against what they received, and a tax
+  // invoice is required to describe the goods. It also made the totals
+  // unauditable — a single figure with nothing behind it.
+  //
+  // A full invoice now copies the order's own lines. An ADVANCE or a
+  // RETENTION invoice keeps the single line, and correctly: it bills a
+  // percentage of the order rather than particular trees, and itemising it
+  // would state that those specific specimens are being charged for in full.
+  if (kind === 'tax_invoice' || kind === 'proforma') {
+    await query(
+      `INSERT INTO invoice_lines
+         (invoice_id, line_no, description, quantity, unit_price, discount_pct)
+       SELECT $1, line_no, description, quantity, unit_price, discount_pct
+         FROM order_items WHERE order_id = $2 ORDER BY line_no`,
+      [rows[0].id, o.id]);
+  } else {
+    await query(
+      `INSERT INTO invoice_lines (invoice_id, line_no, description, quantity, unit_price)
+       VALUES ($1, 1, $2, 1, $3)`,
+      [rows[0].id,
+       kind === 'advance'
+         ? `Advance ${o.advance_pct}% against order ${o.code}`
+         : `Retention against order ${o.code}`,
+       Math.round(net * 100) / 100]);
+  }
 
   await audit({ user, action: 'invoice.issued', entity: 'invoice', entityId: code,
                 after: { order: o.code, kind, total: net + vat } });
@@ -211,7 +240,10 @@ export default async function FinancePage() {
             <tbody>
               {invoices.map((i) => (
                 <tr key={i.code}>
-                  <td>{i.code}</td>
+                  {/* The invoice code is the way to the document that gets
+                      sent. Before this it was plain text, and the sheet it
+                      points at did not exist. */}
+                  <td><Link href={`/admin/finance/${i.code}/print`}>{i.code}</Link></td>
                   <td>{i.order_code ? <Link href={`/admin/orders/${i.order_code}`}>{i.order_code}</Link> : '—'}</td>
                   <td>{st(i.kind)}</td>
                   <td><span className={`pill pill-${i.status === 'paid' ? 'won' : i.status === 'overdue' ? 'lost' : i.status === 'part_paid' ? 'negotiation' : 'quoted'}`}>{st(i.status)}</span></td>

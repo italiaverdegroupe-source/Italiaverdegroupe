@@ -115,14 +115,57 @@ export async function orderFromQuote(
          FROM orders WHERE code LIKE 'ORD-%'`);
     const code = `ORD-${String(seq.n).padStart(6, '0')}`;
 
+    // ── the customer, which nothing was creating ────────────────
+    //
+    // A quotation holds its customer as free text, because at that stage there
+    // may be no relationship yet — somebody who asks for a price is not
+    // necessarily somebody the company has an account for. An ORDER is the
+    // point that changes, and the code copied the same free text onto the
+    // order and left `customer_id` NULL.
+    //
+    // Everything that reads a customer therefore read nothing: the invoice
+    // document had no name to bill, the ageing report joined to a row that did
+    // not exist, credit limits could not be checked against anybody, and the
+    // customers table stayed on its single seeded row no matter how much
+    // business went through. Found by walking the chain to the end and looking
+    // at the document a customer would actually be sent.
+    //
+    // Matched on EMAIL, lower-cased, because it is the one field that is both
+    // usually present and actually unique — matching on a company name would
+    // merge two different "Al Nahda Landscaping"s, and matching on nothing
+    // would create a new customer for every repeat order, which is the same
+    // failure pointed the other way. No email means a new record, which is
+    // honest: without one there is nothing to recognise them by.
+    const email = String(q.customer_email ?? '').trim().toLowerCase();
+    let customerId: string | null = null;
+    if (email) {
+      const { rows: [hit] } = await client.query(
+        `SELECT id FROM customers WHERE lower(email) = $1 LIMIT 1`, [email]);
+      customerId = hit?.id ?? null;
+    }
+    if (!customerId) {
+      const { rows: [cseq] } = await client.query(
+        `SELECT COALESCE(max(substring(code from '[0-9]+$')::bigint), 0) + 1 AS n
+           FROM customers WHERE code LIKE 'CUS-0%'`);
+      const { rows: [made] } = await client.query(
+        `INSERT INTO customers (code, name, company, email, phone, emirate)
+         VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,
+        [`CUS-${String(cseq.n).padStart(6, '0')}`,
+         q.customer_name ?? '—', q.customer_company ?? null,
+         q.customer_email ?? null, q.customer_phone ?? null, q.emirate ?? null]);
+      customerId = made.id;
+    }
+
     const { rows: [order] } = await client.query(
       `INSERT INTO orders
-         (code, quote_id, customer_name, customer_company, customer_email, customer_phone,
+         (code, quote_id, customer_id,
+          customer_name, customer_company, customer_email, customer_phone,
           emirate, project_name, site_address, lpo_number, status, currency,
           vat_enabled, vat_rate, advance_pct, retention_pct, required_by, created_by)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'confirmed',$11,$12,$13,$14,$15,$16,$17)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'confirmed',$12,$13,$14,$15,$16,$17,$18)
        RETURNING id, code`,
-      [code, q.id, q.customer_name, q.customer_company, q.customer_email, q.customer_phone,
+      [code, q.id, customerId,
+       q.customer_name, q.customer_company, q.customer_email, q.customer_phone,
        q.emirate, q.project_name, extra.site_address ?? null, extra.lpo_number ?? null,
        q.currency, q.vat_enabled, q.vat_rate,
        extra.advance_pct ?? 0, extra.retention_pct ?? 0, extra.required_by ?? null, user.id]);
@@ -310,3 +353,70 @@ export const creditPosition = (customerId: string) =>
          WHERE i.customer_id = c.id AND i.status NOT IN ('draft','cancelled','paid')
       ) o ON true
      WHERE c.id = $1`, [customerId]);
+
+/**
+ * One invoice, with everything a document needs to state about it.
+ *
+ * Written when the invoice turned out to have no printable sheet at all: it
+ * could be raised, paid against and aged in the console, and never sent to the
+ * customer it billed. The customer's own details come from the row rather than
+ * from the order, because an invoice is a historical record — re-reading a
+ * customer who has since moved would rewrite a document already sent.
+ */
+export type InvoiceDoc = {
+  code: string; kind: string; status: string;
+  issued_on: string | null; due_on: string | null;
+  currency: string; vat_enabled: boolean; vat_rate: string;
+  trn_at_issue: string | null; lpo_number: string | null; notes: string | null;
+  net: string; vat: string; total: string; retention: string;
+  paid: string; outstanding: string;
+  order_code: string | null; site_address: string | null;
+  customer_name: string | null; customer_company: string | null;
+  customer_email: string | null; customer_phone: string | null;
+  customer_address: string | null; customer_trn: string | null;
+  customer_emirate: string | null;
+};
+
+export async function getInvoice(code: string): Promise<InvoiceDoc | undefined> {
+  const rows = await query<InvoiceDoc>(`
+    SELECT i.code, i.kind, i.status,
+           i.issued_on::text, i.due_on::text,
+           i.currency, i.vat_enabled, i.vat_rate::text,
+           i.trn_at_issue, i.lpo_number, i.notes,
+           i.net_aed::text AS net, i.vat_aed::text AS vat,
+           i.total_aed::text AS total, i.retention_aed::text AS retention,
+           COALESCE(p.amount, 0)::text AS paid,
+           (i.total_aed - COALESCE(p.amount, 0))::text AS outstanding,
+           o.code AS order_code, o.site_address,
+           c.name AS customer_name, c.company AS customer_company,
+           c.email AS customer_email, c.phone AS customer_phone,
+           c.address AS customer_address, c.trn AS customer_trn,
+           c.emirate AS customer_emirate
+      FROM invoices i
+      LEFT JOIN orders o    ON o.id = i.order_id
+      LEFT JOIN customers c ON c.id = i.customer_id
+      LEFT JOIN (SELECT invoice_id, sum(amount_aed) AS amount
+                   FROM payments GROUP BY invoice_id) p ON p.invoice_id = i.id
+     WHERE i.code = $1`, [code]);
+  return rows[0];
+}
+
+export const getInvoiceLines = (code: string) =>
+  query<{ line_no: number; description: string; quantity: number;
+          unit_price: string; discount_pct: string }>(`
+    SELECT l.line_no, l.description, l.quantity,
+           l.unit_price::text, l.discount_pct::text
+      FROM invoice_lines l
+      JOIN invoices i ON i.id = l.invoice_id
+     WHERE i.code = $1
+     ORDER BY l.line_no`, [code]);
+
+/** What has been paid against an invoice, so the document can show the balance. */
+export const getInvoicePayments = (code: string) =>
+  query<{ received_on: string; amount: string; method: string | null;
+          reference: string | null }>(`
+    SELECT p.received_on::text, p.amount_aed::text AS amount, p.method, p.reference
+      FROM payments p
+      JOIN invoices i ON i.id = p.invoice_id
+     WHERE i.code = $1
+     ORDER BY p.received_on, p.id`, [code]);

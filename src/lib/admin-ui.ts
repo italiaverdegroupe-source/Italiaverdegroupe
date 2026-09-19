@@ -90,7 +90,9 @@ export const ADMIN_EN = [
   "BL number",
   "Back up now",
   "Backups",
+  "Balance due",
   "Basis",
+  "Billed to",
   "Body",
   "Bucket",
   "By emirate",
@@ -156,6 +158,7 @@ export const ADMIN_EN = [
   "Deliver to",
   "Delivered",
   "Delivered by value",
+  "Delivered to",
   "Deliveries",
   "Delivery",
   "Delivery terms",
@@ -349,6 +352,7 @@ export const ADMIN_EN = [
   "Password — at least 10 characters",
   "Payment terms",
   "Payment terms (days)",
+  "Payments received",
   "Permit",
   "Phone",
   "Pick a catalogue reference.",
@@ -362,6 +366,7 @@ export const ADMIN_EN = [
   "Prices, discounts and the landed-cost snapshot are copied exactly as quoted — nothing is re-entered and nothing is re-derived.",
   "Print / save as PDF",
   "Profit",
+  "Proforma invoice",
   "Project",
   "Proof note",
   "Publish date",
@@ -489,6 +494,7 @@ export const ADMIN_EN = [
   "TOTAL",
   "TRN",
   "Tables",
+  "Tax invoice",
   "Test",
   "Testimonials",
   "That code does not match anything in the system. It may have been cancelled, renumbered, or mistyped.",
@@ -537,6 +543,7 @@ export const ADMIN_EN = [
   "Update status",
   "Updated",
   "Urgent",
+  "VAT",
   "VAT is off and no TRN is set, so invoices carry no VAT line and are marked not applicable for e-invoicing. UAE e-invoicing is Peppol PINT AE — structured XML through an accredited provider, not a PDF — and the identifiers it needs are already on each invoice, so switching it on is a mapping rather than a migration.",
   "VAT is off, so quotations carry no VAT line and state “exclusive of VAT where applicable”. Switch it on in settings once a TRN is issued.",
   "VAT is off.",
@@ -595,6 +602,7 @@ export const ADMIN_EN = [
   "You have read-only access.",
   "Your account",
   "Your name",
+  "Your reference",
   "Zero because no landed cost has been recorded against stock yet — cost a shipment and this fills in.",
   "advance — the agreed percentage up front",
   "at least 10 characters",
@@ -776,8 +784,12 @@ const it: Partial<Record<AdminKey, string>> = {
     "Esegui il backup adesso",
   "Backups":
     "Backup",
+  "Balance due":
+    "Saldo dovuto",
   "Basis":
     "Base di riparto",
+  "Billed to":
+    "Fatturato a",
   "Body":
     "Testo",
   "Bucket":
@@ -908,6 +920,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Consegnato",
   "Delivered by value":
     "Consegnato a valore",
+  "Delivered to":
+    "Consegnato a",
   "Deliveries":
     "Consegne",
   "Delivery":
@@ -1294,6 +1308,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Termini di pagamento",
   "Payment terms (days)":
     "Termini di pagamento (giorni)",
+  "Payments received":
+    "Pagamenti ricevuti",
   "Permit":
     "Permesso",
   "Phone":
@@ -1320,6 +1336,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Stampa / salva in PDF",
   "Profit":
     "Utile",
+  "Proforma invoice":
+    "Fattura proforma",
   "Project":
     "Progetto",
   "Proof note":
@@ -1574,6 +1592,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Partita IVA (TRN)",
   "Tables":
     "Tabelle",
+  "Tax invoice":
+    "Fattura fiscale",
   "Test":
     "Prova",
   "Testimonials":
@@ -1670,6 +1690,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Aggiornato",
   "Urgent":
     "Urgente",
+  "VAT":
+    "IVA",
   "VAT is off and no TRN is set, so invoices carry no VAT line and are marked not applicable for e-invoicing. UAE e-invoicing is Peppol PINT AE — structured XML through an accredited provider, not a PDF — and the identifiers it needs are already on each invoice, so switching it on is a mapping rather than a migration.":
     "L’IVA è disattivata e non è impostata alcuna partita IVA, quindi le fatture non riportano riga IVA e sono marcate come non applicabili alla fatturazione elettronica. Negli Emirati la fatturazione elettronica è Peppol PINT AE — XML strutturato tramite un fornitore accreditato, non un PDF — e gli identificativi richiesti sono già su ogni fattura, perciò attivarla è una mappatura e non una migrazione.",
   "VAT is off, so quotations carry no VAT line and state “exclusive of VAT where applicable”. Switch it on in settings once a TRN is issued.":
@@ -1786,6 +1808,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Il tuo account",
   "Your name":
     "Il tuo nome",
+  "Your reference":
+    "Vostro riferimento",
   "Zero because no landed cost has been recorded against stock yet — cost a shipment and this fills in.":
     "Zero perché non è ancora stato registrato alcun costo sdoganato sulla giacenza: costificate una spedizione e questo si popola.",
   "advance — the agreed percentage up front":
@@ -2006,8 +2030,12 @@ const ar: Partial<Record<AdminKey, string>> = {
     "خذ نسخة احتياطية الآن",
   "Backups":
     "النسخ الاحتياطية",
+  "Balance due":
+    "الرصيد المستحق",
   "Basis":
     "أساس التوزيع",
+  "Billed to":
+    "الفاتورة باسم",
   "Body":
     "النص",
   "Bucket":
@@ -2138,6 +2166,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "تم التسليم",
   "Delivered by value":
     "المسلَّم بالقيمة",
+  "Delivered to":
+    "التسليم إلى",
   "Deliveries":
     "التسليمات",
   "Delivery":
@@ -2524,6 +2554,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "شروط الدفع",
   "Payment terms (days)":
     "شروط الدفع (أيام)",
+  "Payments received":
+    "الدفعات المستلمة",
   "Permit":
     "التصريح",
   "Phone":
@@ -2550,6 +2582,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "اطبع / احفظ PDF",
   "Profit":
     "الربح",
+  "Proforma invoice":
+    "فاتورة مبدئية",
   "Project":
     "المشروع",
   "Proof note":
@@ -2804,6 +2838,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "الرقم الضريبي",
   "Tables":
     "الجداول",
+  "Tax invoice":
+    "فاتورة ضريبية",
   "Test":
     "اختبار",
   "Testimonials":
@@ -2900,6 +2936,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "حُدّث",
   "Urgent":
     "عاجل",
+  "VAT":
+    "ضريبة القيمة المضافة",
   "VAT is off and no TRN is set, so invoices carry no VAT line and are marked not applicable for e-invoicing. UAE e-invoicing is Peppol PINT AE — structured XML through an accredited provider, not a PDF — and the identifiers it needs are already on each invoice, so switching it on is a mapping rather than a migration.":
     "الضريبة غير مفعّلة ولا رقم ضريبي مُدخَل، فالفواتير لا تحمل بند ضريبة وتُعلَّم غير منطبقة للفوترة الإلكترونية. والفوترة الإلكترونية في الإمارات هي Peppol PINT AE — ملف XML منظَّم عبر مزوّد معتمد، لا ملف PDF — والمعرّفات التي تحتاجها موجودة أصلًا على كل فاتورة، فتفعيلها ربطُ حقولٍ لا ترحيلُ نظام.",
   "VAT is off, so quotations carry no VAT line and state “exclusive of VAT where applicable”. Switch it on in settings once a TRN is issued.":
@@ -3016,6 +3054,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "حسابك",
   "Your name":
     "اسمك",
+  "Your reference":
+    "مرجعكم",
   "Zero because no landed cost has been recorded against stock yet — cost a shipment and this fills in.":
     "صفر لأنه لم تُسجَّل تكلفة نهائية على المخزون بعد — احسب تكلفة شحنة وسيمتلئ هذا.",
   "advance — the agreed percentage up front":

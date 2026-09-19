@@ -4,6 +4,7 @@ import { getQuote, getQuoteItems, totalsOf } from '@/lib/quotes';
 import { getSettings } from '@/lib/settings';
 import { fmtDay } from '@/components/admin/bits';
 import { adminUi } from '@/lib/admin-ui';
+import Letterhead from '@/components/admin/Letterhead';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,11 +42,9 @@ export default async function PrintQuote({
   return (
     <div className="sheet">
       <header className="sh-head">
-        <div>
-          <p className="sh-brand">{site.legalName}</p>
-          <p className="sh-tag">{site.tagline}</p>
-          {q.trn_at_issue && <p className="sh-meta">TRN {q.trn_at_issue}</p>}
-        </div>
+        {/* Was the name, the tagline and a TRN — no address, no licence and no
+            way to reply to the document. See Letterhead. */}
+        <Letterhead site={site} trnAtIssue={q.trn_at_issue} />
         <div className="sh-right">
           <h1>{tr('Quotation')}</h1>
           <p className="sh-meta">{q.code} &nbsp;·&nbsp; {tr('version {n}', { n: q.version })}</p>
@@ -120,8 +119,11 @@ export default async function PrintQuote({
           { days: site.quoteValidityDays })}
       </p>
 
+      {/* A quotation is often printed, and a second sheet gets separated from
+          the first. Whatever page somebody is holding says who sent it and
+          which document it belongs to. */}
       <footer className="sh-foot">
-        <span>{site.legalName}</span>
+        <span>{site.legalName}{site.email ? ` · ${site.email}` : ''}</span>
         <span>{q.code} v{q.version}</span>
       </footer>
 

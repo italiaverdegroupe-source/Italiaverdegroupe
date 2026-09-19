@@ -64,6 +64,13 @@ export default async function SettingsPage() {
     ['Registered office', ['address', 'city', 'country']],
     ['Social',   ['instagram', 'linkedin', 'facebook', 'youtube', 'tiktok']],
     ['Commerce', ['currency', 'quoteValidityDays', 'trn', 'vatEnabled', 'vatRate']],
+    // The half of the company's story a search engine cannot infer: new in the
+    // Emirates, not new in Italy. Added to the dictionary and to site.ts in one
+    // commit and to no group in any of them, so five fields existed, were read
+    // by the structured data, and could not be typed into from anywhere. The
+    // orphan check below is what caught it — on the screen, in production,
+    // rather than in a review.
+    ['History', ['foundedIn', 'foundedAt', 'italianName', 'italianUrl', 'italianSince']],
   ];
 
   // Every editable field belongs in a group or it is not on this screen at

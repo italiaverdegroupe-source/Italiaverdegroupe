@@ -672,3 +672,39 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
   background: var(--olive-800); border-color: var(--olive-800); color: #FBF9F4;
 }
 @media (pointer: coarse) { .adm-lang-b { min-height: 44px; } }
+
+/* ── what leaves the building ──────────────────────────────────
+ *
+ * A quotation and an invoice are printed, saved as PDF and emailed to a
+ * customer. Everything that is console rather than document has to be gone by
+ * then — and it was not: the sidebar printed down the left of every quotation
+ * ever sent, carrying this company's navigation, its alert count and the word
+ * "Backups" onto a document in a buyer's inbox.
+ *
+ * The print sheets hid `.adm-bar`, the narrow-screen bar, and nobody had
+ * looked at what a wide screen actually prints. Found by emulating print media
+ * rather than by looking at the page on screen, which is the only way this is
+ * ever visible.
+ *
+ * Here rather than in each sheet, because it is true of any document this
+ * console ever grows, and a rule copied into two files is a rule that will be
+ * missing from the third.
+ */
+@media print {
+  .adm-side,
+  .adm-bar,
+  .adm-lang,
+  .adm-user { display: none !important; }
+
+  /* The main column was indented to clear a sidebar that is no longer there,
+     which on A4 pushed the sheet off the right edge of the page. */
+  .adm-main,
+  .adm-body {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+  }
+
+  html, body { background: #fff !important; }
+}
