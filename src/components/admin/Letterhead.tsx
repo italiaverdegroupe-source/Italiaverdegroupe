@@ -1,4 +1,5 @@
 import type { Settings } from '@/lib/settings';
+import type { adminUi } from '@/lib/admin-ui';
 
 /**
  * Who is issuing this document, at the top of every sheet a customer keeps.
@@ -22,8 +23,15 @@ import type { Settings } from '@/lib/settings';
  * a buyer the company has no licence, which is a worse statement than silence
  * and, once there is one, simply wrong.
  */
-export default function Letterhead({ site, trnAtIssue }: {
+export default function Letterhead({ site, trnAtIssue, t }: {
   site: Settings;
+  /**
+   * The translator the document is being issued with. "Trade licence" and
+   * "TRN" were English on a sheet that is otherwise entirely Italian or
+   * Arabic — two words a customer would have to guess at on the one line
+   * that says who they are dealing with.
+   */
+  t: ReturnType<typeof adminUi>;
   /**
    * The TRN as it stood when the document was ISSUED, not as it stands today.
    * An invoice is a historical record: re-reading the current registration
@@ -55,9 +63,9 @@ export default function Letterhead({ site, trnAtIssue }: {
       {/* The registrations. Absent until they exist; printed the day they do. */}
       {(licence || trn) && (
         <p className="lh-line">
-          {licence && <>Trade licence {licence}</>}
+          {licence && <>{t('Trade licence {n}', { n: licence })}</>}
           {licence && trn && <> · </>}
-          {trn && <>TRN {trn}</>}
+          {trn && <>{t('TRN {n}', { n: trn })}</>}
         </p>
       )}
 
@@ -67,7 +75,7 @@ export default function Letterhead({ site, trnAtIssue }: {
         <p className="lh-line">
           {site.email}
           {site.email && (site.whatsappLabel || site.phone) && <> · </>}
-          {site.whatsappLabel ? `WhatsApp ${site.whatsappLabel}` : site.phone}
+          {site.whatsappLabel ? t('WhatsApp {n}', { n: site.whatsappLabel }) : site.phone}
         </p>
       )}
 

@@ -11,6 +11,8 @@ import { listSpecimens } from '@/lib/inventory';
 import { getAllProducts } from '@/lib/products';
 import { fmtDate, fmtDay } from '@/components/admin/bits';
 import { adminUi, adminStatus } from '@/lib/admin-ui';
+import DeleteControls from '@/components/admin/DeleteControls';
+import { blockers, deletionInfo } from '@/lib/deletion';
 
 export const dynamic = 'force-dynamic';
 
@@ -147,6 +149,10 @@ export default async function QuotePage({
     listSpecimens({ status: 'available' }),
   ]);
   const t = totalsOf(q, items);
+  // Only looked up once the record is actually in the bin: on a live one this
+  // is two queries nobody needs.
+  const gone = q.deleted_at ? await deletionInfo('quote', q.code) : null;
+  const why = gone && user.role === 'owner' ? await blockers('quote', q.code) : [];
   const catalogue = getAllProducts();
   const editable = q.status === 'draft';
 
@@ -160,6 +166,15 @@ export default async function QuotePage({
         {q.emirate ? ` · ${q.emirate}` : ''}
         {q.valid_until ? ` · valid until ${fmtDay(q.valid_until)}` : ''}
       </p>
+
+      {/* Deleted: the banner goes at the top, so nobody gets halfway through
+          editing a record that is in the bin before noticing. Live: the button
+          goes at the foot, away from the controls somebody came here to use. */}
+      {q.deleted_at && (
+        <DeleteControls kind="quote" code={q.code} back="/admin/quotes"
+                        deletedAt={q.deleted_at} deletedBy={gone?.by}
+                        role={user.role} locale={user.locale} blockers={why} />
+      )}
 
       {versions.length > 1 && (
         <p className="adm-sub">
@@ -271,8 +286,14 @@ export default async function QuotePage({
                 <input type="hidden" name="code" value={q.code} />
                 <input type="hidden" name="version" value={q.version} />
                 <label className="adm-field"><span>{tr("Status")}</span>
-                  <select name="status" defaultValue={st(q.status)}>
-                    {QUOTE_STATUSES.filter((s) => s !== 'superseded').map((s) => <option key={s}>{s}</option>)}
+                  {/* The VALUE is the stored English; only the label is
+                      translated. Selecting on the translation matched no
+                      option at all in Italian or Arabic, so the control fell
+                      back to the first one — and pressing Update set the
+                      quotation to 'draft' without anybody asking it to. */}
+                  <select name="status" defaultValue={q.status}>
+                    {QUOTE_STATUSES.filter((s) => s !== 'superseded')
+                      .map((s) => <option key={s} value={s}>{st(s)}</option>)}
                   </select>
                 </label>
                 <button className="adm-btn adm-set-status" type="submit" style={{ width:'100%' }}>
@@ -328,6 +349,13 @@ export default async function QuotePage({
           </div>
         )}
       </div>
+
+      {!q.deleted_at && (
+        <div className="adm-danger">
+          <DeleteControls kind="quote" code={q.code} back="/admin/quotes"
+                          role={user.role} locale={user.locale} />
+        </div>
+      )}
     </>
   );
 }

@@ -68,7 +68,7 @@ export default async function PrintInvoice(
   return (
     <div className="sheet">
       <header className="sh-head">
-        <Letterhead site={site} trnAtIssue={inv.trn_at_issue} />
+        <Letterhead site={site} trnAtIssue={inv.trn_at_issue} t={tr} />
         <div className="sh-right">
           <h1>{heading}</h1>
           <p className="sh-meta">{inv.code}</p>

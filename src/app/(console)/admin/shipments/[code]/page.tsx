@@ -12,6 +12,8 @@ import {
 import { getAllProducts } from '@/lib/products';
 import { fmtDay } from '@/components/admin/bits';
 import { adminUi, adminStatus } from '@/lib/admin-ui';
+import DeleteControls from '@/components/admin/DeleteControls';
+import { blockers, deletionInfo } from '@/lib/deletion';
 
 export const dynamic = 'force-dynamic';
 
@@ -167,6 +169,11 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
 
   const [costed, docs] = await Promise.all([costOf(s.id), getShipmentDocuments(s.id)]);
 
+  // Only looked up once the record is actually in the bin: on a live one this
+  // is two queries nobody needs.
+  const gone = s.deleted_at ? await deletionInfo('shipment', s.code) : null;
+  const why = gone && user.role === 'owner' ? await blockers('shipment', s.code) : [];
+
   const readOnly = user.role === 'viewer';
   const days = (d: { days_to_expiry: string | null }) =>
     d.days_to_expiry === null ? null : Number(d.days_to_expiry);
@@ -188,15 +195,25 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
       <p className="adm-sub"><Link href="/admin/shipments">{t("← Shipments")}</Link></p>
       <h1>{s.code}</h1>
       <p className="adm-sub">
-        {s.status.replace('_', ' ')}
+        {st(s.status)}
         {s.incoterm ? ` · ${s.incoterm}` : ''}
         {s.container_no ? ` · ${s.container_no}` : ''}
         {s.eta ? ` · ETA ${fmtDay(s.eta)}` : ''}
       </p>
 
+      {/* Deleted: the banner goes at the top, so nobody gets halfway through
+          editing a record that is in the bin before noticing. Live: the button
+          goes at the foot, away from the controls somebody came here to use. */}
+      {s.deleted_at && (
+        <DeleteControls kind="shipment" code={s.code} back="/admin/shipments"
+                        deletedAt={s.deleted_at} deletedBy={gone?.by}
+                        role={user.role} locale={user.locale} blockers={why} />
+      )}
+
       {permitDead && (
         <p className="adm-err">
-          Import permit {s.permit_number} expired on {fmtDay(s.permit_expires_on!)}. A consignment of live plants cannot clear on an expired permit — it will sit at the port accruing storage. Renew before arrival.
+          {t('Import permit {n} expired on {date}. A consignment of live plants cannot clear on an expired permit — it will sit at the port accruing storage. Renew before arrival.',
+             { n: s.permit_number ?? '—', date: fmtDay(s.permit_expires_on!) })}
         </p>
       )}
       {costed.warnings.map((w) => <p key={w} className="adm-err">{w}</p>)}
@@ -332,9 +349,10 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
         <div className="adm-panel adm-pad">
           {outstanding > 0 && (
             <p className="adm-doc-lead">
-              <strong>{outstanding}</strong> of {docs.length} still outstanding
-              {expired.length > 0 && <> · <span className="adm-doc-bad">{expired.length} expired</span></>}
-              {expiring.length > 0 && <> · {expiring.length} expiring within 30 days</>}. A container does not clear on the strength of the ones that are done.
+              {t('{n} of {total} still outstanding', { n: outstanding, total: docs.length })}
+              {expired.length > 0 && <> · <span className="adm-doc-bad">{t('{n} expired', { n: expired.length })}</span></>}
+              {expiring.length > 0 && <> · {t('{n} expiring within 30 days', { n: expiring.length })}</>}
+              {'. '}{t('A container does not clear on the strength of the ones that are done.')}
             </p>
           )}
           {docs.length > 0 && outstanding === 0 && expired.length === 0 && (
@@ -363,25 +381,27 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
                       <input type="hidden" name="kind" value={d.kind} />
 
                       <span className="adm-doc-name">
-                        {DOC_LABEL[d.kind as DocKind] ?? st(d.kind)}
+                        {t(DOC_LABEL[d.kind as DocKind] ?? d.kind)}
                         {due !== null && due < 0 && <b className="adm-doc-bad"> expired</b>}
                         {due !== null && due >= 0 && due <= 30 && <b> {due}d left</b>}
                       </span>
 
                       <input name="reference" defaultValue={d.reference ?? ''}
                              placeholder={t("Reference")} aria-label={t("Reference")} disabled={readOnly} />
-                      <select name="status" defaultValue={st(d.status)} aria-label={t("Status")} disabled={readOnly}>
+                      {/* Selected by the stored value, not its translation —
+                          'not_applicable' never matched 'not applicable'. */}
+                      <select name="status" defaultValue={d.status} aria-label={t("Status")} disabled={readOnly}>
                         {DOC_STATUSES.map((k) => (
-                          <option key={k} value={k}>{DOC_STATUS_LABEL[k as DocStatus]}</option>
+                          <option key={k} value={k}>{t(DOC_STATUS_LABEL[k as DocStatus])}</option>
                         ))}
                       </select>
                       <label className="adm-doc-date">
-                        <span>Issued</span>
+                        <span>{t('Issued')}</span>
                         <input name="issued_on" type="date" defaultValue={d.issued_on ?? ''}
                                disabled={readOnly} />
                       </label>
                       <label className="adm-doc-date">
-                        <span>Expires</span>
+                        <span>{t('Expires')}</span>
                         <input name="expires_on" type="date" defaultValue={d.expires_on ?? ''}
                                disabled={readOnly} />
                       </label>
@@ -395,7 +415,7 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
                           <button className="adm-btn" type="submit">Save</button>
                           <button className="adm-btn adm-btn-quiet" type="submit"
                                   formAction={deleteDocument}
-                                  aria-label={`Remove ${DOC_LABEL[d.kind as DocKind] ?? d.kind}`}>
+                                  aria-label={t("Remove {doc}", { doc: t(DOC_LABEL[d.kind as DocKind] ?? d.kind) })}>
                             Remove
                           </button>
                         </span>
@@ -412,13 +432,13 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
               <input type="hidden" name="code" value={s.code} />
               <select name="kind" defaultValue="other" aria-label={t("Document type")}>
                 {DOC_KINDS.map((k) => (
-                  <option key={k} value={k}>{DOC_LABEL[k as DocKind]}</option>
+                  <option key={k} value={k}>{t(DOC_LABEL[k as DocKind])}</option>
                 ))}
               </select>
               <input name="reference" placeholder={t("Reference")} aria-label={t("Reference")} />
               <select name="status" defaultValue="required" aria-label={t("Status")}>
                 {DOC_STATUSES.map((k) => (
-                  <option key={k} value={k}>{DOC_STATUS_LABEL[k as DocStatus]}</option>
+                  <option key={k} value={k}>{t(DOC_STATUS_LABEL[k as DocStatus])}</option>
                 ))}
               </select>
               <label className="adm-doc-date">
@@ -434,6 +454,13 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
             </form>
           )}
         </div>
+
+      {!s.deleted_at && (
+        <div className="adm-danger">
+          <DeleteControls kind="shipment" code={s.code} back="/admin/shipments"
+                          role={user.role} locale={user.locale} />
+        </div>
+      )}
     </>
   );
 }

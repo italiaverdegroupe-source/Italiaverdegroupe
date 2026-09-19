@@ -29,7 +29,7 @@ export const byProduct = () => query<{
               ELSE '0' END AS margin_pct
     FROM order_items oi
     JOIN orders o ON o.id = oi.order_id
-   WHERE o.status <> 'cancelled' AND oi.product_ref IS NOT NULL
+   WHERE o.deleted_at IS NULL AND o.status <> 'cancelled' AND oi.product_ref IS NOT NULL
    GROUP BY oi.product_ref
    ORDER BY 4 DESC`);
 
@@ -53,7 +53,7 @@ export const byCustomer = () => query<{
       SELECT COALESCE(sum(unit_price * quantity * (1 - discount_pct/100)), 0) AS net
         FROM order_items WHERE order_id = o.id
     ) t ON true
-   WHERE o.status <> 'cancelled'
+   WHERE o.deleted_at IS NULL AND o.status <> 'cancelled'
    GROUP BY lower(COALESCE(NULLIF(btrim(o.customer_company), ''),
                            NULLIF(btrim(o.customer_name), ''), 'unnamed'))
    ORDER BY 3 DESC`);
@@ -70,7 +70,7 @@ export const byEmirate = () => query<{ emirate: string; orders: string; revenue:
       SELECT COALESCE(sum(unit_price * quantity * (1 - discount_pct/100)), 0) AS net
         FROM order_items WHERE order_id = o.id
     ) t ON true
-   WHERE o.status <> 'cancelled'
+   WHERE o.deleted_at IS NULL AND o.status <> 'cancelled'
    GROUP BY 1 ORDER BY 3 DESC`);
 
 /**
@@ -93,8 +93,9 @@ export const bySource = () => query<{
            COALESCE((SELECT sum(unit_price * quantity * (1 - discount_pct/100))
                        FROM order_items WHERE order_id = o.id), 0) AS revenue
       FROM leads l
-      LEFT JOIN quotes q ON q.lead_id = l.id
-      LEFT JOIN orders o ON o.quote_id = q.id AND o.status <> 'cancelled'
+      LEFT JOIN quotes q ON q.lead_id = l.id AND q.deleted_at IS NULL
+      LEFT JOIN orders o ON o.quote_id = q.id AND o.deleted_at IS NULL AND o.status <> 'cancelled'
+     WHERE l.deleted_at IS NULL
   )
   SELECT source,
          count(DISTINCT lead_id)::text AS leads,
@@ -123,7 +124,7 @@ export const bySalesperson = () => query<{
       SELECT COALESCE(sum(unit_price * quantity * (1 - discount_pct/100)), 0) AS net
         FROM quote_items WHERE quote_id = q.id
     ) v ON true
-   WHERE q.status <> 'superseded'
+   WHERE q.deleted_at IS NULL AND q.status <> 'superseded'
    GROUP BY 1 ORDER BY 5 DESC`);
 
 /**
@@ -144,7 +145,8 @@ export const stuckStock = (days = 90) => query<{
          loc.name AS location_name
     FROM stock_items si
     LEFT JOIN inventory_locations loc ON loc.id = si.location_id
-   WHERE si.status IN ('available','acclimatising')
+   WHERE si.deleted_at IS NULL
+     AND si.status IN ('available','acclimatising')
      AND current_date - COALESCE(si.arrived_at, si.created_at::date) >= $1
    ORDER BY 5 DESC`, [String(days)]);
 
@@ -154,7 +156,9 @@ export const cashInStock = () => query<{
 }>(`
   WITH s AS (
     SELECT count(*) AS n, COALESCE(sum(landed_cost_aed), 0) AS cost
-      FROM stock_items WHERE status IN ('incoming','acclimatising','available','reserved')
+      FROM stock_items
+     WHERE deleted_at IS NULL
+       AND status IN ('incoming','acclimatising','available','reserved')
   ), b AS (
     SELECT COALESCE(sum(quantity), 0) AS n,
            COALESCE(sum(quantity * COALESCE(landed_unit_cost_aed, 0)), 0) AS cost
@@ -179,24 +183,24 @@ export const incoming = () => query<{
     FROM shipments s
     LEFT JOIN suppliers sup ON sup.id = s.supplier_id
     LEFT JOIN import_permits p ON p.id = s.permit_id
-   WHERE s.status NOT IN ('received','cancelled')
+   WHERE s.deleted_at IS NULL AND s.status NOT IN ('received','cancelled')
    ORDER BY s.eta NULLS LAST`);
 
 /** The pipeline, as counts rather than a picture. */
 export const pipeline = () => query<{ stage: string; n: string; value: string }>(`
   SELECT 'leads' AS stage, count(*)::text AS n, '0' AS value FROM leads
-   WHERE status NOT IN ('won','lost')
+   WHERE deleted_at IS NULL AND status NOT IN ('won','lost')
   UNION ALL
   SELECT 'quoted', count(DISTINCT q.code)::text,
          COALESCE(sum(v.net), 0)::numeric(14,2)::text
     FROM quotes q
     JOIN LATERAL (SELECT COALESCE(sum(unit_price*quantity*(1-discount_pct/100)),0) AS net
                     FROM quote_items WHERE quote_id = q.id) v ON true
-   WHERE q.status IN ('sent','viewed','negotiation')
+   WHERE q.deleted_at IS NULL AND q.status IN ('sent','viewed','negotiation')
   UNION ALL
   SELECT 'accepted', count(DISTINCT q.code)::text,
          COALESCE(sum(v.net), 0)::numeric(14,2)::text
     FROM quotes q
     JOIN LATERAL (SELECT COALESCE(sum(unit_price*quantity*(1-discount_pct/100)),0) AS net
                     FROM quote_items WHERE quote_id = q.id) v ON true
-   WHERE q.status = 'accepted'`);
+   WHERE q.deleted_at IS NULL AND q.status = 'accepted'`);

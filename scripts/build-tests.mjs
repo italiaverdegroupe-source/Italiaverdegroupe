@@ -20,6 +20,7 @@ const TARGETS = [
   { file: 'backup', format: 'cjs' },
   { file: 'client-ip', format: 'cjs' },
   { file: 'content', format: 'cjs' },
+  { file: 'deletion', format: 'cjs' },
   { file: 'mail', format: 'cjs' },
   { file: 'orders', format: 'cjs' },
   { file: 'outbound', format: 'cjs' },

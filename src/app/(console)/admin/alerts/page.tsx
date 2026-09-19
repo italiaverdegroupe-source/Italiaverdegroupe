@@ -318,7 +318,8 @@ export default async function AlertsPage({ searchParams }: {
           {alerts.length === 0 ? (
             <div className="adm-panel adm-pad">
               <p className="adm-empty">
-                Nothing needs attention. The checks ran {run ? when(run.started_at) : 'never'} — if that says never, press <b>Run checks now</b>.
+                {t('Nothing needs attention. The checks ran {when} — if that says never, press “Run checks now”.',
+                   { when: run ? when(run.started_at) : t('never') })}
               </p>
             </div>
           ) : (

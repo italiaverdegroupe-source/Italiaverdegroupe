@@ -23,7 +23,8 @@ async function createQuote(formData: FormData) {
               phone: string | null; emirate: string | null } | undefined;
   if (leadRef) {
     lead = (await query(`SELECT id, name, company, email, phone, emirate
-                           FROM leads WHERE reference = $1`, [leadRef]))[0] as typeof lead;
+                           FROM leads
+                          WHERE deleted_at IS NULL AND reference = $1`, [leadRef]))[0] as typeof lead;
   }
 
   const name = String(formData.get('customer_name') ?? '').trim() || lead?.name;
@@ -58,7 +59,7 @@ async function createQuote(formData: FormData) {
   redirect(`/admin/quotes/${code}`);
 }
 
-export default async function QuotesPage({ searchParams }: { searchParams: Promise<{ status?: string; lead?: string }> }) {
+export default async function QuotesPage({ searchParams }: { searchParams: Promise<{ status?: string; lead?: string; deleted?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
@@ -66,7 +67,9 @@ export default async function QuotesPage({ searchParams }: { searchParams: Promi
   const sp = await searchParams;
 
   const site = await getSettings();
-  const rows = await listQuotes(QUOTE_STATUSES.includes(sp.status as never) ? sp.status : undefined);
+  const bin = sp.deleted === '1';
+  const rows = await listQuotes(
+    QUOTE_STATUSES.includes(sp.status as never) ? sp.status : undefined, bin);
 
   return (
     <>
@@ -82,11 +85,14 @@ export default async function QuotesPage({ searchParams }: { searchParams: Promi
       )}
 
       <div className="adm-filters">
-        <Link href="/admin/quotes" className="adm-chip" data-on={String(!sp.status)}>{t("All")}</Link>
+        <Link href={bin ? '/admin/quotes?deleted=1' : '/admin/quotes'} className="adm-chip"
+              data-on={String(!sp.status)}>{t("All")}</Link>
         {QUOTE_STATUSES.map((s) => (
-          <Link key={s} href={`/admin/quotes?status=${s}`} className="adm-chip"
-                data-on={String(sp.status === s)}>{s}</Link>
+          <Link key={s} href={`/admin/quotes?status=${s}${bin ? '&deleted=1' : ''}`} className="adm-chip"
+                data-on={String(sp.status === s)}>{st(s)}</Link>
         ))}
+        <Link href={bin ? '/admin/quotes' : '/admin/quotes?deleted=1'} className="adm-chip"
+              data-on={String(bin)}>{bin ? t("Back to live") : t("Deleted")}</Link>
       </div>
 
       <div className="adm-panel" style={{ marginBottom: 28 }}>

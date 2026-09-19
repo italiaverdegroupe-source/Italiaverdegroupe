@@ -18,7 +18,7 @@ export type Order = {
   status: string; currency: string; vat_enabled: boolean; vat_rate: string;
   advance_pct: string; retention_pct: string; retention_release_on: string | null;
   confirmed_on: string; required_by: string | null; completed_on: string | null;
-  notes: string | null; created_at: string;
+  notes: string | null; created_at: string; deleted_at: string | null;
 };
 
 export type OrderItem = {
@@ -35,13 +35,15 @@ export async function nextCode(prefix: 'ORD' | 'DLV' | 'INV', table: string): Pr
   return `${prefix}-${String(Number(rows[0]?.n ?? 0) + 1).padStart(6, '0')}`;
 }
 
-export const listOrders = (status?: string) =>
+export const listOrders = (status?: string, deleted = false) =>
   query<Order & { item_count: string; delivered_lines: string }>(
     `SELECT o.*,
             (SELECT count(*) FROM order_items i WHERE i.order_id = o.id)::text AS item_count,
             (SELECT count(*) FROM order_items i
               WHERE i.order_id = o.id AND i.delivered_qty >= i.quantity)::text AS delivered_lines
-       FROM orders o ${status ? 'WHERE o.status = $1' : ''}
+       FROM orders o
+      WHERE o.deleted_at IS ${deleted ? 'NOT NULL' : 'NULL'}
+            ${status ? 'AND o.status = $1' : ''}
       ORDER BY o.created_at DESC LIMIT 200`, status ? [status] : []);
 
 export async function getOrder(code: string): Promise<Order | undefined> {
@@ -59,7 +61,9 @@ export const getDeliveries = (orderId: string) =>
           delivered_at: string | null; driver: string | null; vehicle: string | null;
           equipment: string | null; received_by: string | null; line_count: string }>(
     `SELECT d.*, (SELECT count(*) FROM delivery_items di WHERE di.delivery_id = d.id)::text AS line_count
-       FROM deliveries d WHERE d.order_id = $1 ORDER BY d.scheduled_for NULLS LAST, d.id`, [orderId]);
+       FROM deliveries d
+      WHERE d.deleted_at IS NULL AND d.order_id = $1
+      ORDER BY d.scheduled_for NULLS LAST, d.id`, [orderId]);
 
 export function orderTotals(o: Order, items: OrderItem[]) {
   let gross = 0, discount = 0, cost = 0, deliveredNet = 0;
@@ -315,7 +319,7 @@ export const ageing = () =>
   query<Ageing>(`
     WITH paid AS (
       SELECT invoice_id, COALESCE(sum(amount_aed), 0) AS amount
-        FROM payments GROUP BY invoice_id
+        FROM payments WHERE deleted_at IS NULL GROUP BY invoice_id
     )
     SELECT i.code AS invoice,
            COALESCE(c.company, c.name) AS customer,
@@ -334,7 +338,8 @@ export const ageing = () =>
       FROM invoices i
       LEFT JOIN customers c ON c.id = i.customer_id
       LEFT JOIN paid p ON p.invoice_id = i.id
-     WHERE i.status NOT IN ('draft','cancelled','paid')
+     WHERE i.deleted_at IS NULL
+       AND i.status NOT IN ('draft','cancelled','paid')
        AND i.total_aed - COALESCE(p.amount, 0) > 0
      ORDER BY i.due_on NULLS LAST`);
 
@@ -348,9 +353,10 @@ export const creditPosition = (customerId: string) =>
       LEFT JOIN LATERAL (
         SELECT sum(i.total_aed - COALESCE(p.amount, 0)) AS amount
           FROM invoices i
-          LEFT JOIN (SELECT invoice_id, sum(amount_aed) AS amount FROM payments GROUP BY invoice_id) p
+          LEFT JOIN (SELECT invoice_id, sum(amount_aed) AS amount FROM payments WHERE deleted_at IS NULL GROUP BY invoice_id) p
                  ON p.invoice_id = i.id
-         WHERE i.customer_id = c.id AND i.status NOT IN ('draft','cancelled','paid')
+         WHERE i.deleted_at IS NULL
+           AND i.customer_id = c.id AND i.status NOT IN ('draft','cancelled','paid')
       ) o ON true
      WHERE c.id = $1`, [customerId]);
 
@@ -396,7 +402,7 @@ export async function getInvoice(code: string): Promise<InvoiceDoc | undefined> 
       LEFT JOIN orders o    ON o.id = i.order_id
       LEFT JOIN customers c ON c.id = i.customer_id
       LEFT JOIN (SELECT invoice_id, sum(amount_aed) AS amount
-                   FROM payments GROUP BY invoice_id) p ON p.invoice_id = i.id
+                   FROM payments WHERE deleted_at IS NULL GROUP BY invoice_id) p ON p.invoice_id = i.id
      WHERE i.code = $1`, [code]);
   return rows[0];
 }
@@ -418,5 +424,5 @@ export const getInvoicePayments = (code: string) =>
     SELECT p.received_on::text, p.amount_aed::text AS amount, p.method, p.reference
       FROM payments p
       JOIN invoices i ON i.id = p.invoice_id
-     WHERE i.code = $1
+     WHERE p.deleted_at IS NULL AND i.code = $1
      ORDER BY p.received_on, p.id`, [code]);

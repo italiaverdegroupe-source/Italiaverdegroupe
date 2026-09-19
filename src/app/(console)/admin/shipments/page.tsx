@@ -8,7 +8,7 @@ import {
 } from '@/lib/procurement';
 import { getLocations } from '@/lib/inventory';
 import { fmtDay } from '@/components/admin/bits';
-import { adminUi } from '@/lib/admin-ui';
+import { adminUi, adminStatus } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,14 +36,16 @@ async function createShipment(formData: FormData) {
   redirect(`/admin/shipments/${code}`);
 }
 
-export default async function ShipmentsPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
+export default async function ShipmentsPage({ searchParams }: { searchParams: Promise<{ status?: string; deleted?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
+  const st = adminStatus(user.locale);
   const sp = await searchParams;
+  const bin = sp.deleted === '1';
 
   const [rows, permits, locations] = await Promise.all([
-    listShipments(SHIPMENT_STATUSES.includes(sp.status as never) ? sp.status : undefined),
+    listShipments(SHIPMENT_STATUSES.includes(sp.status as never) ? sp.status : undefined, bin),
     listPermits(), getLocations(),
   ]);
 
@@ -55,11 +57,14 @@ export default async function ShipmentsPage({ searchParams }: { searchParams: Pr
       </p>
 
       <div className="adm-filters">
-        <Link href="/admin/shipments" className="adm-chip" data-on={String(!sp.status)}>{t("All")}</Link>
+        <Link href={bin ? '/admin/shipments?deleted=1' : '/admin/shipments'} className="adm-chip"
+              data-on={String(!sp.status)}>{t("All")}</Link>
         {SHIPMENT_STATUSES.map((s) => (
-          <Link key={s} href={`/admin/shipments?status=${s}`} className="adm-chip"
-                data-on={String(sp.status === s)}>{s.replace('_', ' ')}</Link>
+          <Link key={s} href={`/admin/shipments?status=${s}${bin ? '&deleted=1' : ''}`} className="adm-chip"
+                data-on={String(sp.status === s)}>{st(s)}</Link>
         ))}
+        <Link href={bin ? '/admin/shipments' : '/admin/shipments?deleted=1'} className="adm-chip"
+              data-on={String(bin)}>{bin ? t("Back to live") : t("Deleted")}</Link>
       </div>
 
       <div className="adm-panel" style={{ marginBottom: 28 }}>

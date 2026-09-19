@@ -31,6 +31,7 @@ const NEEDS = {
   'outbound.test.mjs': ['db'],
   'backup.test.mjs': ['db'],
   'compliance.test.mjs': ['db'],
+  'deletion.test.mjs': ['db'],
   'concurrency.test.mjs': ['db'],
   'partial-delivery.test.mjs': ['db'],
   'reports.test.mjs': ['db'],
@@ -45,6 +46,7 @@ const NEEDS = {
   'contrast-sweep.mjs': ['server'],
   'home-audit.mjs': ['server'],
   'console-sweep.mjs': ['server', 'signin'],
+  'walkthrough.mjs': ['server', 'signin'],
 };
 
 async function serverIsUp() {

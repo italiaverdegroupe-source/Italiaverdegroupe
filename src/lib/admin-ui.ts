@@ -88,6 +88,7 @@ export const ADMIN_EN = [
   "Asking price (AED)",
   "Author",
   "BL number",
+  "Back to live",
   "Back up now",
   "Backups",
   "Balance due",
@@ -99,6 +100,7 @@ export const ADMIN_EN = [
   "By enquiry",
   "Can sign in",
   "Cancel",
+  "Cancel it instead",
   "Carrier",
   "Cash in stock AED",
   "Cash tied up in stock",
@@ -155,6 +157,11 @@ export const ADMIN_EN = [
   "Dealt-with alerts are kept, not deleted. “Was anyone warned before that container sat at the port for a week” has to stay answerable.",
   "Default",
   "Delete",
+  "Delete for good",
+  "Delete {code}? It will be hidden from the lists, and you can put it back.",
+  "Permanently remove {code} from the database? This cannot be undone by anybody, including you.",
+  "Deleted",
+  "Deleted {when} by {who}",
   "Deliver to",
   "Delivered",
   "Delivered by value",
@@ -210,6 +217,7 @@ export const ADMIN_EN = [
   "Height",
   "Height (m)",
   "Hiab 8t, crane, low-loader",
+  "Hide deleted",
   "History",
   "How consent was given",
   "How they found us",
@@ -326,6 +334,7 @@ export const ADMIN_EN = [
   "Only the owner can change alert rules.",
   "Only the owner can change rules.",
   "Only the owner can change settings.",
+  "Only the owner can permanently remove a record.",
   "Only the owner can send a test.",
   "Only this role sees it",
   "Open",
@@ -353,6 +362,7 @@ export const ADMIN_EN = [
   "Payment terms",
   "Payment terms (days)",
   "Payments received",
+  "Permanently removing a record cannot be undone by anybody, including you.",
   "Permit",
   "Phone",
   "Pick a catalogue reference.",
@@ -415,6 +425,7 @@ export const ADMIN_EN = [
   "Required by",
   "Required on site by",
   "Reserved",
+  "Restore",
   "Result",
   "Retention",
   "Retention %",
@@ -458,6 +469,7 @@ export const ADMIN_EN = [
   "Sharing image — a catalogue reference",
   "Shipment",
   "Shipments",
+  "Show deleted",
   "Sign in",
   "Sign out",
   "Sign out everywhere",
@@ -499,6 +511,7 @@ export const ADMIN_EN = [
   "Testimonials",
   "That code does not match anything in the system. It may have been cancelled, renumbered, or mistyped.",
   "That is not an email address.",
+  "That record does not exist, or is already deleted.",
   "That specimen does not exist.",
   "The backup holds data only, not schema, so there is one source of truth for the shape of the database and it is the migrations.",
   "The current password is asked for even though you are already signed in: an unattended screen is the ordinary case, and this is the one action that can lock you out of your own system. Changing it signs out every other device signed in as you, and leaves this one alone.",
@@ -510,6 +523,7 @@ export const ADMIN_EN = [
   "There is one active owner.",
   "These are the values the website and every document read at runtime. Changing them here takes effect immediately — no deploy, no developer.",
   "These override what each page already generates. Leave a box empty and the built-in title or description is used — which for the 68 catalogue pages is already written from the specimen itself, so emptying a box is safe and blanking one is not possible.",
+  "This is hidden, not gone. Restore it, or remove it from the database for good.",
   "This is what the audit log records beside everything you change.",
   "This moves the stock, adds to the delivered quantities and re-derives the order status. Delivering more than remains is refused outright.",
   "This version has been issued, so its lines are locked. Use",
@@ -536,6 +550,7 @@ export const ADMIN_EN = [
   "Unit price (AED)",
   "Units",
   "Unknown health.",
+  "Unknown kind of record.",
   "Unknown language.",
   "Unknown severity.",
   "Unknown status.",
@@ -566,6 +581,7 @@ export const ADMIN_EN = [
   "Viewers cannot create orders.",
   "Viewers cannot create quotations.",
   "Viewers cannot create shipments.",
+  "Viewers cannot delete anything.",
   "Viewers cannot edit content.",
   "Viewers cannot raise invoices.",
   "Viewers cannot record measurements.",
@@ -592,6 +608,7 @@ export const ADMIN_EN = [
   "Who buys, and who comes back",
   "Who can sign in, and what they may do. The roles have been in the database since the beginning and every page respects them — this is the screen that lets you use them without a developer.",
   "Who converts",
+  "Why this cannot be removed yet",
   "Win rate — none decided yet",
   "Won",
   "Wording — leave empty for the built-in text.",
@@ -636,6 +653,55 @@ export const ADMIN_EN = [
   "tax invoice — the order",
   "translated",
   "uncontacted for more than 24 hours.",
+  // The name of a kind of record, lower case, for use inside a sentence.
+  "enquiry",
+  "quotation",
+  "order",
+  "invoice",
+  "payment",
+  "delivery",
+  "shipment",
+  "specimen",
+  "customer",
+  "supplier",
+  "shipment line",
+  "shipment cost",
+  "shipment document",
+  "quotation line",
+  "order line",
+  "purchase order",
+  "Still linked to this {parent}: {n} × {child}. Remove those first.",
+  "That record no longer exists.",
+  "Delete it first. Permanently removing a record that is still live is one click away from removing the wrong one.",
+  "This invoice has payments against it. An invoice that has been paid is an accounting record the law requires to be kept — cancel it instead, which voids it without erasing it.",
+  "A received payment is an accounting record. Reverse it with a credit rather than deleting the evidence that money arrived.",
+  // The shipment document checklist: what a consignment of live plants
+  // needs before it moves, and how far along each one is.
+  "Import permit (MOCCAE)",
+  "Phytosanitary certificate",
+  "CITES certificate",
+  "Commercial invoice",
+  "Packing list",
+  "Bill of lading / airway bill",
+  "Certificate of origin",
+  "Customs declaration",
+  "Other",
+  "Remove {doc}",
+  "Required",
+  "Requested",
+  "Verified",
+  "Not applicable",
+  "Trade licence {n}",
+  "TRN {n}",
+  "WhatsApp {n}",
+  "Import permit {n} expired on {date}. A consignment of live plants cannot clear on an expired permit — it will sit at the port accruing storage. Renew before arrival.",
+  "{n} of {total} still outstanding",
+  "{n} expired",
+  "{n} expiring within 30 days",
+  "A container does not clear on the strength of the ones that are done.",
+  "Nothing needs attention. The checks ran {when} — if that says never, press “Run checks now”.",
+  "never",
+  "This run has been delivered: the stock has moved and the order counts it. Mark it failed or cancelled instead of erasing what happened.",
   "unverified",
   "version {n}",
   "why this changed",
@@ -780,6 +846,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Autore",
   "BL number":
     "Numero di polizza",
+  "Back to live":
+    "Torna agli attivi",
   "Back up now":
     "Esegui il backup adesso",
   "Backups":
@@ -802,6 +870,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Può accedere",
   "Cancel":
     "Annulla",
+  "Cancel it instead":
+    "Annullala invece",
   "Carrier":
     "Vettore",
   "Cash in stock AED":
@@ -914,6 +984,16 @@ const it: Partial<Record<AdminKey, string>> = {
     "Predefinito",
   "Delete":
     "Elimina",
+  "Delete for good":
+    "Elimina definitivamente",
+  "Delete {code}? It will be hidden from the lists, and you can put it back.":
+    "Eliminare {code}? Sarà nascosto dagli elenchi e potrai ripristinarlo.",
+  "Permanently remove {code} from the database? This cannot be undone by anybody, including you.":
+    "Rimuovere definitivamente {code} dal database? Nessuno potrà annullare questa operazione, tu compreso.",
+  "Deleted":
+    "Eliminati",
+  "Deleted {when} by {who}":
+    "Eliminato il {when} da {who}",
   "Deliver to":
     "Consegnare a",
   "Delivered":
@@ -1024,6 +1104,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Altezza (m)",
   "Hiab 8t, crane, low-loader":
     "Gru Hiab 8t, autogru, carrellone",
+  "Hide deleted":
+    "Nascondi gli eliminati",
   "History":
     "Storico",
   "How consent was given":
@@ -1256,6 +1338,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Solo il titolare può modificare le regole.",
   "Only the owner can change settings.":
     "Solo il titolare può modificare le impostazioni.",
+  "Only the owner can permanently remove a record.":
+    "Solo il titolare può rimuovere definitivamente un record.",
   "Only the owner can send a test.":
     "Solo il titolare può inviare un test.",
   "Only this role sees it":
@@ -1310,6 +1394,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Termini di pagamento (giorni)",
   "Payments received":
     "Pagamenti ricevuti",
+  "Permanently removing a record cannot be undone by anybody, including you.":
+    "La rimozione definitiva di un record non può essere annullata da nessuno, nemmeno da voi.",
   "Permit":
     "Permesso",
   "Phone":
@@ -1434,6 +1520,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "In cantiere entro",
   "Reserved":
     "Riservato",
+  "Restore":
+    "Ripristina",
   "Result":
     "Esito",
   "Retention":
@@ -1520,6 +1608,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Spedizione",
   "Shipments":
     "Spedizioni",
+  "Show deleted":
+    "Mostra gli eliminati",
   "Sign in":
     "Accedi",
   "Sign out":
@@ -1602,6 +1692,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Questo codice non corrisponde a nulla nel sistema. Potrebbe essere stato annullato, rinumerato o digitato male.",
   "That is not an email address.":
     "Questo non è un indirizzo e-mail.",
+  "That record does not exist, or is already deleted.":
+    "Quel record non esiste, o è già stato eliminato.",
   "That specimen does not exist.":
     "Quell'esemplare non esiste.",
   "The backup holds data only, not schema, so there is one source of truth for the shape of the database and it is the migrations.":
@@ -1624,6 +1716,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Sono i valori che il sito e ogni documento leggono in esecuzione. Modificarli qui ha effetto immediato: nessun rilascio, nessuno sviluppatore.",
   "These override what each page already generates. Leave a box empty and the built-in title or description is used — which for the 68 catalogue pages is already written from the specimen itself, so emptying a box is safe and blanking one is not possible.":
     "Questi sostituiscono quanto ogni pagina già genera. Lasciate un campo vuoto e viene usato il titolo o la descrizione predefiniti — che per le 68 pagine di catalogo sono già scritti a partire dall’esemplare stesso, perciò svuotare un campo è sicuro e azzerarlo non è possibile.",
+  "This is hidden, not gone. Restore it, or remove it from the database for good.":
+    "È nascosto, non eliminato. Ripristinatelo, oppure rimuovetelo definitivamente dal database.",
   "This is what the audit log records beside everything you change.":
     "È quanto il registro di controllo annota accanto a ogni tua modifica.",
   "This moves the stock, adds to the delivered quantities and re-derives the order status. Delivering more than remains is refused outright.":
@@ -1676,6 +1770,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Unità",
   "Unknown health.":
     "Stato di salute sconosciuto.",
+  "Unknown kind of record.":
+    "Tipo di record sconosciuto.",
   "Unknown language.":
     "Lingua sconosciuta.",
   "Unknown severity.":
@@ -1736,6 +1832,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "I visualizzatori non possono creare preventivi.",
   "Viewers cannot create shipments.":
     "I visualizzatori non possono creare spedizioni.",
+  "Viewers cannot delete anything.":
+    "I visualizzatori non possono eliminare nulla.",
   "Viewers cannot edit content.":
     "I visualizzatori non possono modificare i contenuti.",
   "Viewers cannot raise invoices.":
@@ -1788,6 +1886,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Chi può accedere e cosa può fare. I ruoli sono nel database fin dall’inizio e ogni pagina li rispetta: questa è la schermata che vi permette di usarli senza uno sviluppatore.",
   "Who converts":
     "Chi converte",
+  "Why this cannot be removed yet":
+    "Perché non può ancora essere rimosso",
   "Win rate — none decided yet":
     "Tasso di conversione — nessuna ancora decisa",
   "Won":
@@ -1876,6 +1976,98 @@ const it: Partial<Record<AdminKey, string>> = {
     "tradotto",
   "uncontacted for more than 24 hours.":
     "senza contatto da più di 24 ore.",
+  "enquiry":
+    "richiesta",
+  "quotation":
+    "preventivo",
+  "order":
+    "ordine",
+  "invoice":
+    "fattura",
+  "payment":
+    "pagamento",
+  "delivery":
+    "consegna",
+  "shipment":
+    "spedizione",
+  "specimen":
+    "esemplare",
+  "customer":
+    "cliente",
+  "supplier":
+    "fornitore",
+  "shipment line":
+    "riga di spedizione",
+  "shipment cost":
+    "costo di spedizione",
+  "shipment document":
+    "documento di spedizione",
+  "quotation line":
+    "riga di preventivo",
+  "order line":
+    "riga d’ordine",
+  "purchase order":
+    "ordine di acquisto",
+  "Still linked to this {parent}: {n} × {child}. Remove those first.":
+    "Ancora collegati a questo {parent}: {n} × {child}. Elimina prima quelli.",
+  "That record no longer exists.":
+    "Questo record non esiste più.",
+  "Delete it first. Permanently removing a record that is still live is one click away from removing the wrong one.":
+    "Eliminalo prima. Rimuovere definitivamente un record ancora attivo è a un clic dal rimuovere quello sbagliato.",
+  "This invoice has payments against it. An invoice that has been paid is an accounting record the law requires to be kept — cancel it instead, which voids it without erasing it.":
+    "Questa fattura ha pagamenti registrati. Una fattura pagata è una scrittura contabile che la legge impone di conservare: annullala invece, così resta agli atti ma priva di effetto.",
+  "A received payment is an accounting record. Reverse it with a credit rather than deleting the evidence that money arrived.":
+    "Un pagamento ricevuto è una scrittura contabile. Stornalo con una nota di credito invece di cancellare la prova che il denaro è arrivato.",
+  "Import permit (MOCCAE)":
+    "Permesso di importazione (MOCCAE)",
+  "Phytosanitary certificate":
+    "Certificato fitosanitario",
+  "CITES certificate":
+    "Certificato CITES",
+  "Commercial invoice":
+    "Fattura commerciale",
+  "Packing list":
+    "Distinta di imballaggio",
+  "Bill of lading / airway bill":
+    "Polizza di carico / lettera di vettura aerea",
+  "Certificate of origin":
+    "Certificato di origine",
+  "Customs declaration":
+    "Dichiarazione doganale",
+  "Other":
+    "Altro",
+  "Remove {doc}":
+    "Rimuovi {doc}",
+  "Required":
+    "Necessario",
+  "Requested":
+    "Richiesto",
+  "Verified":
+    "Verificato",
+  "Not applicable":
+    "Non applicabile",
+  "Trade licence {n}":
+    "Licenza commerciale {n}",
+  "TRN {n}":
+    "Partita IVA (TRN) {n}",
+  "WhatsApp {n}":
+    "WhatsApp {n}",
+  "Import permit {n} expired on {date}. A consignment of live plants cannot clear on an expired permit — it will sit at the port accruing storage. Renew before arrival.":
+    "Il permesso di importazione {n} è scaduto il {date}. Una partita di piante vive non può essere sdoganata con un permesso scaduto: resterà in porto accumulando costi di sosta. Rinnovalo prima dell’arrivo.",
+  "{n} of {total} still outstanding":
+    "{n} su {total} ancora mancanti",
+  "{n} expired":
+    "{n} scaduti",
+  "{n} expiring within 30 days":
+    "{n} in scadenza entro 30 giorni",
+  "A container does not clear on the strength of the ones that are done.":
+    "Un container non viene sdoganato grazie a quelli già pronti.",
+  "Nothing needs attention. The checks ran {when} — if that says never, press “Run checks now”.":
+    "Nulla richiede attenzione. I controlli sono stati eseguiti {when}: se dice mai, premi “Esegui i controlli ora”.",
+  "never":
+    "mai",
+  "This run has been delivered: the stock has moved and the order counts it. Mark it failed or cancelled instead of erasing what happened.":
+    "Questa consegna è stata effettuata: la merce si è mossa e l’ordine la conteggia. Segnala come fallita o annullata invece di cancellare quanto è accaduto.",
   "unverified":
     "non verificato",
   "version {n}":
@@ -2026,6 +2218,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "الكاتب",
   "BL number":
     "رقم بوليصة الشحن",
+  "Back to live":
+    "العودة إلى النشطة",
   "Back up now":
     "خذ نسخة احتياطية الآن",
   "Backups":
@@ -2048,6 +2242,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "يمكنه الدخول",
   "Cancel":
     "إلغاء",
+  "Cancel it instead":
+    "ألغِها بدلًا من ذلك",
   "Carrier":
     "الناقل",
   "Cash in stock AED":
@@ -2160,6 +2356,16 @@ const ar: Partial<Record<AdminKey, string>> = {
     "الافتراضي",
   "Delete":
     "حذف",
+  "Delete for good":
+    "حذف نهائي",
+  "Delete {code}? It will be hidden from the lists, and you can put it back.":
+    "هل تريد حذف {code}؟ سيُخفى من القوائم ويمكنك إرجاعه.",
+  "Permanently remove {code} from the database? This cannot be undone by anybody, including you.":
+    "هل تريد إزالة {code} نهائيًا من قاعدة البيانات؟ لا يمكن لأحد التراجع عن ذلك، بمن فيهم أنت.",
+  "Deleted":
+    "المحذوفة",
+  "Deleted {when} by {who}":
+    "حُذف في {when} بواسطة {who}",
   "Deliver to":
     "التسليم إلى",
   "Delivered":
@@ -2270,6 +2476,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "الارتفاع (م)",
   "Hiab 8t, crane, low-loader":
     "رافعة هياب 8 طن، ونش، مقطورة منخفضة",
+  "Hide deleted":
+    "أخفِ المحذوفة",
   "History":
     "السجل",
   "How consent was given":
@@ -2502,6 +2710,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "لا يمكن تغيير القواعد إلا للمالك.",
   "Only the owner can change settings.":
     "لا يمكن تغيير الإعدادات إلا للمالك.",
+  "Only the owner can permanently remove a record.":
+    "لا يمكن إلا للمالك أن يزيل سجلًّا نهائيًّا.",
   "Only the owner can send a test.":
     "لا يمكن إرسال اختبار إلا للمالك.",
   "Only this role sees it":
@@ -2556,6 +2766,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "شروط الدفع (أيام)",
   "Payments received":
     "الدفعات المستلمة",
+  "Permanently removing a record cannot be undone by anybody, including you.":
+    "الإزالة النهائية لسجلّ لا يستطيع أحد التراجع عنها، ولا أنت.",
   "Permit":
     "التصريح",
   "Phone":
@@ -2680,6 +2892,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "مطلوب في الموقع بحلول",
   "Reserved":
     "محجوز",
+  "Restore":
+    "استعادة",
   "Result":
     "النتيجة",
   "Retention":
@@ -2766,6 +2980,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "الشحنة",
   "Shipments":
     "الشحنات",
+  "Show deleted":
+    "أظهر المحذوفة",
   "Sign in":
     "تسجيل الدخول",
   "Sign out":
@@ -2848,6 +3064,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "هذا الرمز لا يطابق أي شيء في النظام. وقد يكون أُلغي أو أُعيد ترقيمه أو كُتب خطأً.",
   "That is not an email address.":
     "هذا ليس بريدًا إلكترونيًّا.",
+  "That record does not exist, or is already deleted.":
+    "هذا السجلّ غير موجود، أو محذوف بالفعل.",
   "That specimen does not exist.":
     "تلك الشجرة غير موجودة.",
   "The backup holds data only, not schema, so there is one source of truth for the shape of the database and it is the migrations.":
@@ -2870,6 +3088,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "هذه هي القيم التي يقرأها الموقع وكل مستند أثناء التشغيل. وتغييرها هنا يسري فورًا — بلا نشر ولا مطوّر.",
   "These override what each page already generates. Leave a box empty and the built-in title or description is used — which for the 68 catalogue pages is already written from the specimen itself, so emptying a box is safe and blanking one is not possible.":
     "هذه تتجاوز ما تولّده كل صفحة أصلًا. اترك الحقل فارغًا ويُستخدم العنوان أو الوصف المدمج — وهو لصفحات الكتالوج الـ68 مكتوب من الصنف نفسه، فإفراغ الحقل آمن وتركه بلا نص غير ممكن.",
+  "This is hidden, not gone. Restore it, or remove it from the database for good.":
+    "هذا مخفيّ لا محذوف. استعده، أو أزله من قاعدة البيانات نهائيًّا.",
   "This is what the audit log records beside everything you change.":
     "هذا ما يسجّله سجل التدقيق بجانب كل تغيير تجريه.",
   "This moves the stock, adds to the delivered quantities and re-derives the order status. Delivering more than remains is refused outright.":
@@ -2922,6 +3142,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "الوحدات",
   "Unknown health.":
     "حالة صحية غير معروفة.",
+  "Unknown kind of record.":
+    "نوع سجلّ غير معروف.",
   "Unknown language.":
     "لغة غير معروفة.",
   "Unknown severity.":
@@ -2982,6 +3204,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "لا يمكن للمطّلعين إنشاء عروض أسعار.",
   "Viewers cannot create shipments.":
     "لا يمكن للمطّلعين إنشاء شحنات.",
+  "Viewers cannot delete anything.":
+    "لا يمكن للمطّلعين حذف أي شيء.",
   "Viewers cannot edit content.":
     "لا يمكن للمطّلعين تعديل المحتوى.",
   "Viewers cannot raise invoices.":
@@ -3034,6 +3258,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "من يمكنه الدخول، وما المسموح له به. الأدوار موجودة في قاعدة البيانات منذ البداية وكل صفحة تحترمها — وهذه هي الشاشة التي تتيح لك استخدامها بلا مطوّر.",
   "Who converts":
     "من يتحوّل إلى عميل",
+  "Why this cannot be removed yet":
+    "لماذا لا يمكن إزالته بعد",
   "Win rate — none decided yet":
     "نسبة الإغلاق — لم يُحسم أي منها بعد",
   "Won":
@@ -3122,6 +3348,98 @@ const ar: Partial<Record<AdminKey, string>> = {
     "مترجَم",
   "uncontacted for more than 24 hours.":
     "دون تواصل لأكثر من 24 ساعة.",
+  "enquiry":
+    "طلب استفسار",
+  "quotation":
+    "عرض سعر",
+  "order":
+    "طلب",
+  "invoice":
+    "فاتورة",
+  "payment":
+    "دفعة",
+  "delivery":
+    "تسليم",
+  "shipment":
+    "شحنة",
+  "specimen":
+    "صنف",
+  "customer":
+    "عميل",
+  "supplier":
+    "مورّد",
+  "shipment line":
+    "بند شحنة",
+  "shipment cost":
+    "تكلفة شحنة",
+  "shipment document":
+    "مستند شحنة",
+  "quotation line":
+    "بند عرض سعر",
+  "order line":
+    "بند طلب",
+  "purchase order":
+    "أمر شراء",
+  "Still linked to this {parent}: {n} × {child}. Remove those first.":
+    "ما زال مرتبطًا بهذا السجل ({parent}): {n} × {child}. احذفها أولًا.",
+  "That record no longer exists.":
+    "هذا السجل لم يعد موجودًا.",
+  "Delete it first. Permanently removing a record that is still live is one click away from removing the wrong one.":
+    "احذفه أولًا. الإزالة النهائية لسجل ما زال نشطًا تبعد نقرة واحدة عن إزالة السجل الخطأ.",
+  "This invoice has payments against it. An invoice that has been paid is an accounting record the law requires to be kept — cancel it instead, which voids it without erasing it.":
+    "على هذه الفاتورة دفعات مسجَّلة. والفاتورة المدفوعة سجل محاسبي يُلزم القانون بحفظه — ألغِها بدلًا من ذلك، فتبطل دون أن تُمحى.",
+  "A received payment is an accounting record. Reverse it with a credit rather than deleting the evidence that money arrived.":
+    "الدفعة المستلمة سجل محاسبي. اعكسها بإشعار دائن بدلًا من حذف الدليل على وصول المال.",
+  "Import permit (MOCCAE)":
+    "تصريح استيراد (MOCCAE)",
+  "Phytosanitary certificate":
+    "شهادة صحة نباتية",
+  "CITES certificate":
+    "شهادة سايتس (CITES)",
+  "Commercial invoice":
+    "فاتورة تجارية",
+  "Packing list":
+    "قائمة تعبئة",
+  "Bill of lading / airway bill":
+    "بوليصة شحن / بوليصة شحن جوي",
+  "Certificate of origin":
+    "شهادة منشأ",
+  "Customs declaration":
+    "بيان جمركي",
+  "Other":
+    "أخرى",
+  "Remove {doc}":
+    "إزالة {doc}",
+  "Required":
+    "مطلوب",
+  "Requested":
+    "تم طلبه",
+  "Verified":
+    "تم التحقق",
+  "Not applicable":
+    "لا ينطبق",
+  "Trade licence {n}":
+    "الرخصة التجارية {n}",
+  "TRN {n}":
+    "الرقم الضريبي {n}",
+  "WhatsApp {n}":
+    "واتساب {n}",
+  "Import permit {n} expired on {date}. A consignment of live plants cannot clear on an expired permit — it will sit at the port accruing storage. Renew before arrival.":
+    "انتهت صلاحية تصريح الاستيراد {n} في {date}. ولا يمكن تخليص شحنة من النباتات الحية بتصريح منتهٍ — ستبقى في الميناء وتتراكم عليها رسوم التخزين. جدّده قبل الوصول.",
+  "{n} of {total} still outstanding":
+    "{n} من {total} ما زالت ناقصة",
+  "{n} expired":
+    "{n} منتهية الصلاحية",
+  "{n} expiring within 30 days":
+    "{n} تنتهي خلال 30 يومًا",
+  "A container does not clear on the strength of the ones that are done.":
+    "الحاوية لا تُخلَّص بفضل المستندات الجاهزة وحدها.",
+  "Nothing needs attention. The checks ran {when} — if that says never, press “Run checks now”.":
+    "لا شيء يحتاج انتباهًا. آخر تشغيل للفحوصات كان {when} — وإن كان «أبدًا» فاضغط «شغّل الفحوصات الآن».",
+  "never":
+    "أبدًا",
+  "This run has been delivered: the stock has moved and the order counts it. Mark it failed or cancelled instead of erasing what happened.":
+    "تم تنفيذ هذا التسليم: المخزون تحرّك والطلب يحتسبه. علِّمه كفاشل أو ملغى بدل محو ما حدث.",
   "unverified":
     "غير مُتحقَّق منه",
   "version {n}":

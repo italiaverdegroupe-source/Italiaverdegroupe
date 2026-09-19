@@ -45,17 +45,19 @@ export default async function Overview() {
 
   const [counts, recent, stale, daily, byEmirate, bySource, byType] = await Promise.all([
     query<{ status: string; n: string }>(
-      'SELECT status, count(*) AS n FROM leads GROUP BY status'),
+      'SELECT status, count(*) AS n FROM leads WHERE deleted_at IS NULL GROUP BY status'),
     query<{ reference: string; name: string; company: string | null; emirate: string | null;
             status: string; created_at: string; enquiry_type: string; quantity: number | null }>(
       `SELECT reference, name, company, emirate, status, created_at, enquiry_type, quantity
-         FROM leads ORDER BY created_at DESC LIMIT 8`),
+         FROM leads WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT 8`),
     query<{ n: string }>(
       `SELECT count(*) AS n FROM leads
-        WHERE status = 'new' AND created_at < now() - interval '24 hours'`),
+        WHERE deleted_at IS NULL
+          AND status = 'new' AND created_at < now() - interval '24 hours'`),
     query<{ d: string; n: string }>(
       `SELECT date_trunc('day', created_at)::date::text AS d, count(*) AS n
-         FROM leads WHERE created_at > now() - ($1 || ' days')::interval
+         FROM leads
+        WHERE deleted_at IS NULL AND created_at > now() - ($1 || ' days')::interval
         GROUP BY 1 ORDER BY 1`, [String(DAYS)]),
     query<{ k: string; n: string }>(
       // The sentinel stays English INSIDE the query. It is a grouping key:
@@ -63,7 +65,7 @@ export default async function Overview() {
       // depending on who was looking at the screen, and two people comparing
       // notes would see different totals. It is translated on the way out.
       `SELECT coalesce(nullif(btrim(emirate), ''), 'Not stated') AS k, count(*) AS n
-         FROM leads GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 8`),
+         FROM leads WHERE deleted_at IS NULL GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 8`),
     // Grouped on the LOWERCASED value, then presented in title case. Without
     // that, "direct" and "Direct" are two sources in the chart and the two
     // bars add up to the truth only if you notice they are the same word —
@@ -73,10 +75,10 @@ export default async function Overview() {
     query<{ k: string; n: string }>(
       `SELECT initcap(lower(coalesce(nullif(btrim(source), ''), 'direct'))) AS k,
               count(*) AS n
-         FROM leads GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 6`),
+         FROM leads WHERE deleted_at IS NULL GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 6`),
     query<{ k: string; n: string }>(
       `SELECT initcap(lower(enquiry_type)) AS k, count(*) AS n
-         FROM leads GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 6`),
+         FROM leads WHERE deleted_at IS NULL GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 6`),
   ]);
 
   const by = Object.fromEntries(counts.map((c) => [c.status, Number(c.n)]));

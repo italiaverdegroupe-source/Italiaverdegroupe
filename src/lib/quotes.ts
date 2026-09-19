@@ -19,7 +19,7 @@ export type Quote = {
   issued_on: string | null; valid_until: string | null; accepted_on: string | null;
   delivery_terms: string | null; payment_terms: string | null;
   terms: string | null; notes: string | null; internal_note: string | null;
-  created_at: string;
+  created_at: string; deleted_at: string | null;
 };
 
 export type QuoteItem = {
@@ -67,10 +67,12 @@ export async function nextQuoteCode(): Promise<string> {
 
 const QUOTE_SELECT = `SELECT * FROM quotes`;
 
-export const listQuotes = (status?: string) =>
+export const listQuotes = (status?: string, deleted = false) =>
   query<Quote & { item_count: string }>(
     `SELECT q.*, (SELECT count(*) FROM quote_items i WHERE i.quote_id = q.id)::text AS item_count
-       FROM quotes q ${status ? 'WHERE q.status = $1' : ''}
+       FROM quotes q
+      WHERE q.deleted_at IS ${deleted ? 'NOT NULL' : 'NULL'}
+            ${status ? 'AND q.status = $1' : ''}
       ORDER BY q.created_at DESC LIMIT 200`, status ? [status] : []);
 
 export async function getQuote(code: string, version?: number): Promise<Quote | undefined> {

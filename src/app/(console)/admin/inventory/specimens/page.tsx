@@ -70,7 +70,7 @@ async function addSpecimen(formData: FormData) {
   redirect(`/admin/inventory/specimens/${code}`);
 }
 
-export default async function SpecimensPage({ searchParams }: { searchParams: Promise<{ status?: string; ref?: string }> }) {
+export default async function SpecimensPage({ searchParams }: { searchParams: Promise<{ status?: string; ref?: string; deleted?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
@@ -78,16 +78,18 @@ export default async function SpecimensPage({ searchParams }: { searchParams: Pr
   const sp = await searchParams;
 
   const [rows, locations, catalogue] = await Promise.all([
-    listSpecimens({ status: sp.status, productRef: sp.ref }),
+    listSpecimens({ status: sp.status, productRef: sp.ref, deleted: sp.deleted === '1' }),
     getLocations(),
     Promise.resolve(getAllProducts()),
   ]);
   const nameOf = new Map(catalogue.map((p) => [p.reference, p.name]));
 
-  const link = (s?: string) => {
+  const bin = sp.deleted === '1';
+  const link = (s?: string, deleted = bin) => {
     const p = new URLSearchParams();
     if (s) p.set('status', s);
     if (sp.ref) p.set('ref', sp.ref);
+    if (deleted) p.set('deleted', '1');
     const q = p.toString();
     return q ? `/admin/inventory/specimens?${q}` : '/admin/inventory/specimens';
   };
@@ -103,8 +105,11 @@ export default async function SpecimensPage({ searchParams }: { searchParams: Pr
       <div className="adm-filters">
         <Link href={link()} className="adm-chip" data-on={String(!sp.status)}>{t("All")}</Link>
         {ITEM_STATUSES.map((s) => (
-          <Link key={s} href={link(s)} className="adm-chip" data-on={String(sp.status === s)}>{s}</Link>
+          <Link key={s} href={link(s)} className="adm-chip" data-on={String(sp.status === s)}>{st(s)}</Link>
         ))}
+        <Link href={link(sp.status, !bin)} className="adm-chip" data-on={String(bin)}>
+          {bin ? t("Back to live") : t("Deleted")}
+        </Link>
       </div>
 
       <div className="adm-panel" style={{ marginBottom: 28 }}>

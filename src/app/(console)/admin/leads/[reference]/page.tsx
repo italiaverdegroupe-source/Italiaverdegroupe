@@ -6,6 +6,8 @@ import { query } from '@/lib/db';
 import { STATUSES, StatusPill, fmtDate } from '@/components/admin/bits';
 import { getSettings } from '@/lib/settings';
 import { adminUi } from '@/lib/admin-ui';
+import DeleteControls from '@/components/admin/DeleteControls';
+import { blockers, deletionInfo } from '@/lib/deletion';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +17,7 @@ type Lead = {
   emirate: string | null; project_type: string | null; service_scope: string | null;
   product_ref: string | null; quantity: number | null; required_date: string | null;
   message: string | null; source: string | null; status: string;
+  deleted_at: string | null;
   items: LeadItem[] | null;
   next_follow_up: string | null; last_contacted: string | null; consent: boolean;
 };
@@ -109,6 +112,11 @@ export default async function LeadPage({ params }: { params: Promise<{ reference
     `SELECT id, at, user_email, kind, body FROM lead_notes
       WHERE lead_id = $1 ORDER BY at DESC`, [lead.id]);
 
+  // Only looked up once the record is actually gone: on a live lead this is
+  // two queries nobody needs.
+  const gone = lead.deleted_at ? await deletionInfo('lead', lead.reference) : null;
+  const why = gone && user.role === 'owner' ? await blockers('lead', lead.reference) : [];
+
   const wa = lead.phone
     ? `https://wa.me/${lead.phone.replace(/[^\d]/g, '')}?text=${encodeURIComponent(
         `Hello ${lead.name}, thank you for your enquiry with ${site.legalName} (ref ${lead.reference}).`)}`
@@ -141,6 +149,16 @@ export default async function LeadPage({ params }: { params: Promise<{ reference
         <StatusPill status={lead.status} /> &nbsp;{lead.reference}
         {lead.company ? ` · ${lead.company}` : ''}
       </p>
+
+      {/* Deleted: the banner goes at the top, because somebody must not get
+          halfway through editing a record that is in the bin before noticing.
+          Live: the button goes at the foot of the page, out of the way of
+          every control somebody actually came here to use. */}
+      {lead.deleted_at && (
+        <DeleteControls kind="lead" code={lead.reference} back="/admin/leads"
+                        deletedAt={lead.deleted_at} deletedBy={gone?.by}
+                        role={user.role} locale={user.locale} blockers={why} />
+      )}
 
       <div className="adm-two">
         <div className="adm-panel adm-pad">
@@ -235,6 +253,13 @@ export default async function LeadPage({ params }: { params: Promise<{ reference
           )}
         </div>
       </div>
+
+      {!lead.deleted_at && (
+        <div className="adm-danger">
+          <DeleteControls kind="lead" code={lead.reference} back="/admin/leads"
+                          role={user.role} locale={user.locale} />
+        </div>
+      )}
     </>
   );
 }

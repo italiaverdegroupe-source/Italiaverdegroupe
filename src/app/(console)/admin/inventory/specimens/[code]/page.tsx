@@ -1,5 +1,9 @@
 import Link from 'next/link';
 import { adminUi, adminStatus } from '@/lib/admin-ui';
+import DeleteControls from '@/components/admin/DeleteControls';
+// Aliased: this page already has a `blockers`, the reasons a tree cannot be
+// sold, which is a different question from why it cannot be destroyed.
+import { blockers as purgeBlockers, deletionInfo } from '@/lib/deletion';
 import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
@@ -120,6 +124,11 @@ export default async function SpecimenPage({ params }: { params: Promise<{ code:
   ]);
   const product = getAllProducts().find((p) => p.reference === s.product_ref);
 
+  // Only looked up once the record is actually in the bin: on a live one this
+  // is two queries nobody needs.
+  const gone = s.deleted_at ? await deletionInfo('specimen', s.code) : null;
+  const why = gone && user.role === 'owner' ? await purgeBlockers('specimen', s.code) : [];
+
   // Why it cannot be sold, stated rather than left for someone to work out.
   const blockers: string[] = [];
   if (s.status !== 'available') blockers.push(`${t('status is')} ${st(s.status)}`);
@@ -141,6 +150,15 @@ export default async function SpecimenPage({ params }: { params: Promise<{ code:
           ? <span className="pill pill-won">{t('sellable')}</span>
           : <span className="pill pill-lost">{t('not sellable')}</span>}
       </p>
+
+      {/* Deleted: the banner goes at the top, so nobody gets halfway through
+          editing a record that is in the bin before noticing. Live: the button
+          goes at the foot, away from the controls somebody came here to use. */}
+      {s.deleted_at && (
+        <DeleteControls kind="specimen" code={s.code} back="/admin/inventory/specimens"
+                        deletedAt={s.deleted_at} deletedBy={gone?.by}
+                        role={user.role} locale={user.locale} blockers={why} />
+      )}
 
       {!s.is_sellable && blockers.length > 0 && (
         <p className="adm-err">{t('Not sellable because:')} {blockers.join('; ')}.</p>
@@ -276,6 +294,13 @@ export default async function SpecimenPage({ params }: { params: Promise<{ code:
           )}
         </div>
       </div>
+
+      {!s.deleted_at && (
+        <div className="adm-danger">
+          <DeleteControls kind="specimen" code={s.code} back="/admin/inventory/specimens"
+                          role={user.role} locale={user.locale} />
+        </div>
+      )}
     </>
   );
 }

@@ -178,7 +178,8 @@ const SCANS: Record<string, (rule: Rule) => Promise<Candidate[]>> = {
       `SELECT reference, name, company,
               round(extract(epoch FROM now() - created_at) / 3600)::text AS hours
          FROM leads
-        WHERE status = 'new' AND last_contacted IS NULL
+        WHERE deleted_at IS NULL
+          AND status = 'new' AND last_contacted IS NULL
           AND created_at < now() - ($1 || ' hours')::interval
         ORDER BY created_at`, [String(hours)]);
     return rows.map((l) => ({
@@ -195,7 +196,8 @@ const SCANS: Record<string, (rule: Rule) => Promise<Candidate[]>> = {
     const rows = await query<{ reference: string; name: string; company: string | null; due: string }>(
       `SELECT reference, name, company, next_follow_up::text AS due
          FROM leads
-        WHERE next_follow_up IS NOT NULL
+        WHERE deleted_at IS NULL
+          AND next_follow_up IS NOT NULL
           AND next_follow_up <= current_date + ($1 || ' days')::interval
           AND status NOT IN ('won', 'lost')
         ORDER BY next_follow_up`, [String(days)]);
@@ -216,7 +218,8 @@ const SCANS: Record<string, (rule: Rule) => Promise<Candidate[]>> = {
               COALESCE((SELECT sum(unit_price * quantity * (1 - discount_pct/100))
                           FROM quote_items WHERE quote_id = q.id), 0)::numeric(14,2)::text AS total
          FROM quotes q
-        WHERE q.status = 'sent' AND q.valid_until IS NOT NULL
+        WHERE q.deleted_at IS NULL
+          AND q.status = 'sent' AND q.valid_until IS NOT NULL
           AND q.valid_until BETWEEN current_date AND current_date + ($1 || ' days')::interval
         ORDER BY q.valid_until`, [String(days)]);
     return rows.map((q) => ({
@@ -238,7 +241,8 @@ const SCANS: Record<string, (rule: Rule) => Promise<Candidate[]>> = {
               d.scheduled_for::text AS when, COALESCE(d.site_address, o.site_address) AS site
          FROM deliveries d
          JOIN orders o ON o.id = d.order_id
-        WHERE d.status IN ('scheduled', 'loading', 'in_transit')
+        WHERE d.deleted_at IS NULL AND o.deleted_at IS NULL
+          AND d.status IN ('scheduled', 'loading', 'in_transit')
           AND d.scheduled_for IS NOT NULL
           AND d.scheduled_for <= current_date + ($1 || ' days')::interval
         ORDER BY d.scheduled_for`, [String(days)]);
@@ -259,7 +263,8 @@ const SCANS: Record<string, (rule: Rule) => Promise<Candidate[]>> = {
       `SELECT s.code, sup.name AS supplier, s.eta::text AS eta, s.container_no AS container
          FROM shipments s
          LEFT JOIN suppliers sup ON sup.id = s.supplier_id
-        WHERE s.status IN ('planned', 'booked', 'in_transit')
+        WHERE s.deleted_at IS NULL
+          AND s.status IN ('planned', 'booked', 'in_transit')
           AND s.eta IS NOT NULL
           AND s.eta <= current_date + ($1 || ' days')::interval
         ORDER BY s.eta`, [String(days)]);
@@ -305,9 +310,10 @@ const SCANS: Record<string, (rule: Rule) => Promise<Candidate[]>> = {
               (i.total_aed - COALESCE(p.amount, 0))::text AS outstanding
          FROM invoices i
          LEFT JOIN customers c ON c.id = i.customer_id
-         LEFT JOIN (SELECT invoice_id, sum(amount_aed) AS amount FROM payments GROUP BY invoice_id) p
+         LEFT JOIN (SELECT invoice_id, sum(amount_aed) AS amount FROM payments WHERE deleted_at IS NULL GROUP BY invoice_id) p
                 ON p.invoice_id = i.id
-        WHERE i.status NOT IN ('draft', 'cancelled', 'paid')
+        WHERE i.deleted_at IS NULL
+          AND i.status NOT IN ('draft', 'cancelled', 'paid')
           AND i.due_on IS NOT NULL
           AND i.due_on BETWEEN current_date AND current_date + ($1 || ' days')::interval
           AND i.total_aed - COALESCE(p.amount, 0) > 0
@@ -336,9 +342,10 @@ const SCANS: Record<string, (rule: Rule) => Promise<Candidate[]>> = {
                    ELSE '1-30' END AS band
          FROM invoices i
          LEFT JOIN customers c ON c.id = i.customer_id
-         LEFT JOIN (SELECT invoice_id, sum(amount_aed) AS amount FROM payments GROUP BY invoice_id) p
+         LEFT JOIN (SELECT invoice_id, sum(amount_aed) AS amount FROM payments WHERE deleted_at IS NULL GROUP BY invoice_id) p
                 ON p.invoice_id = i.id
-        WHERE i.status NOT IN ('draft', 'cancelled', 'paid')
+        WHERE i.deleted_at IS NULL
+          AND i.status NOT IN ('draft', 'cancelled', 'paid')
           AND i.due_on IS NOT NULL
           AND current_date - i.due_on >= $1
           AND i.total_aed - COALESCE(p.amount, 0) > 0
@@ -381,7 +388,8 @@ const SCANS: Record<string, (rule: Rule) => Promise<Candidate[]>> = {
               (current_date - COALESCE(si.arrived_at, si.acquired_at, si.created_at::date))::text AS days,
               si.asking_price_aed::text AS price
          FROM stock_items si
-        WHERE si.status = 'available'
+        WHERE si.deleted_at IS NULL
+          AND si.status = 'available'
           AND COALESCE(si.arrived_at, si.acquired_at, si.created_at::date) <= current_date - ($1 || ' days')::interval
         ORDER BY 3 DESC`, [String(days)]);
     return rows.map((s) => ({
@@ -400,7 +408,8 @@ const SCANS: Record<string, (rule: Rule) => Promise<Candidate[]>> = {
       `SELECT si.code, si.product_ref, si.health, loc.name AS location
          FROM stock_items si
          LEFT JOIN inventory_locations loc ON loc.id = si.location_id
-        WHERE si.health IN ('stressed', 'critical')
+        WHERE si.deleted_at IS NULL
+          AND si.health IN ('stressed', 'critical')
           AND si.status NOT IN ('dead', 'written_off', 'sold')
         ORDER BY CASE si.health WHEN 'critical' THEN 0 ELSE 1 END, si.code`);
     return rows.map((s) => ({
@@ -452,11 +461,13 @@ const SCANS: Record<string, (rule: Rule) => Promise<Candidate[]>> = {
          LEFT JOIN LATERAL (
            SELECT sum(i.total_aed - COALESCE(p.amount, 0)) AS amount
              FROM invoices i
-             LEFT JOIN (SELECT invoice_id, sum(amount_aed) AS amount FROM payments GROUP BY invoice_id) p
+             LEFT JOIN (SELECT invoice_id, sum(amount_aed) AS amount FROM payments WHERE deleted_at IS NULL GROUP BY invoice_id) p
                     ON p.invoice_id = i.id
-            WHERE i.customer_id = c.id AND i.status NOT IN ('draft', 'cancelled', 'paid')
+            WHERE i.deleted_at IS NULL
+              AND i.customer_id = c.id AND i.status NOT IN ('draft', 'cancelled', 'paid')
          ) o ON true
-        WHERE c.credit_limit_aed > 0 AND COALESCE(o.amount, 0) > c.credit_limit_aed`);
+        WHERE c.deleted_at IS NULL
+          AND c.credit_limit_aed > 0 AND COALESCE(o.amount, 0) > c.credit_limit_aed`);
     return rows.map((c) => ({
       subject: c.id, bucket: String(Math.floor(Number(c.outstanding) / 10000)),
       title: `${c.customer} is over their credit limit`,

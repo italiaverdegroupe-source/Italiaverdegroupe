@@ -708,3 +708,15 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 
   html, body { background: #fff !important; }
 }
+
+/* The foot of a record page, where the one button that removes it lives.
+   Set apart from the working controls above rather than sitting among them:
+   the distance is the point. */
+.adm-danger {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: flex-end;
+}
+@media print { .adm-danger { display: none !important; } }

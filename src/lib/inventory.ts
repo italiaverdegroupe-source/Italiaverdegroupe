@@ -69,6 +69,7 @@ export const getStockByProduct = () =>
              count(*) FILTER (WHERE si.status IN ('dead','written_off')) AS specimens_lost
         FROM stock_items si
         LEFT JOIN inventory_locations loc ON loc.id = si.location_id
+       WHERE si.deleted_at IS NULL
        GROUP BY si.product_ref
     ),
     batches AS (
@@ -104,7 +105,7 @@ export type Specimen = {
   purchase_cost: string | null; purchase_currency: string; fx_rate_to_aed: string | null;
   landed_cost_aed: string | null; asking_price_aed: string | null; notes: string | null;
   height_m: string | null; trunk_girth_cm: string | null; measured_at: string | null;
-  is_sellable: boolean;
+  is_sellable: boolean; deleted_at: string | null;
 };
 
 const SPECIMEN_SELECT = `
@@ -113,7 +114,7 @@ const SPECIMEN_SELECT = `
          sup.name AS supplier_name,
          si.acquired_at, si.arrived_at, si.acclimatised_until,
          si.purchase_cost, si.purchase_currency, si.fx_rate_to_aed,
-         si.landed_cost_aed, si.asking_price_aed, si.notes,
+         si.landed_cost_aed, si.asking_price_aed, si.notes, si.deleted_at,
          m.height_m, m.trunk_girth_cm, m.measured_at,
          (${SELLABLE_ITEM_SQL}) AS is_sellable
     FROM stock_items si
@@ -126,13 +127,18 @@ const SPECIMEN_SELECT = `
        ORDER BY measured_at DESC, id DESC LIMIT 1
     ) m ON true`;
 
-export function listSpecimens(opts: { status?: string; productRef?: string } = {}) {
-  const where: string[] = [];
+export function listSpecimens(
+  opts: { status?: string; productRef?: string; deleted?: boolean } = {},
+) {
+  // A deleted specimen is out of every list by default — including the picker
+  // a quotation line is built from, where offering a tree somebody has just
+  // removed is how it gets sold twice.
+  const where: string[] = [`si.deleted_at IS ${opts.deleted ? 'NOT NULL' : 'NULL'}`];
   const params: unknown[] = [];
   if (opts.status) { params.push(opts.status); where.push(`si.status = $${params.length}`); }
   if (opts.productRef) { params.push(opts.productRef); where.push(`si.product_ref = $${params.length}`); }
   return query<Specimen>(
-    `${SPECIMEN_SELECT} ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
+    `${SPECIMEN_SELECT} WHERE ${where.join(' AND ')}
      ORDER BY si.code LIMIT 500`, params);
 }
 

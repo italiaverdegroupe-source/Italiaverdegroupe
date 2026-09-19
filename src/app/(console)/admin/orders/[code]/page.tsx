@@ -9,6 +9,8 @@ import {
 } from '@/lib/orders';
 import { fmtDay } from '@/components/admin/bits';
 import { adminUi, adminStatus } from '@/lib/admin-ui';
+import DeleteControls from '@/components/admin/DeleteControls';
+import { blockers, deletionInfo } from '@/lib/deletion';
 
 export const dynamic = 'force-dynamic';
 
@@ -97,6 +99,10 @@ export default async function OrderPage({ params }: { params: Promise<{ code: st
   const o = await getOrder(code);
   if (!o) notFound();
   const [items, deliveries] = await Promise.all([getOrderItems(o.id), getDeliveries(o.id)]);
+  // Only looked up once the record is actually in the bin: on a live one this
+  // is two queries nobody needs.
+  const gone = o.deleted_at ? await deletionInfo('order', o.code) : null;
+  const why = gone && user.role === 'owner' ? await blockers('order', o.code) : [];
   const t = orderTotals(o, items);
   const open = deliveries.filter((d) => d.status !== 'delivered' && d.status !== 'cancelled');
 
@@ -110,6 +116,15 @@ export default async function OrderPage({ params }: { params: Promise<{ code: st
         {o.project_name ? ` · ${o.project_name}` : ''}
         {o.lpo_number ? ` · LPO ${o.lpo_number}` : ''}
       </p>
+
+      {/* Deleted: the banner goes at the top, so nobody gets halfway through
+          editing a record that is in the bin before noticing. Live: the button
+          goes at the foot, away from the controls somebody came here to use. */}
+      {o.deleted_at && (
+        <DeleteControls kind="order" code={o.code} back="/admin/orders"
+                        deletedAt={o.deleted_at} deletedBy={gone?.by}
+                        role={user.role} locale={user.locale} blockers={why} />
+      )}
 
       <div className="adm-cards">
         <div className="adm-card"><b>{t.fulfilledPct}%</b><span>{tr("Delivered by value")}</span></div>
@@ -152,7 +167,8 @@ export default async function OrderPage({ params }: { params: Promise<{ code: st
             {deliveries.length === 0 ? <p className="adm-empty">{tr("Nothing scheduled.")}</p> : (
               <table className="adm-t">
                 <thead><tr><th>{tr("Run")}</th><th>{tr("Status")}</th><th>{tr("Scheduled")}</th><th>{tr("Driver")}</th>
-                           <th>{tr("Equipment")}</th><th>{tr("Lines")}</th><th>{tr("Received by")}</th></tr></thead>
+                           <th>{tr("Equipment")}</th><th>{tr("Lines")}</th><th>{tr("Received by")}</th>
+                           {user.role !== 'viewer' && <th />}</tr></thead>
                 <tbody>
                   {deliveries.map((d) => (
                     <tr key={d.code}>
@@ -163,6 +179,19 @@ export default async function OrderPage({ params }: { params: Promise<{ code: st
                       <td>{d.equipment ?? '—'}</td>
                       <td className="num">{d.line_count}</td>
                       <td>{d.received_by ?? '—'}</td>
+                      {/* A run booked against the wrong order is the mistake
+                          this table sees most, and it was the one thing here
+                          nobody could take back. A delivered one is left
+                          alone: the stock has moved. */}
+                      {user.role !== 'viewer' && (
+                        <td>
+                          {d.status === 'delivered' ? null : (
+                            <DeleteControls kind="delivery" code={d.code}
+                                            back={`/admin/orders/${o.code}`}
+                                            role={user.role} locale={user.locale} />
+                          )}
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -223,6 +252,13 @@ export default async function OrderPage({ params }: { params: Promise<{ code: st
           </div>
         )}
       </div>
+
+      {!o.deleted_at && (
+        <div className="adm-danger">
+          <DeleteControls kind="order" code={o.code} back="/admin/orders"
+                          role={user.role} locale={user.locale} />
+        </div>
+      )}
     </>
   );
 }

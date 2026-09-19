@@ -8,6 +8,7 @@ import { getSettings } from '@/lib/settings';
 import { fire } from '@/lib/alerts';
 import { fmtDay } from '@/components/admin/bits';
 import { adminUi, adminStatus } from '@/lib/admin-ui';
+import DeleteControls from '@/components/admin/DeleteControls';
 
 export const dynamic = 'force-dynamic';
 
@@ -120,9 +121,11 @@ async function recordPayment(formData: FormData) {
   await query(
     `UPDATE invoices i
         SET status = CASE
-              WHEN COALESCE((SELECT sum(amount_aed) FROM payments p WHERE p.invoice_id = i.id), 0)
+              WHEN COALESCE((SELECT sum(amount_aed) FROM payments p
+                              WHERE p.invoice_id = i.id AND p.deleted_at IS NULL), 0)
                    >= i.total_aed THEN 'paid'
-              WHEN COALESCE((SELECT sum(amount_aed) FROM payments p WHERE p.invoice_id = i.id), 0) > 0
+              WHEN COALESCE((SELECT sum(amount_aed) FROM payments p
+                              WHERE p.invoice_id = i.id AND p.deleted_at IS NULL), 0) > 0
                    THEN 'part_paid'
               ELSE i.status END
       WHERE i.id = $1`, [inv.id]);
@@ -147,9 +150,15 @@ async function recordPayment(formData: FormData) {
   revalidatePath('/admin/finance');
 }
 
-export default async function FinancePage() {
+export default async function FinancePage({
+  searchParams,
+}: { searchParams: Promise<{ deleted?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
+  // The bin holds only the invoice table. The ageing, the buckets and every
+  // figure on the cards stay on live invoices whichever list is showing:
+  // "outstanding" must not change because somebody clicked a filter.
+  const bin = (await searchParams).deleted === '1';
   // `t` is the order totals in the helper above, so the translator is `tr`
   // throughout this file — see the note there.
   const tr = adminUi(user.locale);
@@ -159,15 +168,22 @@ export default async function FinancePage() {
   const [invoices, rows, totals] = await Promise.all([
     query<{ code: string; order_code: string | null; kind: string; status: string;
             issued_on: string | null; due_on: string | null; total_aed: string;
-            retention_aed: string; paid: string; pint_status: string }>(`
+            retention_aed: string; paid: string; pint_status: string;
+            deleted_at: string | null; deleted_by: string | null }>(`
       SELECT i.code, o.code AS order_code, i.kind, i.status, i.issued_on, i.due_on,
              i.total_aed::text, i.retention_aed::text, i.pint_status,
-             COALESCE((SELECT sum(amount_aed) FROM payments p WHERE p.invoice_id = i.id), 0)::text AS paid
-        FROM invoices i LEFT JOIN orders o ON o.id = i.order_id
+             i.deleted_at, u.email AS deleted_by,
+             COALESCE((SELECT sum(amount_aed) FROM payments p
+                        WHERE p.invoice_id = i.id AND p.deleted_at IS NULL), 0)::text AS paid
+        FROM invoices i
+        LEFT JOIN orders o ON o.id = i.order_id
+        LEFT JOIN users u  ON u.id = i.deleted_by
+       WHERE i.deleted_at IS ${bin ? 'NOT NULL' : 'NULL'}
        ORDER BY i.issued_on DESC NULLS LAST, i.id DESC LIMIT 200`),
     ageing(),
     query<{ bucket: string; amount: string }>(`
-      WITH paid AS (SELECT invoice_id, sum(amount_aed) amount FROM payments GROUP BY invoice_id)
+      WITH paid AS (SELECT invoice_id, sum(amount_aed) amount FROM payments
+                     WHERE deleted_at IS NULL GROUP BY invoice_id)
       SELECT CASE
                WHEN i.due_on IS NULL OR current_date <= i.due_on THEN 'current'
                WHEN current_date - i.due_on <= 30 THEN '1-30'
@@ -176,7 +192,8 @@ export default async function FinancePage() {
                ELSE '90+' END AS bucket,
              sum(i.total_aed - COALESCE(p.amount, 0))::text AS amount
         FROM invoices i LEFT JOIN paid p ON p.invoice_id = i.id
-       WHERE i.status NOT IN ('draft','cancelled','paid')
+       WHERE i.deleted_at IS NULL
+         AND i.status NOT IN ('draft','cancelled','paid')
        GROUP BY 1`),
   ]);
 
@@ -231,12 +248,17 @@ export default async function FinancePage() {
       </div>
 
       <h2>{tr("Invoices")}</h2>
+      <div className="adm-filters">
+        <Link href="/admin/finance" className="adm-chip" data-on={String(!bin)}>{tr("All")}</Link>
+        <Link href="/admin/finance?deleted=1" className="adm-chip" data-on={String(bin)}>{tr("Deleted")}</Link>
+      </div>
       <div className="adm-panel" style={{ marginBottom: 28 }}>
         {invoices.length === 0 ? <p className="adm-empty">{tr("No invoices raised.")}</p> : (
           <table className="adm-t">
             <thead><tr><th>{tr("Invoice")}</th><th>{tr("Order")}</th><th>{tr("Kind")}</th><th>{tr("Status")}</th>
                        <th>{tr("Issued")}</th><th>{tr("Due")}</th><th>{tr("Total")}</th><th>{tr("Paid")}</th>
-                       <th>{tr("Retention")}</th><th>e-invoice</th></tr></thead>
+                       <th>{tr("Retention")}</th><th>e-invoice</th>
+                       {user.role !== 'viewer' && <th>{bin ? tr("Deleted") : ''}</th>}</tr></thead>
             <tbody>
               {invoices.map((i) => (
                 <tr key={i.code}>
@@ -253,6 +275,21 @@ export default async function FinancePage() {
                   <td className="num">{aed(Number(i.paid))}</td>
                   <td className="num">{Number(i.retention_aed) ? aed(Number(i.retention_aed)) : '—'}</td>
                   <td>{st(i.pint_status)}</td>
+                  {/* An invoice with money against it is not deletable at all
+                      — the law requires it kept — so the control is simply
+                      absent rather than present and always refused. */}
+                  {user.role !== 'viewer' && (
+                    <td>
+                      {Number(i.paid) > 0 ? (
+                        <span className="adm-sub">{tr("Cancel it instead")}</span>
+                      ) : (
+                        <DeleteControls kind="invoice" code={i.code}
+                                        back={bin ? '/admin/finance?deleted=1' : '/admin/finance'}
+                                        deletedAt={i.deleted_at} deletedBy={i.deleted_by}
+                                        role={user.role} locale={user.locale} />
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

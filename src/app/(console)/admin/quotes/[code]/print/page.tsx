@@ -44,7 +44,7 @@ export default async function PrintQuote({
       <header className="sh-head">
         {/* Was the name, the tagline and a TRN — no address, no licence and no
             way to reply to the document. See Letterhead. */}
-        <Letterhead site={site} trnAtIssue={q.trn_at_issue} />
+        <Letterhead site={site} trnAtIssue={q.trn_at_issue} t={tr} />
         <div className="sh-right">
           <h1>{tr('Quotation')}</h1>
           <p className="sh-meta">{q.code} &nbsp;·&nbsp; {tr('version {n}', { n: q.version })}</p>

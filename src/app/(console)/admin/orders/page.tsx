@@ -34,13 +34,15 @@ async function convert(formData: FormData) {
   redirect(`/admin/orders/${code}`);
 }
 
-export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ status?: string; quote?: string }> }) {
+export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ status?: string; quote?: string; deleted?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
   const st = adminStatus(user.locale);
   const sp = await searchParams;
-  const rows = await listOrders(ORDER_STATUSES.includes(sp.status as never) ? sp.status : undefined);
+  const bin = sp.deleted === '1';
+  const rows = await listOrders(
+    ORDER_STATUSES.includes(sp.status as never) ? sp.status : undefined, bin);
 
   return (
     <>
@@ -50,11 +52,14 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
       </p>
 
       <div className="adm-filters">
-        <Link href="/admin/orders" className="adm-chip" data-on={String(!sp.status)}>{t("All")}</Link>
+        <Link href={bin ? '/admin/orders?deleted=1' : '/admin/orders'} className="adm-chip"
+              data-on={String(!sp.status)}>{t("All")}</Link>
         {ORDER_STATUSES.map((s) => (
-          <Link key={s} href={`/admin/orders?status=${s}`} className="adm-chip"
+          <Link key={s} href={`/admin/orders?status=${s}${bin ? '&deleted=1' : ''}`} className="adm-chip"
                 data-on={String(sp.status === s)}>{st(s)}</Link>
         ))}
+        <Link href={bin ? '/admin/orders' : '/admin/orders?deleted=1'} className="adm-chip"
+              data-on={String(bin)}>{bin ? t("Back to live") : t("Deleted")}</Link>
       </div>
 
       <div className="adm-panel" style={{ marginBottom: 28 }}>

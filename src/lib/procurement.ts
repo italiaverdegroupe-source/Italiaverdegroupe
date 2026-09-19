@@ -1,4 +1,5 @@
 import { query } from '@/lib/db';
+import type { AdminKey } from '@/lib/admin-ui';
 import { costShipment, type CostLine, type ShipmentLine, type CostedShipment } from '@/lib/landed-cost';
 
 export const SHIPMENT_STATUSES = [
@@ -18,8 +19,14 @@ export const DOC_STATUSES = ['required', 'requested', 'received', 'verified', 'n
 export type DocKind = (typeof DOC_KINDS)[number];
 export type DocStatus = (typeof DOC_STATUSES)[number];
 
-/** What each document is called by the people who chase it. */
-export const DOC_LABEL: Record<DocKind, string> = {
+/**
+ * What each document is called by the people who chase it.
+ *
+ * Typed as AdminKey rather than string so the label is a translation key by
+ * construction: a new document kind whose name nobody has translated is a
+ * compile error, not an English row in an Arabic checklist.
+ */
+export const DOC_LABEL: Record<DocKind, AdminKey> = {
   import_permit: 'Import permit (MOCCAE)',
   phytosanitary: 'Phytosanitary certificate',
   cites: 'CITES certificate',
@@ -31,7 +38,7 @@ export const DOC_LABEL: Record<DocKind, string> = {
   other: 'Other',
 };
 
-export const DOC_STATUS_LABEL: Record<DocStatus, string> = {
+export const DOC_STATUS_LABEL: Record<DocStatus, AdminKey> = {
   required: 'Required',
   requested: 'Requested',
   received: 'Received',
@@ -61,13 +68,13 @@ export type Shipment = {
   etd: string | null; eta: string | null; arrived_on: string | null; cleared_on: string | null;
   to_location: string | null; location_name: string | null; notes: string | null;
   permit_number: string | null; permit_expires_on: string | null;
-  item_count: string; total_qty: string;
+  item_count: string; total_qty: string; deleted_at: string | null;
 };
 
 const SHIPMENT_SELECT = `
   SELECT s.id, s.code, s.status, s.incoterm, s.carrier, s.container_no, s.bl_number,
          s.origin_port, s.destination_port, s.etd, s.eta, s.arrived_on, s.cleared_on,
-         s.to_location, s.notes,
+         s.to_location, s.notes, s.deleted_at,
          sup.name AS supplier_name, loc.name AS location_name,
          p.permit_number, p.expires_on AS permit_expires_on,
          (SELECT count(*) FROM shipment_items si WHERE si.shipment_id = s.id)::text AS item_count,
@@ -77,9 +84,11 @@ const SHIPMENT_SELECT = `
     LEFT JOIN inventory_locations loc ON loc.id = s.to_location
     LEFT JOIN import_permits p ON p.id = s.permit_id`;
 
-export const listShipments = (status?: string) =>
+export const listShipments = (status?: string, deleted = false) =>
   query<Shipment>(
-    `${SHIPMENT_SELECT} ${status ? 'WHERE s.status = $1' : ''}
+    `${SHIPMENT_SELECT}
+      WHERE s.deleted_at IS ${deleted ? 'NOT NULL' : 'NULL'}
+            ${status ? 'AND s.status = $1' : ''}
      ORDER BY COALESCE(s.eta, s.etd) DESC NULLS LAST, s.id DESC LIMIT 200`,
     status ? [status] : []);
 
