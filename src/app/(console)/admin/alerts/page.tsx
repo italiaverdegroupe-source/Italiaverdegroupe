@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { refuse } from '@/app/(console)/admin/refuse';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
@@ -10,6 +11,7 @@ import {
 import { drainOutbound, outboundSummary, requeueBlocked } from '@/lib/outbound';
 import { mailProvider, sendMail, mailFrom } from '@/lib/mail';
 import { adminUi } from '@/lib/admin-ui';
+import Refusal from '@/components/admin/Refusal';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,7 +47,7 @@ async function requireEditor() {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot change alerts.'));
+  if (user.role === 'viewer') refuse('/admin/alerts', t('Viewers cannot change alerts.'));
   return user;
 }
 
@@ -81,10 +83,10 @@ async function sendTest(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role !== 'owner') throw new Error(t('Only the owner can send a test.'));
+  if (user.role !== 'owner') refuse('/admin/alerts', t('Only the owner can send a test.'));
 
   const to = String(formData.get('to') ?? '').trim();
-  if (!to.includes('@')) throw new Error(t('Enter an email address to send the test to.'));
+  if (!to.includes('@')) refuse('/admin/alerts', t('Enter an email address to send the test to.'));
 
   // The outcome is recorded rather than thrown.
   //
@@ -146,12 +148,12 @@ async function emailAll(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role !== 'owner') throw new Error(t('Only the owner can change rules.'));
+  if (user.role !== 'owner') refuse('/admin/alerts', t('Only the owner can change rules.'));
 
   const to = String(formData.get('email_all') ?? '').trim();
   // Empty clears them — deliberately possible, because turning it off should
   // be as easy as turning it on and not a matter of emptying sixteen fields.
-  if (to && !to.includes('@')) throw new Error(t('That is not an email address.'));
+  if (to && !to.includes('@')) refuse('/admin/alerts', t('That is not an email address.'));
 
   const rows = await query<{ id: string }>(
     `UPDATE alert_rules SET email_to = $1, updated_at = now(), updated_by = $2
@@ -208,18 +210,18 @@ async function saveRule(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role !== 'owner') throw new Error(t('Only the owner can change alert rules.'));
+  if (user.role !== 'owner') refuse('/admin/alerts', t('Only the owner can change alert rules.'));
 
   const id = String(formData.get('id') ?? '');
   const severity = String(formData.get('severity') ?? 'info');
-  if (!SEV.includes(severity as Severity)) throw new Error(t('Unknown severity.'));
+  if (!SEV.includes(severity as Severity)) refuse('/admin/alerts', t('Unknown severity.'));
 
   const rawThreshold = String(formData.get('threshold') ?? '').trim();
   const threshold = rawThreshold === '' ? null : Number(rawThreshold);
   if (threshold !== null && !Number.isInteger(threshold)) {
-    throw new Error(t('The number is a count of days, hours or units — it has to be whole.'));
+    refuse('/admin/alerts', t('The number is a count of days, hours or units — it has to be whole.'));
   }
-  if (threshold !== null && threshold < 0) throw new Error(t('The number cannot be negative.'));
+  if (threshold !== null && threshold < 0) refuse('/admin/alerts', t('The number cannot be negative.'));
 
   const role = String(formData.get('to_role') ?? '').trim();
 
@@ -244,13 +246,13 @@ async function saveRule(formData: FormData) {
 // ── page ─────────────────────────────────────────────────────
 
 export default async function AlertsPage({ searchParams }: {
-  searchParams: Promise<{ show?: string; tab?: string }>;
+  searchParams: Promise<{ show?: string; tab?: string; error?: string }>;
 }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
 
-  const { show, tab } = await searchParams;
+  const { show, tab, error } = await searchParams;
   const includeDone = show === 'all';
   const view = tab === 'rules' ? 'rules' : tab === 'outbound' ? 'outbound' : 'inbox';
 
@@ -278,6 +280,7 @@ export default async function AlertsPage({ searchParams }: {
   return (
     <>
       <h1>{t("Alerts")}</h1>
+      <Refusal message={error} />
       <p className="adm-sub">
         {t("The part of the system that speaks first. Everything else waits to be asked — an invoice falls overdue in silence, a permit lapses while a container is at sea. These are the conditions worth being interrupted for.")}
       </p>

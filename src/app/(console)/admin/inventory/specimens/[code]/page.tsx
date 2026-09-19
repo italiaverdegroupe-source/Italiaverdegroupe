@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { refuse } from '@/app/(console)/admin/refuse';
 import { adminUi, adminStatus } from '@/lib/admin-ui';
 import DeleteControls from '@/components/admin/DeleteControls';
 // Aliased: this page already has a `blockers`, the reasons a tree cannot be
@@ -14,6 +15,13 @@ import {
 } from '@/lib/inventory';
 import { getAllProducts } from '@/lib/products';
 import { fmtDate, fmtDay } from '@/components/admin/bits';
+import Refusal from '@/components/admin/Refusal';
+
+/** Back to the specimen the form was submitted from. */
+const spBack = (f: FormData) => {
+  const code = String(f.get('code') ?? '').trim();
+  return code ? `/admin/inventory/specimens/${code}` : '/admin/inventory/specimens';
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +31,7 @@ async function moveSpecimen(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot change stock.'));
+  if (user.role === 'viewer') refuse(spBack(formData), t('Viewers cannot change stock.'));
 
   const code = String(formData.get('code'));
   const before = await getSpecimen(code);
@@ -31,8 +39,8 @@ async function moveSpecimen(formData: FormData) {
 
   const status = String(formData.get('status'));
   const health = String(formData.get('health'));
-  if (!ITEM_STATUSES.includes(status as never)) throw new Error(t('Unknown status.'));
-  if (!HEALTH.includes(health as never)) throw new Error(t('Unknown health.'));
+  if (!ITEM_STATUSES.includes(status as never)) refuse(spBack(formData), t('Unknown status.'));
+  if (!HEALTH.includes(health as never)) refuse(spBack(formData), t('Unknown health.'));
 
   const locationId = String(formData.get('location_id') ?? '').trim() || null;
   const sellableFrom = String(formData.get('acclimatised_until') ?? '').trim() || null;
@@ -84,7 +92,7 @@ async function addMeasurement(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot record measurements.'));
+  if (user.role === 'viewer') refuse(spBack(formData), t('Viewers cannot record measurements.'));
 
   const code = String(formData.get('code'));
   const s = await getSpecimen(code);
@@ -106,7 +114,9 @@ async function addMeasurement(formData: FormData) {
   revalidatePath(`/admin/inventory/specimens/${code}`);
 }
 
-export default async function SpecimenPage({ params }: { params: Promise<{ code: string }> }) {
+export default async function SpecimenPage({ params, searchParams }: {
+  params: Promise<{ code: string }>; searchParams: Promise<{ error?: string }>;
+}) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
@@ -115,6 +125,7 @@ export default async function SpecimenPage({ params }: { params: Promise<{ code:
   // screen, and nowhere else.
   const st = adminStatus(user.locale);
   const { code } = await params;
+  const { error } = await searchParams;
 
   const s = await getSpecimen(code);
   if (!s) notFound();
@@ -143,6 +154,7 @@ export default async function SpecimenPage({ params }: { params: Promise<{ code:
         <Link href="/admin/inventory/specimens">← {t('Specimens')}</Link>
       </p>
       <h1>{s.code}</h1>
+      <Refusal message={error} />
       <p className="adm-sub">
         {product ? `${product.name} · ` : ''}{s.product_ref}
         {' · '}

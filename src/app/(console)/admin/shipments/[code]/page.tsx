@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { refuse } from '@/app/(console)/admin/refuse';
 import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
@@ -14,6 +15,13 @@ import { fmtDay } from '@/components/admin/bits';
 import { adminUi, adminStatus } from '@/lib/admin-ui';
 import DeleteControls from '@/components/admin/DeleteControls';
 import { blockers, deletionInfo } from '@/lib/deletion';
+import Refusal from '@/components/admin/Refusal';
+
+/** Back to the shipment the form was submitted from. */
+const sBack = (f: FormData) => {
+  const code = String(f.get('code') ?? '').trim();
+  return code ? `/admin/shipments/${code}` : '/admin/shipments';
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +34,7 @@ async function addItem(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot change shipments.'));
+  if (user.role === 'viewer') refuse(sBack(formData), t('Viewers cannot change shipments.'));
 
   const code = String(formData.get('code'));
   const s = await getShipment(code);
@@ -56,14 +64,14 @@ async function addCost(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot change shipments.'));
+  if (user.role === 'viewer') refuse(sBack(formData), t('Viewers cannot change shipments.'));
 
   const code = String(formData.get('code'));
   const s = await getShipment(code);
   if (!s) notFound();
 
   const amount = Number(String(formData.get('amount') ?? '0'));
-  if (!Number.isFinite(amount)) throw new Error(t('Amount must be a number.'));
+  if (!Number.isFinite(amount)) refuse(sBack(formData), t('Amount must be a number.'));
 
   await query(
     `INSERT INTO shipment_costs (shipment_id, kind, description, amount, currency, fx_rate_to_aed, allocation)
@@ -91,7 +99,7 @@ async function saveDocument(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot change shipments.'));
+  if (user.role === 'viewer') refuse(sBack(formData), t('Viewers cannot change shipments.'));
 
   const code = String(formData.get('code'));
   const s = await getShipment(code);
@@ -124,14 +132,14 @@ async function deleteDocument(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot change shipments.'));
+  if (user.role === 'viewer') refuse(sBack(formData), t('Viewers cannot change shipments.'));
 
   const code = String(formData.get('code'));
   const s = await getShipment(code);
   if (!s) notFound();
 
   const id = String(formData.get('id') ?? '').trim();
-  if (!id) throw new Error(t('No document named.'));
+  if (!id) refuse(sBack(formData), t('No document named.'));
   await removeShipmentDocument(s.id, id);
 
   await audit({ user, action: 'shipment.document_removed', entity: 'shipment', entityId: code,
@@ -145,7 +153,7 @@ async function startChecklist(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot change shipments.'));
+  if (user.role === 'viewer') refuse(sBack(formData), t('Viewers cannot change shipments.'));
 
   const code = String(formData.get('code'));
   const s = await getShipment(code);
@@ -157,12 +165,15 @@ async function startChecklist(formData: FormData) {
   revalidatePath(`/admin/shipments/${code}`);
 }
 
-export default async function ShipmentPage({ params }: { params: Promise<{ code: string }> }) {
+export default async function ShipmentPage({ params, searchParams }: {
+  params: Promise<{ code: string }>; searchParams: Promise<{ error?: string }>;
+}) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
   const st = adminStatus(user.locale);
   const { code } = await params;
+  const { error } = await searchParams;
 
   const s = await getShipment(code);
   if (!s) notFound();
@@ -194,6 +205,7 @@ export default async function ShipmentPage({ params }: { params: Promise<{ code:
     <>
       <p className="adm-sub"><Link href="/admin/shipments">{t("← Shipments")}</Link></p>
       <h1>{s.code}</h1>
+      <Refusal message={error} />
       <p className="adm-sub">
         {st(s.status)}
         {s.incoterm ? ` · ${s.incoterm}` : ''}

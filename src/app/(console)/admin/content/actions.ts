@@ -31,7 +31,9 @@ async function editor() {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot edit content.'));
+  // The tab is not known this deep, so the refusal lands on the default one
+  // — still the right screen, still the reason, still readable.
+  if (user.role === 'viewer') refuse('site', t('Viewers cannot edit content.'));
   return user;
 }
 

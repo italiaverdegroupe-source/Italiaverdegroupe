@@ -150,10 +150,21 @@ export function proxy(req: NextRequest) {
   const headers = new Headers(req.headers);
   headers.set('x-locale', locale);
 
+  // Cloned, not rebuilt. `new URL('/en' + pathname, req.url)` looks equivalent
+  // and silently DROPS THE QUERY STRING, because a URL built from a path
+  // replaces everything after the host. English is the branch that gets
+  // rewritten, so English — and only English — lost every query parameter it
+  // was ever sent: /catalog?q=olive came back as all 68 specimens, the bulk
+  // and sourcing buttons landed on the ordinary enquiry form, and every
+  // ?_rsc= prefetch the router makes answered with HTML instead of a payload,
+  // which is an InvariantError per link on every page. Arabic and Italian
+  // were fine, which is exactly why nobody noticed.
+  const target = req.nextUrl.clone();
+  target.pathname = `/en${pathname === '/' ? '' : pathname}`;
+
   const res = PREFIXED.test(pathname)
     ? NextResponse.next({ request: { headers } })
-    : NextResponse.rewrite(new URL(`/en${pathname === '/' ? '' : pathname}`, req.url),
-                           { request: { headers } });
+    : NextResponse.rewrite(target, { request: { headers } });
 
   if (wrongHost) res.headers.set('X-Robots-Tag', 'noindex, nofollow');
   return res;

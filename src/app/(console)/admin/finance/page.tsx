@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { refuse } from '@/app/(console)/admin/refuse';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
@@ -9,6 +10,7 @@ import { fire } from '@/lib/alerts';
 import { fmtDay } from '@/components/admin/bits';
 import { adminUi, adminStatus } from '@/lib/admin-ui';
 import DeleteControls from '@/components/admin/DeleteControls';
+import Refusal from '@/components/admin/Refusal';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,11 +23,11 @@ async function raiseInvoice(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const tr = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(tr('Viewers cannot raise invoices.'));
+  if (user.role === 'viewer') refuse('/admin/finance', tr('Viewers cannot raise invoices.'));
 
   const orderCode = String(formData.get('order_code') ?? '').trim();
   const o = await getOrder(orderCode);
-  if (!o) throw new Error(tr('No order {code}.', { code: orderCode }));
+  if (!o) refuse('/admin/finance', tr('No order {code}.', { code: orderCode }));
   const items = await getOrderItems(o.id);
   const t = orderTotals(o, items);
 
@@ -99,15 +101,15 @@ async function recordPayment(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot record payments.'));
+  if (user.role === 'viewer') refuse('/admin/finance', t('Viewers cannot record payments.'));
 
   const invoiceCode = String(formData.get('invoice_code') ?? '').trim();
   const amount = Number(String(formData.get('amount_aed') ?? '0'));
-  if (!amount) throw new Error(t('Enter an amount.'));
+  if (!amount) refuse('/admin/finance', t('Enter an amount.'));
 
   const inv = (await query<{ id: string; total_aed: string }>(
     `SELECT id, total_aed FROM invoices WHERE code = $1`, [invoiceCode]))[0];
-  if (!inv) throw new Error(t('No invoice {code}.', { code: invoiceCode }));
+  if (!inv) refuse('/admin/finance', t('No invoice {code}.', { code: invoiceCode }));
 
   await query(
     `INSERT INTO payments (invoice_id, amount_aed, method, received_on, reference, note, recorded_by)
@@ -152,13 +154,15 @@ async function recordPayment(formData: FormData) {
 
 export default async function FinancePage({
   searchParams,
-}: { searchParams: Promise<{ deleted?: string }> }) {
+}: { searchParams: Promise<{ deleted?: string; error?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   // The bin holds only the invoice table. The ageing, the buckets and every
   // figure on the cards stay on live invoices whichever list is showing:
   // "outstanding" must not change because somebody clicked a filter.
-  const bin = (await searchParams).deleted === '1';
+  const sp = await searchParams;
+  const error = sp.error;
+  const bin = sp.deleted === '1';
   // `t` is the order totals in the helper above, so the translator is `tr`
   // throughout this file — see the note there.
   const tr = adminUi(user.locale);
@@ -204,6 +208,7 @@ export default async function FinancePage({
   return (
     <>
       <h1>{tr("Finance")}</h1>
+      <Refusal message={error} />
       <p className="adm-sub">
         {tr("Contractors here pay late, so what is owed and how late it is sits on the front page rather than in a spreadsheet.")}
       </p>

@@ -2,7 +2,7 @@ import { deleteRecord, restoreRecord, purgeRecord } from '@/app/(console)/admin/
 import { adminUi } from '@/lib/admin-ui';
 import { blockerText, type BlockReason, type DeletableKind } from '@/lib/deletion';
 import { fmtDate } from '@/components/admin/bits';
-import ConfirmButton from '@/components/admin/ConfirmButton';
+import DeleteForm from '@/components/admin/DeleteForm';
 
 /**
  * The delete control, everywhere.
@@ -12,15 +12,17 @@ import ConfirmButton from '@/components/admin/ConfirmButton';
  * confirmation, the role check or the return path.
  *
  * WHY A FORM AND NOT A FETCH. It is a server action behind an ordinary form,
- * so it works with JavaScript disabled, before hydration, and on the slow
- * connection an operations tool is most often used on. `formAction` lets the
- * same form carry restore and permanent deletion without nesting forms, which
- * is invalid HTML and which browsers silently unnest.
+ * so it works on the slow connection an operations tool is most often used
+ * on, and before the page has finished hydrating.
  *
- * THE CONFIRMATION IS THE NATIVE ONE, deliberately — see ConfirmButton, the
- * one client component in here, which exists only because `confirm()` needs an
- * event handler. It names the record in the question, so the dialog is a
- * reading rather than a reflex.
+ * WHY THE BUTTONS ARE A CLIENT COMPONENT. Two reasons, both in DeleteForm:
+ * the confirmation needs an event handler, and a refusal has to be RETURNED
+ * by the action rather than thrown, or a production build replaces it with a
+ * digest and the person is told nothing at all.
+ *
+ * Everything this component decides — the wording, the role, the blockers —
+ * is decided on the server and handed down as finished strings, so the
+ * browser is never sent the rules, only the outcome.
  */
 export default function DeleteControls({
   kind, code, back, deletedAt, deletedBy, role, locale, blockers = [],
@@ -40,62 +42,61 @@ export default function DeleteControls({
   const t = adminUi(locale);
   if (role === 'viewer') return null;
 
-  const hidden = (
-    <>
-      <input type="hidden" name="kind" value={kind} />
-      <input type="hidden" name="code" value={code} />
-      <input type="hidden" name="back" value={back} />
-    </>
-  );
+  const common = { kind, code, back };
 
   // ── still live: one button, and it is reversible ──
   if (!deletedAt) {
     return (
-      <form action={deleteRecord} className="del">
-        {hidden}
-        <ConfirmButton
+      <div className="del">
+        <DeleteForm
+          {...common}
+          action={deleteRecord}
           className="adm-btn-sec del-btn"
+          label={t('Delete')}
           ask={t('Delete {code}? It will be hidden from the lists, and you can put it back.', { code })}
-        >
-          {t('Delete')}
-        </ConfirmButton>
+        />
         <style>{`
-          .del { display: inline-flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+          .del { display: inline-grid; gap: 8px; }
           .del-btn { color: var(--terra-700, #A2422A); }
           .del-btn:hover { border-color: var(--terra-700, #A2422A); }
           @media (pointer: coarse) { .del button { min-height: 44px; } }
         `}</style>
-      </form>
+      </div>
     );
   }
 
   // ── deleted: say so plainly, and offer both ways out ──
   return (
-    <form action={restoreRecord} className="del del-gone">
-      {hidden}
+    <div className="del-gone">
       <p className="del-note">
         <strong>
-          {t('Deleted {when} by {who}', {
-            when: fmtDate(deletedAt), who: deletedBy ?? '—',
-          })}
+          {t('Deleted {when} by {who}', { when: fmtDate(deletedAt), who: deletedBy ?? '—' })}
         </strong>
         <br />
         {t('This is hidden, not gone. Restore it, or remove it from the database for good.')}
       </p>
+
       <div className="del-row">
-        <button type="submit" className="adm-btn">{t('Restore')}</button>
+        <DeleteForm
+          {...common}
+          action={restoreRecord}
+          className="adm-btn"
+          label={t('Restore')}
+          ask={t('Put {code} back? It will appear in the lists again.', { code })}
+        />
         {/* Owner only, and refused while anything live still points at it —
             the reasons are listed rather than the button simply failing. */}
         {role === 'owner' && blockers.length === 0 && (
-          <ConfirmButton
-            formAction={purgeRecord}
+          <DeleteForm
+            {...common}
+            action={purgeRecord}
             className="adm-btn-sec del-btn"
+            label={t('Delete for good')}
             ask={t('Permanently remove {code} from the database? This cannot be undone by anybody, including you.', { code })}
-          >
-            {t('Delete for good')}
-          </ConfirmButton>
+          />
         )}
       </div>
+
       {role === 'owner' && blockers.length > 0 && (
         <div className="del-why">
           <p className="del-why-h">{t('Why this cannot be removed yet')}</p>
@@ -116,7 +117,7 @@ export default function DeleteControls({
           border-radius: var(--radius, 8px); margin-bottom: 18px;
         }
         .del-note { margin: 0; font-size: .88rem; line-height: 1.55; }
-        .del-row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .del-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: start; }
         .del-btn { color: var(--terra-700, #A2422A); }
         .del-btn:hover { border-color: var(--terra-700, #A2422A); }
         .del-warn { margin: 0; font-size: .8rem; color: var(--fg-mute, #6B6E60); }
@@ -128,7 +129,8 @@ export default function DeleteControls({
         .del-why ul { margin: 0; padding-inline-start: 1.1rem; }
         .del-why li { margin-bottom: .25rem; }
         @media (pointer: coarse) { .del-gone button { min-height: 44px; } }
+        @media print { .del-gone, .del { display: none !important; } }
       `}</style>
-    </form>
+    </div>
   );
 }

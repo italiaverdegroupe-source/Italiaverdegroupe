@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { refuse } from '@/app/(console)/admin/refuse';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
@@ -9,6 +10,7 @@ import {
 import { getAllProducts } from '@/lib/products';
 import { fmtDay } from '@/components/admin/bits';
 import { adminUi, adminStatus } from '@/lib/admin-ui';
+import Refusal from '@/components/admin/Refusal';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,14 +20,14 @@ async function addSpecimen(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot add stock.'));
+  if (user.role === 'viewer') refuse('/admin/inventory/specimens', t('Viewers cannot add stock.'));
 
   const productRef = String(formData.get('product_ref') ?? '').trim();
-  if (!productRef) throw new Error(t('Pick a catalogue reference.'));
+  if (!productRef) refuse('/admin/inventory/specimens', t('Pick a catalogue reference.'));
 
   const locationId = String(formData.get('location_id') ?? '').trim() || null;
   const status = String(formData.get('status') ?? 'incoming');
-  if (!ITEM_STATUSES.includes(status as never)) throw new Error(t('Unknown status.'));
+  if (!ITEM_STATUSES.includes(status as never)) refuse('/admin/inventory/specimens', t('Unknown status.'));
 
   const num = (k: string) => {
     const v = String(formData.get(k) ?? '').trim();
@@ -70,12 +72,13 @@ async function addSpecimen(formData: FormData) {
   redirect(`/admin/inventory/specimens/${code}`);
 }
 
-export default async function SpecimensPage({ searchParams }: { searchParams: Promise<{ status?: string; ref?: string; deleted?: string }> }) {
+export default async function SpecimensPage({ searchParams }: { searchParams: Promise<{ status?: string; ref?: string; deleted?: string; error?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
   const st = adminStatus(user.locale);
   const sp = await searchParams;
+  const error = sp.error;
 
   const [rows, locations, catalogue] = await Promise.all([
     listSpecimens({ status: sp.status, productRef: sp.ref, deleted: sp.deleted === '1' }),
@@ -98,6 +101,7 @@ export default async function SpecimensPage({ searchParams }: { searchParams: Pr
     <>
       <p className="adm-sub"><Link href="/admin/inventory">{t("← Inventory")}</Link></p>
       <h1>{t("Specimens")}</h1>
+      <Refusal message={error} />
       <p className="adm-sub">
         {rows.length} shown{sp.ref ? ` · ${sp.ref}` : ''}{sp.status ? ` · ${st(sp.status)}` : ''}
       </p>

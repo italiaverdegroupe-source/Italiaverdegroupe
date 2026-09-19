@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { refuse } from '@/app/(console)/admin/refuse';
 import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
@@ -13,6 +14,20 @@ import { fmtDate, fmtDay } from '@/components/admin/bits';
 import { adminUi, adminStatus } from '@/lib/admin-ui';
 import DeleteControls from '@/components/admin/DeleteControls';
 import { blockers, deletionInfo } from '@/lib/deletion';
+import Refusal from '@/components/admin/Refusal';
+
+/**
+ * Back to the quotation the form was submitted from.
+ *
+ * Read out of the posted data rather than from a closure, because these
+ * actions are defined above the component and have no `params` of their own —
+ * and the code is on the form already, since the action needs it anyway.
+ */
+const qBack = (f: FormData) => {
+  const code = String(f.get('code') ?? '').trim();
+  const v = String(f.get('version') ?? '').trim();
+  return code ? `/admin/quotes/${code}${v ? `?v=${v}` : ''}` : '/admin/quotes';
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -25,14 +40,14 @@ async function addLine(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot change quotations.'));
+  if (user.role === 'viewer') refuse(qBack(formData), t('Viewers cannot change quotations.'));
 
   const code = String(formData.get('code'));
   const version = Number(formData.get('version'));
   const q = await getQuote(code, version);
   if (!q) notFound();
   if (q.status !== 'draft') {
-    throw new Error(t('This version has been issued. Create a new version to change it.'));
+    refuse(qBack(formData), t('This version has been issued. Create a new version to change it.'));
   }
 
   const kind = String(formData.get('kind') ?? 'product') as 'specimen' | 'product' | 'service';
@@ -50,7 +65,7 @@ async function addLine(formData: FormData) {
     const specCode = String(formData.get('specimen_code') ?? '').trim();
     const rows = await query<{ id: string; product_ref: string; landed_cost_aed: string | null }>(
       `SELECT id, product_ref, landed_cost_aed FROM stock_items WHERE code = $1`, [specCode]);
-    if (!rows[0]) throw new Error(t('That specimen does not exist.'));
+    if (!rows[0]) refuse(qBack(formData), t('That specimen does not exist.'));
     stockItemId = rows[0].id;
     productRef = rows[0].product_ref;
     landed = rows[0].landed_cost_aed ? Number(rows[0].landed_cost_aed) : null;
@@ -59,7 +74,7 @@ async function addLine(formData: FormData) {
     productRef = String(formData.get('product_ref') ?? '').trim() || null;
     if (!label && productRef) label = productRef;
   }
-  if (!label) throw new Error(t('A line needs a description.'));
+  if (!label) refuse(qBack(formData), t('A line needs a description.'));
 
   const { rows: [n] } = { rows: await query<{ next: string }>(
     `SELECT COALESCE(max(line_no), 0) + 1 AS next FROM quote_items WHERE quote_id = $1`, [q.id]) };
@@ -82,12 +97,12 @@ async function setStatus(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot change quotations.'));
+  if (user.role === 'viewer') refuse(qBack(formData), t('Viewers cannot change quotations.'));
 
   const code = String(formData.get('code'));
   const version = Number(formData.get('version'));
   const status = String(formData.get('status'));
-  if (!QUOTE_STATUSES.includes(status as never)) throw new Error(t('Unknown status.'));
+  if (!QUOTE_STATUSES.includes(status as never)) refuse(qBack(formData), t('Unknown status.'));
 
   const q = await getQuote(code, version);
   if (!q) notFound();
@@ -121,7 +136,7 @@ async function reviseQuote(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot revise quotations.'));
+  if (user.role === 'viewer') refuse(qBack(formData), t('Viewers cannot revise quotations.'));
 
   const code = String(formData.get('code'));
   const { version } = await newVersion(code, user);
@@ -133,13 +148,13 @@ async function reviseQuote(formData: FormData) {
 
 export default async function QuotePage({
   params, searchParams,
-}: { params: Promise<{ code: string }>; searchParams: Promise<{ v?: string }> }) {
+}: { params: Promise<{ code: string }>; searchParams: Promise<{ v?: string; error?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const tr = adminUi(user.locale);
   const st = adminStatus(user.locale);
   const { code } = await params;
-  const { v } = await searchParams;
+  const { v, error } = await searchParams;
 
   const q = await getQuote(code, v ? Number(v) : undefined);
   if (!q) notFound();
@@ -160,6 +175,7 @@ export default async function QuotePage({
     <>
       <p className="adm-sub"><Link href="/admin/quotes">{tr("← Quotations")}</Link></p>
       <h1>{q.code} <span style={{ fontSize: '.55em', color: '#8A8D7D' }}>v{q.version}</span></h1>
+      <Refusal message={error} />
       <p className="adm-sub">
         <span className={`pill pill-${q.status === 'accepted' ? 'won' : q.status === 'draft' ? 'new' : ['rejected','expired','superseded'].includes(q.status) ? 'lost' : 'quoted'}`}>{st(q.status)}</span>
         {' '}{q.customer_name}{q.customer_company ? ` · ${q.customer_company}` : ''}

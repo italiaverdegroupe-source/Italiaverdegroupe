@@ -8,8 +8,36 @@ import { site } from '@/lib/site';
 import { ui } from '@/lib/ui';
 import { familyName, familyBlurb, specimenCount } from '@/lib/product-copy';
 
-// Six collections, fixed in the code. Anything else is not a route.
-export const dynamicParams = false;
+/**
+ * `true`, and the whole reason is what happens after a save.
+ *
+ * With `dynamicParams = false` a slug outside `generateStaticParams` is not a
+ * route at all, and unmatched paths fall through to global-not-found — which
+ * is why it was chosen. The cost turned out to be severe. Saving anything in
+ * the console calls `revalidatePath('/[lang]', 'layout')`, which invalidates
+ * every prerendered page beneath it; a page whose params are closed cannot be
+ * re-rendered on demand, so from that moment it answered 404 and kept
+ * answering 404 until the container was restarted. Pressing "Save settings"
+ * took the entire catalogue, every collection and every location page off the
+ * site — silently, on a weekday, with no error anywhere.
+ *
+ * So the params are open and the page refuses an unknown one itself, with
+ * notFound(), which renders (site)/not-found.tsx inside the site's own shell.
+ * A visitor sees the same 404; an invalidated page re-renders instead of
+ * disappearing. Proved by tests/revalidation.test.mjs, which presses Save and
+ * then asks for these pages, and checks an unknown slug is still a 404.
+ */
+export const dynamicParams = true;
+
+/**
+ * Five minutes, the same as every other page on this site.
+ *
+ * The page reads the company settings, so it should not be older than they
+ * are. It is not what fixes the disappearing-catalogue defect described above
+ * — opening the parameters is — but a page that can be re-rendered should
+ * also say how often.
+ */
+export const revalidate = 300;
 
 export function generateStaticParams() {
   return getFamilies().map((f) => ({ family: f.slug }));

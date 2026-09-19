@@ -702,6 +702,10 @@ export const ADMIN_EN = [
   "Nothing needs attention. The checks ran {when} — if that says never, press “Run checks now”.",
   "never",
   "This run has been delivered: the stock has moved and the order counts it. Mark it failed or cancelled instead of erasing what happened.",
+  "Something went wrong",
+  "This screen could not finish loading. Nothing you were doing has been lost — the records are unchanged. Try again, and if it keeps happening send the reference below.",
+  "Try again",
+  "Put {code} back? It will appear in the lists again.",
   "unverified",
   "version {n}",
   "why this changed",
@@ -2068,6 +2072,14 @@ const it: Partial<Record<AdminKey, string>> = {
     "mai",
   "This run has been delivered: the stock has moved and the order counts it. Mark it failed or cancelled instead of erasing what happened.":
     "Questa consegna è stata effettuata: la merce si è mossa e l’ordine la conteggia. Segnala come fallita o annullata invece di cancellare quanto è accaduto.",
+  "Something went wrong":
+    "Qualcosa è andato storto",
+  "This screen could not finish loading. Nothing you were doing has been lost — the records are unchanged. Try again, and if it keeps happening send the reference below.":
+    "Questa schermata non è riuscita a caricarsi. Nulla di quanto stavi facendo è andato perduto: i record sono invariati. Riprova e, se continua, comunica il riferimento qui sotto.",
+  "Try again":
+    "Riprova",
+  "Put {code} back? It will appear in the lists again.":
+    "Ripristinare {code}? Tornerà negli elenchi.",
   "unverified":
     "non verificato",
   "version {n}":
@@ -3440,6 +3452,14 @@ const ar: Partial<Record<AdminKey, string>> = {
     "أبدًا",
   "This run has been delivered: the stock has moved and the order counts it. Mark it failed or cancelled instead of erasing what happened.":
     "تم تنفيذ هذا التسليم: المخزون تحرّك والطلب يحتسبه. علِّمه كفاشل أو ملغى بدل محو ما حدث.",
+  "Something went wrong":
+    "حدث خطأ ما",
+  "This screen could not finish loading. Nothing you were doing has been lost — the records are unchanged. Try again, and if it keeps happening send the reference below.":
+    "تعذّر تحميل هذه الشاشة بالكامل. ولم يضع شيء مما كنت تفعله — السجلات كما هي. أعد المحاولة، وإن تكرر الأمر فأرسل الرقم المرجعي أدناه.",
+  "Try again":
+    "أعد المحاولة",
+  "Put {code} back? It will appear in the lists again.":
+    "هل تريد إرجاع {code}؟ سيظهر في القوائم من جديد.",
   "unverified":
     "غير مُتحقَّق منه",
   "version {n}":

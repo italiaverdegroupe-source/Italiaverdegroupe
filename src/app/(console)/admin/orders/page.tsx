@@ -1,10 +1,12 @@
 import Link from 'next/link';
+import { refuse } from '@/app/(console)/admin/refuse';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { listOrders, orderFromQuote, ORDER_STATUSES } from '@/lib/orders';
 import { fmtDay } from '@/components/admin/bits';
 import { adminUi, adminStatus } from '@/lib/admin-ui';
+import Refusal from '@/components/admin/Refusal';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +16,7 @@ async function convert(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot create orders.'));
+  if (user.role === 'viewer') refuse('/admin/orders', t('Viewers cannot create orders.'));
 
   const quote = String(formData.get('quote_code') ?? '').trim();
   const version = Number(formData.get('quote_version') ?? 1);
@@ -34,12 +36,13 @@ async function convert(formData: FormData) {
   redirect(`/admin/orders/${code}`);
 }
 
-export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ status?: string; quote?: string; deleted?: string }> }) {
+export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ status?: string; quote?: string; deleted?: string; error?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
   const st = adminStatus(user.locale);
   const sp = await searchParams;
+  const error = sp.error;
   const bin = sp.deleted === '1';
   const rows = await listOrders(
     ORDER_STATUSES.includes(sp.status as never) ? sp.status : undefined, bin);
@@ -47,6 +50,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
   return (
     <>
       <h1>{t("Orders")}</h1>
+      <Refusal message={error} />
       <p className="adm-sub">
         {t("Fulfilment is tracked per line. An order for 200 trees arriving in three containers is normal, and the status follows the quantities rather than being set by hand.")}
       </p>

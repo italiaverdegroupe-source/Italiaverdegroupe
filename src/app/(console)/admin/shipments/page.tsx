@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { refuse } from '@/app/(console)/admin/refuse';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
@@ -9,6 +10,7 @@ import {
 import { getLocations } from '@/lib/inventory';
 import { fmtDay } from '@/components/admin/bits';
 import { adminUi, adminStatus } from '@/lib/admin-ui';
+import Refusal from '@/components/admin/Refusal';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +20,7 @@ async function createShipment(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot create shipments.'));
+  if (user.role === 'viewer') refuse('/admin/shipments', t('Viewers cannot create shipments.'));
 
   const str = (k: string) => String(formData.get(k) ?? '').trim() || null;
   const code = await nextShipmentCode();
@@ -36,12 +38,13 @@ async function createShipment(formData: FormData) {
   redirect(`/admin/shipments/${code}`);
 }
 
-export default async function ShipmentsPage({ searchParams }: { searchParams: Promise<{ status?: string; deleted?: string }> }) {
+export default async function ShipmentsPage({ searchParams }: { searchParams: Promise<{ status?: string; deleted?: string; error?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
   const st = adminStatus(user.locale);
   const sp = await searchParams;
+  const error = sp.error;
   const bin = sp.deleted === '1';
 
   const [rows, permits, locations] = await Promise.all([
@@ -52,6 +55,7 @@ export default async function ShipmentsPage({ searchParams }: { searchParams: Pr
   return (
     <>
       <h1>{t("Shipments")}</h1>
+      <Refusal message={error} />
       <p className="adm-sub">
         {t("Consignments from Italy, their compliance paperwork, and what each one actually costs once it lands.")}
       </p>

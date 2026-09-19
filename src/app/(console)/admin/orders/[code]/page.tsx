@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { refuse } from '@/app/(console)/admin/refuse';
 import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
@@ -11,6 +12,13 @@ import { fmtDay } from '@/components/admin/bits';
 import { adminUi, adminStatus } from '@/lib/admin-ui';
 import DeleteControls from '@/components/admin/DeleteControls';
 import { blockers, deletionInfo } from '@/lib/deletion';
+import Refusal from '@/components/admin/Refusal';
+
+/** Back to the order the form was submitted from. See quotes for the why. */
+const oBack = (f: FormData) => {
+  const code = String(f.get('code') ?? '').trim();
+  return code ? `/admin/orders/${code}` : '/admin/orders';
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +34,7 @@ async function scheduleDelivery(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot schedule deliveries.'));
+  if (user.role === 'viewer') refuse(oBack(formData), t('Viewers cannot schedule deliveries.'));
 
   const orderCode = String(formData.get('code'));
   const o = await getOrder(orderCode);
@@ -59,7 +67,7 @@ async function scheduleDelivery(formData: FormData) {
   }
   if (!any) {
     await query('DELETE FROM deliveries WHERE id = $1', [rows[0].id]);
-    throw new Error(t('Put a quantity against at least one line.'));
+    refuse(oBack(formData), t('Put a quantity against at least one line.'));
   }
 
   await audit({ user, action: 'delivery.scheduled', entity: 'order', entityId: orderCode,
@@ -73,12 +81,12 @@ async function markDelivered(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot complete deliveries.'));
+  if (user.role === 'viewer') refuse(oBack(formData), t('Viewers cannot complete deliveries.'));
 
   const deliveryCode = String(formData.get('delivery_code'));
   const orderCode = String(formData.get('code'));
   const receivedBy = String(formData.get('received_by') ?? '').trim();
-  if (!receivedBy) throw new Error(t('Record who received it — that is the proof of delivery.'));
+  if (!receivedBy) refuse(oBack(formData), t('Record who received it — that is the proof of delivery.'));
 
   await completeDelivery(deliveryCode, receivedBy,
     String(formData.get('proof_note') ?? '').trim() || null, user);
@@ -89,12 +97,13 @@ async function markDelivered(formData: FormData) {
   revalidatePath('/admin/inventory');
 }
 
-export default async function OrderPage({ params }: { params: Promise<{ code: string }> }) {
+export default async function OrderPage({ params, searchParams }: { params: Promise<{ code: string }>; searchParams: Promise<{ error?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const tr = adminUi(user.locale);
   const st = adminStatus(user.locale);
   const { code } = await params;
+  const { error } = await searchParams;
 
   const o = await getOrder(code);
   if (!o) notFound();
@@ -110,6 +119,7 @@ export default async function OrderPage({ params }: { params: Promise<{ code: st
     <>
       <p className="adm-sub"><Link href="/admin/orders">{tr("← Orders")}</Link></p>
       <h1>{o.code}</h1>
+      <Refusal message={error} />
       <p className="adm-sub">
         <span className={`pill pill-${o.status === 'delivered' || o.status === 'completed' ? 'won' : o.status === 'partially_delivered' ? 'negotiation' : 'quoted'}`}>{st(o.status)}</span>
         {' '}{o.customer_company ?? o.customer_name}

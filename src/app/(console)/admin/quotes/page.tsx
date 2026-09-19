@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { refuse } from '@/app/(console)/admin/refuse';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
@@ -7,6 +8,7 @@ import { listQuotes, nextQuoteCode, taxSnapshot, QUOTE_STATUSES, logQuoteEvent }
 import { getSettings } from '@/lib/settings';
 import { fmtDay } from '@/components/admin/bits';
 import { adminUi, adminStatus } from '@/lib/admin-ui';
+import Refusal from '@/components/admin/Refusal';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +18,7 @@ async function createQuote(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot create quotations.'));
+  if (user.role === 'viewer') refuse('/admin/quotes', t('Viewers cannot create quotations.'));
 
   const leadRef = String(formData.get('lead_reference') ?? '').trim();
   let lead: { id: string; name: string; company: string | null; email: string;
@@ -28,7 +30,7 @@ async function createQuote(formData: FormData) {
   }
 
   const name = String(formData.get('customer_name') ?? '').trim() || lead?.name;
-  if (!name) throw new Error(t('A quotation needs a customer.'));
+  if (!name) refuse('/admin/quotes', t('A quotation needs a customer.'));
 
   const tax = await taxSnapshot();
   const code = await nextQuoteCode();
@@ -59,12 +61,13 @@ async function createQuote(formData: FormData) {
   redirect(`/admin/quotes/${code}`);
 }
 
-export default async function QuotesPage({ searchParams }: { searchParams: Promise<{ status?: string; lead?: string; deleted?: string }> }) {
+export default async function QuotesPage({ searchParams }: { searchParams: Promise<{ status?: string; lead?: string; deleted?: string; error?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
   const st = adminStatus(user.locale);
   const sp = await searchParams;
+  const error = sp.error;
 
   const site = await getSettings();
   const bin = sp.deleted === '1';
@@ -74,6 +77,7 @@ export default async function QuotesPage({ searchParams }: { searchParams: Promi
   return (
     <>
       <h1>{t("Quotations")}</h1>
+      <Refusal message={error} />
       <p className="adm-sub">
         {t("Issued quotations are never edited — repricing creates a new version and supersedes the old one, so what was actually quoted stays answerable.")}
       </p>

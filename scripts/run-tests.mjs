@@ -47,6 +47,7 @@ const NEEDS = {
   'home-audit.mjs': ['server'],
   'console-sweep.mjs': ['server', 'signin'],
   'walkthrough.mjs': ['server', 'signin'],
+  'revalidation.test.mjs': ['server', 'signin'],
 };
 
 async function serverIsUp() {

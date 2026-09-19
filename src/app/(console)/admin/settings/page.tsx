@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { refuse } from '@/app/(console)/admin/refuse';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { getSettings, saveSettings, EDITABLE, type EditableKey } from '@/lib/settings';
@@ -15,7 +16,7 @@ async function save(formData: FormData) {
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
   // Company identity and the tax position are owner-level decisions.
-  if (user.role !== 'owner') throw new Error(t('Only the owner can change settings.'));
+  if (user.role !== 'owner') refuse('/admin/settings', t('Only the owner can change settings.'));
 
   const before = await getSettings();
   const values: Partial<Record<EditableKey, unknown>> = {};
@@ -28,7 +29,7 @@ async function save(formData: FormData) {
   // Charging VAT without a registration number is an offence. Refuse the
   // combination outright rather than letting it reach a customer document.
   if (values.vatEnabled === true && !String(values.trn ?? '').trim()) {
-    throw new Error(t('Enter the TRN before switching VAT on — VAT cannot be charged without a registration number.'));
+    refuse('/admin/settings', t('Enter the TRN before switching VAT on — VAT cannot be charged without a registration number.'));
   }
 
   await saveSettings(values, user.id);

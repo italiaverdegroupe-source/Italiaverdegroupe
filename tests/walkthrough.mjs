@@ -13,6 +13,11 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
 const errors = [];
 page.on('pageerror', (e) => errors.push(String(e)));
 page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+// The browser's own "Failed to load resource" says nothing about WHICH
+// resource, which is useless in a report. The response tells us.
+page.on('response', (r) => {
+  if (r.status() >= 500) errors.push(`${r.status()} ${r.request().method()} ${r.url()}`);
+});
 
 let failed = 0;
 const check = (n, ok, x='') => { console.log((ok?'  PASS  ':'  FAIL  ')+n+(x?'   '+x:'')); if(!ok) failed++; };
@@ -76,7 +81,28 @@ check('it has a reference', /^LEAD-|^ENQ-|^[A-Z]{2,4}-\d+/.test(leadRef.trim()),
 await page.goto(`${B}/admin/leads/${leadRef.trim()}`, { waitUntil: 'domcontentloaded' });
 const leadName = await page.locator('h1').innerText();
 if (!throttled) check('the lead opens', leadName.includes(who));
-check('and offers a delete', await page.locator('.adm-danger form.del').count() === 1);
+check('and offers a delete', await page.locator('.adm-danger .del button').count() === 1);
+
+// ── 2b. a refusal the person can actually read ───────────────
+//
+// Every validation message in this console used to be `throw new Error(...)`,
+// which a production build replaces with a digest before it reaches the
+// browser. Fifty-six rules, in three languages, that nobody had ever read.
+// This is the one check that would have caught it, so it runs against a
+// production build or it proves nothing.
+step('a refusal reaches the screen');
+await page.goto(`${B}/admin/quotes`, { waitUntil: 'domcontentloaded' });
+{
+  const blank = page.locator('form').filter({ has: page.locator('input[name=customer_name]') });
+  await blank.locator('button[type=submit]').first().click();
+  await page.waitForLoadState('networkidle');
+  const shown = await page.locator('body').innerText();
+  check('THE POINT: the rule is shown, not swallowed into a digest',
+    /quotation needs a customer/i.test(shown),
+    shown.includes('Something went wrong') ? 'got the error page instead' : '');
+  check('and it is shown on the screen it came from, not a dead end',
+    page.url().includes('/admin/quotes'), page.url());
+}
 
 // ── 3. a quotation ───────────────────────────────────────────
 step('raising a quotation');
@@ -99,7 +125,11 @@ if (quoteCode) {
     await addLine.locator('input[name=quantity]').fill('6');
     await addLine.locator('input[name=unit_price]').fill('4200');
     await addLine.locator('button[type=submit]').click();
-    await page.waitForLoadState('networkidle');
+    // The action revalidates and re-renders in place, so wait for the line
+    // itself rather than for the network — 'networkidle' settles first.
+    await page.waitForFunction(
+      () => /Olea europaea/.test(document.body.innerText), null, { timeout: 20000 })
+      .catch(() => {});
     await page.goto(`${B}/admin/quotes/${quoteCode}`, { waitUntil: 'networkidle' });
   }
   const qtext = await page.locator('body').innerText();
@@ -142,7 +172,9 @@ if (quoteCode) {
   if (await conv.count()) {
     await conv.locator('input[name=quote_code]').fill(quoteCode);
     await conv.locator('button[type=submit]').first().click();
-    await page.waitForLoadState('networkidle');
+    // Waiting for the destination rather than for the network to go quiet:
+    // the action redirects, and 'networkidle' can settle on the way there.
+    await page.waitForURL(/\/admin\/orders\/ORD-/, { timeout: 20000 }).catch(() => {});
   }
   orderCode = (page.url().match(/\/admin\/orders\/([^/?]+)/) ?? [])[1] ?? null;
   check('an order is created from the quotation', Boolean(orderCode), page.url());
@@ -264,12 +296,16 @@ check('restoring puts it back', (await page.locator('body').innerText()).include
 if (invCode) {
   await page.goto(`${B}/admin/finance`, { waitUntil: 'domcontentloaded' });
   const row = page.locator('table.adm-t tbody tr').filter({ hasText: invCode });
-  check('an unpaid invoice offers a delete', await row.locator('form.del button').count() > 0);
+  check('an unpaid invoice offers a delete', await row.locator('.del button').count() > 0);
 }
 
 // ── 7. nothing broke in the browser ──────────────────────────
 step('the console');
-check('no page threw in the browser', errors.length === 0, errors.slice(0, 3).join(' | '));
+// The browser logs one generic line per failed subresource as well as the
+// response itself, so the same fault appears twice; the URLs are what matter.
+const real = [...new Set(errors)].filter((e) => !/^Failed to load resource/.test(e));
+check('nothing on any screen returned a server error', real.length === 0,
+  real.slice(0, 4).join(' | '));
 
 console.log('\n' + (failed ? `${failed} FAILED` : 'all passed'));
 console.log(`lead=${leadRef?.trim()} quote=${quoteCode} order=${orderCode} invoice=${invCode}`);

@@ -174,6 +174,9 @@ for (const loc of ['it', 'ar']) {
     // 'proforma' is a Latin word Italian and English both took whole. An
     // Italian invoice says proforma; translating it would be inventing a word.
     'proforma',
+    // A brand name with the number beside it. 'WhatsApp {n}' in Italian is
+    // 'WhatsApp {n}'; anything else would be a mistranslation.
+    'WhatsApp {n}',
   ]);
   const same = A.ADMIN_KEYS.filter((k) => d[k] && d[k] === k && !SAME_ON_PURPOSE.has(k));
   check(`${loc}: no console string was left sitting in English`,
@@ -310,6 +313,42 @@ for (const w of [390, 1280]) {
     document.documentElement.scrollWidth - document.documentElement.clientWidth);
   check(`the Arabic homepage does not scroll sideways at ${w}px`, over <= 1, `${over}px`);
 }
+
+// ── the query string survives the rewrite ────────────────────
+//
+// English is the language that gets REWRITTEN rather than passed through, and
+// a rewrite built from a path alone silently drops everything after the '?'.
+// For months /catalog?q=olive answered with the whole catalogue on the English
+// site and with sixteen matches on the Arabic one, which is the shape of bug
+// that hides for ever: the language nobody tests is the language that works.
+// Counted through the product links, because the page prints a total in its
+// own copy that has nothing to do with the result.
+const cardsAt = async (path) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(`${B}${path}`, { waitUntil: 'domcontentloaded' });
+  return page.$$eval('a[href*="/catalog/"]',
+    (as) => new Set(as.map((a) => a.getAttribute('href'))).size);
+};
+const all = await cardsAt('/catalog');
+const some = await cardsAt('/catalog?q=olive');
+check('THE POINT: a search on the English site is not thrown away by the rewrite',
+  some > 0 && some < all, `${some} of ${all}`);
+check('and Arabic, which is passed through rather than rewritten, agrees',
+  (await cardsAt('/ar/catalog?q=olive')) === some, `${some}`);
+
+// The same defect, seen from the other side: every <Link> prefetch carries
+// ?_rsc=, so dropping the query made the router ask for a payload and get a
+// page. One InvariantError per link, on every page of the site.
+const failedPrefetch = [];
+page.on('response', (r) => {
+  if (r.status() >= 500) failedPrefetch.push(`${r.status()} ${r.url()}`);
+});
+// Not 'networkidle': the homepage keeps a connection open and never reaches
+// it. Loaded, then a moment for the router to prefetch what is in view.
+await page.goto(`${B}/`, { waitUntil: 'load' });
+await page.waitForTimeout(2500);
+check('and no prefetch answers with a server error',
+  failedPrefetch.length === 0, failedPrefetch.slice(0, 3).join(' | '));
 
 await browser.close();
 console.log(failed ? `\n${failed} FAILED` : '\nall passed');

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { refuse } from '@/app/(console)/admin/refuse';
 import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
@@ -8,6 +9,13 @@ import { getSettings } from '@/lib/settings';
 import { adminUi } from '@/lib/admin-ui';
 import DeleteControls from '@/components/admin/DeleteControls';
 import { blockers, deletionInfo } from '@/lib/deletion';
+import Refusal from '@/components/admin/Refusal';
+
+/** Back to the lead the form was submitted from. */
+const lBack = (f: FormData) => {
+  const ref = String(f.get('reference') ?? '').trim();
+  return ref ? `/admin/leads/${ref}` : '/admin/leads';
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -54,14 +62,14 @@ async function updateLead(formData: FormData) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
-  if (user.role === 'viewer') throw new Error(t('Viewers cannot change leads.'));
+  if (user.role === 'viewer') refuse(lBack(formData), t('Viewers cannot change leads.'));
 
   const reference = String(formData.get('reference'));
   const status = String(formData.get('status'));
   const followUp = String(formData.get('next_follow_up') ?? '').trim() || null;
   const note = String(formData.get('note') ?? '').trim();
 
-  if (!STATUSES.includes(status as never)) throw new Error(t('Unknown status.'));
+  if (!STATUSES.includes(status as never)) refuse(lBack(formData), t('Unknown status.'));
 
   const before = (await query<Lead>(
     'SELECT * FROM leads WHERE reference = $1', [reference]))[0];
@@ -96,11 +104,12 @@ async function updateLead(formData: FormData) {
   revalidatePath('/admin');
 }
 
-export default async function LeadPage({ params }: { params: Promise<{ reference: string }> }) {
+export default async function LeadPage({ params, searchParams }: { params: Promise<{ reference: string }>; searchParams: Promise<{ error?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
   const { reference } = await params;
+  const { error } = await searchParams;
   const site = await getSettings();
 
   const lead = (await query<Lead>('SELECT * FROM leads WHERE reference = $1', [reference]))[0];
@@ -145,6 +154,7 @@ export default async function LeadPage({ params }: { params: Promise<{ reference
     <>
       <p className="adm-sub"><Link href="/admin/leads">{t("← All leads")}</Link></p>
       <h1>{lead.name}</h1>
+      <Refusal message={error} />
       <p className="adm-sub">
         <StatusPill status={lead.status} /> &nbsp;{lead.reference}
         {lead.company ? ` · ${lead.company}` : ''}
