@@ -603,7 +603,12 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
    The console is a desk tool, but "did that land" gets asked from a car, and a
    control you have to aim at twice is worse there than anywhere. */
 @media (pointer: coarse) {
-  .adm-btn, .adm-chip { min-height: 44px; }
+  /* .adm-btn-sec was missing, which is thirty-four under-sized targets on the
+     alerts screen alone — "Dealt with" on every row — plus the account chip
+     and the sign-out button at the foot of the sidebar. A secondary button is
+     still a button, and a thumb does not know the difference. */
+  .adm-btn, .adm-btn-sec, .adm-chip, .adm-who, .adm-out { min-height: 44px; }
+  .adm-btn-sec, .adm-who, .adm-out { display: inline-flex; align-items: center; }
   .adm-chip { display: inline-flex; align-items: center; }
   .adm-field input, .adm-field select, .adm-field textarea,
   .adm input[type='text'], .adm input[type='search'], .adm input[type='email'],
