@@ -74,14 +74,34 @@ without one, because charging VAT without registration is an offence. Until
 then every quotation says "exclusive of VAT where applicable", which is the
 correct thing for an unregistered company to say.
 
-### d. Google Search Console
+### d. Reinstall the Railway GitHub App — **pushes are not deploying**
+
+This one is invisible until you look for it, and it is the reason to check it
+first. The Railway service watches
+`italiaverdegroupe-source/Italiaverdegroupe`, branch
+`claude/peaceful-feynman-ealwig`, but the **Railway GitHub App is no longer
+installed on the repository**, so the webhook that starts a build is not being
+delivered. Railway reports auto-deploy as disabled and refuses to enable it:
+*"this repository does not have a Railway GitHub App installation."*
+
+The effect: a whole day of commits sat on GitHub with the live site still
+running an older build, with nothing failing and nothing to notice. It was
+found by comparing the deployed commit against the branch head, which is worth
+doing after any push until this is fixed.
+
+Install it at **[github.com/apps/railway](https://github.com/apps/railway)**,
+grant it this repository, then in Railway refresh the repositories and switch
+auto-deploy back on. Until then every release is a manual deploy from the
+Railway dashboard — pick the service, Deployments, and deploy the branch head.
+
+### e. Google Search Console
 
 Set `GOOGLE_SITE_VERIFICATION` on Railway to the token Google gives you, then
 verify the property and submit `https://verdegardenae.com/sitemap.xml`. The
 sitemap, `robots.txt` and the structured data are already written and correct;
 this is the step that tells Google to come and read them.
 
-### e. Two decisions that are yours, not mine
+### f. Two decisions that are yours, not mine
 
 - **`CANONICAL_REDIRECT=1`** would send `www.verdegardenae.com` and the Railway
   address permanently to `verdegardenae.com`. It is good for search ranking and
@@ -111,6 +131,10 @@ this is the step that tells Google to come and read them.
   where the law requires a record kept, permanent only for the owner and only
   once nothing points at the record.
 - **Backups** run and are being kept — three good runs recorded.
+- **The journal** has its first article, on what decides whether an olive
+  tree survives its first Emirati summer, in all three languages. Written in
+  the console like any other, and kept in `db/seed/posts/` so it can be
+  restored or translated side by side.
 
 ## 3. Running it
 
