@@ -288,6 +288,83 @@ check('and MAIL_FROM wins when it is set, so a display name is possible',
 check('SMTP is preferred over Resend when both are configured',
   (process.env.RESEND_API_KEY = 'x', M.mailProvider() === 'smtp'), M.mailProvider());
 
+// ── the Resend path, which is now the one that matters ───────
+// Railway blocks outbound SMTP below the Pro plan, so this company sends over
+// Resend's HTTPS API — a code path that had never once been executed. The
+// request shape is asserted against a stub rather than a real key, and so is
+// the CLASSIFICATION of each failure, which is the part with consequences: a
+// permanent verdict drops the message for good, a transient one keeps it in
+// the queue. Get those the wrong way round and either a typo is retried for
+// hours or a rate limit throws away a customer's notification.
+{
+  const env = { ...process.env };
+  delete process.env.SMTP_URL;
+  process.env.RESEND_API_KEY = 'test-key';
+  process.env.MAIL_FROM = 'Verde Garden Trading <no-reply@verdegardenae.com>';
+  process.env.MAIL_REPLY_TO = 'italiaverdegroupe@gmail.com';
+
+  const realFetch = globalThis.fetch;
+  let seen = null;
+  const stub = (status, body) => {
+    globalThis.fetch = async (url, init) => {
+      seen = { url: String(url), init, body: JSON.parse(init.body) };
+      return new Response(body, { status });
+    };
+  };
+
+  stub(200, JSON.stringify({ id: 're_abc123' }));
+  const id = await M.sendMail({ to: 'buyer@example.com', subject: 'Hello', text: 'Body' });
+  check('a Resend send returns the provider id, which is what the queue records',
+    id === 're_abc123', String(id));
+  check('it posts to the Resend endpoint with the key as a bearer token',
+    seen.url === 'https://api.resend.com/emails'
+    && seen.init.method === 'POST'
+    && seen.init.headers.authorization === 'Bearer test-key',
+    `${seen.init.method} ${seen.url}`);
+  check('THE POINT: From is MAIL_FROM verbatim, so it stays on the verified domain',
+    seen.body.from === 'Verde Garden Trading <no-reply@verdegardenae.com>', seen.body.from);
+  check('the recipient is sent as an array, which is what the API expects',
+    Array.isArray(seen.body.to) && seen.body.to[0] === 'buyer@example.com',
+    JSON.stringify(seen.body.to));
+  check('the subject, the text part and a reply-to all go with it',
+    seen.body.subject === 'Hello' && seen.body.text === 'Body'
+    && seen.body.reply_to === 'italiaverdegroupe@gmail.com',
+    JSON.stringify({ s: seen.body.subject, r: seen.body.reply_to }));
+
+  // 422 is what Resend answers when From is not on a domain you have verified
+  // — the single likeliest mistake when this is first set up. It must fail
+  // loudly and once, not forty times.
+  stub(422, JSON.stringify({ message: 'The verdegardenae.com domain is not verified.' }));
+  let e = await M.sendMail({ to: 'buyer@example.com', subject: 's', text: 't' })
+    .then(() => null, (err) => err);
+  check('THE POINT: an unverified sending domain is permanent, not retried',
+    M.isPermanent(e), e?.constructor?.name ?? 'did not throw');
+  check('and the queue carries Resend own words, not a summary of them',
+    /not verified/.test(e?.message ?? ''), e?.message ?? '');
+
+  stub(429, 'Too many requests');
+  e = await M.sendMail({ to: 'buyer@example.com', subject: 's', text: 't' })
+    .then(() => null, (err) => err);
+  check('a rate limit is transient, so the notification waits rather than dying',
+    e instanceof M.TransientMailError && !M.isPermanent(e), e?.constructor?.name ?? 'did not throw');
+
+  stub(503, 'upstream down');
+  e = await M.sendMail({ to: 'buyer@example.com', subject: 's', text: 't' })
+    .then(() => null, (err) => err);
+  check('so is an outage at their end',
+    e instanceof M.TransientMailError, e?.constructor?.name ?? 'did not throw');
+
+  globalThis.fetch = async () => { throw new Error('getaddrinfo ENOTFOUND'); };
+  e = await M.sendMail({ to: 'buyer@example.com', subject: 's', text: 't' })
+    .then(() => null, (err) => err);
+  check('and so is not being able to reach them at all',
+    e instanceof M.TransientMailError, e?.constructor?.name ?? 'did not throw');
+
+  globalThis.fetch = realFetch;
+  Object.assign(process.env, env);
+  delete process.env.MAIL_REPLY_TO;
+}
+
 const sent = await M.sendMail({ to: 'not-an-address', subject: 's', text: 't' })
   .then(() => null, (err) => err);
 check('an address with no @ in it is refused before a connection is opened',
