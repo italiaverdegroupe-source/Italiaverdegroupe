@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { alternates, type Locale } from '@/lib/i18n';
+import { alternates, LOCALE_TAG, type Locale } from '@/lib/i18n';
 import L from '@/components/L';
 import Image from 'next/image';
 import { getBlocks, publishedPosts, getSeo } from '@/lib/content';
@@ -37,8 +37,17 @@ const cover = (ref: string | null) => {
   try { return imageFor(ref); } catch { return null; }   // a renamed photo must not 500 the page
 };
 
-const fmt = (v: string | null) =>
-  v ? new Date(v).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+/**
+ * The date an article was published, in the language it is being read in.
+ *
+ * It was 'en-GB' on both journal pages, so an Arabic reader got "19 September
+ * 2026" under an Arabic headline and an Italian reader got the English month
+ * name. The locale tag is already derived from the route — nothing had to be
+ * looked up, it simply was not passed.
+ */
+const fmt = (v: string | null, lang: Locale) =>
+  v ? new Date(v).toLocaleDateString(LOCALE_TAG[lang],
+      { day: 'numeric', month: 'long', year: 'numeric' }) : '';
 
 export default async function JournalPage(
   { params }: { params: Promise<{ lang: Locale }> },
@@ -74,7 +83,7 @@ export default async function JournalPage(
                     )}
                     <span className="jr-body">
                       <time className="jr-date" dateTime={p.published_at ?? undefined}>
-                        {fmt(p.published_at)}
+                        {fmt(p.published_at, lang)}
                       </time>
                       <span className="jr-title">{p.title}</span>
                       {p.excerpt && <span className="jr-ex">{p.excerpt}</span>}
