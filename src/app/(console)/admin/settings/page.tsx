@@ -61,7 +61,8 @@ export default async function SettingsPage() {
 
   // The headings are keys too — see EDITABLE's own note.
   const groups: [AdminKey, EditableKey[]][] = [
-    ['Company',  ['legalName', 'brandName', 'tagline', 'description', 'licenceNumber']],
+    ['Company',  ['legalName', 'brandName', 'tagline', 'description', 'licenceNumber',
+                  'consoleWelcome']],
     ['Contact',  ['phone', 'whatsapp', 'whatsappLabel', 'email']],
     ['Registered office', ['address', 'city', 'country']],
     ['Social',   ['instagram', 'linkedin', 'facebook', 'youtube', 'tiktok']],

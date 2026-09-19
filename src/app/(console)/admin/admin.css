@@ -295,8 +295,11 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 .lg-media { position: absolute; inset: 0; z-index: -2; overflow: hidden; }
 .lg-img {
   object-fit: cover;
-  /* Push the avenue left, clear of the card. */
-  object-position: 34% 50%;
+  /* The frame is 2.1:1 and most screens are not, so `cover` crops the sides.
+     Held at centre: the sun and the skyline are on the left, the olive and the
+     villa on the right, and both halves have to survive the crop — the whole
+     argument of the picture is that those two things are in one frame. */
+  object-position: 50% 50%;
   /* The sources are ~1388px wide, so they upscale on a large display. A
      fractional scale hides the softness without costing a layout. */
   transform: scale(1.04);
@@ -304,30 +307,123 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 
 .lg-veil {
   position: absolute; inset: 0; z-index: -1;
-  /* Mirrored from the public hero's veil: darkest at the RIGHT, under the
-     card. Same green-black ink the site uses (rgb 10 14 8), not pure black. */
+  /* Three washes, each doing one job.
+     1. A deep green-black ramp that gets heavy on the RIGHT, under the card —
+        the villa wall there is pale stone, and a white glass panel on pale
+        stone has no edge at all.
+     2. A warm amber breath at the lower left, so the sunrise keeps its colour
+        instead of going grey under the darkening.
+     3. A vignette at the foot, which is where the terrace is brightest and
+        where the mark and the clock sit. */
   background:
-    linear-gradient(266deg,
-      rgb(10 14 8 / .93) 0%, rgb(10 14 8 / .80) 30%,
-      rgb(10 14 8 / .42) 62%, rgb(10 14 8 / .58) 100%),
-    linear-gradient(to top, rgb(10 14 8 / .86) 0%, rgb(10 14 8 / .10) 42%);
+    /* 262deg runs right-to-left, so 0% is the edge the card sits on. Heavy
+       there and then off quickly: the first version held .40 all the way to
+       the left edge and the sunrise — the reason this photograph was chosen —
+       came out grey. */
+    linear-gradient(262deg,
+      rgb(8 12 7 / .88) 0%, rgb(8 12 7 / .66) 24%,
+      rgb(8 12 7 / .22) 52%, rgb(8 12 7 / .14) 100%),
+    /* Put back the warmth the darkening takes out, centred on the sun. */
+    radial-gradient(90% 75% at 11% 62%, rgb(214 142 46 / .26), rgb(214 142 46 / 0) 66%),
+    /* Enough foot to carry the mark and the clock, and no more: the terrace
+       and the pool are the brightest part of the frame and worth keeping. */
+    linear-gradient(to top, rgb(8 12 7 / .56) 0%, rgb(8 12 7 / 0) 40%);
 }
 
-.lg-mark {
+/* ── the company, on the light half ────────────────────────────
+   A sign-in screen is the first thing anybody sees of this system and it was
+   a form on a photograph. This column is the other half of the argument: who
+   this is, what they do, and three numbers that are counted rather than
+   claimed. Everything here sits directly on the picture, so everything here
+   carries the hero's shadow. */
+.lg-story {
   grid-column: 1;
-  align-self: start;
-  display: flex; flex-direction: column; gap: 2px;
-  /* Anything sitting directly on the photograph gets the hero's shadow. */
-  text-shadow: 0 1px 16px rgb(10 14 8 / .55);
+  align-self: center;
+  max-width: 34rem;
+  display: grid;
+  gap: clamp(16px, 2.4vw, 26px);
+  text-shadow: 0 1px 20px rgb(8 12 7 / .7);
 }
-.lg-mark-name {
-  font-family: var(--font-fraunces), serif;
-  font-size: clamp(1.15rem, 2vw, 1.5rem); letter-spacing: -.01em; color: #FFFDF8;
+
+.lg-mark { display: flex; align-items: center; gap: 12px; }
+.lg-mark-leaf {
+  display: grid; place-items: center; flex: none;
+  width: 40px; height: 40px; border-radius: 9px;
+  color: #F2D9A4;
+  background: rgb(8 12 7 / .30);
+  border: 1px solid rgb(255 253 248 / .30);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
 }
-.lg-mark-sub {
-  font-size: .72rem; letter-spacing: .24em; text-transform: uppercase;
-  color: var(--brass-300, #D2B37C);
+.lg-mark-txt { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.lg-mark-txt b {
+  font-family: var(--font-fraunces), serif; font-weight: 500;
+  font-size: clamp(1.1rem, 1.8vw, 1.4rem); letter-spacing: -.01em; color: #FFFDF8;
 }
+/* The brass this line used sits at roughly 60% luminance — fine on the dark
+   third of the photograph, invisible where the sunrise blows out behind it.
+   Small caps at .66rem have almost no ink to carry a colour, so the fix is
+   a brighter brass, a heavier stem, and a shadow of its own rather than the
+   column's soft one, which a 1px stroke simply disappears into. */
+.lg-mark-txt i {
+  font-style: normal; font-weight: 600;
+  font-size: .68rem; letter-spacing: .22em; text-transform: uppercase;
+  color: #F2D9A4;
+  text-shadow: 0 1px 2px rgb(8 12 7 / .92), 0 0 14px rgb(8 12 7 / .75);
+}
+
+.lg-claim {
+  margin: 0;
+  font-family: var(--font-fraunces), serif; font-weight: 400;
+  /* Down to 1.6rem on a phone: at clamp's old floor this ran to five lines
+     above the card and pushed the password box off the screen. */
+  font-size: clamp(1.6rem, 3.6vw, 3rem);
+  line-height: 1.08; letter-spacing: -.025em; color: #FFFDF8;
+  text-wrap: balance;
+}
+.lg-claim-sub {
+  margin: 0; max-width: 30rem;
+  font-size: clamp(.88rem, 1.1vw, 1rem); line-height: 1.6;
+  color: rgb(255 253 248 / .82);
+}
+
+/* The three numbers. Hairline rules between them rather than boxes: a card
+   here would compete with the one that matters, which is the form. */
+.lg-facts {
+  margin: 0; display: flex; flex-wrap: wrap;
+  gap: clamp(18px, 2.6vw, 34px);
+}
+.lg-facts > div { display: grid; gap: 2px; }
+.lg-facts dt {
+  font-family: var(--font-fraunces), serif; font-weight: 450;
+  font-size: clamp(1.5rem, 2.4vw, 2.1rem); line-height: 1;
+  letter-spacing: -.03em; color: #FFFDF8;
+  font-variant-numeric: tabular-nums;
+}
+.lg-facts dd {
+  margin: 0; font-weight: 500;
+  font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
+  color: rgb(255 253 248 / .82);
+  text-shadow: 0 1px 2px rgb(8 12 7 / .8);
+}
+
+/* The time where the company trades, not where the server runs. The dot is
+   the one thing on this screen that moves. */
+.lg-clock {
+  margin: 0; display: flex; align-items: center; gap: 9px;
+  font-size: .74rem; letter-spacing: .14em; text-transform: uppercase;
+  color: rgb(255 253 248 / .6); font-variant-numeric: tabular-nums;
+}
+.lg-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex: none;
+  background: #7FA45C; box-shadow: 0 0 0 0 rgb(127 164 92 / .6);
+  animation: lg-pulse 2.6s ease-out infinite;
+}
+@keyframes lg-pulse {
+  0%   { box-shadow: 0 0 0 0 rgb(127 164 92 / .55); }
+  70%  { box-shadow: 0 0 0 9px rgb(127 164 92 / 0); }
+  100% { box-shadow: 0 0 0 0 rgb(127 164 92 / 0); }
+}
+@media (prefers-reduced-motion: reduce) { .lg-dot { animation: none; } }
 
 .adm-login-box {
   grid-column: 2;
@@ -430,11 +526,31 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 @media (max-width: 860px) {
   .adm-login {
     grid-template-columns: 1fr;
-    align-content: center; gap: 28px;
+    align-content: center; gap: clamp(20px, 4vh, 30px);
   }
-  .lg-mark { grid-column: 1; align-self: end; }
+  .lg-story {
+    grid-column: 1; align-self: end; max-width: 460px; margin-inline: auto;
+    gap: 14px;
+  }
   .adm-login-box { grid-column: 1; max-width: 460px; margin-inline: auto; }
-  .lg-img { object-position: 50% 45%; }
+  /* The tree, not the skyline: at phone width the frame crops to a third of
+     itself, and the olive is the half worth keeping. */
+  .lg-img { object-position: 66% 42%; }
+  /* The veil ramps left-to-right, which means nothing once the card is under
+     the story rather than beside it. Darken from the bottom instead. */
+  .lg-veil {
+    background:
+      linear-gradient(to top, rgb(8 12 7 / .92) 0%, rgb(8 12 7 / .74) 42%,
+                      rgb(8 12 7 / .34) 100%),
+      radial-gradient(90% 60% at 20% 10%, rgb(196 128 40 / .20), rgb(196 128 40 / 0) 70%);
+  }
+}
+
+/* Under about 560px the three numbers and the sentence beneath the claim are
+   competing with the form for a screen that has room for one of them. The
+   company keeps its name and its claim; the proof goes. */
+@media (max-width: 560px) {
+  .lg-claim-sub, .lg-facts { display: none; }
 }
 
 /* filters */

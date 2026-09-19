@@ -787,6 +787,15 @@ export const ADMIN_EN = [
   "on the event",
   "on a schedule",
   "{n} in total. A kind with no rule raises nothing — silence is a choice, not a fault.",
+  "specimens",
+  "emirates",
+  "languages",
+  "Italian roots for a greener tomorrow",
+  "Mature specimens lifted in Italy, cleared, acclimatised and planted across the Emirates.",
+  "Dubai",
+  "Welcome back",
+  "Welcome back, {name}",
+  "Name greeted on the sign-in screen",
   "unverified",
   "version {n}",
   "why this changed",
@@ -2323,6 +2332,24 @@ const it: Partial<Record<AdminKey, string>> = {
     "a intervalli",
   "{n} in total. A kind with no rule raises nothing — silence is a choice, not a fault.":
     "{n} in tutto. Un tipo senza regola non segnala nulla: il silenzio è una scelta, non un guasto.",
+  "specimens":
+    "esemplari",
+  "emirates":
+    "emirati",
+  "languages":
+    "lingue",
+  "Italian roots for a greener tomorrow":
+    "Radici italiane per un domani più verde",
+  "Mature specimens lifted in Italy, cleared, acclimatised and planted across the Emirates.":
+    "Esemplari maturi estratti in Italia, sdoganati, acclimatati e messi a dimora in tutti gli Emirati.",
+  "Dubai":
+    "Dubai",
+  "Welcome back":
+    "Bentornato",
+  "Welcome back, {name}":
+    "Bentornato, {name}",
+  "Name greeted on the sign-in screen":
+    "Nome salutato nella schermata di accesso",
   "unverified":
     "non verificato",
   "version {n}":
@@ -3865,6 +3892,24 @@ const ar: Partial<Record<AdminKey, string>> = {
     "حسب جدول زمني",
   "{n} in total. A kind with no rule raises nothing — silence is a choice, not a fault.":
     "{n} في المجموع. والنوع الذي لا قاعدة له لا يُطلق شيئًا — فالصمت اختيار لا عطل.",
+  "specimens":
+    "صنفًا",
+  "emirates":
+    "إمارات",
+  "languages":
+    "لغات",
+  "Italian roots for a greener tomorrow":
+    "جذورٌ إيطالية لغدٍ أكثر خضرة",
+  "Mature specimens lifted in Italy, cleared, acclimatised and planted across the Emirates.":
+    "أصناف ناضجة تُقتلع في إيطاليا، ثم تُخلَّص وتتأقلم وتُغرس في جميع أنحاء الإمارات.",
+  "Dubai":
+    "دبي",
+  "Welcome back":
+    "أهلًا بعودتك",
+  "Welcome back, {name}":
+    "أهلًا بعودتك، {name}",
+  "Name greeted on the sign-in screen":
+    "الاسم الذي تُحيّيه شاشة الدخول",
   "unverified":
     "غير مُتحقَّق منه",
   "version {n}":

@@ -78,6 +78,17 @@ export const site = {
    * on the invoice is reserved and wired — type these into Settings and the
    * next invoice carries them.
    */
+  /**
+   * The name the sign-in screen greets.
+   *
+   * A console with two people in it is not a product with a user base — it is
+   * a company, and the person who opens it every morning owns it. Greeting him
+   * by name costs nothing and is the difference between a form and a front
+   * door. Empty means the screen simply says "welcome back", which is what it
+   * should say before anybody has decided whose console this is.
+   */
+  consoleWelcome: '',
+
   bankAccountName: '',
   bankName: '',
   bankIban: '',

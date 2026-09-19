@@ -82,6 +82,7 @@ export const EDITABLE = {
   // account to pay it into is an invoice that gets paid late while somebody
   // emails to ask. Blank until the account is open, and — like the licence —
   // never invented: a wrong IBAN on a document is worse than none.
+  consoleWelcome:   { label: 'Name greeted on the sign-in screen', type: 'text' },
   bankAccountName:  { label: 'Bank: account name', type: 'text' },
   bankName:         { label: 'Bank: name and branch', type: 'text' },
   bankIban:         { label: 'Bank: IBAN', type: 'text' },
