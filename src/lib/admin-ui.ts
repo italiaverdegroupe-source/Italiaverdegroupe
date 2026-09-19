@@ -706,6 +706,87 @@ export const ADMIN_EN = [
   "This screen could not finish loading. Nothing you were doing has been lost — the records are unchanged. Try again, and if it keeps happening send the reference below.",
   "Try again",
   "Put {code} back? It will appear in the lists again.",
+  "Credit note",
+  "Account name",
+  "Bank",
+  "Cancelled",
+  "Payment",
+  "Please quote {code} on the transfer.",
+  "Bank: account name",
+  "Bank: name and branch",
+  "Bank: IBAN",
+  "Bank: SWIFT / BIC",
+  "Note printed under the bank details",
+  "Legal name",
+  "Brand name",
+  "Tagline",
+  "WhatsApp number (digits, with country code)",
+  "WhatsApp, as displayed",
+  "City / emirate",
+  "Country",
+  "Instagram link",
+  "LinkedIn link",
+  "Facebook link",
+  "YouTube link",
+  "TikTok link",
+  "Trade licence number",
+  "Founded (year, or yyyy-mm-dd)",
+  "Founded in (city, country)",
+  "Italian company behind this one, if any",
+  "Its website",
+  "Growing / trading in Italy since (year)",
+  "TRN (tax registration number)",
+  "Charge VAT",
+  "VAT rate (0.05 = 5%)",
+  "Quotation validity (days)",
+  "Registered office",
+  "Commerce",
+  "New enquiry",
+  "Enquiry still unanswered",
+  "Follow-up due",
+  "Quotation accepted",
+  "Quotation about to expire",
+  "Order confirmed",
+  "Delivery coming up",
+  "Shipment arriving",
+  "Import permit expiring",
+  "Invoice falling due",
+  "Invoice overdue",
+  "Payment received",
+  "Stock running low",
+  "Stock not moving",
+  "Tree in poor health",
+  "No recent backup",
+  "Customer over credit limit",
+  "The first hour decides the sale. An enquiry that waits until someone opens the list has usually already been answered by a competitor.",
+  "Catches what the arrival alert missed — an enquiry nobody has touched after the given number of hours.",
+  "A promised call that never happens costs the deal and the reputation. Fires for follow-ups due within the given number of days.",
+  "Acceptance starts a clock: stock is reserved, the order has to be raised and the customer expects confirmation the same day.",
+  "A quotation nearing its validity date is the cheapest sale left in the pipeline — one call, on a price already agreed.",
+  "Confirmation is where fulfilment, invoicing and delivery planning all begin.",
+  "A delivery needs a crane, a permit and a driver arranged the day before, not the morning of. Fires for deliveries scheduled within the given number of days.",
+  "Live trees do not wait at a port. Clearance, transport and yard space have to be ready before the container lands, not after demurrage starts.",
+  "A MOCCAE permit is valid six months. If it lapses while a container is at sea, the shipment cannot clear — and a container of live trees sitting at the port is the most expensive failure in this business.",
+  "A reminder before the due date collects far more than a chase after it, and costs nothing in goodwill.",
+  "Contractors here pay late as a matter of course. The alert re-raises as the debt crosses 30, 60 and 90 days, because each band is a different conversation.",
+  "Cash landing is the only event that closes the loop, and the one the owner most wants to see.",
+  "Replacement stock comes from Italy with a lead time measured in weeks, so the reorder decision has to be made while there is still something to sell.",
+  "Living stock costs water, labour and space every month it waits, and a tree that has not sold in months is usually mispriced rather than unlucky.",
+  "A stressed tree can be saved; a dead one is a written-off asset. This is the alert that pays for itself first.",
+  "A backup system fails silently — nothing breaks when it stops, and the discovery happens on the one day it was needed. This is the alert that makes the silence audible.",
+  "The limit exists to stop one contractor quietly becoming the whole receivables book. Crossing it should be a decision, not a discovery.",
+  "Hours without contact",
+  "Days ahead",
+  "Days before expiry",
+  "Days before ETA",
+  "Days before due",
+  "Days past due",
+  "Units remaining or fewer",
+  "Days in stock",
+  "Hours since the last good backup",
+  "on the event",
+  "on a schedule",
+  "{n} in total. A kind with no rule raises nothing — silence is a choice, not a fault.",
   "unverified",
   "version {n}",
   "why this changed",
@@ -2080,6 +2161,168 @@ const it: Partial<Record<AdminKey, string>> = {
     "Riprova",
   "Put {code} back? It will appear in the lists again.":
     "Ripristinare {code}? Tornerà negli elenchi.",
+  "Credit note":
+    "Nota di credito",
+  "Account name":
+    "Intestatario del conto",
+  "Bank":
+    "Banca",
+  "Cancelled":
+    "Annullata",
+  "Payment":
+    "Pagamento",
+  "Please quote {code} on the transfer.":
+    "Indicare {code} nella causale del bonifico.",
+  "Bank: account name":
+    "Banca: intestatario del conto",
+  "Bank: name and branch":
+    "Banca: nome e filiale",
+  "Bank: IBAN":
+    "Banca: IBAN",
+  "Bank: SWIFT / BIC":
+    "Banca: SWIFT / BIC",
+  "Note printed under the bank details":
+    "Nota stampata sotto le coordinate bancarie",
+  "Legal name":
+    "Ragione sociale",
+  "Brand name":
+    "Nome commerciale",
+  "Tagline":
+    "Slogan",
+  "WhatsApp number (digits, with country code)":
+    "Numero WhatsApp (cifre, con prefisso internazionale)",
+  "WhatsApp, as displayed":
+    "WhatsApp, come mostrato",
+  "City / emirate":
+    "Città / emirato",
+  "Country":
+    "Paese",
+  "Instagram link":
+    "Link Instagram",
+  "LinkedIn link":
+    "Link LinkedIn",
+  "Facebook link":
+    "Link Facebook",
+  "YouTube link":
+    "Link YouTube",
+  "TikTok link":
+    "Link TikTok",
+  "Trade licence number":
+    "Numero di licenza commerciale",
+  "Founded (year, or yyyy-mm-dd)":
+    "Fondata (anno, oppure aaaa-mm-gg)",
+  "Founded in (city, country)":
+    "Fondata a (città, paese)",
+  "Italian company behind this one, if any":
+    "Società italiana alle spalle di questa, se esiste",
+  "Its website":
+    "Il suo sito web",
+  "Growing / trading in Italy since (year)":
+    "Coltiva / opera in Italia dal (anno)",
+  "TRN (tax registration number)":
+    "Partita IVA / TRN (numero di registrazione fiscale)",
+  "Charge VAT":
+    "Applica l’IVA",
+  "VAT rate (0.05 = 5%)":
+    "Aliquota IVA (0,05 = 5%)",
+  "Quotation validity (days)":
+    "Validità del preventivo (giorni)",
+  "Registered office":
+    "Sede legale",
+  "Commerce":
+    "Commercio",
+  "New enquiry":
+    "Nuova richiesta",
+  "Enquiry still unanswered":
+    "Richiesta ancora senza risposta",
+  "Follow-up due":
+    "Follow-up in scadenza",
+  "Quotation accepted":
+    "Preventivo accettato",
+  "Quotation about to expire":
+    "Preventivo in scadenza",
+  "Order confirmed":
+    "Ordine confermato",
+  "Delivery coming up":
+    "Consegna imminente",
+  "Shipment arriving":
+    "Spedizione in arrivo",
+  "Import permit expiring":
+    "Permesso di importazione in scadenza",
+  "Invoice falling due":
+    "Fattura in scadenza",
+  "Invoice overdue":
+    "Fattura scaduta",
+  "Payment received":
+    "Pagamento ricevuto",
+  "Stock running low":
+    "Scorte in esaurimento",
+  "Stock not moving":
+    "Scorte ferme",
+  "Tree in poor health":
+    "Albero in cattiva salute",
+  "No recent backup":
+    "Nessun backup recente",
+  "Customer over credit limit":
+    "Cliente oltre il limite di credito",
+  "The first hour decides the sale. An enquiry that waits until someone opens the list has usually already been answered by a competitor.":
+    "La prima ora decide la vendita. Una richiesta che aspetta finché qualcuno apre l’elenco ha di solito già ricevuto risposta da un concorrente.",
+  "Catches what the arrival alert missed — an enquiry nobody has touched after the given number of hours.":
+    "Intercetta ciò che l’avviso di arrivo ha mancato: una richiesta che nessuno ha toccato dopo il numero di ore indicato.",
+  "A promised call that never happens costs the deal and the reputation. Fires for follow-ups due within the given number of days.":
+    "Una telefonata promessa e mai fatta costa la trattativa e la reputazione. Scatta per i follow-up in scadenza entro il numero di giorni indicato.",
+  "Acceptance starts a clock: stock is reserved, the order has to be raised and the customer expects confirmation the same day.":
+    "L’accettazione fa partire un orologio: la merce viene riservata, l’ordine va emesso e il cliente si aspetta conferma lo stesso giorno.",
+  "A quotation nearing its validity date is the cheapest sale left in the pipeline — one call, on a price already agreed.":
+    "Un preventivo vicino alla scadenza è la vendita più economica rimasta in pipeline: una telefonata, su un prezzo già concordato.",
+  "Confirmation is where fulfilment, invoicing and delivery planning all begin.":
+    "Dalla conferma partono evasione, fatturazione e pianificazione della consegna.",
+  "A delivery needs a crane, a permit and a driver arranged the day before, not the morning of. Fires for deliveries scheduled within the given number of days.":
+    "Una consegna richiede gru, permesso e autista organizzati il giorno prima, non la mattina stessa. Scatta per le consegne previste entro il numero di giorni indicato.",
+  "Live trees do not wait at a port. Clearance, transport and yard space have to be ready before the container lands, not after demurrage starts.":
+    "Gli alberi vivi non aspettano in porto. Sdoganamento, trasporto e spazio in vivaio devono essere pronti prima che il container arrivi, non dopo l’inizio della controstallia.",
+  "A MOCCAE permit is valid six months. If it lapses while a container is at sea, the shipment cannot clear — and a container of live trees sitting at the port is the most expensive failure in this business.":
+    "Un permesso MOCCAE vale sei mesi. Se scade mentre un container è in mare, la spedizione non può essere sdoganata: e un container di alberi vivi fermo in porto è il guasto più costoso di questo mestiere.",
+  "A reminder before the due date collects far more than a chase after it, and costs nothing in goodwill.":
+    "Un promemoria prima della scadenza incassa molto più di un sollecito dopo, e non costa nulla in rapporti.",
+  "Contractors here pay late as a matter of course. The alert re-raises as the debt crosses 30, 60 and 90 days, because each band is a different conversation.":
+    "Qui gli appaltatori pagano tardi per abitudine. L’avviso si ripresenta quando il debito supera 30, 60 e 90 giorni, perché ogni fascia è una conversazione diversa.",
+  "Cash landing is the only event that closes the loop, and the one the owner most wants to see.":
+    "L’incasso è l’unico evento che chiude il cerchio, ed è quello che il titolare vuole vedere di più.",
+  "Replacement stock comes from Italy with a lead time measured in weeks, so the reorder decision has to be made while there is still something to sell.":
+    "Le scorte di rimpiazzo arrivano dall’Italia con tempi misurati in settimane, quindi il riordino va deciso finché c’è ancora qualcosa da vendere.",
+  "Living stock costs water, labour and space every month it waits, and a tree that has not sold in months is usually mispriced rather than unlucky.":
+    "Le piante vive costano acqua, manodopera e spazio ogni mese che aspettano, e un albero invenduto da mesi di solito ha il prezzo sbagliato, non la sfortuna.",
+  "A stressed tree can be saved; a dead one is a written-off asset. This is the alert that pays for itself first.":
+    "Un albero sofferente si può salvare; uno morto è un bene da svalutare. È l’avviso che si ripaga per primo.",
+  "A backup system fails silently — nothing breaks when it stops, and the discovery happens on the one day it was needed. This is the alert that makes the silence audible.":
+    "Un sistema di backup si guasta in silenzio: quando si ferma non si rompe nulla, e ce se ne accorge l’unico giorno in cui serviva. È l’avviso che rende udibile quel silenzio.",
+  "The limit exists to stop one contractor quietly becoming the whole receivables book. Crossing it should be a decision, not a discovery.":
+    "Il limite esiste perché un solo appaltatore non diventi in silenzio l’intero portafoglio crediti. Superarlo dev’essere una decisione, non una scoperta.",
+  "Hours without contact":
+    "Ore senza contatto",
+  "Days ahead":
+    "Giorni di anticipo",
+  "Days before expiry":
+    "Giorni prima della scadenza",
+  "Days before ETA":
+    "Giorni prima dell’ETA",
+  "Days before due":
+    "Giorni prima della scadenza di pagamento",
+  "Days past due":
+    "Giorni di ritardo",
+  "Units remaining or fewer":
+    "Unità rimaste o meno",
+  "Days in stock":
+    "Giorni in magazzino",
+  "Hours since the last good backup":
+    "Ore dall’ultimo backup riuscito",
+  "on the event":
+    "sull’evento",
+  "on a schedule":
+    "a intervalli",
+  "{n} in total. A kind with no rule raises nothing — silence is a choice, not a fault.":
+    "{n} in tutto. Un tipo senza regola non segnala nulla: il silenzio è una scelta, non un guasto.",
   "unverified":
     "non verificato",
   "version {n}":
@@ -3460,6 +3703,168 @@ const ar: Partial<Record<AdminKey, string>> = {
     "أعد المحاولة",
   "Put {code} back? It will appear in the lists again.":
     "هل تريد إرجاع {code}؟ سيظهر في القوائم من جديد.",
+  "Credit note":
+    "إشعار دائن",
+  "Account name":
+    "اسم الحساب",
+  "Bank":
+    "المصرف",
+  "Cancelled":
+    "ملغاة",
+  "Payment":
+    "الدفع",
+  "Please quote {code} on the transfer.":
+    "يُرجى ذكر {code} في بيان التحويل.",
+  "Bank: account name":
+    "المصرف: اسم الحساب",
+  "Bank: name and branch":
+    "المصرف: الاسم والفرع",
+  "Bank: IBAN":
+    "المصرف: الآيبان",
+  "Bank: SWIFT / BIC":
+    "المصرف: سويفت / BIC",
+  "Note printed under the bank details":
+    "ملاحظة تُطبع أسفل بيانات المصرف",
+  "Legal name":
+    "الاسم القانوني",
+  "Brand name":
+    "الاسم التجاري",
+  "Tagline":
+    "العبارة التعريفية",
+  "WhatsApp number (digits, with country code)":
+    "رقم واتساب (أرقام فقط مع رمز الدولة)",
+  "WhatsApp, as displayed":
+    "واتساب، كما يظهر",
+  "City / emirate":
+    "المدينة / الإمارة",
+  "Country":
+    "الدولة",
+  "Instagram link":
+    "رابط إنستغرام",
+  "LinkedIn link":
+    "رابط لينكدإن",
+  "Facebook link":
+    "رابط فيسبوك",
+  "YouTube link":
+    "رابط يوتيوب",
+  "TikTok link":
+    "رابط تيك توك",
+  "Trade licence number":
+    "رقم الرخصة التجارية",
+  "Founded (year, or yyyy-mm-dd)":
+    "سنة التأسيس (سنة أو yyyy-mm-dd)",
+  "Founded in (city, country)":
+    "مكان التأسيس (مدينة، دولة)",
+  "Italian company behind this one, if any":
+    "الشركة الإيطالية التي تقف خلفها، إن وُجدت",
+  "Its website":
+    "موقعها الإلكتروني",
+  "Growing / trading in Italy since (year)":
+    "تزرع/تتاجر في إيطاليا منذ (سنة)",
+  "TRN (tax registration number)":
+    "الرقم الضريبي (TRN)",
+  "Charge VAT":
+    "تحصيل ضريبة القيمة المضافة",
+  "VAT rate (0.05 = 5%)":
+    "نسبة الضريبة (0.05 = ٥٪)",
+  "Quotation validity (days)":
+    "مدة صلاحية عرض السعر (أيام)",
+  "Registered office":
+    "المقر المسجَّل",
+  "Commerce":
+    "التجارة",
+  "New enquiry":
+    "طلب استفسار جديد",
+  "Enquiry still unanswered":
+    "استفسار ما زال بلا رد",
+  "Follow-up due":
+    "موعد متابعة مستحق",
+  "Quotation accepted":
+    "عرض سعر مقبول",
+  "Quotation about to expire":
+    "عرض سعر يوشك أن ينتهي",
+  "Order confirmed":
+    "طلب مؤكَّد",
+  "Delivery coming up":
+    "تسليم قادم",
+  "Shipment arriving":
+    "شحنة قادمة",
+  "Import permit expiring":
+    "تصريح استيراد يوشك أن ينتهي",
+  "Invoice falling due":
+    "فاتورة تقترب من الاستحقاق",
+  "Invoice overdue":
+    "فاتورة متأخرة",
+  "Payment received":
+    "دفعة مستلمة",
+  "Stock running low":
+    "المخزون يقترب من النفاد",
+  "Stock not moving":
+    "مخزون راكد",
+  "Tree in poor health":
+    "شجرة في حالة صحية سيئة",
+  "No recent backup":
+    "لا توجد نسخة احتياطية حديثة",
+  "Customer over credit limit":
+    "عميل تجاوز حد الائتمان",
+  "The first hour decides the sale. An enquiry that waits until someone opens the list has usually already been answered by a competitor.":
+    "الساعة الأولى هي التي تحسم البيع. والاستفسار الذي ينتظر حتى يفتح أحدهم القائمة يكون غالبًا قد ردّ عليه منافس بالفعل.",
+  "Catches what the arrival alert missed — an enquiry nobody has touched after the given number of hours.":
+    "يلتقط ما فات تنبيه الوصول — استفسار لم يلمسه أحد بعد عدد الساعات المحدد.",
+  "A promised call that never happens costs the deal and the reputation. Fires for follow-ups due within the given number of days.":
+    "مكالمة وُعد بها ولم تحدث تكلّف الصفقة والسمعة. يعمل للمتابعات المستحقة خلال عدد الأيام المحدد.",
+  "Acceptance starts a clock: stock is reserved, the order has to be raised and the customer expects confirmation the same day.":
+    "القبول يُطلق عدّادًا: يُحجز المخزون، ويجب إصدار الطلب، والعميل يتوقع التأكيد في اليوم نفسه.",
+  "A quotation nearing its validity date is the cheapest sale left in the pipeline — one call, on a price already agreed.":
+    "عرض السعر الذي يقترب من انتهاء صلاحيته هو أرخص بيعة متبقية في المسار — مكالمة واحدة على سعر متفق عليه أصلًا.",
+  "Confirmation is where fulfilment, invoicing and delivery planning all begin.":
+    "من التأكيد يبدأ التنفيذ والفوترة وتخطيط التسليم.",
+  "A delivery needs a crane, a permit and a driver arranged the day before, not the morning of. Fires for deliveries scheduled within the given number of days.":
+    "التسليم يحتاج رافعة وتصريحًا وسائقًا يُرتَّب في اليوم السابق لا في صباح اليوم نفسه. يعمل لعمليات التسليم المجدولة خلال عدد الأيام المحدد.",
+  "Live trees do not wait at a port. Clearance, transport and yard space have to be ready before the container lands, not after demurrage starts.":
+    "الأشجار الحية لا تنتظر في الميناء. التخليص والنقل ومساحة الساحة يجب أن تكون جاهزة قبل وصول الحاوية لا بعد بدء غرامات التأخير.",
+  "A MOCCAE permit is valid six months. If it lapses while a container is at sea, the shipment cannot clear — and a container of live trees sitting at the port is the most expensive failure in this business.":
+    "تصريح الوزارة صالح ستة أشهر. وإذا انتهى بينما الحاوية في البحر تعذّر تخليص الشحنة — وحاوية أشجار حية واقفة في الميناء هي أغلى إخفاق في هذه التجارة.",
+  "A reminder before the due date collects far more than a chase after it, and costs nothing in goodwill.":
+    "التذكير قبل تاريخ الاستحقاق يحصّل أكثر بكثير من المطالبة بعده، ولا يكلّف شيئًا من العلاقة.",
+  "Contractors here pay late as a matter of course. The alert re-raises as the debt crosses 30, 60 and 90 days, because each band is a different conversation.":
+    "المقاولون هنا يتأخرون في الدفع كعادة. ويتكرر التنبيه كلما تجاوز الدين ٣٠ و٦٠ و٩٠ يومًا، لأن كل مرحلة حديث مختلف.",
+  "Cash landing is the only event that closes the loop, and the one the owner most wants to see.":
+    "وصول النقد هو الحدث الوحيد الذي يُغلق الدورة، وهو ما يودّ المالك رؤيته أكثر من غيره.",
+  "Replacement stock comes from Italy with a lead time measured in weeks, so the reorder decision has to be made while there is still something to sell.":
+    "المخزون البديل يأتي من إيطاليا بمهلة تُقاس بالأسابيع، فقرار إعادة الطلب يجب أن تُتخذ وما زال هناك ما يُباع.",
+  "Living stock costs water, labour and space every month it waits, and a tree that has not sold in months is usually mispriced rather than unlucky.":
+    "المخزون الحي يكلّف ماءً وعمالة ومساحة كل شهر ينتظره، والشجرة التي لم تُبع منذ أشهر يكون سعرها خاطئًا غالبًا لا حظها.",
+  "A stressed tree can be saved; a dead one is a written-off asset. This is the alert that pays for itself first.":
+    "الشجرة المجهدة يمكن إنقاذها؛ أما الميتة فأصل مشطوب. وهذا التنبيه أول ما يسدّد كلفته.",
+  "A backup system fails silently — nothing breaks when it stops, and the discovery happens on the one day it was needed. This is the alert that makes the silence audible.":
+    "نظام النسخ الاحتياطي يتعطّل بصمت — لا شيء ينكسر حين يتوقف، ويُكتشف الأمر في اليوم الوحيد الذي احتجناه فيه. وهذا التنبيه هو ما يجعل ذلك الصمت مسموعًا.",
+  "The limit exists to stop one contractor quietly becoming the whole receivables book. Crossing it should be a decision, not a discovery.":
+    "الحد موجود كي لا يصبح مقاول واحد بهدوء كامل دفتر الذمم. وتجاوزه ينبغي أن يكون قرارًا لا اكتشافًا.",
+  "Hours without contact":
+    "ساعات بلا تواصل",
+  "Days ahead":
+    "أيام مقدَّمًا",
+  "Days before expiry":
+    "أيام قبل انتهاء الصلاحية",
+  "Days before ETA":
+    "أيام قبل الوصول المتوقع",
+  "Days before due":
+    "أيام قبل الاستحقاق",
+  "Days past due":
+    "أيام بعد الاستحقاق",
+  "Units remaining or fewer":
+    "الوحدات المتبقية أو أقل",
+  "Days in stock":
+    "أيام في المخزون",
+  "Hours since the last good backup":
+    "ساعات منذ آخر نسخة احتياطية ناجحة",
+  "on the event":
+    "عند وقوع الحدث",
+  "on a schedule":
+    "حسب جدول زمني",
+  "{n} in total. A kind with no rule raises nothing — silence is a choice, not a fault.":
+    "{n} في المجموع. والنوع الذي لا قاعدة له لا يُطلق شيئًا — فالصمت اختيار لا عطل.",
   "unverified":
     "غير مُتحقَّق منه",
   "version {n}":

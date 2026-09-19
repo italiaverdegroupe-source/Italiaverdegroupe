@@ -5,7 +5,7 @@ import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { getSettings, saveSettings, EDITABLE, type EditableKey } from '@/lib/settings';
 import { query } from '@/lib/db';
 import { fmtDate } from '@/components/admin/bits';
-import { adminUi } from '@/lib/admin-ui';
+import { adminUi, type AdminKey } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,7 +59,8 @@ export default async function SettingsPage() {
        FROM settings st LEFT JOIN users u ON u.id = st.updated_by
       ORDER BY st.updated_at DESC LIMIT 12`);
 
-  const groups: [string, EditableKey[]][] = [
+  // The headings are keys too — see EDITABLE's own note.
+  const groups: [AdminKey, EditableKey[]][] = [
     ['Company',  ['legalName', 'brandName', 'tagline', 'description', 'licenceNumber']],
     ['Contact',  ['phone', 'whatsapp', 'whatsappLabel', 'email']],
     ['Registered office', ['address', 'city', 'country']],
@@ -72,6 +73,10 @@ export default async function SettingsPage() {
     // orphan check below is what caught it — on the screen, in production,
     // rather than in a review.
     ['History', ['foundedIn', 'foundedAt', 'italianName', 'italianUrl', 'italianSince']],
+    // Where a customer sends the money. Blank until the account is open; the
+    // invoice prints nothing at all rather than half a bank record, and the
+    // whole block appears the moment these are filled in.
+    ['Payment', ['bankAccountName', 'bankName', 'bankIban', 'bankSwift', 'paymentNote']],
   ];
 
   // Every editable field belongs in a group or it is not on this screen at
@@ -107,7 +112,7 @@ export default async function SettingsPage() {
       <form action={save}>
         {groups.map(([title, keys]) => (
           <div key={title} className="adm-panel adm-pad" style={{ marginBottom: 20 }}>
-            <h2>{title}</h2>
+            <h2>{t(title)}</h2>
             <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))' }}>
               {keys.map((key) => {
                 const f = EDITABLE[key];
@@ -118,14 +123,14 @@ export default async function SettingsPage() {
                            style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                       <input type="checkbox" name={key} defaultChecked={value === true}
                              style={{ width: 16, height: 16 }} disabled={user.role !== 'owner'} />
-                      <span>{f.label}</span>
+                      <span>{t(f.label)}</span>
                     </label>
                   );
                 }
                 if (f.type === 'textarea') {
                   return (
                     <label key={key} className="adm-field" style={{ gridColumn: '1 / -1' }}>
-                      <span>{f.label}</span>
+                      <span>{t(f.label)}</span>
                       <textarea name={key} rows={3} defaultValue={String(value ?? '')}
                                 disabled={user.role !== 'owner'} />
                     </label>
@@ -133,7 +138,7 @@ export default async function SettingsPage() {
                 }
                 return (
                   <label key={key} className="adm-field">
-                    <span>{f.label}</span>
+                    <span>{t(f.label)}</span>
                     <input name={key}
                            type={f.type === 'number' ? 'number' : f.type === 'url' ? 'url' : 'text'}
                            step={f.type === 'number' ? 'any' : undefined}
@@ -163,7 +168,7 @@ export default async function SettingsPage() {
             <tbody>
               {history.map((h) => (
                 <tr key={h.key}>
-                  <td>{EDITABLE[h.key as EditableKey]?.label ?? h.key}</td>
+                  <td>{EDITABLE[h.key as EditableKey] ? t(EDITABLE[h.key as EditableKey].label) : h.key}</td>
                   <td className="num">{fmtDate(h.updated_at)}</td>
                   <td>{h.email ?? '—'}</td>
                 </tr>

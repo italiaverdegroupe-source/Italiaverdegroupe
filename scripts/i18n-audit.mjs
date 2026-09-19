@@ -30,7 +30,13 @@ function visibleStrings(src) {
   }
   // Thrown messages an operator sees on screen
   for (const m of src.matchAll(/(?:Error|refuse)\([^)]*?['"`]([A-Z][^'"`]{8,160})['"`]/g)) out.push(m[1]);
-  return out.filter((s) => !/^[\s\d.,:%·—–-]*$/.test(s));
+  // `Promise<string | null>` in a type annotation looks exactly like a JSX
+  // text node to the rule above: a capital letter between '>' and '<'. There
+  // is no cheap way to tell them apart without parsing, and a permanent false
+  // positive is worse than a narrow exception — a count that is never zero is
+  // a count nobody reads. These are type names, never labels.
+  const TYPE_NAME = /^(?:Promise|Record|Array|Partial|Readonly|Required|Map|Set|Pick|Omit|Awaited|ReturnType)$/;
+  return out.filter((s) => !/^[\s\d.,:%·—–-]*$/.test(s) && !TYPE_NAME.test(s));
 }
 
 const site = files.filter((f) => f.includes('[lang]') || (f.includes('components') && !f.includes('components/admin')));

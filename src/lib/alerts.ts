@@ -1,4 +1,5 @@
 import { query, requirePool } from '@/lib/db';
+import type { AdminKey } from '@/lib/admin-ui';
 
 /**
  * Alerts: the part of the system that speaks first.
@@ -30,12 +31,20 @@ export type Severity = 'info' | 'warning' | 'urgent';
 
 export type AlertKind = {
   key: string;
-  label: string;
+  /**
+   * Typed as AdminKey, not string, because all three of these are printed on
+   * the Alerts screen and all three were English in every language — the name
+   * of each rule, the paragraph explaining why it exists, and the label on the
+   * number it takes. Forty-five sentences on the one screen an owner reads
+   * when something is wrong. A new rule with no translation is now a compile
+   * error rather than another English paragraph.
+   */
+  label: AdminKey;
   /** Why this alert exists — shown in the console beside the rule. */
-  why: string;
+  why: AdminKey;
   trigger: 'event' | 'scan';
   /** What the rule's number means for this kind, if it takes one. */
-  thresholdLabel?: string;
+  thresholdLabel?: AdminKey;
   defaultThreshold?: number;
   defaultSeverity: Severity;
   /** Tokens a custom message may use. */

@@ -339,7 +339,7 @@ export default async function AlertsPage({ searchParams }: {
                         <b>{a.href ? <Link href={a.href}>{a.title}</Link> : a.title}</b>
                         {a.body && <div className="adm-sub" style={{ margin: 0 }}>{a.body}</div>}
                         <div className="adm-sub" style={{ margin: 0, fontSize: 12 }}>
-                          {kindByKey(a.kind)?.label ?? a.kind}
+                          {(() => { const k = kindByKey(a.kind); return k ? t(k.label) : a.kind; })()}
                         </div>
                       </td>
                       <td>{when(a.raised_at)}</td>
@@ -408,10 +408,10 @@ export default async function AlertsPage({ searchParams }: {
                 <input type="hidden" name="id" value={r.id} />
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
                   <h2 style={{ margin: 0 }}>{r.name}</h2>
-                  <span className="pill pill-quoted">{k?.trigger === 'event' ? 'on the event' : 'on a schedule'}</span>
+                  <span className="pill pill-quoted">{k?.trigger === 'event' ? t('on the event') : t('on a schedule')}</span>
                   <code style={{ fontSize: 12, opacity: 0.6 }}>{r.kind}</code>
                 </div>
-                {k && <p className="adm-sub" style={{ marginTop: 6 }}>{k.why}</p>}
+                {k && <p className="adm-sub" style={{ marginTop: 6 }}>{t(k.why)}</p>}
 
                 <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))' }}>
                   <label className="adm-field" style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -429,7 +429,7 @@ export default async function AlertsPage({ searchParams }: {
 
                   {k?.thresholdLabel && (
                     <label className="adm-field">
-                      <span>{k.thresholdLabel}</span>
+                      <span>{t(k.thresholdLabel)}</span>
                       <input name="threshold" type="number" min={0} step="1"
                              defaultValue={r.threshold ?? ''} disabled={user.role !== 'owner'} />
                     </label>
@@ -477,7 +477,8 @@ export default async function AlertsPage({ searchParams }: {
           <div className="adm-panel adm-pad">
             <h2>{t("Kinds available")}</h2>
             <p className="adm-sub">
-              {ALERT_KINDS.length} in total. A kind with no rule raises nothing — silence is a choice, not a fault.
+              {t('{n} in total. A kind with no rule raises nothing — silence is a choice, not a fault.',
+                 { n: ALERT_KINDS.length })}
             </p>
           </div>
         </>

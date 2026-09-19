@@ -60,13 +60,29 @@ export default async function PrintInvoice(
   // registered issuing something headed "Tax Invoice" is a problem, not a
   // formatting choice.
   const isTax = inv.vat_enabled && Number(inv.vat) > 0;
-  const heading = isTax ? tr('Tax invoice')
+  const heading = inv.kind === 'credit_note' ? tr('Credit note')
+    : isTax ? tr('Tax invoice')
     : inv.kind === 'proforma' ? tr('Proforma invoice')
     : tr('Invoice');
   const cur = inv.currency || site.currency;
 
+  // A cancelled invoice printed today is indistinguishable from a live one,
+  // and the copy that gets paid is whichever one is on somebody's desk. It
+  // says so across the sheet instead.
+  const void_ = inv.status === 'cancelled';
+
+  // Where the money goes. Absent in full until an account exists — an invoice
+  // that shows half a bank record is worse than one that shows none.
+  const bank = [
+    [tr('Account name'), site.bankAccountName],
+    [tr('Bank'), site.bankName],
+    ['IBAN', site.bankIban],
+    ['SWIFT / BIC', site.bankSwift],
+  ].filter(([, v]) => String(v ?? '').trim()) as [string, string][];
+
   return (
-    <div className="sheet">
+    <div className="sheet" data-void={String(void_)}>
+      {void_ && <p className="sh-void" role="status">{tr('Cancelled')}</p>}
       <header className="sh-head">
         <Letterhead site={site} trnAtIssue={inv.trn_at_issue} t={tr} />
         <div className="sh-right">
@@ -176,6 +192,24 @@ export default async function PrintInvoice(
         </section>
       )}
 
+      {/* How to pay. Below the figures, because it is the last thing read
+          and the first thing needed. Nothing at all while the account is not
+          open, rather than a heading with empty rows beneath it. */}
+      {!void_ && bank.length > 0 && (
+        <section className="sh-bank">
+          <p className="sh-label">{tr('Payment')}</p>
+          <dl className="sh-bank-dl">
+            {bank.map(([k, v]) => (
+              <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
+            ))}
+          </dl>
+          {site.paymentNote && <p className="sh-small">{site.paymentNote}</p>}
+          <p className="sh-small">
+            {tr('Please quote {code} on the transfer.', { code: inv.code })}
+          </p>
+        </section>
+      )}
+
       {inv.notes && <p className="sh-small">{inv.notes}</p>}
 
       <footer className="sh-foot">
@@ -186,6 +220,27 @@ export default async function PrintInvoice(
       <style>{`
         @page { size: A4; margin: 16mm 14mm; }
         body { background: #fff !important; }
+
+        /* Across the sheet, at an angle, light enough to read the figures
+           through and heavy enough that nobody pays it by mistake. Printed
+           too: the danger is the paper copy, not the screen. */
+        .sh-void {
+          position: absolute; inset-inline: 0; top: 38%;
+          margin: 0; text-align: center; pointer-events: none;
+          font-family: var(--font-fraunces), Georgia, serif;
+          font-size: 92px; letter-spacing: .12em; text-transform: uppercase;
+          color: rgb(162 66 42 / .16); transform: rotate(-22deg);
+          -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        .sheet[data-void='true'] { position: relative; }
+
+        .sh-bank { margin-top: 22px; break-inside: avoid; }
+        .sh-bank-dl { margin: 0 0 6px; display: grid; gap: 2px; }
+        .sh-bank-dl > div { display: flex; gap: 10px; }
+        .sh-bank-dl dt {
+          min-width: 32mm; color: #6B6E60; font-size: 10px; padding-top: 1px;
+        }
+        .sh-bank-dl dd { margin: 0; font-variant-numeric: tabular-nums; }
         .adm-bar { display: none !important; }
         .adm-body { padding: 0 !important; max-width: none !important; }
 

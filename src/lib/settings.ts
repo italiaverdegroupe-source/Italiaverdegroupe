@@ -1,4 +1,5 @@
 import { cache } from 'react';
+import type { AdminKey } from '@/lib/admin-ui';
 import { query } from '@/lib/db';
 import { site as defaults, type Site } from '@/lib/site';
 
@@ -37,7 +38,15 @@ export type Settings = {
   -readonly [K in keyof Site]: Widen<Site[K]>;
 };
 
-/** Fields the console is allowed to write, and how to coerce what comes back. */
+/**
+ * Fields the console is allowed to write, and how to coerce what comes back.
+ *
+ * Every `label` is an AdminKey, so it is a translation key by construction.
+ * They were plain strings, printed straight onto the screen, which meant the
+ * whole Settings page — thirty-five field labels and seven headings — stayed
+ * in English however the console was set. A new field with no translation is
+ * a compile error now rather than another English row.
+ */
 export const EDITABLE = {
   legalName:        { label: 'Legal name', type: 'text' },
   brandName:        { label: 'Brand name', type: 'text' },
@@ -69,7 +78,16 @@ export const EDITABLE = {
   vatRate:          { label: 'VAT rate (0.05 = 5%)', type: 'number' },
   currency:         { label: 'Currency', type: 'text' },
   quoteValidityDays:{ label: 'Quotation validity (days)', type: 'number' },
-} as const;
+  // Where the money is supposed to go. An invoice with a balance due and no
+  // account to pay it into is an invoice that gets paid late while somebody
+  // emails to ask. Blank until the account is open, and — like the licence —
+  // never invented: a wrong IBAN on a document is worse than none.
+  bankAccountName:  { label: 'Bank: account name', type: 'text' },
+  bankName:         { label: 'Bank: name and branch', type: 'text' },
+  bankIban:         { label: 'Bank: IBAN', type: 'text' },
+  bankSwift:        { label: 'Bank: SWIFT / BIC', type: 'text' },
+  paymentNote:      { label: 'Note printed under the bank details', type: 'textarea' },
+} as const satisfies Record<string, { label: AdminKey; type: string }>;
 
 export type EditableKey = keyof typeof EDITABLE;
 

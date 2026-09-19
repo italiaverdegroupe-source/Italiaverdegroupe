@@ -69,6 +69,21 @@ export const site = {
   italianUrl: '',
   italianSince: '',
 
+  /**
+   * Where a customer sends the money.
+   *
+   * Empty for the same reason the trade licence is empty: the account is not
+   * open, and a wrong IBAN on a document that has already been emailed is
+   * worse than an invoice that says nothing and gets a phone call. The place
+   * on the invoice is reserved and wired — type these into Settings and the
+   * next invoice carries them.
+   */
+  bankAccountName: '',
+  bankName: '',
+  bankIban: '',
+  bankSwift: '',
+  paymentNote: '',
+
   sourcingRegions: ['Toscana', 'Sicilia', 'Lombardia', 'Puglia'],
 
   /**
