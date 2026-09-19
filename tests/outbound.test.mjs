@@ -331,10 +331,17 @@ check('SMTP is preferred over Resend when both are configured',
     && seen.body.reply_to === 'italiaverdegroupe@gmail.com',
     JSON.stringify({ s: seen.body.subject, r: seen.body.reply_to }));
 
-  // 422 is what Resend answers when From is not on a domain you have verified
-  // — the single likeliest mistake when this is first set up. It must fail
-  // loudly and once, not forty times.
-  stub(422, JSON.stringify({ message: 'The verdegardenae.com domain is not verified.' }));
+  // 403 with a validation_error is what Resend actually answers when From is
+  // not on a domain you have verified — copied from the real reply this
+  // company's production server got on its first send, not from the docs. It
+  // is the likeliest mistake the first time mail is set up, and it has to
+  // fail loudly and once rather than five times over two hours.
+  stub(403, JSON.stringify({
+    statusCode: 403,
+    message: 'The verdegardenae.com domain is not verified. Please, add and'
+      + ' verify your domain on https://resend.com/domains',
+    name: 'validation_error',
+  }));
   let e = await M.sendMail({ to: 'buyer@example.com', subject: 's', text: 't' })
     .then(() => null, (err) => err);
   check('THE POINT: an unverified sending domain is permanent, not retried',
