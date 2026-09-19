@@ -96,6 +96,9 @@ function isExempt(pathname: string): boolean {
 /** Already carries a locale that has its own prefix. */
 const PREFIXED = /^\/(ar|it)(\/|$)/;
 
+/** Set on the rewritten request so the second pass can recognise itself. */
+const REWRITE_MARK = 'x-vg-rewritten';
+
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   if (isExempt(pathname)) return NextResponse.next();
@@ -105,7 +108,22 @@ export function proxy(req: NextRequest) {
   // which is the duplicate-content problem this file was written for, aimed
   // at ourselves. The short one is canonical because it is the one already
   // published; the long one permanently redirects to it.
+  //
+  // THE GUARD IS NOT OPTIONAL. This proxy is invoked a SECOND time, with the
+  // path its own rewrite produced — /catalog comes back round as /en/catalog.
+  // Without the marker below, that re-entry matches this rule and 308s to
+  // /catalog, which rewrites to /en/catalog, which 308s again: every English
+  // URL on the site, which is every URL a visitor is given, answers nothing
+  // but ERR_TOO_MANY_REDIRECTS. Arabic and Italian are untouched, because
+  // those are the two branches that do not rewrite — which is exactly why it
+  // looks like the site is up when it is not.
+  //
+  // The marker rides on the REQUEST headers of our own rewrite, so it is
+  // present on the way back and absent on anything that arrived from outside.
+  // A client that sends it by hand gets the English page at /en/catalog
+  // instead of a redirect to /catalog, and nothing else changes.
   if (pathname === '/en' || pathname.startsWith('/en/')) {
+    if (req.headers.get(REWRITE_MARK) === '1') return NextResponse.next();
     const url = req.nextUrl.clone();
     url.pathname = pathname.slice(3) || '/';
     return NextResponse.redirect(url, 308);
@@ -149,6 +167,7 @@ export function proxy(req: NextRequest) {
   const locale = PREFIXED.test(pathname) ? pathname.slice(1, 3) : 'en';
   const headers = new Headers(req.headers);
   headers.set('x-locale', locale);
+  headers.set(REWRITE_MARK, '1');
 
   // Cloned, not rebuilt. `new URL('/en' + pathname, req.url)` looks equivalent
   // and silently DROPS THE QUERY STRING, because a URL built from a path
