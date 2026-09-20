@@ -25,6 +25,23 @@ const spBack = (f: FormData) => {
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Money, grouped, with the fils kept.
+ *
+ * node-postgres hands a `numeric` column back as the string Postgres printed,
+ * and src/lib/db.ts installs no type parser, so a landed cost arrived here as
+ * "185000.00" and these two rows printed it exactly that way, while the same
+ * column read "AED 185,000" on the reports page.
+ *
+ * Two decimals rather than the reports page's none: the asking-price input
+ * further down this same page shows the stored value to the fil, and a
+ * summary that silently rounds where the field beside it does not is a
+ * discrepancy somebody will eventually try to explain.
+ */
+const aed = (v: string | number) =>
+  new Intl.NumberFormat('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    .format(Number(v));
+
 async function moveSpecimen(formData: FormData) {
   'use server';
   await assertSameOrigin();
@@ -145,7 +162,7 @@ export default async function SpecimenPage({ params, searchParams }: {
   if (s.status !== 'available') blockers.push(`${t('status is')} ${st(s.status)}`);
   if (s.health === 'critical' || s.health === 'dead') blockers.push(`${t('health is')} ${st(s.health)}`);
   if (s.acclimatised_until && new Date(s.acclimatised_until) > new Date())
-    blockers.push(`${t('still acclimatising until')} ${fmtDay(s.acclimatised_until)}`);
+    blockers.push(`${t('still acclimatising until')} ${fmtDay(s.acclimatised_until, user.locale)}`);
   if (s.location_sellable === false) blockers.push(`${t('cannot sell from')} ${s.location_name}`);
 
   return (
@@ -186,12 +203,12 @@ export default async function SpecimenPage({ params, searchParams }: {
               <div><dt>{t('Grade')}</dt><dd>{s.grade ?? '—'}</dd></div>
               <div><dt>{t('Location')}</dt><dd>{s.location_name ?? '—'}</dd></div>
               <div><dt>{t('Supplier')}</dt><dd>{s.supplier_name ?? '—'}</dd></div>
-              <div><dt>{t('Arrived')}</dt><dd>{s.arrived_at ? fmtDay(s.arrived_at) : '—'}</dd></div>
-              <div><dt>{t('Sellable from')}</dt><dd>{s.acclimatised_until ? fmtDay(s.acclimatised_until) : '—'}</dd></div>
+              <div><dt>{t('Arrived')}</dt><dd>{s.arrived_at ? fmtDay(s.arrived_at, user.locale) : '—'}</dd></div>
+              <div><dt>{t('Sellable from')}</dt><dd>{s.acclimatised_until ? fmtDay(s.acclimatised_until, user.locale) : '—'}</dd></div>
               <div><dt>{t('Purchase cost')}</dt><dd>{s.purchase_cost ? `${s.purchase_currency} ${s.purchase_cost}` : '—'}</dd></div>
               <div><dt>{t('FX at purchase')}</dt><dd>{s.fx_rate_to_aed ?? '—'}</dd></div>
-              <div><dt>{t('Landed cost')}</dt><dd>{s.landed_cost_aed ? `AED ${s.landed_cost_aed}` : '—'}</dd></div>
-              <div><dt>{t('Asking price')}</dt><dd>{s.asking_price_aed ? `AED ${s.asking_price_aed}` : '—'}</dd></div>
+              <div><dt>{t('Landed cost')}</dt><dd>{s.landed_cost_aed ? `AED ${aed(s.landed_cost_aed)}` : '—'}</dd></div>
+              <div><dt>{t('Asking price')}</dt><dd>{s.asking_price_aed ? `AED ${aed(s.asking_price_aed)}` : '—'}</dd></div>
             </dl>
             {s.notes && <p style={{ whiteSpace: 'pre-wrap', marginTop: 16 }}>{s.notes}</p>}
           </div>
@@ -209,7 +226,7 @@ export default async function SpecimenPage({ params, searchParams }: {
                 <tbody>
                   {measurements.map((m) => (
                     <tr key={m.id}>
-                      <td className="num">{fmtDay(m.measured_at)}</td>
+                      <td className="num">{fmtDay(m.measured_at, user.locale)}</td>
                       <td className="num">{m.height_m ? `${m.height_m} m` : '—'}</td>
                       <td className="num">{m.trunk_girth_cm ? `${m.trunk_girth_cm} cm` : '—'}</td>
                       <td className="num">{m.crown_width_m ? `${m.crown_width_m} m` : '—'}</td>
@@ -229,7 +246,7 @@ export default async function SpecimenPage({ params, searchParams }: {
             ) : movements.map((m) => (
               <div key={m.id} className="adm-note">
                 <div className="adm-note-meta">
-                  {fmtDate(m.at)} · {m.user_email ?? t('system')} · {st(m.kind)}
+                  {fmtDate(m.at, user.locale)} · {m.user_email ?? t('system')} · {st(m.kind)}
                 </div>
                 <div>
                   {m.from_status && m.to_status && m.from_status !== m.to_status

@@ -9,11 +9,18 @@ export const revalidate = 300;
 
 export const generateMetadata = async (
   { params }: { params: Promise<{ lang: Locale }> },
-): Promise<Metadata> => metadataFor((await params).lang, '/contact', {
-  title: 'Contact',
-  description:
-    'Reach Verde Garden Trading — WhatsApp, phone and email, delivery across the United Arab Emirates, and what to send us so a quotation comes back the same day.',
-});
+): Promise<Metadata> => {
+  // The title and description were English literals, so /ar/contact and /it/contact
+  // shipped an English SERP snippet under an hreflang cluster that told Google
+  // they were the Arabic and Italian pages. The body was translated; only the
+  // head was not, which is the half a searcher sees first.
+  const { lang } = await params;
+  const t = ui(lang);
+  return metadataFor(lang, '/contact', {
+    title: t('seo.contactTitle'),
+    description: t('seo.contactDesc'),
+  });
+};
 
 /**
  * A contact page, because "Request a quote" is not one.

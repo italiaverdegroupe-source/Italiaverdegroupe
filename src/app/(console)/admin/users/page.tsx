@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth';
 import { listUsers, ROLES, ROLE_MEANS } from '@/lib/users';
 import { addUser, saveUser, resetUserPassword, signOutUser } from '../account/actions';
+import { fmtDate, fmtDay } from '@/components/admin/bits';
 import { adminUi } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
@@ -50,16 +51,31 @@ export default async function UsersPage({ searchParams }: {
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
             <h2 style={{ margin: 0 }}>{u.name}</h2>
             <span className="pill pill-quoted">{u.role}</span>
-            {!u.is_active && <span className="pill pill-lost">signed off</span>}
-            {String(u.id) === String(user.id) && <span className="pill pill-won">you</span>}
+            {!u.is_active && <span className="pill pill-lost">{t("signed off")}</span>}
+            {String(u.id) === String(user.id) && <span className="pill pill-won">{t("you")}</span>}
             <code style={{ fontSize: 12, opacity: 0.7 }}>{u.email}</code>
           </div>
+          {/* This line used to be three raw template literals, so the one
+              sentence on the account-management screen that says when somebody
+              last signed in stayed in English between two translated Italian
+              paragraphs — and it wrote the timestamp itself, slicing the
+              Postgres string and calling .replace('T', ' ') on a value that
+              has never contained a T (the column comes back as
+              '2026-09-20 03:23:34.792375+00', space-separated). The times were
+              therefore printed in raw UTC, four hours behind the office, in a
+              format no other console page uses. fmtDate does the timezone and
+              the reader's language; the count is a whole sentence with a token
+              in it so each language can decide where the number goes. */}
           <p className="adm-sub" style={{ marginTop: 6 }}>
             {u.last_login_at
-              ? `Last signed in ${u.last_login_at.slice(0, 16).replace('T', ' ')}`
-              : 'Has never signed in'}
-            {' · '}{u.sessions} live session{u.sessions === '1' ? '' : 's'}
-            {' · '}created {u.created_at.slice(0, 10)}
+              ? t("Last signed in {when}", { when: fmtDate(u.last_login_at, user.locale) })
+              : t("Has never signed in")}
+            {' · '}
+            {u.sessions === '1'
+              ? t("{n} live session", { n: u.sessions })
+              : t("{n} live sessions", { n: u.sessions })}
+            {' · '}
+            {t("created {when}", { when: fmtDay(u.created_at, user.locale) })}
           </p>
 
           <form action={saveUser}

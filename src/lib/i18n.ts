@@ -26,6 +26,19 @@ export const LOCALE_NAMES: Record<Locale, string> = {
   it: 'Italiano',
 };
 
+/**
+ * The word "Language", in each language.
+ *
+ * The switcher's accessible name was the English word on every locale, so a
+ * screen reader on the Arabic site announced the one control that changes the
+ * language in the language its user had already chosen not to read. The names
+ * above are each in their own language for the same reason; this is the label
+ * that sits in front of them.
+ */
+export const LOCALE_LABEL: Record<Locale, string> = {
+  en: 'Language', ar: 'اللغة', it: 'Lingua',
+};
+
 /** The short label on the switcher button. */
 export const LOCALE_SHORT: Record<Locale, string> = {
   en: 'EN', ar: 'ع', it: 'IT',

@@ -34,7 +34,14 @@ const LOCALES = ['', '/ar', '/it'];
 async function pagesFromSitemap() {
   const xml = await (await fetch(`${B}/sitemap.xml`)).text();
   const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-  const paths = urls.map((u) => new URL(u).pathname).filter((p) => !/^\/(ar|it)\//.test(p));
+  // (\/|$), not \/. The sitemap lists every locale of every page now, and this
+  // reduces it back to one entry per page so the loop below can ask for each
+  // one in all three languages. With a bare \/ the locale HOME pages — "/ar"
+  // and "/it", which have nothing after the prefix — survived the filter and
+  // were then prefixed a second time, so the crawl went looking for /ar/ar and
+  // /it/it and reported four 404s against a site that was fine. Same shape as
+  // PREFIXED in src/proxy.ts, for the same reason.
+  const paths = urls.map((u) => new URL(u).pathname).filter((p) => !/^\/(ar|it)(\/|$)/.test(p));
   const catalogue = paths.filter((p) => p.startsWith('/catalog/'));
   const rest = paths.filter((p) => !p.startsWith('/catalog/'));
   return { rest, catalogue: catalogue.slice(0, 3), total: paths.length };

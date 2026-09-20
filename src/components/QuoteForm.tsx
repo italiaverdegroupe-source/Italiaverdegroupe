@@ -1,7 +1,7 @@
 'use client';
 
 import L from '@/components/L';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { site, fallbackContact } from '@/lib/site';
 import { ui } from '@/lib/ui';
 import { productCopy } from '@/lib/product-copy';
@@ -13,10 +13,18 @@ type Props = {
   products: { reference: string; name: string }[];
 };
 
+/**
+ * Keys, not labels.
+ *
+ * These three were English strings, so the first thing an Arabic or Italian
+ * visitor met on the only page that turns a reader into an enquiry was three
+ * English options and three English hints. Everything else on the form was
+ * translated around them.
+ */
 const TYPES = [
-  { v: 'quote', label: 'Quote a specimen', hint: 'You know what you want' },
-  { v: 'bulk', label: 'Bulk / project pricing', hint: 'Volume for a project' },
-  { v: 'sourcing', label: 'Source a specific tree', hint: 'Not in the catalogue' },
+  { v: 'quote', label: 'qf.type.quote', hint: 'qf.type.quote.hint' },
+  { v: 'bulk', label: 'qf.type.bulk', hint: 'qf.type.bulk.hint' },
+  { v: 'sourcing', label: 'qf.type.sourcing', hint: 'qf.type.sourcing.hint' },
 ] as const;
 
 export default function QuoteForm({ defaultType = 'quote', defaultRef = '', products }: Props) {
@@ -26,6 +34,14 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
   const t = ui(locale);
   const [type, setType] = useState<string>(defaultType);
   const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
+  const doneRef = useRef<HTMLHeadingElement>(null);
+
+  // Focus follows the confirmation the moment it replaces the form. Focusing
+  // scrolls it into view, which is the fix for the sighted visitor, and moves
+  // the screen reader's cursor, which is the fix for everyone else.
+  useEffect(() => {
+    if (state === 'done') doneRef.current?.focus();
+  }, [state]);
   const [reference, setReference] = useState('');
   const [error, setError] = useState('');
 
@@ -56,8 +72,24 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
 
   if (state === 'done') {
     return (
-      <div className="done">
-        <h2>{t("Enquiry received.")}</h2>
+      /**
+       * The one screen in the funnel that must land, and it did not.
+       *
+       * Submitting from the bottom of a long form swapped the form for this
+       * block and left the scroll position where it was — 893px down a page
+       * that is now 300px tall, so the confirmation and the reference number
+       * sat above the viewport and the visitor saw a blank strip and the
+       * footer. Nothing announced it either: focus fell to <body> and there
+       * was no live region, so a screen reader said nothing at all and the
+       * reference number — the only thing the visitor needs to keep — was
+       * never spoken.
+       *
+       * role="status" announces it; focusing the heading (tabindex -1) both
+       * scrolls it into view and gives every assistive technology an
+       * unambiguous place to start reading.
+       */
+      <div className="done" role="status" aria-live="polite">
+        <h2 ref={doneRef} tabIndex={-1}>{t("Enquiry received.")}</h2>
         <p className="done-ref">{t("Your reference is")} <strong>{reference}</strong></p>
         <p>
           {t("We will come back with availability, lead time and a priced quotation. Very large or out-of-season specimens can take longer to confirm with the nursery.")}
@@ -67,6 +99,7 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
           .done { padding: 48px 0; max-width: 56ch; }
           .done-ref { font-size: 1.1rem; }
           .done-ref strong { font-family: var(--font-fraunces), serif; color: var(--olive-700); letter-spacing: .02em; }
+          .done h2:focus-visible { outline: 2px solid var(--brass-500); outline-offset: 6px; }
         `}</style>
       </div>
     );
@@ -79,12 +112,14 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
     <form onSubmit={onSubmit} className="qf" noValidate>
       <fieldset className="types">
         <legend className="flabel">{t("What do you need?")}</legend>
-        {TYPES.map((t) => (
-          <label key={t.v} className={`type ${type === t.v ? 'on' : ''}`}>
-            <input type="radio" name="_type" value={t.v}
-                   checked={type === t.v} onChange={() => setType(t.v)} />
-            <span className="type-l">{t.label}</span>
-            <span className="type-h">{t.hint}</span>
+        {/* `ty`, not `t` — the loop variable shadowed the translator, which is
+            why these three were the strings that never got translated. */}
+        {TYPES.map((ty) => (
+          <label key={ty.v} className={`type ${type === ty.v ? 'on' : ''}`}>
+            <input type="radio" name="_type" value={ty.v}
+                   checked={type === ty.v} onChange={() => setType(ty.v)} />
+            <span className="type-l">{t(ty.label)}</span>
+            <span className="type-h">{t(ty.hint)}</span>
           </label>
         ))}
       </fieldset>
@@ -165,8 +200,8 @@ export default function QuoteForm({ defaultType = 'quote', defaultRef = '', prod
       <label className="fld">
         <span>
           {sourcing
-            ? 'Describe the tree you are looking for — species, age, height, trunk girth, form'
-            : 'Anything else we should know — site access, planting, timeline'}
+            ? t('qf.msg.sourcing')
+            : t('qf.msg.general')}
           {sourcing && <i> *</i>}
         </span>
         <textarea name="message" rows={5} required={sourcing} maxLength={4000} />

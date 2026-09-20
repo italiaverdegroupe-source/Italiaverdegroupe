@@ -27,6 +27,21 @@ async function createQuote(formData: FormData) {
     lead = (await query(`SELECT id, name, company, email, phone, emirate
                            FROM leads
                           WHERE deleted_at IS NULL AND reference = $1`, [leadRef]))[0] as typeof lead;
+    // A reference that matches nothing used to fall straight through here.
+    // The operator typed VG-9AS550F5P, fat-fingered one of the nine random
+    // characters, filled in the customer name as well — and got a quotation
+    // that looked entirely correct and was not attached to the enquiry at
+    // all. Nothing on the quotation screen shows the lead, so there is no
+    // surface on which that is ever noticed, and /admin/reports builds its
+    // channel attribution by joining quotes to leads on exactly this link, so
+    // the typo quietly writes the enquiry out of the conversion figures.
+    // Refusing is what the rest of the console does with a code that does not
+    // resolve — see the order lookup on the finance page.
+    if (!lead) {
+      refuse('/admin/quotes',
+        t('No live lead has the reference {ref}. Check it against the leads list, or clear the field and type the customer in by hand.',
+          { ref: leadRef }));
+    }
   }
 
   const name = String(formData.get('customer_name') ?? '').trim() || lead?.name;
@@ -118,8 +133,8 @@ export default async function QuotesPage({ searchParams }: { searchParams: Promi
                   <td>{q.emirate ?? '—'}</td>
                   <td className="num">{q.item_count}</td>
                   <td><span className={`pill pill-${q.status === 'accepted' ? 'won' : q.status === 'rejected' || q.status === 'expired' || q.status === 'superseded' ? 'lost' : q.status === 'draft' ? 'new' : 'quoted'}`}>{st(q.status)}</span></td>
-                  <td className="num">{q.valid_until ? fmtDay(q.valid_until) : '—'}</td>
-                  <td className="num">{fmtDay(q.created_at)}</td>
+                  <td className="num">{q.valid_until ? fmtDay(q.valid_until, user.locale) : '—'}</td>
+                  <td className="num">{fmtDay(q.created_at, user.locale)}</td>
                 </tr>
               ))}
             </tbody>
@@ -133,7 +148,7 @@ export default async function QuotesPage({ searchParams }: { searchParams: Promi
           <form action={createQuote}>
             <div style={{ display:'grid', gap:14, gridTemplateColumns:'repeat(auto-fit,minmax(210px,1fr))' }}>
               <label className="adm-field"><span>{t("From lead reference")}</span>
-                <input name="lead_reference" defaultValue={sp.lead ?? ''} placeholder={t("VG-XXXXXXX")} />
+                <input name="lead_reference" defaultValue={sp.lead ?? ''} placeholder={t("VG-XXXXXXXXX")} />
               </label>
               <label className="adm-field"><span>{t("Customer name")}</span><input name="customer_name" /></label>
               <label className="adm-field"><span>{t("Company")}</span><input name="customer_company" /></label>

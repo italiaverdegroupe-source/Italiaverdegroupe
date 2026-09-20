@@ -3,10 +3,11 @@ import { alternates, type Locale } from '@/lib/i18n';
 import L from '@/components/L';
 import { notFound } from 'next/navigation';
 import ProductCard from '@/components/ProductCard';
-import { locations, getLocation } from '@/lib/locations';
+import { locations, getLocation, localisedLocation } from '@/lib/locations';
 import { getSettings } from '@/lib/settings';
 import { getAllProducts } from '@/lib/products';
 import { ui } from '@/lib/ui';
+import { ldJson } from '@/lib/schema';
 
 /**
  * `true`, and the whole reason is what happens after a save.
@@ -49,9 +50,15 @@ export async function generateMetadata(
   const { lang, emirate } = await params;
   const l = getLocation(emirate);
   if (!l) return { title: 'Not found' };
+  // Title, description and the emirate's own name all in the reader's
+  // language. This was an English sentence with an English place name on all
+  // fourteen non-English location URLs, under an hreflang cluster telling
+  // Google they were the Arabic and Italian versions.
+  const t = ui(lang);
+  const loc = localisedLocation(l, lang);
   return {
-    title: `Italian tree supply & delivery in ${l.name}`,
-    description: `${l.intro} Specimen olive trees, palms and ornamental plants imported from Italy and delivered in ${l.name}.`,
+    title: t('seo.locationTitle', { name: loc.name }),
+    description: t('seo.locationDesc', { intro: loc.intro, name: loc.name }),
     alternates: alternates(lang, `/locations/${l.slug}`),
   };
 }
@@ -63,6 +70,7 @@ export default async function LocationPage(
   const t = ui(lang);
   const l = getLocation(emirate);
   if (!l) notFound();
+  const loc = localisedLocation(l, lang);
   const site = await getSettings();
   const picks = getAllProducts().filter((p) => p.family === 'Olive Trees' || p.family === 'Palms').slice(0, 4);
 
@@ -71,25 +79,25 @@ export default async function LocationPage(
     '@type': 'Service',
     serviceType: 'Tree and plant supply, delivery and planting',
     provider: { '@type': 'Organization', name: site.legalName },
-    areaServed: { '@type': 'AdministrativeArea', name: `${l.name}, United Arab Emirates` },
+    areaServed: { '@type': 'AdministrativeArea', name: `${loc.name}, ${site.country}` },
   };
 
   return (
     <div className="section">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={ldJson(jsonLd)} />
       <div className="wrap">
         <p className="eyebrow">{t('loc.eyebrow')}</p>
-        <h1>{t('loc.title', { name: l.name })}</h1>
-        <p className="lede">{l.intro}</p>
+        <h1>{t('loc.title', { name: loc.name })}</h1>
+        <p className="lede">{loc.intro}</p>
 
         <h2 className="sub-h">{t('loc.onSite')}</h2>
-        <ul className="notes">{l.notes.map((n) => <li key={n}>{n}</li>)}</ul>
+        <ul className="notes">{loc.notes.map((n) => <li key={n}>{n}</li>)}</ul>
 
         <h2 className="sub-h">{t('loc.common')}</h2>
         <div className="grid cols-4">{picks.map((p) => <ProductCard key={p.reference} p={p} locale={lang} />)}</div>
 
         <div className="loc-cta">
-          <L href={`/quote?type=bulk`} className="btn btn-primary">{t('loc.requestPricing', { name: l.name })}</L>
+          <L href={`/quote?type=bulk`} className="btn btn-primary">{t('loc.requestPricing', { name: loc.name })}</L>
         </div>
 
         <nav className="others" aria-label={t('loc.otherEmirates')}>

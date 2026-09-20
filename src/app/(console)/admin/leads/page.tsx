@@ -8,13 +8,32 @@ import { adminUi, adminStatus } from '@/lib/admin-ui';
 export const dynamic = 'force-dynamic';
 
 type Row = {
+  /**
+   * The size of the whole filtered set, repeated on every row by
+   * `count(*) OVER ()`. A window function is evaluated before LIMIT, so this
+   * is the real total and it costs no second round trip.
+   */
+  total: string;
   reference: string; name: string; company: string | null; email: string;
   phone: string | null; emirate: string | null; enquiry_type: string;
   product_ref: string | null; quantity: number | null; status: string; created_at: string;
   deleted_at: string | null;
 };
 
-export default async function LeadsPage({ searchParams }: { searchParams: Promise<{ status?: string; q?: string; deleted?: string }> }) {
+/**
+ * How many leads are on one page.
+ *
+ * There was no pagination at all: the query took the newest 300 and the
+ * subtitle printed "300 shown", which is true and tells you nothing — there
+ * was no signal that a 301st lead existed and no route through the interface
+ * that could reach it. At roughly an enquiry a day this list starts losing
+ * its oldest records inside a year, and the oldest records are the ones
+ * nobody remembers the name of. A hundred is a long page that still renders
+ * quickly; the count below is of the whole filtered set, not of this page.
+ */
+const PER_PAGE = 100;
+
+export default async function LeadsPage({ searchParams }: { searchParams: Promise<{ status?: string; q?: string; deleted?: string; page?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
@@ -37,13 +56,31 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
 
   const clauses = [showDeleted ? 'deleted_at IS NOT NULL' : 'deleted_at IS NULL', ...where];
 
+  // A page number that is not a number, or is zero or negative, is a URL
+  // somebody typed or a stale link — it becomes page one rather than an
+  // error, because there is nothing dangerous about it.
+  const page = Math.max(1, Math.floor(Number(sp.page)) || 1);
+  const offset = (page - 1) * PER_PAGE;
+  params.push(offset);
+
   const rows = await query<Row>(
-    `SELECT reference, name, company, email, phone, emirate, enquiry_type,
+    `SELECT count(*) OVER () AS total,
+            reference, name, company, email, phone, emirate, enquiry_type,
             product_ref, quantity, status, created_at, deleted_at
        FROM leads
       WHERE ${clauses.join(' AND ')}
-      ORDER BY ${showDeleted ? 'deleted_at' : 'created_at'} DESC LIMIT 300`, params);
+      ORDER BY ${showDeleted ? 'deleted_at' : 'created_at'} DESC
+      LIMIT ${PER_PAGE} OFFSET $${params.length}`, params);
 
+  // No rows means either nothing matches or the page number is past the end;
+  // either way there is no window count to read, and zero is the honest
+  // answer for what is on screen.
+  const total = Number(rows[0]?.total ?? 0);
+  const pages = Math.max(1, Math.ceil(total / PER_PAGE));
+
+  // Changing a filter deliberately drops the page number: page 7 of "all"
+  // is not page 7 of "lost", and landing on an empty page because the new
+  // filter has fewer results is the one thing a filter must not do.
   const link = (s: string | null, bin = showDeleted) => {
     const p = new URLSearchParams();
     if (s) p.set('status', s);
@@ -53,10 +90,30 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
     return str ? `/admin/leads?${str}` : '/admin/leads';
   };
 
+  /** The same list, another page: everything else about the view is kept. */
+  const pageLink = (n: number) => {
+    const p = new URLSearchParams();
+    if (status) p.set('status', status);
+    if (q) p.set('q', q);
+    if (showDeleted) p.set('deleted', '1');
+    if (n > 1) p.set('page', String(n));
+    const str = p.toString();
+    return str ? `/admin/leads?${str}` : '/admin/leads';
+  };
+
   return (
     <>
       <h1>{t("Leads")}</h1>
-      <p className="adm-sub">{rows.length} shown{status ? ` · ${st(status)}` : ''}{q ? ` · “${q}”` : ''}</p>
+      {/* The count is of everything that matches, not of what fits on the
+          page. "300 shown" was accurate and useless: it read identically
+          whether there were 300 leads or 3,000. */}
+      <p className="adm-sub">
+        {rows.length === 0
+          ? (page > 1 ? t("There is nothing on this page.") : t("Nothing matches."))
+          : t("Showing {from}–{to} of {total}", {
+              from: offset + 1, to: offset + rows.length, total })}
+        {status ? ` · ${st(status)}` : ''}{q ? ` · “${q}”` : ''}
+      </p>
 
       <div className="adm-filters">
         <Link href={link(null)} className="adm-chip" data-on={String(!status)}>{t("All")}</Link>
@@ -80,7 +137,11 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
 
       <div className="adm-panel">
         {rows.length === 0 ? (
-          <p className="adm-empty">{t("Nothing matches.")}</p>
+          <p className="adm-empty">
+            {page > 1
+              ? <>{t("There is nothing on this page.")}{' '}<Link href={pageLink(1)}>{t("Back to the first page")}</Link></>
+              : t("Nothing matches.")}
+          </p>
         ) : (
           <table className="adm-t">
             <thead>
@@ -110,14 +171,36 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
                   <td>{l.product_ref ?? '—'}</td>
                   <td className="num">{l.quantity ?? '—'}</td>
                   <td>{l.emirate ?? '—'}</td>
-                  <td><StatusPill status={st(l.status)} /></td>
-                  <td className="num">{fmtDate(showDeleted ? (l.deleted_at ?? l.created_at) : l.created_at)}</td>
+                  {/* The raw status colours the pill, the translated one is
+                      what the reader sees. Passing the translation to both
+                      produced `pill-nuova` on the Italian console, which
+                      admin.css has no rule for, and every pill on this list
+                      went flat. */}
+                  <td><StatusPill status={l.status} label={st(l.status)} /></td>
+                  <td className="num">{fmtDate(showDeleted ? (l.deleted_at ?? l.created_at) : l.created_at, user.locale)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
       </div>
+
+      {/* Nothing to page through when nothing came back: a page number past
+          the end has no count behind it, so "Page 7 of 1" is all the pager
+          could honestly say. The empty panel above offers the way back. */}
+      {rows.length > 0 && (page > 1 || page < pages) && (
+        <nav className="adm-filters" aria-label={t("Pages")}>
+          {page > 1 && (
+            <Link className="adm-chip" rel="prev" href={pageLink(page - 1)}>{t("← Previous")}</Link>
+          )}
+          <span className="adm-chip" data-on="true" aria-current="page">
+            {t("Page {n} of {total}", { n: page, total: pages })}
+          </span>
+          {page < pages && (
+            <Link className="adm-chip" rel="next" href={pageLink(page + 1)}>{t("Next →")}</Link>
+          )}
+        </nav>
+      )}
     </>
   );
 }

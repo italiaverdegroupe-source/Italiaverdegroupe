@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { recentBackups, lastGoodBackup, runBackup } from '@/lib/backup';
 import { s3Config } from '@/lib/s3';
+import { fmtDate } from '@/components/admin/bits';
 import { adminUi } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
@@ -57,7 +58,13 @@ export default async function BackupsPage({ searchParams }: {
     <>
       <h1>{t("Backups")}</h1>
       <p className="adm-sub">
-        {t("The database lives on Neon&rsquo;s free plan, which keeps six hours of point-in-time history and will not schedule its own snapshots. Six hours is not a backup policy — it is the window in which somebody has to notice. This takes a full copy every night, stores it off Neon, reads it back to check it arrived intact, and keeps a month of them.")}
+        {/* The apostrophe is the character itself, not `&rsquo;`.
+            JSX decodes HTML entities in markup text nodes, but this sentence
+            is an argument to t() — a plain JavaScript string — so nothing ever
+            decoded it and the page printed "Neon&rsquo;s free plan" to the
+            operator, in the opening line of the page a cautious client reads
+            most carefully. Line 85 below always had it right. */}
+        {t("The database lives on Neon’s free plan, which keeps six hours of point-in-time history and will not schedule its own snapshots. Six hours is not a backup policy — it is the window in which somebody has to notice. This takes a full copy every night, stores it off Neon, reads it back to check it arrived intact, and keeps a month of them.")}
       </p>
 
       {error && <p className="adm-err">{error}</p>}
@@ -106,7 +113,7 @@ export default async function BackupsPage({ searchParams }: {
             )}
             {runs.map((r) => (
               <tr key={r.id}>
-                <td>{r.started_at.slice(0, 16).replace('T', ' ')}<br />
+                <td>{fmtDate(r.started_at, user.locale)}<br />
                     <span className="adm-sub" style={{ margin: 0, fontSize: 12 }}>{r.trigger}</span></td>
                 <td>
                   <span className={`pill ${r.status === 'ok' ? 'pill-won' : r.status === 'failed' ? 'pill-lost' : 'pill-new'}`}>

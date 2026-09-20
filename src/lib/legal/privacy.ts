@@ -10,6 +10,20 @@ import type { LegalSet } from './types';
  * problem, naming the regulator rather than inviting you to write to us about
  * us. That there is no automated decision-making, which is a question the law
  * asks and a silence answers badly. And which law governs the document itself.
+ *
+ * WHY "HOW LONG WE KEEP IT" NOW SAYS WHO DOES THE DELETING. The schedule used
+ * to read as though a job ran: an unconverted enquiry was kept two years and
+ * "after that it is deleted", staff sign-in records were "ninety days". No
+ * such job exists. Nothing in this codebase deletes a lead or a login attempt
+ * on a timer — the only removal of either is an operator doing it from the
+ * console — so the policy was promising a mechanism the system does not have,
+ * which is the first thing a data-protection review checks and the easiest
+ * kind of promise to be caught out on. The periods have not changed, because
+ * they are the right periods; what changed is that the document now says they
+ * are a policy a person applies at a review, and says where that review
+ * happens. If a nightly sweep is ever added alongside the other timed work in
+ * src/instrumentation.ts, this paragraph is what should be rewritten — in all
+ * three languages — and not before it runs in production.
  */
 export const privacy: LegalSet = {
   en: {
@@ -107,13 +121,14 @@ export const privacy: LegalSet = {
         heading: 'How long we keep it',
         body: [
           { t: 'dl', items: [
-            { term: 'An enquiry that never became an order', def: 'Kept while we are still in conversation, and for two years after the last contact — trees are specified years before they are planted, and somebody who asked about olives in 2026 is often the same project in 2028. After that it is deleted.' },
+            { term: 'An enquiry that never became an order', def: 'Kept while we are still in conversation, and for two years after the last contact — trees are specified years before they are planted, and somebody who asked about olives in 2026 is often the same project in 2028. Past two years it is no longer an enquiry we keep, and it is deleted at the next review of the records.' },
             { term: 'An order, a quotation that became one, and its invoices', def: 'Kept for the period UAE commercial and tax law requires for accounting records — five years from the end of the tax period the record belongs to — and then deleted.' },
             { term: 'Import and phytosanitary paperwork', def: 'Kept for as long as the customs and agricultural authorities require it to be producible, which is the same five-year horizon.' },
             { term: 'A claim, a replacement or a dispute', def: 'Kept until it is closed and then for as long as a claim about it could still be brought.' },
-            { term: 'Sign-in records for our own staff accounts', def: 'Ninety days, which is what the lockout that protects those accounts needs in order to work.' },
-            { term: 'Backups', def: 'Nightly, encrypted, and rolled forward. A record you asked us to delete disappears from the live database immediately and falls out of the backups as they roll. It is not restored into the live system except in a disaster, and if that happened we would re-apply your deletion.' },
+            { term: 'Sign-in records for our own staff accounts', def: 'Ninety days is the window the lockout that protects those accounts works over, and it is the period we hold ourselves to. Anything older is kept only as the security record of who signed in and when, and is cleared down in the same review. These are our own staff’s sign-ins — an email address, a time and the network address it came from — not yours.' },
+            { term: 'Backups', def: 'Nightly, encrypted, and rolled forward. A record you asked us to delete is taken out of the live database as soon as we act on the request, and falls out of the backups as they roll. It is not restored into the live system except in a disaster, and if that happened we would re-apply your deletion.' },
           ] },
+          { t: 'p', text: 'These periods are a policy we apply, not a timer running in the background. Nothing on this site erases a record by itself the moment its period ends: a person reviews the records, and what is past its period is deleted from our console, where the deletion is recorded and is permanent. We would rather say that than imply an automatic sweep, because a retention schedule nobody carries out is worse than one that says who carries it out. If you would rather not wait for the next review, ask through the [enquiry form](/quote) and we will delete whatever we are not required to keep.' },
         ],
       },
       {
@@ -280,13 +295,14 @@ export const privacy: LegalSet = {
         heading: 'مدة احتفاظنا به',
         body: [
           { t: 'dl', items: [
-            { term: 'استفسار لم يتحوّل إلى طلب', def: 'يُحفظ ما دمنا في تواصل، ولمدة سنتين بعد آخر اتصال — فالأشجار تُحدَّد مواصفاتها قبل سنوات من زراعتها، ومن سأل عن الزيتون في 2026 كثيرًا ما يكون المشروع نفسه في 2028. وبعد ذلك يُحذف.' },
+            { term: 'استفسار لم يتحوّل إلى طلب', def: 'يُحفظ ما دمنا في تواصل، ولمدة سنتين بعد آخر اتصال — فالأشجار تُحدَّد مواصفاتها قبل سنوات من زراعتها، ومن سأل عن الزيتون في 2026 كثيرًا ما يكون المشروع نفسه في 2028. وبعد انقضاء السنتين لا يعود استفسارًا نحتفظ به، فيُحذف عند أقرب مراجعة للسجلات.' },
             { term: 'طلب، وعرض سعر تحوّل إليه، وفواتيره', def: 'تُحفظ للمدة التي يفرضها القانون التجاري والضريبي الإماراتي للسجلات المحاسبية — خمس سنوات من نهاية الفترة الضريبية التي يخصّها السجل — ثم تُحذف.' },
             { term: 'مستندات الاستيراد والصحة النباتية', def: 'تُحفظ طوال المدة التي تشترط فيها الجهات الجمركية والزراعية إمكان إبرازها، وهي الأفق الخمسي نفسه.' },
             { term: 'مطالبة أو استبدال أو نزاع', def: 'يُحفظ حتى إغلاقه، ثم للمدة التي يمكن أن تُرفع خلالها دعوى بشأنه.' },
-            { term: 'سجلات تسجيل الدخول لحسابات موظفينا', def: 'تسعون يومًا، وهي المدة التي يحتاجها الإيقاف الذي يحمي تلك الحسابات كي يعمل.' },
-            { term: 'النسخ الاحتياطية', def: 'ليلية ومشفّرة ومتدرّجة. السجل الذي تطلب حذفه يختفي من قاعدة البيانات الحيّة فورًا، ويسقط من النسخ الاحتياطية مع تدرّجها. ولا يُستعاد إلى النظام الحيّ إلا في كارثة، ولو حدث ذلك لأعدنا تطبيق حذفك.' },
+            { term: 'سجلات تسجيل الدخول لحسابات موظفينا', def: 'تسعون يومًا هي النافذة التي يعمل خلالها الإيقاف الذي يحمي تلك الحسابات، وهي المدة التي نُلزم بها أنفسنا. وما هو أقدم منها لا يبقى إلا سجلًّا أمنيًّا لمن دخل ومتى، ويُمسح في المراجعة نفسها. وهذه تسجيلات دخول موظفينا نحن — بريد إلكتروني ووقت وعنوان الشبكة الذي جاء منه — لا تسجيلاتك أنت.' },
+            { term: 'النسخ الاحتياطية', def: 'ليلية ومشفّرة ومتدرّجة. السجل الذي تطلب حذفه يُزال من قاعدة البيانات الحيّة فور تنفيذنا طلبك، ويسقط من النسخ الاحتياطية مع تدرّجها. ولا يُستعاد إلى النظام الحيّ إلا في كارثة، ولو حدث ذلك لأعدنا تطبيق حذفك.' },
           ] },
+          { t: 'p', text: 'وهذه المدد سياسة نطبّقها، لا مؤقّتًا يعمل في الخلفية. فلا شيء في هذا الموقع يمحو سجلًّا من تلقاء نفسه لحظة انتهاء مدّته: بل يراجع أحدنا السجلات، وما انقضت مدّته يُحذف من لوحة التشغيل لدينا، حيث يُقيَّد الحذف ويكون نهائيًّا. ونؤثر قول ذلك على الإيحاء بمسحٍ تلقائي، لأن جدول احتفاظ لا ينفّذه أحد أسوأ من جدول يُسمّي من ينفّذه. وإن لم تشأ انتظار المراجعة التالية، فاطلب ذلك عبر [نموذج الاستفسار](/quote) ونحذف كل ما لا يُلزمنا القانون بحفظه.' },
         ],
       },
       {
@@ -453,13 +469,14 @@ export const privacy: LegalSet = {
         heading: 'Per quanto tempo li conserviamo',
         body: [
           { t: 'dl', items: [
-            { term: 'Una richiesta che non è mai diventata un ordine', def: 'Conservata finché siamo in contatto e per due anni dall’ultimo scambio: gli alberi si specificano anni prima di essere piantati, e chi ha chiesto di olivi nel 2026 è spesso lo stesso progetto nel 2028. Dopodiché viene cancellata.' },
+            { term: 'Una richiesta che non è mai diventata un ordine', def: 'Conservata finché siamo in contatto e per due anni dall’ultimo scambio: gli alberi si specificano anni prima di essere piantati, e chi ha chiesto di olivi nel 2026 è spesso lo stesso progetto nel 2028. Passati i due anni non è più una richiesta che conserviamo, e viene cancellata alla prima revisione degli archivi.' },
             { term: 'Un ordine, il preventivo che lo è diventato e le sue fatture', def: 'Conservati per il periodo che la normativa commerciale e fiscale emiratina impone alle scritture contabili — cinque anni dalla fine del periodo d’imposta cui il documento appartiene — e poi cancellati.' },
             { term: 'Documentazione di importazione e fitosanitaria', def: 'Conservata per tutto il tempo in cui le autorità doganali e agricole ne richiedono l’esibibilità, cioè lo stesso orizzonte di cinque anni.' },
             { term: 'Una contestazione, una sostituzione o una controversia', def: 'Conservata fino alla chiusura e poi per il tempo in cui potrebbe ancora esserne fatta valere una pretesa.' },
-            { term: 'Registrazioni di accesso degli account del nostro personale', def: 'Novanta giorni, il tempo di cui ha bisogno il blocco che protegge quegli account per funzionare.' },
-            { term: 'Backup', def: 'Notturni, cifrati e a rotazione. Un dato di cui chiedete la cancellazione sparisce subito dal database attivo ed esce dai backup man mano che ruotano. Non viene ripristinato nel sistema attivo se non in caso di disastro; e se accadesse, riapplicheremmo la vostra cancellazione.' },
+            { term: 'Registrazioni di accesso degli account del nostro personale', def: 'Novanta giorni è la finestra su cui lavora il blocco che protegge quegli account, ed è il periodo a cui ci atteniamo. Quel che è più vecchio resta solo come traccia di sicurezza di chi è entrato e quando, e viene ripulito nella stessa revisione. Sono accessi del nostro personale — un indirizzo e-mail, un orario e l’indirizzo di rete da cui è arrivato — non vostri.' },
+            { term: 'Backup', def: 'Notturni, cifrati e a rotazione. Un dato di cui chiedete la cancellazione viene tolto dal database attivo appena diamo seguito alla richiesta, ed esce dai backup man mano che ruotano. Non viene ripristinato nel sistema attivo se non in caso di disastro; e se accadesse, riapplicheremmo la vostra cancellazione.' },
           ] },
+          { t: 'p', text: 'Questi periodi sono una politica che applichiamo, non un timer che gira in sottofondo. Nulla su questo sito cancella un dato da solo nel momento in cui scade il suo periodo: è una persona che rivede gli archivi, e ciò che ha superato il proprio periodo viene cancellato dalla nostra console, dove la cancellazione è registrata ed è definitiva. Preferiamo dirlo piuttosto che lasciar intendere una pulizia automatica, perché uno scadenzario che nessuno esegue è peggio di uno che dice chi lo esegue. Se preferite non aspettare la revisione successiva, chiedetecelo dal [modulo di richiesta](/quote) e cancelleremo tutto ciò che non siamo tenuti a conservare.' },
         ],
       },
       {

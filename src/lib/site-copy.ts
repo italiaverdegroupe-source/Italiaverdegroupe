@@ -36,7 +36,7 @@ export const COPY_EN = [
   'From the Italian nursery to the finished site.', 'From the catalogue',
   'Growing regions', 'Grown in', 'Height', 'Height or girth, and how many',
   'Italian growers have spent generations producing the specimen material this region wants — ancient olive trees with genuine trunk character, cloud-pruned and sculptural forms, architectural palms and agaves. The Mediterranean climate that produces them is close enough to Gulf conditions that well-selected material adapts, provided it is handled correctly on the way.',
-  'Italian horticulture, supplied properly in the Gulf.', 'Italian trees &amp; plants',
+  'Italian horticulture, supplied properly in the Gulf.', 'Italian trees & plants',
   'Journal', 'Lead time', 'Legal', 'Living stock, handled as such',
   'Looking for one particular tree?', 'Name', 'New photograph coming',
   'No prices are published — every specimen is quoted individually, because availability and size change with the consignment.',
@@ -75,12 +75,22 @@ export const COPY_EN = [
   'When it has to be on site', 'Where should the price go?', 'Where we deliver',
   'Who we supply', 'Why Italian stock', 'Why quotations, not a checkout',
   'Your name', 'Your reference is', 'Your shortlist', 'e.g. March', 'specimens →',
+  // The company's own description and strapline. They are the two sentences
+  // the Organization JSON-LD publishes about this business, and they were
+  // English on the Arabic and Italian homepages — in the machine-readable
+  // layer, where nobody would think to check.
+  'We import premium trees and plants from Italian nurseries and supply landscaping companies, developers, hotels and private estates across the United Arab Emirates.',
+  'Italian Trees & Plants, Imported for the UAE',
 ] as const;
 
 export type CopyKey = (typeof COPY_EN)[number];
 
 /** Arabic, as a buyer in the Emirates reads it. */
 const ar: Record<CopyKey, string> = {
+  "We import premium trees and plants from Italian nurseries and supply landscaping companies, developers, hotels and private estates across the United Arab Emirates.":
+    "نستورد أشجاراً ونباتات فاخرة من المشاتل الإيطالية ونورّدها لشركات تنسيق الحدائق والمطوّرين والفنادق والمزارع الخاصة في جميع أنحاء الإمارات العربية المتحدة.",
+  "Italian Trees & Plants, Imported for the UAE":
+    "أشجار ونباتات إيطالية، مستوردة للإمارات",
   "About":
     "من نحن",
   "Access for a crane, planting included, a drawing to send over…":
@@ -151,7 +161,7 @@ const ar: Record<CopyKey, string> = {
     "أمضى المزارعون الإيطاليون أجيالًا في إنتاج ما تطلبه هذه المنطقة تحديدًا — أشجار زيتون معمّرة بجذوع ذات طابع حقيقي، وأشكال منحوتة ومشذّبة، ونخيل وصبّار بقيمة معمارية. والمناخ المتوسطي الذي ينتجها قريب بما يكفي من ظروف الخليج لتتأقلم الأشجار المنتقاة جيدًا، شرط أن تُعامل معاملة صحيحة في الطريق.",
   "Italian horticulture, supplied properly in the Gulf.":
     "بستنة إيطالية، تُورَّد في الخليج كما ينبغي.",
-  "Italian trees &amp; plants":
+  "Italian trees & plants":
     "أشجار ونباتات إيطالية",
   "Journal":
     "المدوّنة",
@@ -321,6 +331,10 @@ const ar: Record<CopyKey, string> = {
 
 /** Italian, for the growers, the suppliers, and the half of this that is Italian. */
 const it: Record<CopyKey, string> = {
+  "We import premium trees and plants from Italian nurseries and supply landscaping companies, developers, hotels and private estates across the United Arab Emirates.":
+    "Importiamo alberi e piante di pregio da vivai italiani e riforniamo imprese di paesaggistica, sviluppatori, alberghi e tenute private in tutti gli Emirati Arabi Uniti.",
+  "Italian Trees & Plants, Imported for the UAE":
+    "Alberi e piante italiane, importati per gli Emirati",
   "About":
     "Chi siamo",
   "Access for a crane, planting included, a drawing to send over…":
@@ -391,7 +405,7 @@ const it: Record<CopyKey, string> = {
     "I vivaisti italiani producono da generazioni proprio il materiale che questa regione cerca: olivi secolari con tronchi di vero carattere, forme scultoree e potature a nuvola, palme e agavi di valore architettonico. Il clima mediterraneo che li produce è abbastanza vicino alle condizioni del Golfo perché il materiale ben selezionato si adatti, purché sia trattato correttamente lungo il percorso.",
   "Italian horticulture, supplied properly in the Gulf.":
     "Vivaismo italiano, fornito come si deve nel Golfo.",
-  "Italian trees &amp; plants":
+  "Italian trees & plants":
     "Alberi e piante italiane",
   "Journal":
     "Giornale",

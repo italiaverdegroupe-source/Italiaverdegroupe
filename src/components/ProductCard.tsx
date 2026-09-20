@@ -22,6 +22,14 @@ export default function ProductCard(
   // value — a card whose picture is described in English on an Arabic page is
   // the version of this bug that a sighted reader never notices.
   const copy = productCopy(p, locale);
+  // "On Request" is not a price, it is the absence of one written out in
+  // English, and all sixty-eight rows of the catalogue carry it. Because it is
+  // a non-empty string the truthiness test that used to live at the call site
+  // below always took it, so the translated line underneath was unreachable
+  // and every Arabic and Italian card read ON REQUEST in Latin capitals.
+  // Treated as the sentinel it is, the sentence comes from the dictionary
+  // instead — and the day a real figure lands in the data it still wins.
+  const priced = p.price && p.price.trim().toLowerCase() !== 'on request' ? p.price : null;
   const [w, h] = p.imageSize.split('x').map(Number);
   return (
     <article className="spec reveal">
@@ -32,7 +40,28 @@ export default function ProductCard(
             alt={copy.name}
             width={w || 1388}
             height={h || 861}
-            sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 300px"
+            // These numbers look wrong and are not. `sizes` tells the browser
+            // how wide the IMAGE will be laid out, and the frame below is
+            // `aspect-ratio: 4 / 5` with `object-fit: cover` while every
+            // source photograph is landscape at about 1.64:1. Cover scales
+            // the picture until it fills the box's HEIGHT, so the picture is
+            // actually laid out at boxWidth / 0.8 * 1.64 = 2.05x the width of
+            // the box it is being cropped into. Describing the box — 90vw,
+            // 45vw, 300px — asked for half the pixels the browser then had to
+            // stretch over the frame: measured on /catalog at 1440px, a
+            // 360x220 file was being blown up into a 272x340 slot, and at
+            // 412px/DPR2 an 828-wide file into 1516 device pixels, a 1.83x
+            // upscale on the one thing this business sells on the look of.
+            // Next does not compensate for object-fit (see
+            // node_modules/next/dist/docs/01-app/03-api-reference/02-components/image.md,
+            // "sizes"), so the crop factor is applied here by hand.
+            //
+            // The other half of the waste is not fixable from this file: half
+            // of every downloaded pixel is thrown away by the crop, because
+            // the photographs are landscape and the frame is portrait.
+            // Re-cropping public/products/*.jpg to 4:5 would remove that and
+            // is the right follow-up.
+            sizes="(max-width: 640px) 185vw, (max-width: 1024px) 93vw, 615px"
             priority={priority}
           />
           <span className="spec-ref">{p.reference}</span>
@@ -66,7 +95,7 @@ export default function ProductCard(
               </div>
             )}
           </dl>
-          <span className="spec-cta">{p.price ? p.price : t('cat.priceOnRequest')}</span>
+          <span className="spec-cta">{priced ?? t('cat.priceOnRequest')}</span>
         </div>
       </L>
 
@@ -77,59 +106,12 @@ export default function ProductCard(
         <ShortlistButton item={{ ref: p.reference, name: copy.name, slug: p.slug }} compact />
       </div>
 
-      <style>{`
-        .spec { display: flex; flex-direction: column; }
-        .spec-add { margin-top: 12px; }
-        .spec-link { display: grid; gap: 16px; text-decoration: none; color: inherit; }
-
-        .spec-frame {
-          position: relative; aspect-ratio: 4 / 5; overflow: hidden;
-          background: var(--sand-100); border-radius: var(--radius);
-        }
-        .spec-frame img {
-          width: 100%; height: 100%; object-fit: cover;
-          transition: transform .9s var(--ease), filter .5s var(--ease);
-        }
-        .spec:hover .spec-frame img { transform: scale(1.055); }
-
-        .spec-ref {
-          position: absolute; inset-inline-start: 10px; top: 10px;
-          padding: .32em .6em;
-          font-size: .62rem; font-weight: 600; letter-spacing: .13em;
-          color: var(--sand-50); background: rgb(20 21 15 / .52);
-          backdrop-filter: blur(6px); border-radius: 2px;
-        }
-        .spec-flag {
-          position: absolute; inset-inline-start: 10px; bottom: 10px;
-          display: inline-flex; align-items: center; gap: .45em;
-          padding: .34em .68em; font-size: .75rem; letter-spacing: .03em;
-          background: rgb(16 21 9 / .82); color: #F3EFE4; border-radius: 2px;
-          backdrop-filter: blur(3px);
-        }
-        .spec-flag svg { opacity: .8; }
-
-        .spec-body { display: grid; gap: 10px; }
-        .spec-name { margin: 0; font-size: 1.22rem; line-height: 1.15; }
-
-        .spec-dl { display: grid; gap: 0; margin: 0; }
-        .spec-dl > div {
-          display: flex; justify-content: space-between; gap: 1rem;
-          padding: .42rem 0; border-top: 1px solid var(--line-soft);
-          font-size: .82rem;
-        }
-        .spec-dl dt { color: var(--fg-mute); }
-        .spec-dl dd { margin: 0; color: var(--fg-soft); font-variant-numeric: tabular-nums; }
-
-        .spec-cta {
-          font-size: .78rem; font-weight: 600; letter-spacing: .12em;
-          text-transform: uppercase; color: var(--olive-700);
-          display: inline-flex; align-items: center; gap: .5em;
-        }
-        .spec-cta::after {
-          content: '→'; transition: transform .3s var(--ease);
-        }
-        .spec:hover .spec-cta::after { transform: translateX(4px); }
-      `}</style>
+      {/* The CSS that used to be here now lives in src/app/globals.css.
+          This component is rendered in a loop on five different templates, so
+          a <style> element in its markup was emitted sixty-eight times on
+          /catalog alone — a third of that document, byte for byte identical.
+          The rules were static and referred only to the design tokens, so
+          nothing about them was ever per-card. See the note in globals.css. */}
     </article>
   );
 }

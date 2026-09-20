@@ -20,12 +20,34 @@ import Link from 'next/link';
  * The digest is printed small, because it is the one thing that makes a
  * reported problem findable in the logs.
  *
- * `reset()` re-renders the segment without a full reload, which is the right
- * first thing to try when the cause was a slow connection rather than a bug.
+ * THE "TRY AGAIN" BUTTON USED TO BE DECORATIVE, and the comment that used to
+ * sit here said the opposite of what the framework does. It called `reset()`
+ * and claimed that re-rendering the segment was "the right first thing to try
+ * when the cause was a slow connection" — but `reset()` does not re-fetch
+ * anything. The shipped boundary is three lines
+ * (node_modules/next/dist/client/components/error-boundary.js):
+ * `reset` only clears the boundary's own error state, while `retry` calls
+ * `router.refresh()` first and then clears it. Next 16's own reference says
+ * as much — "In most cases, you should use retry() instead" — and that
+ * `retry()` "will try to re-fetch and re-render the error boundary's
+ * children" (03-api-reference/03-file-conventions/error.md).
+ *
+ * That distinction is the whole point of this page. The failure it was
+ * written for is a server-rendered page whose payload errored on the server:
+ * Neon suspends its compute, the first query after a quiet hour times out,
+ * the RSC payload comes back as an error. Clearing the error state and
+ * re-rendering that same already-failed payload throws again immediately, so
+ * the button put the visitor straight back on the page they were already
+ * looking at. `retry()` asks the server for the segment again, which is the
+ * one thing that can succeed once the database has woken up.
+ *
+ * `retry` became stable in 16.3 and this project is on 16.3.5, so there is no
+ * flag and no fallback to keep: the boundary passes both props on every
+ * render and `reset` is simply the wrong one of the two here.
  */
-export default function SiteError({ error, reset }: {
+export default function SiteError({ error, retry }: {
   error: Error & { digest?: string };
-  reset: () => void;
+  retry: () => void;
 }) {
   const locale = useLocale();
   const t = ui(locale);
@@ -37,7 +59,7 @@ export default function SiteError({ error, reset }: {
       <p className="err-lede">{t('error.lede')}</p>
 
       <div className="err-actions">
-        <button type="button" className="btn" onClick={reset}>{t('error.retry')}</button>
+        <button type="button" className="btn" onClick={() => retry()}>{t('error.retry')}</button>
         <Link href={`/${locale}`} className="btn btn-ghost">{t('error.home')}</Link>
       </div>
 

@@ -174,6 +174,10 @@ for (const loc of ['it', 'ar']) {
     'Console', 'Menu', 'Social', 'Report', 'Backup', 'Verde Garden', 'WhatsApp',
     'Bucket', 'Container', 'Incoterm', 'Password', 'Pipeline AED', 'Version',
     '/journal/', 'INV-000001', 'ORD-000001', 'QT-000001', 'VG-XXXXXXX',
+    // The lead-reference shape shown on the New quotation form. A code's
+    // format is not a sentence; translating the X's would teach the operator
+    // to type something the parser rejects.
+    'VG-XXXXXXXXX',
     'olive-trees-gulf-summer', '· AED', '− AED',
     // 'proforma' is a Latin word Italian and English both took whole. An
     // Italian invoice says proforma; translating it would be inventing a word.

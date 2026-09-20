@@ -144,7 +144,7 @@ export default async function ProductPage(
   return (
     <div className="section section-tight det-top">
       <script type="application/ld+json" suppressHydrationWarning
-              dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+              dangerouslySetInnerHTML={ldJson(jsonLd)} />
       <script type="application/ld+json" suppressHydrationWarning
               dangerouslySetInnerHTML={ldJson(breadcrumbs(lang, [
                 { name: t('Catalogue'), path: '/catalog' },

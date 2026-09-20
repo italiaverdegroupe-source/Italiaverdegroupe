@@ -165,19 +165,52 @@ img, svg { max-width: 100%; display: block; }
    scope. */
 .faqs { display: grid; gap: 0; border-top: 1px solid var(--line); }
 .faq { border-bottom: 1px solid var(--line); }
+/* The gutter the indicator sits in was written physically — `20px 40px 20px 0`
+   reserves it on the RIGHT in every language — while the indicator itself is
+   placed logically and moves to the LEFT under dir="rtl". So on the Arabic
+   pages the two ended up on opposite sides: measured on /ar/services the
+   questions began at x=128 and the mark landed at x=136, printed through the
+   first letter of all four rows. Written logically the gutter follows the
+   indicator and the two can never separate again. */
 .faq summary {
-  cursor: pointer; padding: 20px 40px 20px 0; position: relative;
+  cursor: pointer; position: relative;
+  padding-block: 20px; padding-inline: 0 40px;
   font-family: var(--font-display); font-size: 1.04rem; list-style: none;
+  transition: color .16s ease;
 }
 .faq summary::-webkit-details-marker { display: none; }
+/* Everything else clickable on this site answers the cursor — .btn, .tlink,
+   .nav a, .lang-btn all change on hover. The accordion rows declared
+   `cursor: pointer` and then nothing, which made them the single exception
+   and read as a row that had been forgotten rather than one that is quiet. */
+.faq summary:hover { color: var(--olive-700); }
+.faq summary:hover::before,
+.faq summary:hover::after { background: var(--olive-700); }
+
+/* Two drawn bars rather than a '+' glyph swapped for a '–'.
+   `content` is not an animatable property, so the `transition: transform` this
+   indicator has always declared could never fire — open and closed simply cut
+   between two characters, and the reduced-motion override below was dead for
+   the same reason. Rotating the upright bar flat onto the horizontal one is
+   the same plus-becomes-minus the design already showed, and it is the motion
+   the declared transition was describing all along. Bars, not a rotated
+   glyph: turning a '+' by 45 degrees gives an '×', which would quietly change
+   what the open state means. */
+.faq summary::before,
 .faq summary::after {
-  content: '+'; position: absolute; inset-inline-end: 8px; top: 50%;
-  transform: translateY(-50%); font-size: 1.3rem; color: var(--brass-700);
-  transition: transform .18s ease;
+  content: ''; position: absolute; inset-inline-end: 8px; top: 50%;
+  width: 13px; height: 1.5px; border-radius: 1px; background: var(--brass-700);
+  transform: translateY(-50%);
+  transition: transform .18s ease, background .16s ease;
 }
-.faq[open] summary::after { content: '–'; }
+.faq summary::before { transform: translateY(-50%) rotate(90deg); }
+.faq[open] summary::before { transform: translateY(-50%) rotate(0deg); }
 .faq p { margin: 0 0 22px; max-width: 68ch; color: var(--fg-soft); }
-@media (prefers-reduced-motion: reduce) { .faq summary::after { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .faq summary,
+  .faq summary::before,
+  .faq summary::after { transition: none; }
+}
 
 /* ── layout ────────────────────────────────────────────────── */
 .wrap { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gutter); }
@@ -227,6 +260,101 @@ img, svg { max-width: 100%; display: block; }
 }
 .tlink:hover { background-size: 100% 1px; }
 
+/* ── the specimen card, and the control beside it ──────────────
+   These two blocks used to live inside ProductCard.tsx and
+   ShortlistButton.tsx, written the way almost every other component on this
+   site writes its CSS: a <style> element in the returned markup. That is a
+   fine convention right up to the point where the component is rendered in a
+   loop, and these two are the only ones that are — the catalogue, the
+   collection pages, the emirate pages, the specimen page's "more from this
+   family" strip and the home grid all map over ProductCard, and every card
+   carries a ShortlistButton.
+
+   The cost was measured rather than guessed: /catalog came back as a 718 KB
+   document holding 142 <style> elements, only 8 of them distinct. The card's
+   2.2 KB block and the button's 1.0 KB block, emitted 68 times each, were
+   219,559 bytes — 30.6% of the page — of byte-for-byte duplication, and React
+   re-inserted all 142 of them again on hydration. gzip hides nearly all of it
+   on the wire; what it does not hide is 142 stylesheet objects and 1,817 CSSOM
+   rules for one grid, which the browser must parse and hold, and which anyone
+   who opens the Elements panel sees immediately.
+
+   Both blocks are entirely static and reference nothing but the custom
+   properties declared at the top of this file, so the move is a move and not
+   a rewrite. They are emitted once now, from the stylesheet the browser
+   already had to fetch. */
+
+.spec { display: flex; flex-direction: column; }
+.spec-add { margin-top: 12px; }
+.spec-link { display: grid; gap: 16px; text-decoration: none; color: inherit; }
+
+.spec-frame {
+  position: relative; aspect-ratio: 4 / 5; overflow: hidden;
+  background: var(--sand-100); border-radius: var(--radius);
+}
+.spec-frame img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform .9s var(--ease), filter .5s var(--ease);
+}
+.spec:hover .spec-frame img { transform: scale(1.055); }
+
+.spec-ref {
+  position: absolute; inset-inline-start: 10px; top: 10px;
+  padding: .32em .6em;
+  font-size: .62rem; font-weight: 600; letter-spacing: .13em;
+  color: var(--sand-50); background: rgb(20 21 15 / .52);
+  backdrop-filter: blur(6px); border-radius: 2px;
+}
+.spec-flag {
+  position: absolute; inset-inline-start: 10px; bottom: 10px;
+  display: inline-flex; align-items: center; gap: .45em;
+  padding: .34em .68em; font-size: .75rem; letter-spacing: .03em;
+  background: rgb(16 21 9 / .82); color: #F3EFE4; border-radius: 2px;
+  backdrop-filter: blur(3px);
+}
+.spec-flag svg { opacity: .8; }
+
+.spec-body { display: grid; gap: 10px; }
+.spec-name { margin: 0; font-size: 1.22rem; line-height: 1.15; }
+
+.spec-dl { display: grid; gap: 0; margin: 0; }
+.spec-dl > div {
+  display: flex; justify-content: space-between; gap: 1rem;
+  padding: .42rem 0; border-top: 1px solid var(--line-soft);
+  font-size: .82rem;
+}
+.spec-dl dt { color: var(--fg-mute); }
+.spec-dl dd { margin: 0; color: var(--fg-soft); font-variant-numeric: tabular-nums; }
+
+.spec-cta {
+  font-size: .78rem; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--olive-700);
+  display: inline-flex; align-items: center; gap: .5em;
+}
+.spec-cta::after {
+  content: '→'; display: inline-block; transition: transform .3s var(--ease);
+}
+.spec:hover .spec-cta::after { transform: translateX(4px); }
+
+.sl-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: .55em 1em; border-radius: 999px;
+  font: inherit; font-size: .82rem; font-weight: 500; cursor: pointer;
+  background: var(--bg); color: var(--olive-900);
+  border: 1px solid var(--line);
+  transition: border-color .15s ease, background .15s ease, color .15s ease;
+}
+.sl-btn:hover { border-color: var(--olive-700); color: var(--olive-700); }
+.sl-btn.on {
+  background: var(--olive-700); color: #fff; border-color: var(--olive-700);
+}
+.sl-btn.on:hover { background: var(--olive-900); border-color: var(--olive-900); color: #fff; }
+.sl-btn-compact { padding: .42em .8em; font-size: .76rem; }
+/* 32px on a phone, on the one control that turns a browse into an
+   enquiry. */
+@media (pointer: coarse) { .sl-btn, .sl-btn-compact { min-height: 44px; } }
+@media (prefers-reduced-motion: reduce) { .sl-btn { transition: none; } }
+
 /* ── paper grain, applied once on body ─────────────────────── */
 .grain::after {
   content: ''; position: fixed; inset: 0; z-index: 9999; pointer-events: none;
@@ -256,6 +384,32 @@ img, svg { max-width: 100%; display: block; }
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip-path: inset(50%); white-space: nowrap;
+}
+/* ── and back again when it is the thing you are on ──
+   The skip link is the first tab stop on every public page and on the
+   console, and it stayed a 1x1 clipped box even while it held focus: the
+   global :focus-visible ring drew itself around nothing, so the first press
+   of Tab on this site made a keyboard user's cursor disappear. That is WCAG
+   2.4.7 Focus Visible failing before a word has been read.
+
+   `position: fixed` rather than putting it back in flow, because the header
+   is sticky with a backdrop filter at z-index 50 and a link revealed in the
+   document would open underneath it — visible in the DOM and invisible on the
+   screen, which is the same failure wearing a different hat.
+
+   This is written on the utility rather than on a .skip-link of its own
+   because the skip link is the only thing wearing this class that can ever
+   take focus: the quote form's honeypot is aria-hidden with tabindex="-1",
+   and the hidden <label>s are labels, which are not focusable at all. */
+.visually-hidden:focus,
+.visually-hidden:focus-visible {
+  position: fixed; inset-block-start: 8px; inset-inline-start: 8px;
+  width: auto; height: auto; overflow: visible; clip-path: none;
+  z-index: 1000; padding: 10px 16px;
+  background: var(--bg); color: var(--olive-900);
+  border: 1px solid var(--olive-700); border-radius: var(--radius);
+  font-size: .9rem; font-weight: 500; text-decoration: none;
+  box-shadow: var(--shadow-lift);
 }
 
 /* ═══════════ the language switcher ═══════════ */
@@ -346,10 +500,25 @@ img, svg { max-width: 100%; display: block; }
 
 /* An arrow drawn to point at the next thing points the other way when the
    next thing is to the left. Glyph arrows are flipped; SVG chevrons already
-   sit inside mirrored flex rows, so only the drawn ones need this. */
+   sit inside mirrored flex rows, so only the drawn ones need this.
+
+   .spec-cta::after and .slb-go were missing from this list, which is how
+   /ar/catalog came to show the header's mirrored "← اطلب عرض سعر" above
+   sixty-eight cards whose own arrow still pointed right, back at the words it
+   was meant to lead away from. Two arrows disagreeing on one screen is worse
+   than none, because it says the Arabic pass stopped halfway. */
 [dir='rtl'] .hdr-quote-arrow,
 [dir='rtl'] .hero-feat-go,
+[dir='rtl'] .spec-cta::after,
+[dir='rtl'] .slb-go,
 [dir='rtl'] .btn .arrow { display: inline-block; transform: scaleX(-1); }
+
+/* The card's hover slide is physical too. Mirroring the glyph alone would
+   leave it sliding to the right — away from the direction it now points — so
+   the translate is composed onto the flip rather than replacing it. Order
+   matters: scaleX(-1) first puts the translate into the mirrored coordinate
+   system, so the same +4px carries the arrow four pixels to the LEFT. */
+[dir='rtl'] .spec:hover .spec-cta::after { transform: scaleX(-1) translateX(4px); }
 
 /* Numbers, references and dates stay left-to-right inside Arabic sentences.
    VG-OL-007 rendered right-to-left is not the reference anybody can search. */

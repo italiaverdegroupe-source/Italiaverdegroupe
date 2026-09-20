@@ -5,6 +5,7 @@ import L from '@/components/L';
 import { getSettings } from '@/lib/settings';
 import { site } from '@/lib/site';
 import { ui } from '@/lib/ui';
+import { ldJson } from '@/lib/schema';
 
 /**
  * Revalidated on a timer as well as on demand.
@@ -19,11 +20,18 @@ export const revalidate = 300;
 
 export const generateMetadata = async (
   { params }: { params: Promise<{ lang: Locale }> },
-): Promise<Metadata> => metadataFor((await params).lang, '/services', {
-  title: 'Services — supply, import, delivery and planting',
-  description:
-    'Tree supply from Italian nurseries, import and phytosanitary documentation, acclimatisation, delivery with crane offloading, and planting across the UAE.',
-});
+): Promise<Metadata> => {
+  // The title and description were English literals, so /ar/services and /it/services
+  // shipped an English SERP snippet under an hreflang cluster that told Google
+  // they were the Arabic and Italian pages. The body was translated; only the
+  // head was not, which is the half a searcher sees first.
+  const { lang } = await params;
+  const t = ui(lang);
+  return metadataFor(lang, '/services', {
+    title: t('seo.servicesTitle'),
+    description: t('seo.servicesDesc'),
+  });
+};
 
 /**
  * The six are a sequence, not a menu — a tree passes through all of them in
@@ -31,38 +39,16 @@ export const generateMetadata = async (
  * "Planting" read as something you might buy instead of "Import", which is not
  * what is on offer at all.
  */
-const STAGES: { title: string; body: string; detail: string }[] = [
-  {
-    title: 'Selection at the grower',
-    body: 'We choose the individual plant in the nursery, in Toscana, Puglia, Sicilia or Lombardia — to your specification, not from whatever a stock list happens to hold that month.',
-    detail: 'Photographs of the actual specimen before anything is committed.',
-  },
-  {
-    title: 'Import & documentation',
-    body: 'Phytosanitary certification, import permits, customs clearance and the paperwork that live plant material attracts at both ends.',
-    detail: 'Handled by us. Nothing on this list becomes your problem at the border.',
-  },
-  {
-    title: 'Acclimatisation',
-    body: 'Conditioning on arrival before stock is released to site, so a tree that has just come out of an Italian winter meets a Gulf summer in stages.',
-    detail: 'This is the step that decides whether a specimen establishes or fails in year one.',
-  },
-  {
-    title: 'Transport & offloading',
-    body: 'Low-loader, and crane or hiab where the root ball demands it. Site access — gate widths, overhead lines, ground bearing — is confirmed before a delivery date is agreed.',
-    detail: `Across all ${site.emirates.length} emirates.`,
-  },
-  {
-    title: 'Planting',
-    body: 'Pit preparation, soil amendment, staking and irrigation connection, where planting is within the quoted scope.',
-    detail: 'Optional. Plenty of contractors take supply only, and that is quoted too.',
-  },
-  {
-    title: 'Project supply',
-    body: 'Phased consignments held to one specification across a development, so the trees in phase four match the ones in phase one.',
-    detail: 'For schemes that run over months rather than a single delivery.',
-  },
-];
+/**
+ * Keys, not sentences.
+ *
+ * The six stages were an English array, so the whole body of /ar/services and
+ * /it/services was English under a translated heading — on the page that
+ * explains what this company actually does. The copy now lives in the ui
+ * dictionary with everything else, where a missing translation is a compile
+ * error rather than an English paragraph nobody notices.
+ */
+const STAGES = ['svc.s1', 'svc.s2', 'svc.s3', 'svc.s4', 'svc.s5', 'svc.s6'] as const;
 
 /** What a buyer reads on a services page is delivery, planting, import and
  *  aftercare. The general and commercial questions stay on the home page. */
@@ -103,16 +89,22 @@ export default async function ServicesPage(
           </ul>
 
           <ol className="svc-stages">
-            {STAGES.map((s, i) => (
-              <li key={s.title}>
-                <span className="svc-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-                <div className="svc-txt">
-                  <h2>{s.title}</h2>
-                  <p>{s.body}</p>
-                  <p className="svc-detail">{s.detail}</p>
-                </div>
-              </li>
-            ))}
+            {STAGES.map((k, i) => {
+              const detail = t(`${k}.d` as 'svc.s1.d');
+              return (
+                <li key={k}>
+                  <span className="svc-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                  <div className="svc-txt">
+                    <h2>{t(`${k}.t` as 'svc.s1.t')}</h2>
+                    <p>{t(`${k}.b` as 'svc.s1.b')}</p>
+                    {/* The last stage has no aside. It used to render an empty
+                        paragraph carrying the detail styling — a stray indent
+                        and a blank line at the foot of the list. */}
+                    {detail && <p className="svc-detail">{detail}</p>}
+                  </div>
+                </li>
+              );
+            })}
           </ol>
         </div>
       </div>
@@ -161,7 +153,7 @@ export default async function ServicesPage(
             </div>
           </div>
           <script type="application/ld+json" suppressHydrationWarning
-            dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            dangerouslySetInnerHTML={ldJson({
               '@context': 'https://schema.org',
               '@type': 'FAQPage',
               mainEntity: serviceFaqs.map((f) => ({
@@ -169,7 +161,7 @@ export default async function ServicesPage(
                 name: f.question,
                 acceptedAnswer: { '@type': 'Answer', text: f.answer },
               })),
-            }) }} />
+            })} />
         </section>
       )}
 

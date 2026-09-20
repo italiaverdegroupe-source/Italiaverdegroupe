@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { query } from '@/lib/db';
-import { ageing, getOrder, getOrderItems, orderTotals, nextCode } from '@/lib/orders';
+import { ageing, getOrder, getOrderItems, orderTotals, nextCode, r2 } from '@/lib/orders';
 import { getSettings } from '@/lib/settings';
 import { fire } from '@/lib/alerts';
 import { fmtDay } from '@/components/admin/bits';
@@ -33,10 +33,49 @@ async function raiseInvoice(formData: FormData) {
 
   const cfg = await getSettings();
   const kind = String(formData.get('kind') ?? 'tax_invoice');
-  // An advance invoice bills the agreed percentage, not the whole order.
-  const net = kind === 'advance' ? t.net * (Number(o.advance_pct) / 100) : t.net;
+
+  /**
+   * One order, up to three documents, and they must sum to the order.
+   *
+   * Only `advance` was special-cased here. `retention` fell through to the
+   * else and billed the FULL ORDER NET — on a 580,000 order with 10%
+   * retention the release invoice asked for 580,000 instead of 58,000, ten
+   * times the amount being released, and that figure went on to the customer's
+   * document, into total_aed, into the ageing report and into the credit-limit
+   * check. It was also additive in the other direction: an advance of 30% plus
+   * a full tax invoice plus a retention invoice billed 140% of the order,
+   * because each was computed from the whole net without reference to the
+   * others.
+   *
+   * The split is the standard one. The advance is taken up front, the
+   * retention is withheld until release, and the tax invoice in between bills
+   * what is left — so advance + tax invoice + retention = the order net,
+   * exactly, and the VAT on each follows its own net.
+   *
+   * Computed on NET rather than on the VAT-inclusive total, because VAT is
+   * applied to each document's own net below. Taking a percentage of the
+   * gross and then charging VAT on that would tax the VAT.
+   *
+   * A proforma is not part of the split: it is the whole order, priced, before
+   * anything is billed at all.
+   */
+  const advanceNet   = r2(t.net * (Number(o.advance_pct) / 100));
+  const retentionNet = r2(t.net * (Number(o.retention_pct) / 100));
+  const net =
+      kind === 'advance'   ? advanceNet
+    : kind === 'retention' ? retentionNet
+    : kind === 'proforma'  ? t.net
+    :                        r2(t.net - advanceNet - retentionNet);
+
+  if (net <= 0) {
+    refuse('/admin/finance', tr('Nothing left to invoice on {code}.', { code: o.code }));
+  }
+
   const vat = o.vat_enabled ? Math.round(net * Number(o.vat_rate) * 100) / 100 : 0;
-  const retention = kind === 'tax_invoice' ? t.retention : 0;
+  // Recorded on the tax invoice as the amount HELD BACK from it, so the
+  // document can say so. It is not subtracted again — this invoice's net
+  // already excludes it.
+  const retention = kind === 'tax_invoice' ? retentionNet : 0;
   const code = await nextCode('INV', 'invoices');
 
   const rows = await query<{ id: string }>(
@@ -86,7 +125,7 @@ async function raiseInvoice(formData: FormData) {
       [rows[0].id,
        kind === 'advance'
          ? `Advance ${o.advance_pct}% against order ${o.code}`
-         : `Retention against order ${o.code}`,
+         : `Retention ${o.retention_pct}% released against order ${o.code}`,
        Math.round(net * 100) / 100]);
   }
 

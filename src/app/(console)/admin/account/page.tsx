@@ -2,6 +2,11 @@ import { redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { changeOwnPassword, changeOwnName, signOutEverywhereElse } from './actions';
+// These two pages wrote their own timestamps — `.slice(0, 16).replace('T', ' ')`
+// — which printed raw UTC, four hours behind the office, in a format no other
+// console screen uses. The .replace was dead code besides: the column arrives
+// space-separated from Postgres and has never contained a T.
+import { fmtDate, fmtDay } from '@/components/admin/bits';
 import { adminUi } from '@/lib/admin-ui';
 
 export const dynamic = 'force-dynamic';
@@ -48,15 +53,27 @@ export default async function AccountPage({ searchParams }: {
   const t = adminUi(user.locale);
   const { error, ok } = await searchParams;
 
-  const [sessions, recent] = await Promise.all([
+  // The table is capped and the headline is not, and they are two queries for
+  // that reason. The sentence below used to print `sessions.length`, which is
+  // the LIMIT — so an account with fifty-nine live sessions was told it had
+  // twenty, while /admin/users one click away ran a real count(*) and said
+  // fifty-nine. This is the screen somebody opens to ask "is anyone else
+  // signed in as me?", and it was answering a different question from its own
+  // sibling. The cap on the table stays: twenty rows of user agent is as much
+  // as anybody reads, and now the page says so out loud.
+  const [sessions, liveCount, recent] = await Promise.all([
     query<{ created_at: string; expires_at: string; ip: string | null; user_agent: string | null }>(
       `SELECT created_at::text, expires_at::text, ip, user_agent
          FROM sessions WHERE user_id = $1 AND expires_at > now()
         ORDER BY created_at DESC LIMIT 20`, [user.id]),
+    query<{ n: string }>(
+      `SELECT count(*)::text AS n
+         FROM sessions WHERE user_id = $1 AND expires_at > now()`, [user.id]),
     query<{ at: string; ip: string | null; successful: boolean }>(
       `SELECT at::text, ip, successful FROM login_attempts
         WHERE email = $1 ORDER BY at DESC LIMIT 10`, [user.email.toLowerCase()]),
   ]);
+  const live = Number(liveCount[0]?.n ?? sessions.length);
 
   return (
     <>
@@ -111,7 +128,10 @@ export default async function AccountPage({ searchParams }: {
       <div className="adm-panel adm-pad" style={{ marginBottom: 18 }}>
         <h2>{t("Where you are signed in")}</h2>
         <p className="adm-sub">
-          {sessions.length} live session{sessions.length === 1 ? '' : 's'}, including this one. A session lasts fourteen days.
+          {live === 1
+            ? t("{n} live session, including this one. A session lasts fourteen days.", { n: live })
+            : t("{n} live sessions, including this one. A session lasts fourteen days.", { n: live })}
+          {live > sessions.length && <> {t("Showing the {n} most recent.", { n: sessions.length })}</>}
         </p>
         {sessions.length > 0 && (
           <table className="adm-t">
@@ -119,10 +139,10 @@ export default async function AccountPage({ searchParams }: {
             <tbody>
               {sessions.map((s, i) => (
                 <tr key={i}>
-                  <td>{s.created_at.slice(0, 16).replace('T', ' ')}</td>
+                  <td>{fmtDate(s.created_at, user.locale)}</td>
                   <td><Addr value={s.ip} t={t} /></td>
                   <td style={{ maxWidth: 380, fontSize: 12 }}>{s.user_agent ?? '—'}</td>
-                  <td>{s.expires_at.slice(0, 10)}</td>
+                  <td>{fmtDay(s.expires_at, user.locale)}</td>
                 </tr>
               ))}
             </tbody>
@@ -148,11 +168,11 @@ export default async function AccountPage({ searchParams }: {
             )}
             {recent.map((a, i) => (
               <tr key={i}>
-                <td>{a.at.slice(0, 16).replace('T', ' ')}</td>
+                <td>{fmtDate(a.at, user.locale)}</td>
                 <td><Addr value={a.ip} t={t} /></td>
                 <td>
                   <span className={`pill ${a.successful ? 'pill-won' : 'pill-lost'}`}>
-                    {a.successful ? 'signed in' : 'refused'}
+                    {a.successful ? t("signed in") : t("refused")}
                   </span>
                 </td>
               </tr>

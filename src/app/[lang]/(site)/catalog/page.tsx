@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
-import { type Locale } from '@/lib/i18n';
+import { type Locale, localePath } from '@/lib/i18n';
 import { metadataFor } from '@/lib/content';
 import L from '@/components/L';
 import ProductCard from '@/components/ProductCard';
 import { getAllProducts, getFamilies, familySlug, sizeBand, SIZE_BANDS, heightMidpoint, searchProducts, rankBySearch } from '@/lib/products';
 import { ui } from '@/lib/ui';
+import { specimenCount } from '@/lib/product-copy';
 
 /**
  * Revalidated on a timer as well as on demand.
@@ -19,11 +20,18 @@ export const revalidate = 300;
 
 export const generateMetadata = async (
   { params }: { params: Promise<{ lang: Locale }> },
-): Promise<Metadata> => metadataFor((await params).lang, '/catalog', {
-  title: 'Catalogue — Italian trees & plants for the UAE',
-  description:
-    'Browse specimen olive trees, palms, agaves, cacti and ornamental trees imported from Italy and supplied across the United Arab Emirates. All prices on request.',
-});
+): Promise<Metadata> => {
+  // The title and description were English literals, so /ar/catalog and /it/catalog
+  // shipped an English SERP snippet under an hreflang cluster that told Google
+  // they were the Arabic and Italian pages. The body was translated; only the
+  // head was not, which is the half a searcher sees first.
+  const { lang } = await params;
+  const t = ui(lang);
+  return metadataFor(lang, '/catalog', {
+    title: t('seo.catalogTitle'),
+    description: t('seo.catalogDesc'),
+  });
+};
 
 type Search = { family?: string; size?: string; sort?: string; q?: string };
 
@@ -61,7 +69,12 @@ export default async function CatalogPage(
     <div className="section">
       <div className="wrap">
         <p className="eyebrow">{t("Catalogue")}</p>
-        <h1 className="cat-h1">{t("Italian trees &amp; plants")}</h1>
+        {/* The key used to be the HTML entity "Italian trees &amp; plants".
+            JSX renders text rather than HTML, so the headline of the main
+            commercial page printed the five literal characters &amp; where the
+            ampersand should be — in English only, because the Arabic and
+            Italian translations of that key had a real ampersand or none. */}
+        <h1 className="cat-h1">{t("Italian trees & plants")}</h1>
         <p className="lede">
           {t("Every specimen is quoted individually — availability, size and price depend on the season and the consignment. Tell us what the project needs and we will price it.")}
         </p>
@@ -71,7 +84,12 @@ export default async function CatalogPage(
             searchable, shareable, back-button-able and works with JavaScript
             off — all of which a keystroke handler would have cost for no gain
             at this size. */}
-        <form className="cat-search" role="search" action="/catalog">
+        {/* action was the literal "/catalog", so submitting a search from
+            /ar/catalog or /it/catalog landed the reader on the ENGLISH
+            catalogue — the one control on the page whose whole job is to keep
+            them in it. localePath is what every link on the site already uses
+            to stay in the reader's language; a form action needs it too. */}
+        <form className="cat-search" role="search" action={localePath(lang, '/catalog')}>
           {sp.family && <input type="hidden" name="family" value={sp.family} />}
           {sp.size && <input type="hidden" name="size" value={sp.size} />}
           {sp.sort && <input type="hidden" name="sort" value={sp.sort} />}
@@ -116,16 +134,21 @@ export default async function CatalogPage(
           <div className="fgroup">
             <span className="flabel">{t("Sort")}</span>
             <div className="fchips">
-              {[['', 'Reference'], ['tallest', 'Tallest first'], ['smallest', 'Smallest first']].map(([v, l]) => (
-                <L key={l} href={qs({ sort: v || undefined })}
-                      className={`chip ${(sp.sort ?? '') === v ? 'on' : ''}`}>{l}</L>
+              {([['', 'cat.sortReference'], ['tallest', 'cat.sortTallest'],
+                 ['smallest', 'cat.sortSmallest']] as const).map(([v, k]) => (
+                <L key={k} href={qs({ sort: v || undefined })}
+                      className={`chip ${(sp.sort ?? '') === v ? 'on' : ''}`}>{t(k)}</L>
               ))}
             </div>
           </div>
         </div>
 
         <p className="count">
-          {list.length} {list.length === 1 ? 'specimen' : 'specimens'}
+          {/* Was `{n} specimen` / `{n} specimens`, which is English grammar
+              applied to Arabic: an 's' on an Arabic noun is a different word,
+              and Arabic has six plural forms rather than two. specimenCount
+              asks Intl.PluralRules which one applies. */}
+          {specimenCount(list.length, lang)}
           {q && <> {t('cat.matching')} <strong>&ldquo;{q}&rdquo;</strong></>}
         </p>
 

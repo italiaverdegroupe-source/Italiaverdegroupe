@@ -6,7 +6,7 @@ import { getSessionUser, audit, assertSameOrigin } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { STATUSES, StatusPill, fmtDate } from '@/components/admin/bits';
 import { getSettings } from '@/lib/settings';
-import { adminUi } from '@/lib/admin-ui';
+import { adminUi, adminStatus } from '@/lib/admin-ui';
 import DeleteControls from '@/components/admin/DeleteControls';
 import { blockers, deletionInfo } from '@/lib/deletion';
 import Refusal from '@/components/admin/Refusal';
@@ -156,7 +156,7 @@ export default async function LeadPage({ params, searchParams }: { params: Promi
       <h1>{lead.name}</h1>
       <Refusal message={error} />
       <p className="adm-sub">
-        <StatusPill status={lead.status} /> &nbsp;{lead.reference}
+        <StatusPill status={lead.status} label={adminStatus(user.locale)(lead.status)} /> &nbsp;{lead.reference}
         {lead.company ? ` · ${lead.company}` : ''}
       </p>
 

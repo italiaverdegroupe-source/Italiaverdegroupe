@@ -19,11 +19,18 @@ export const revalidate = 300;
 
 export const generateMetadata = async (
   { params }: { params: Promise<{ lang: Locale }> },
-): Promise<Metadata> => metadataFor((await params).lang, '/quote', {
-  title: 'Request a quote',
-  description:
-    'Tell us the species, sizes, quantities and site. We come back with availability, lead time and a priced quotation for delivery anywhere in the UAE.',
-});
+): Promise<Metadata> => {
+  // The title and description were English literals, so /ar/quote and /it/quote
+  // shipped an English SERP snippet under an hreflang cluster that told Google
+  // they were the Arabic and Italian pages. The body was translated; only the
+  // head was not, which is the half a searcher sees first.
+  const { lang } = await params;
+  const t = ui(lang);
+  return metadataFor(lang, '/quote', {
+    title: t('seo.quoteTitle'),
+    description: t('seo.quoteDesc'),
+  });
+};
 
 type Search = { type?: string; ref?: string };
 

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 import {
-  LOCALES, LOCALE_NAMES, LOCALE_SHORT, LOCALE_TAG, localePath, splitLocale,
+  LOCALES, LOCALE_NAMES, LOCALE_SHORT, LOCALE_TAG, LOCALE_LABEL, localePath, splitLocale,
 } from '@/lib/i18n';
 
 /**
@@ -23,6 +23,36 @@ import {
 export default function LangSwitch({ id = 'lang' }: { id?: string }) {
   const pathname = usePathname();
   const { locale: current, path } = splitLocale(pathname);
+
+  /**
+   * The query string comes with you.
+   *
+   * usePathname() is the path and nothing else, so switching language threw
+   * away everything after the '?'. A reader who had searched the catalogue for
+   * "olive", filtered to a size band and then asked for Arabic landed on an
+   * unfiltered Arabic catalogue and had to do it all again — and the same on
+   * /quote, where ?type=bulk decides which enquiry form they are looking at.
+   * Nothing said their choices had been dropped; the page simply came back
+   * different.
+   *
+   * READ FROM THE BROWSER, NOT FROM useSearchParams(). The hook is the obvious
+   * answer and it is the wrong one here: this switcher sits in the header of
+   * every page, and useSearchParams() makes the client tree up to the nearest
+   * Suspense boundary client-rendered — which, with no boundary above it, is
+   * the entire page. The build says so outright ("useSearchParams() should be
+   * wrapped in a suspense boundary") and refuses to prerender. Wrapping it
+   * would work, but the fallback would be a hole where the language control
+   * belongs, popping in after hydration on all 285 URLs.
+   *
+   * An effect costs one render and nothing else. The first paint carries the
+   * plain path, which is exactly the href this had before and still works with
+   * JavaScript off; once hydrated the query is appended. The menu has to be
+   * opened before anything can be clicked, so in practice the query is always
+   * there by the time it matters.
+   */
+  const [qs, setQs] = useState('');
+  useEffect(() => { setQs(window.location.search.replace(/^\?/, '')); }, [pathname]);
+  const keep = (href: string) => (qs ? `${href}?${qs}` : href);
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
 
@@ -42,12 +72,18 @@ export default function LangSwitch({ id = 'lang' }: { id?: string }) {
 
   return (
     <div className="lang" ref={box}>
+      {/* aria-label was the English word "Language" on every locale, so a
+          screen reader on the Arabic site announced the one control that
+          changes language in the language its user had already chosen not to
+          read. aria-haspopup tells them it opens something before they press
+          it, which an expanded state alone does not. */}
       <button
         type="button"
         className="lang-btn"
         aria-expanded={open}
+        aria-haspopup="listbox"
         aria-controls={`${id}-menu`}
-        aria-label={`Language: ${LOCALE_NAMES[current]}`}
+        aria-label={`${LOCALE_LABEL[current]}: ${LOCALE_NAMES[current]}`}
         onClick={() => setOpen((v) => !v)}
       >
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none"
@@ -67,7 +103,7 @@ export default function LangSwitch({ id = 'lang' }: { id?: string }) {
                   end before following it; aria-current marks the one you are
                   already reading, which an icon alone does not say aloud. */}
               <Link
-                href={localePath(l, path)}
+                href={keep(localePath(l, path))}
                 hrefLang={LOCALE_TAG[l]}
                 lang={LOCALE_TAG[l]}
                 aria-current={l === current ? 'true' : undefined}

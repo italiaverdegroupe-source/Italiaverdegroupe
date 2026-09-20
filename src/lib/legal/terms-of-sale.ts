@@ -11,6 +11,20 @@ import type { LegalSet } from './types';
  * validly given; subcontracting and assignment; confidentiality; anti-bribery;
  * variation in writing; severability, entire agreement and third-party rights;
  * a complaints route with a timetable; and the language clause.
+ *
+ * WHY THE NOTICES CLAUSE NO LONGER MENTIONS "THE REGISTERED ADDRESS ABOVE".
+ * It used to, and there was no address above: Settings carries no address yet
+ * and LegalContact deliberately prints nothing rather than inventing one, so
+ * section 1 gives the company, the city and the contact channels and stops
+ * there. A notices clause that names a delivery channel the contract does not
+ * supply is the kind of thing a buyer's lawyer marks up on first reading, and
+ * the notices clause is the one that gets tested — termination, force majeure
+ * and retention of title all turn on valid service. The clause now rests on
+ * the channel the contract really does provide, the email address on the
+ * order, and leaves post open where the other side has given an address in
+ * writing for it. That way it is correct today, with no address anywhere, and
+ * still correct on the day one is entered in the console — rather than being
+ * a sentence that only becomes true after somebody remembers to fill a field.
  */
 export const termsOfSale: LegalSet = {
   en: {
@@ -188,7 +202,7 @@ export const termsOfSale: LegalSet = {
         heading: 'The rest of it',
         body: [
           { t: 'dl', items: [
-            { term: 'Notices', def: 'A notice under these terms is valid if it is in writing, sent to the email address on the order or to the registered address above, and it takes effect when it arrives during working hours. A message to a driver or a site foreman is not a notice.' },
+            { term: 'Notices', def: 'A notice under these terms is valid if it is in writing, sent to the email address on the order — or to a postal address the other of us has given in writing for notices — and it takes effect when it arrives during working hours. Email is the channel this contract always provides, and ours is printed on every quotation and invoice we issue, so a notice can always be validly served. A message to a driver or a site foreman is not a notice.' },
             { term: 'Subcontracting', def: 'We use growers, freight forwarders, clearing agents, crane operators and planting crews. We remain responsible to you for what they do on our behalf.' },
             { term: 'Assignment', def: 'Neither of us transfers this contract to somebody else without the other’s written agreement, except that we may transfer it to a company taking over this business.' },
             { term: 'Variation', def: 'A change to these terms or to an order is effective only in writing, agreed by both of us.' },
@@ -387,7 +401,7 @@ export const termsOfSale: LegalSet = {
         heading: 'ما تبقّى',
         body: [
           { t: 'dl', items: [
-            { term: 'الإخطارات', def: 'يكون الإخطار بموجب هذه الشروط صحيحًا إن كان كتابيًّا، ومرسَلًا إلى البريد الإلكتروني المذكور في الطلب أو إلى العنوان المسجّل أعلاه، ويسري عند وصوله خلال ساعات العمل. أما الرسالة إلى سائق أو مشرف موقع فليست إخطارًا.' },
+            { term: 'الإخطارات', def: 'يكون الإخطار بموجب هذه الشروط صحيحًا إن كان كتابيًّا، ومرسَلًا إلى البريد الإلكتروني المذكور في الطلب — أو إلى عنوان بريدي يكون الطرف الآخر قد حدّده كتابةً لتلقّي الإخطارات — ويسري عند وصوله خلال ساعات العمل. والبريد الإلكتروني هو القناة التي يوفّرها هذا العقد دائمًا، وعنواننا مطبوع على كل عرض سعر وكل فاتورة نصدرها، فلا يتعذّر توجيه إخطار صحيح في أي حال. أما الرسالة إلى سائق أو مشرف موقع فليست إخطارًا.' },
             { term: 'التعاقد من الباطن', def: 'نستعين بمزارعين ووكلاء شحن ومخلّصين ومشغّلي رافعات وطواقم زراعة. ونبقى مسؤولين أمامك عمّا يفعلونه نيابةً عنّا.' },
             { term: 'التنازل', def: 'لا ينقل أيّ منّا هذا العقد إلى غيره دون موافقة الآخر الكتابية، إلا أنه يجوز لنا نقله إلى شركة تتولّى هذا النشاط.' },
             { term: 'التعديل', def: 'لا يسري تعديل هذه الشروط أو أي طلب إلا كتابةً وباتفاق الطرفين.' },
@@ -586,7 +600,7 @@ export const termsOfSale: LegalSet = {
         heading: 'Il resto',
         body: [
           { t: 'dl', items: [
-            { term: 'Comunicazioni', def: 'Una comunicazione ai sensi di queste condizioni è valida se è scritta, inviata all’indirizzo e-mail indicato nell’ordine o alla sede indicata sopra, e ha effetto quando arriva in orario di lavoro. Un messaggio a un autista o a un capocantiere non è una comunicazione.' },
+            { term: 'Comunicazioni', def: 'Una comunicazione ai sensi di queste condizioni è valida se è scritta, inviata all’indirizzo e-mail indicato nell’ordine — o a un indirizzo postale che l’altra parte abbia indicato per iscritto per le comunicazioni — e ha effetto quando arriva in orario di lavoro. L’e-mail è il canale che questo contratto garantisce sempre, e il nostro indirizzo è stampato su ogni preventivo e ogni fattura che emettiamo, perciò una comunicazione può sempre essere validamente inviata. Un messaggio a un autista o a un capocantiere non è una comunicazione.' },
             { term: 'Subappalto', def: 'Ci avvaliamo di vivai, spedizionieri, agenzie doganali, gruisti e squadre di impianto. Restiamo responsabili verso di voi di ciò che fanno per nostro conto.' },
             { term: 'Cessione', def: 'Nessuno dei due trasferisce questo contratto ad altri senza l’accordo scritto dell’altro, salvo che noi possiamo trasferirlo a una società che subentri in questa attività.' },
             { term: 'Modifiche', def: 'Una modifica a queste condizioni o a un ordine ha effetto solo per iscritto e concordata da entrambi.' },

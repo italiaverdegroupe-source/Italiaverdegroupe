@@ -8,7 +8,10 @@ export const DELIVERY_STATUSES = [
 ] as const;
 export const INVOICE_STATUSES = ['draft','issued','part_paid','paid','overdue','cancelled'] as const;
 
-const r2 = (n: number) => Math.round(n * 100) / 100;
+/** Money, to the fil. Exported because the invoicing split has to round the
+    same way the order totals do, or the three documents stop summing to the
+    order by a fil and somebody has to explain why. */
+export const r2 = (n: number) => Math.round(n * 100) / 100;
 
 export type Order = {
   id: string; code: string; quote_id: string | null; customer_id: string | null;

@@ -9,6 +9,7 @@ import { ogImage } from '@/lib/site';
 import { getBlocks, fill, publishedFaqs, publishedTestimonials, getSeo } from '@/lib/content';
 import { getAllProducts, getShowcaseProducts, getFamilies, imageFor } from '@/lib/products';
 import { ui } from '@/lib/ui';
+import { ldJson } from '@/lib/schema';
 
 // The picture the owner chose, and the reason the rest of this section is
 // built the way it is. It lives in public/brand, never public/products: it is
@@ -390,7 +391,7 @@ export default async function HomePage(
           {/* Structured data, so these can answer the question in the search
               result itself rather than only on the page. */}
           <script type="application/ld+json" suppressHydrationWarning
-            dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            dangerouslySetInnerHTML={ldJson({
               '@context': 'https://schema.org',
               '@type': 'FAQPage',
               mainEntity: faqs.map((f) => ({
@@ -398,7 +399,7 @@ export default async function HomePage(
                 name: f.question,
                 acceptedAnswer: { '@type': 'Answer', text: f.answer },
               })),
-            }) }} />
+            })} />
         </section>
       )}
 

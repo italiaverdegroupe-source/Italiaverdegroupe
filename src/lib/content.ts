@@ -2,6 +2,10 @@ import { cache } from 'react';
 import { query } from '@/lib/db';
 import { ogImage } from '@/lib/site';
 import { alternates, DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
+import { BLOCK_TRANSLATIONS } from '@/lib/content-translations';
+// Re-exported so tests can assert the fallback chain against the same table
+// the code uses, rather than against a copy that can drift out of step with it.
+export { BLOCK_TRANSLATIONS };
 
 /**
  * Editable site content.
@@ -125,6 +129,34 @@ const fallbacks = Object.fromEntries(
 ) as Record<BlockKey, string>;
 
 /**
+ * The compiled floor FOR THE LANGUAGE BEING READ.
+ *
+ * `fallbacks` above is English, and for a long time it was the only floor
+ * there was. The Arabic and Italian copy existed — 30 blocks each, written and
+ * committed to db/seed/blocks.*.tsv — but the script that loaded them into
+ * content_blocks was in no build step and had never been run against
+ * production, so the table was empty and every Arabic page fell through to the
+ * English. Two thirds of the words on /ar were Latin script, including the
+ * headline.
+ *
+ * Compiled in, not seeded, for the same reason the English floor is compiled:
+ * the production image is built with no database, so a page that depends on a
+ * row existing is a page that can ship empty. A stored value still wins over
+ * this — an editor's change is the point of the content system — but nothing
+ * an editor does or forgets can make the site English again.
+ */
+function localeFloor(locale: Locale): Record<BlockKey, string> {
+  const t = BLOCK_TRANSLATIONS[locale];
+  if (!t) return fallbacks;
+  const out = { ...fallbacks };
+  for (const k of Object.keys(out) as BlockKey[]) {
+    const v = t[k];
+    if (typeof v === 'string' && v.trim() !== '') out[k] = v;
+  }
+  return out;
+}
+
+/**
  * The live copy: stored values layered over the compiled defaults.
  *
  * On any failure the defaults are returned rather than throwing. A content
@@ -158,7 +190,7 @@ export const getBlocks = cache(async (
       `SELECT key, value, locale FROM content_blocks
         WHERE locale = $1 OR locale = $2
         ORDER BY (locale = $1) ASC`, [locale, DEFAULT_LOCALE]);
-    const merged = { ...fallbacks };
+    const merged = localeFloor(locale);
     for (const r of rows) {
       // An unknown key is ignored rather than trusted: it is either a
       // leftover from a renamed block or something that does not belong.
@@ -168,7 +200,8 @@ export const getBlocks = cache(async (
     }
     return merged;
   } catch {
-    return fallbacks;
+    // A database outage must not also change the language of the site.
+    return localeFloor(locale);
   }
 });
 

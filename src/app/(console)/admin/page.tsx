@@ -195,7 +195,11 @@ export default async function Overview() {
                   <td>{l.enquiry_type}</td>
                   <td className="num">{l.quantity ?? '—'}</td>
                   <td>{l.emirate ?? '—'}</td>
-                  <td><StatusPill status={st(l.status)} /></td>
+                  {/* status keys the colour, label carries the words. Passing
+                      the translated label as `status` gave every pill the class
+                      pill-Nuovo, which matches nothing, so the colour vanished
+                      on the Italian and Arabic console. */}
+                  <td><StatusPill status={l.status} label={st(l.status)} /></td>
                   <td className="num">{fmtDate(l.created_at)}</td>
                 </tr>
               ))}

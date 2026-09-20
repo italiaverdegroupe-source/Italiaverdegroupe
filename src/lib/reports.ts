@@ -16,7 +16,19 @@ export const byProduct = () => query<{
   product_ref: string; units: string; revenue: string; cost: string;
   profit: string; margin_pct: string;
 }>(`
-  SELECT oi.product_ref,
+  -- COALESCE, not "product_ref IS NOT NULL".
+  --
+  -- The filter used to drop every order line that carried no catalogue
+  -- reference, and a line only carries one when it was raised against a
+  -- catalogue item. Anything sourced to order, any bulk project line, any
+  -- one-off specimen — the lines with the most money on them — vanished from
+  -- this report entirely. With a database whose lines were all free text the
+  -- screen said "no orders yet" while the orders list showed several, which
+  -- reads as a broken report rather than a filtered one.
+  --
+  -- They are grouped under their own description now, so the report shows the
+  -- whole book. The reference still groups catalogue lines the way it did.
+  SELECT COALESCE(NULLIF(btrim(oi.product_ref), ''), btrim(oi.description)) AS product_ref,
          sum(oi.quantity)::text AS units,
          sum(oi.unit_price * oi.quantity * (1 - oi.discount_pct/100))::numeric(14,2)::text AS revenue,
          sum(COALESCE(oi.landed_unit_cost_aed,0) * oi.quantity)::numeric(14,2)::text AS cost,
@@ -29,8 +41,8 @@ export const byProduct = () => query<{
               ELSE '0' END AS margin_pct
     FROM order_items oi
     JOIN orders o ON o.id = oi.order_id
-   WHERE o.deleted_at IS NULL AND o.status <> 'cancelled' AND oi.product_ref IS NOT NULL
-   GROUP BY oi.product_ref
+   WHERE o.deleted_at IS NULL AND o.status <> 'cancelled'
+   GROUP BY COALESCE(NULLIF(btrim(oi.product_ref), ''), btrim(oi.description))
    ORDER BY 4 DESC`);
 
 /** To whom, and who comes back. */

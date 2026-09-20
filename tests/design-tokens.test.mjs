@@ -62,12 +62,19 @@ for (const t of latinFonts) {
     declaring.length === roots.length, `${declaring.length} of ${roots.length}`);
 }
 
-// The Arabic faces are the opposite rule: the SITE layout must declare them,
-// and the console must not. Arabic pages set --font-sans and --font-display to
-// these under [dir='rtl'], so a site layout that dropped them would render
-// Arabic in a Latin serif with no Arabic glyphs in it. The console is an
-// English-only tool, and loading two Arabic webfonts on every operations
-// screen would be weight bought for nobody.
+// The Arabic faces, in BOTH root layouts now.
+//
+// This check used to assert the opposite of what it asserts today: that the
+// console must NOT declare them, because "the console is an English-only
+// tool". It stopped being one the day the console was translated, and the
+// assertion outlived the fact — so the test was actively holding the Arabic
+// console in a Latin serif with no Arabic glyphs in it, which is the exact
+// failure it was written to prevent on the public site.
+//
+// The rule that matters is not WHERE they are declared but WHEN they are
+// ATTACHED: both layouts declare the faces and add their variables to <html>
+// only when the language being rendered is Arabic, so an English or Italian
+// reader — and an English or Italian operator — downloads neither.
 const arabicFonts = ['--font-arabic-display', '--font-arabic-body'];
 const siteRoot = roots.find((f) => f.includes('[lang]'));
 const consoleRoot = roots.find((f) => f.includes('(console)'));
@@ -76,8 +83,18 @@ check('the console has a root layout of its own', Boolean(consoleRoot), String(c
 for (const t of arabicFonts) {
   check(`${t} is declared by the site layout`,
     Boolean(siteRoot) && declaresFont(siteRoot, t));
-  check(`${t} is NOT loaded by the console`,
-    Boolean(consoleRoot) && !declaresFont(consoleRoot, t));
+  check(`${t} is declared by the console layout`,
+    Boolean(consoleRoot) && declaresFont(consoleRoot, t));
+}
+
+// THE POINT: declared is not the same as loaded. A font variable that is on
+// <html> unconditionally is a font every visitor downloads, so each layout has
+// to gate the Arabic ones on the language it is rendering.
+for (const [label, file] of [['site', siteRoot], ['console', consoleRoot]]) {
+  const src = file ? readFileSync(file, 'utf8') : '';
+  check(`the ${label} layout attaches the Arabic faces only when the language is Arabic`,
+    /===\s*'ar'/.test(src) && /arabic/i.test(src),
+    file ?? 'no layout');
 }
 
 const fromFont = [...latinFonts, ...arabicFonts];

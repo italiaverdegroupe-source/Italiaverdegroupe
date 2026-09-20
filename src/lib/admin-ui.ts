@@ -298,6 +298,68 @@ export const ADMIN_EN = [
   "No lines on this shipment yet.",
   "No lines yet.",
   "No order {code}.",
+  "Nothing left to invoice on {code}.",
+  "Skip to content",
+  "A charge that genuinely came in wrong is better corrected with a second, negative cost line, which leaves both figures in the history. Edit this one when it was simply typed wrong.",
+  "A line needs a whole quantity of at least one. Remove the line instead of setting it to zero.",
+  "Back to the first page",
+  "Edit the {kind} cost",
+  "Edit the {ref} line",
+  "Edit this cost",
+  "Edit this line",
+  "Every import cost is spread across the lines, so changing this one moves the landed cost of the others too. That is the arithmetic working, not a mistake.",
+  "Has never signed in",
+  "Keep it",
+  "Last signed in {when}",
+  "Next →",
+  "No cost named.",
+  "No import costs on this shipment yet.",
+  "No line named.",
+  "No live lead has the reference {ref}. Check it against the leads list, or clear the field and type the customer in by hand.",
+  "Page {n} of {total}",
+  "Pages",
+  "Part of this line has already been received. Correct the quantity instead of removing the line.",
+  "Remove this cost",
+  "Remove this line",
+  "Save cost",
+  "Save line",
+  "Showing the {n} most recent.",
+  "Showing {from}–{to} of {total}",
+  "That cost is not on this shipment.",
+  "That line is not on this shipment.",
+  "The database lives on Neon’s free plan, which keeps six hours of point-in-time history and will not schedule its own snapshots. Six hours is not a backup policy — it is the window in which somebody has to notice. This takes a full copy every night, stores it off Neon, reads it back to check it arrived intact, and keeps a month of them.",
+  "There is no bin for content. Once this is gone the only copy is last night's backup.",
+  "There is nothing on this page.",
+  "This deletes the cost and re-spreads what is left across the lines. It cannot be undone.",
+  "This deletes the line and re-spreads every import cost across the lines that are left. It cannot be undone.",
+  "Unknown kind of cost.",
+  "Unknown way to spread a cost.",
+  "VG-XXXXXXXXX",
+  "Yes, delete this article",
+  "Yes, delete this question",
+  "Yes, delete this testimonial",
+  "Yes, remove this cost",
+  "Yes, remove this line",
+  "by piece",
+  "by value",
+  "by volume",
+  "by weight",
+  "count — handling, clearance",
+  "created {when}",
+  "refused",
+  "signed in",
+  "signed off",
+  "value — duty, insurance",
+  "volume — freight, transport",
+  "weight — anything charged by the kilo",
+  "you",
+  "{n} live session",
+  "{n} live session, including this one. A session lasts fourteen days.",
+  "{n} live sessions",
+  "{n} live sessions, including this one. A session lasts fourteen days.",
+  "{n} of this line has already been received, damaged or rejected, so the quantity cannot go below {n}.",
+  "← Previous",
+  "Retention of {amount} is withheld from this invoice and released separately.",
   "No orders yet.",
   "No quotations yet.",
   "No rule has an address on it",
@@ -1361,6 +1423,130 @@ const it: Partial<Record<AdminKey, string>> = {
     "Ancora nessuna riga.",
   "No order {code}.":
     "Nessun ordine {code}.",
+  "Nothing left to invoice on {code}.":
+    "Non resta nulla da fatturare su {code}.",
+  "Skip to content":
+    "Vai al contenuto",
+  "A charge that genuinely came in wrong is better corrected with a second, negative cost line, which leaves both figures in the history. Edit this one when it was simply typed wrong.":
+    "Un addebito arrivato davvero sbagliato è meglio correggerlo con una seconda voce di costo negativa, che lascia entrambi gli importi nello storico. Modifica questa voce quando è stata semplicemente digitata male.",
+  "A line needs a whole quantity of at least one. Remove the line instead of setting it to zero.":
+    "Una riga richiede una quantità intera di almeno uno. Per azzerarla, rimuovi la riga invece di impostare zero.",
+  "Back to the first page":
+    "Torna alla prima pagina",
+  "Edit the {kind} cost":
+    "Modifica il costo {kind}",
+  "Edit the {ref} line":
+    "Modifica la riga {ref}",
+  "Edit this cost":
+    "Modifica questo costo",
+  "Edit this line":
+    "Modifica questa riga",
+  "Every import cost is spread across the lines, so changing this one moves the landed cost of the others too. That is the arithmetic working, not a mistake.":
+    "Ogni costo d'importazione è ripartito su tutte le righe, quindi modificare questa sposta anche il costo sdoganato delle altre. È il calcolo che funziona, non un errore.",
+  "Has never signed in":
+    "Non ha mai effettuato l'accesso",
+  "Keep it":
+    "Conservalo",
+  "Last signed in {when}":
+    "Ultimo accesso {when}",
+  "Next →":
+    "Successiva →",
+  "No cost named.":
+    "Nessun costo indicato.",
+  "No import costs on this shipment yet.":
+    "Nessun costo d'importazione su questa spedizione.",
+  "No line named.":
+    "Nessuna riga indicata.",
+  "No live lead has the reference {ref}. Check it against the leads list, or clear the field and type the customer in by hand.":
+    "Nessuna richiesta attiva ha il riferimento {ref}. Verificalo nell'elenco delle richieste, oppure svuota il campo e inserisci il cliente a mano.",
+  "Page {n} of {total}":
+    "Pagina {n} di {total}",
+  "Pages":
+    "Pagine",
+  "Part of this line has already been received. Correct the quantity instead of removing the line.":
+    "Una parte di questa riga è già stata ricevuta. Correggi la quantità invece di rimuovere la riga.",
+  "Remove this cost":
+    "Rimuovi questo costo",
+  "Remove this line":
+    "Rimuovi questa riga",
+  "Save cost":
+    "Salva costo",
+  "Save line":
+    "Salva riga",
+  "Showing the {n} most recent.":
+    "Sono mostrate le {n} più recenti.",
+  "Showing {from}–{to} of {total}":
+    "Da {from} a {to} di {total}",
+  "That cost is not on this shipment.":
+    "Quel costo non appartiene a questa spedizione.",
+  "That line is not on this shipment.":
+    "Quella riga non appartiene a questa spedizione.",
+  "The database lives on Neon’s free plan, which keeps six hours of point-in-time history and will not schedule its own snapshots. Six hours is not a backup policy — it is the window in which somebody has to notice. This takes a full copy every night, stores it off Neon, reads it back to check it arrived intact, and keeps a month of them.":
+    "Il database è sul piano gratuito di Neon, che conserva sei ore di storico point-in-time e non pianifica snapshot propri. Sei ore non sono una politica di backup: sono la finestra entro cui qualcuno deve accorgersene. Questo prende ogni notte una copia completa, la archivia fuori da Neon, la rilegge per verificare che sia arrivata integra, e ne conserva un mese.",
+  "There is no bin for content. Once this is gone the only copy is last night's backup.":
+    "Per i contenuti non esiste un cestino. Una volta eliminato questo, l'unica copia è il backup di stanotte.",
+  "There is nothing on this page.":
+    "Non c'è nulla in questa pagina.",
+  "This deletes the cost and re-spreads what is left across the lines. It cannot be undone.":
+    "Questo elimina il costo e ripartisce di nuovo quel che resta sulle righe. Non è reversibile.",
+  "This deletes the line and re-spreads every import cost across the lines that are left. It cannot be undone.":
+    "Questo elimina la riga e ripartisce di nuovo ogni costo d'importazione sulle righe rimaste. Non è reversibile.",
+  "Unknown kind of cost.":
+    "Tipo di costo sconosciuto.",
+  "Unknown way to spread a cost.":
+    "Criterio di ripartizione sconosciuto.",
+  "VG-XXXXXXXXX":
+    "VG-XXXXXXXXX",
+  "Yes, delete this article":
+    "Sì, elimina questo articolo",
+  "Yes, delete this question":
+    "Sì, elimina questa domanda",
+  "Yes, delete this testimonial":
+    "Sì, elimina questa testimonianza",
+  "Yes, remove this cost":
+    "Sì, rimuovi questo costo",
+  "Yes, remove this line":
+    "Sì, rimuovi questa riga",
+  "by piece":
+    "per pezzo",
+  "by value":
+    "per valore",
+  "by volume":
+    "per volume",
+  "by weight":
+    "per peso",
+  "count — handling, clearance":
+    "numero di pezzi — movimentazione, sdoganamento",
+  "created {when}":
+    "creato il {when}",
+  "refused":
+    "rifiutato",
+  "signed in":
+    "accesso riuscito",
+  "signed off":
+    "disattivato",
+  "value — duty, insurance":
+    "valore — dazi, assicurazione",
+  "volume — freight, transport":
+    "volume — nolo, trasporto",
+  "weight — anything charged by the kilo":
+    "peso — tutto ciò che si paga al chilo",
+  "you":
+    "tu",
+  "{n} live session":
+    "{n} sessione attiva",
+  "{n} live session, including this one. A session lasts fourteen days.":
+    "{n} sessione attiva, inclusa questa. Una sessione dura quattordici giorni.",
+  "{n} live sessions":
+    "{n} sessioni attive",
+  "{n} live sessions, including this one. A session lasts fourteen days.":
+    "{n} sessioni attive, inclusa questa. Una sessione dura quattordici giorni.",
+  "{n} of this line has already been received, damaged or rejected, so the quantity cannot go below {n}.":
+    "Di questa riga {n} sono già stati ricevuti, danneggiati o rifiutati, quindi la quantità non può scendere sotto {n}.",
+  "← Previous":
+    "← Precedente",
+  "Retention of {amount} is withheld from this invoice and released separately.":
+    "Una ritenuta di {amount} è trattenuta da questa fattura e verrà svincolata separatamente.",
   "No orders yet.":
     "Ancora nessun ordine.",
   "No quotations yet.":
@@ -2923,6 +3109,130 @@ const ar: Partial<Record<AdminKey, string>> = {
     "لا بنود بعد.",
   "No order {code}.":
     "لا يوجد طلب {code}.",
+  "Nothing left to invoice on {code}.":
+    "لم يبقَ شيء لإصدار فاتورة به على {code}.",
+  "Skip to content":
+    "تخطَّ إلى المحتوى",
+  "A charge that genuinely came in wrong is better corrected with a second, negative cost line, which leaves both figures in the history. Edit this one when it was simply typed wrong.":
+    "إذا وصلت الرسوم خاطئة فعلًا، فالأفضل تصحيحها ببند تكلفة ثانٍ بقيمة سالبة، فيبقى الرقمان كلاهما في السجل. أمّا التعديل هنا فهو لحالة الخطأ في الكتابة وحدها.",
+  "A line needs a whole quantity of at least one. Remove the line instead of setting it to zero.":
+    "يحتاج البند إلى كمية صحيحة لا تقل عن واحد. أزل البند بدل ضبط الكمية على صفر.",
+  "Back to the first page":
+    "العودة إلى الصفحة الأولى",
+  "Edit the {kind} cost":
+    "تعديل تكلفة {kind}",
+  "Edit the {ref} line":
+    "تعديل بند {ref}",
+  "Edit this cost":
+    "تعديل هذه التكلفة",
+  "Edit this line":
+    "تعديل هذا البند",
+  "Every import cost is spread across the lines, so changing this one moves the landed cost of the others too. That is the arithmetic working, not a mistake.":
+    "تُوزَّع كل تكلفة استيراد على البنود جميعها، ولذلك يؤدي تعديل هذا البند إلى تغيّر التكلفة النهائية للبنود الأخرى أيضًا. هذا هو الحساب يعمل كما ينبغي، وليس خطأ.",
+  "Has never signed in":
+    "لم يسجّل الدخول قط",
+  "Keep it":
+    "الإبقاء عليه",
+  "Last signed in {when}":
+    "آخر دخول {when}",
+  "Next →":
+    "← التالي",
+  "No cost named.":
+    "لم تُحدَّد أي تكلفة.",
+  "No import costs on this shipment yet.":
+    "لا توجد تكاليف استيراد على هذه الشحنة بعد.",
+  "No line named.":
+    "لم يُحدَّد أي بند.",
+  "No live lead has the reference {ref}. Check it against the leads list, or clear the field and type the customer in by hand.":
+    "لا يوجد استفسار نشط بالمرجع {ref}. راجعه في قائمة الاستفسارات، أو أفرغ الحقل وأدخل بيانات العميل يدويًا.",
+  "Page {n} of {total}":
+    "صفحة {n} من {total}",
+  "Pages":
+    "الصفحات",
+  "Part of this line has already been received. Correct the quantity instead of removing the line.":
+    "استُلم جزء من هذا البند بالفعل. صحّح الكمية بدل إزالة البند.",
+  "Remove this cost":
+    "إزالة هذه التكلفة",
+  "Remove this line":
+    "إزالة هذا البند",
+  "Save cost":
+    "حفظ التكلفة",
+  "Save line":
+    "حفظ البند",
+  "Showing the {n} most recent.":
+    "المعروض هنا أحدث {n} منها.",
+  "Showing {from}–{to} of {total}":
+    "من {from} إلى {to} من أصل {total}",
+  "That cost is not on this shipment.":
+    "هذه التكلفة ليست على هذه الشحنة.",
+  "That line is not on this shipment.":
+    "هذا البند ليس على هذه الشحنة.",
+  "The database lives on Neon’s free plan, which keeps six hours of point-in-time history and will not schedule its own snapshots. Six hours is not a backup policy — it is the window in which somebody has to notice. This takes a full copy every night, stores it off Neon, reads it back to check it arrived intact, and keeps a month of them.":
+    "قاعدة البيانات على الخطة المجانية من Neon، التي تحتفظ بست ساعات من السجل الزمني ولا تجدول لقطات خاصة بها. وستّ ساعات ليست سياسة نسخ احتياطي — بل هي النافذة التي يجب أن ينتبه أحدهم خلالها. هذا يأخذ نسخة كاملة كل ليلة، ويخزّنها خارج Neon، ويقرأها مرة أخرى للتأكد من وصولها سليمة، ويحتفظ بشهر منها.",
+  "There is no bin for content. Once this is gone the only copy is last night's backup.":
+    "لا توجد سلة محذوفات للمحتوى. متى حُذف هذا، فالنسخة الوحيدة الباقية هي النسخة الاحتياطية الليلة الماضية.",
+  "There is nothing on this page.":
+    "لا يوجد شيء في هذه الصفحة.",
+  "This deletes the cost and re-spreads what is left across the lines. It cannot be undone.":
+    "هذا يحذف التكلفة ويعيد توزيع ما تبقّى على البنود. ولا يمكن التراجع عنه.",
+  "This deletes the line and re-spreads every import cost across the lines that are left. It cannot be undone.":
+    "هذا يحذف البند ويعيد توزيع كل تكاليف الاستيراد على البنود المتبقية. ولا يمكن التراجع عنه.",
+  "Unknown kind of cost.":
+    "نوع تكلفة غير معروف.",
+  "Unknown way to spread a cost.":
+    "طريقة توزيع غير معروفة.",
+  "VG-XXXXXXXXX":
+    "VG-XXXXXXXXX",
+  "Yes, delete this article":
+    "نعم، احذف هذا المقال",
+  "Yes, delete this question":
+    "نعم، احذف هذا السؤال",
+  "Yes, delete this testimonial":
+    "نعم، احذف هذه الشهادة",
+  "Yes, remove this cost":
+    "نعم، أزل هذه التكلفة",
+  "Yes, remove this line":
+    "نعم، أزل هذا البند",
+  "by piece":
+    "حسب العدد",
+  "by value":
+    "حسب القيمة",
+  "by volume":
+    "حسب الحجم",
+  "by weight":
+    "حسب الوزن",
+  "count — handling, clearance":
+    "العدد — المناولة والتخليص",
+  "created {when}":
+    "أُنشئ في {when}",
+  "refused":
+    "مرفوض",
+  "signed in":
+    "تم الدخول",
+  "signed off":
+    "معطَّل",
+  "value — duty, insurance":
+    "القيمة — الرسوم الجمركية والتأمين",
+  "volume — freight, transport":
+    "الحجم — الشحن والنقل",
+  "weight — anything charged by the kilo":
+    "الوزن — كل ما يُحتسب بالكيلوغرام",
+  "you":
+    "أنت",
+  "{n} live session":
+    "{n} جلسة نشطة",
+  "{n} live session, including this one. A session lasts fourteen days.":
+    "{n} جلسة نشطة، بما فيها هذه. وتدوم الجلسة أربعة عشر يومًا.",
+  "{n} live sessions":
+    "عدد الجلسات النشطة {n}",
+  "{n} live sessions, including this one. A session lasts fourteen days.":
+    "عدد الجلسات النشطة {n}، بما فيها هذه. وتدوم الجلسة أربعة عشر يومًا.",
+  "{n} of this line has already been received, damaged or rejected, so the quantity cannot go below {n}.":
+    "سُجِّل {n} من هذا البند بين مستلَم وتالف ومرفوض، فلا يمكن أن تقل الكمية عن {n}.",
+  "← Previous":
+    "السابق →",
+  "Retention of {amount} is withheld from this invoice and released separately.":
+    "محتجز من هذه الفاتورة مبلغ {amount} يُفرج عنه بمستند منفصل.",
   "No orders yet.":
     "لا طلبات بعد.",
   "No quotations yet.":

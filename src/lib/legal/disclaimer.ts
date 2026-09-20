@@ -10,6 +10,18 @@ import type { LegalSet } from './types';
  *
  * Added here: what the translated pages themselves mean, a governing law
  * clause the page lacked, and a plain statement about the journal.
+ *
+ * NO ITALICS IN THIS DOCUMENT, DELIBERATELY. The botanical names in section 3
+ * were written as *Olea europaea*, the way a botanist would type them, and the
+ * legal renderer printed the asterisks: LegalPage's inline markup is **bold**
+ * and [text](/path) only, so a single asterisk is passed through as text. Four
+ * literal asterisks were sitting on the face of a published legal document, in
+ * all three languages, in the very paragraph that tells a specifier how to pin
+ * down plant identity for a tender. The names now stand without emphasis,
+ * which is the fix that lives in this file; if the renderer ever grows the
+ * single-asterisk <em> branch that Prose.tsx already ships for the journal,
+ * the italics can come back here — but not before, because a document must
+ * never be written against markup that does not exist yet.
  */
 export const disclaimer: LegalSet = {
   en: {
@@ -48,7 +60,7 @@ export const disclaimer: LegalSet = {
         heading: 'Botanical and common names',
         body: [
           { t: 'p', text: 'We use the names the trade uses, which are not always the names a botanist would. Common names in particular are regional and overlapping. If a specification turns on identity — for a landscape consent, a tender or a plant schedule — quote the botanical name in your enquiry and we will confirm in writing what is being supplied against it.' },
-          { t: 'p', text: 'Botanical names are not translated anywhere on this site. *Olea europaea* is *Olea europaea* in every language, and that is the entire point of binomial nomenclature; a page that translated it would be inviting a mistake into a plant schedule.' },
+          { t: 'p', text: 'Botanical names are not translated anywhere on this site. Olea europaea is Olea europaea in every language, and that is the entire point of binomial nomenclature; a page that translated it would be inviting a mistake into a plant schedule.' },
         ],
       },
       {
@@ -140,7 +152,7 @@ export const disclaimer: LegalSet = {
         heading: 'الأسماء النباتية والشائعة',
         body: [
           { t: 'p', text: 'نستخدم الأسماء التي يستخدمها القطاع، وهي ليست دائمًا الأسماء التي يستخدمها عالِم النبات. والأسماء الشائعة على وجه الخصوص إقليمية ومتداخلة. فإن كانت المواصفة تتوقّف على الهوية — لموافقة تنسيق مواقع، أو مناقصة، أو جدول نباتات — فاذكر الاسم النباتي في استفسارك وسنؤكّد كتابةً ما يُورَّد مقابله.' },
-          { t: 'p', text: 'ولا تُترجَم الأسماء النباتية في أي موضع من هذا الموقع. فـ*Olea europaea* هي *Olea europaea* بكل لغة، وهذا هو جوهر التسمية الثنائية؛ والصفحة التي تترجمها تدعو الخطأ إلى جدول نباتات.' },
+          { t: 'p', text: 'ولا تُترجَم الأسماء النباتية في أي موضع من هذا الموقع. فـOlea europaea هي Olea europaea بكل لغة، وهذا هو جوهر التسمية الثنائية؛ والصفحة التي تترجمها تدعو الخطأ إلى جدول نباتات.' },
         ],
       },
       {
@@ -232,7 +244,7 @@ export const disclaimer: LegalSet = {
         heading: 'Nomi botanici e nomi comuni',
         body: [
           { t: 'p', text: 'Usiamo i nomi che usa il settore, che non sempre sono quelli che userebbe un botanico. I nomi comuni in particolare sono regionali e si sovrappongono. Se una specifica dipende dall’identità — per un’autorizzazione paesaggistica, una gara o uno schedario piante — indicate il nome botanico nella richiesta e confermeremo per iscritto che cosa viene fornito a fronte di esso.' },
-          { t: 'p', text: 'I nomi botanici non sono tradotti in nessun punto di questo sito. *Olea europaea* è *Olea europaea* in ogni lingua, ed è esattamente il senso della nomenclatura binomiale; una pagina che la traducesse inviterebbe un errore dentro uno schedario piante.' },
+          { t: 'p', text: 'I nomi botanici non sono tradotti in nessun punto di questo sito. Olea europaea è Olea europaea in ogni lingua, ed è esattamente il senso della nomenclatura binomiale; una pagina che la traducesse inviterebbe un errore dentro uno schedario piante.' },
         ],
       },
       {

@@ -35,6 +35,17 @@ import './globals.css';
  * It reads the locale from the header src/proxy.ts sets, because a not-found
  * is handed no params and `next/root-params` needs `[lang]` above every root
  * layout, which the console's own layout rules out.
+ *
+ * IT IS THE PUBLIC SITE'S 404 AND ONLY THE PUBLIC SITE'S. Because this file
+ * owns every unmatched path, it also used to answer /admin/invoices,
+ * /admin/customers and every other guessed console section — putting a
+ * signed-in operator out on the marketing header with Catalogue, Collections
+ * and "Request a quote" and no link back into the console. It cannot tell the
+ * difference itself: the console is exempt from src/proxy.ts, so no path and
+ * no locale header reaches this render. The console now catches those URLs
+ * before they get here, with src/app/(console)/admin/[...rest]/page.tsx, which
+ * hands them to the console's own 404; the reasoning is written out in that
+ * file. Nothing under /admin should reach this page any more.
  */
 
 const fraunces = Fraunces({
@@ -85,7 +96,14 @@ export default async function GlobalNotFound() {
         <LocaleProvider locale={lang}>
           <a href="#main" className="visually-hidden">{t('nav.skip')}</a>
           <Header locale={lang} />
-          <main id="main">
+          {/* tabIndex={-1} is what makes the skip link above actually work. An
+              anchor whose target cannot hold focus only moves the scroll
+              position: the browser's focus stays on the link, so the next Tab
+              goes back into the header the visitor was trying to skip. Chrome
+              hides this with its sequential-focus starting point and Safari
+              does not. The console's own <main> carries the same attribute for
+              the same reason. */}
+          <main id="main" tabIndex={-1}>
             <div className="section">
               <div className="wrap nf">
                 <p className="eyebrow">404</p>

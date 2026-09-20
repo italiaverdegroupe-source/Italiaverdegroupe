@@ -136,6 +136,19 @@ export default async function Header({ locale }: { locale: Locale }) {
              is anywhere near it. This word is half the company's name. */
           text-transform: uppercase; color: var(--ink-600);
         }
+        /* The wordmark is the way home from every page and it was the one link
+           in the header that did not answer the cursor — .nav a changes colour
+           and draws its rule underneath, the quote button fills, and the logo
+           sat there doing nothing. Warming the mark and the name rather than
+           moving either: the lockup is the brand's own drawing and it should
+           not wobble, but it should admit that it is a link. olive-600 on the
+           bar's travertine measures 7.24:1, so the hover is not a step down in
+           legibility from the 16:1 it rests at. */
+        .brand-mark, .brand-txt strong { transition: color .16s ease; }
+        .brand:hover .brand-mark, .brand:hover .brand-txt strong { color: var(--olive-600); }
+        @media (prefers-reduced-motion: reduce) {
+          .brand-mark, .brand-txt strong { transition: none; }
+        }
 
         .brand-line {
           display: none; margin: 0 auto 0 0;

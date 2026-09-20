@@ -9,6 +9,7 @@ import { ogImage } from '@/lib/site';
 import { imageFor } from '@/lib/products';
 import { getSettings } from '@/lib/settings';
 import { ui } from '@/lib/ui';
+import { ldJson } from '@/lib/schema';
 
 export const revalidate = 300;
 export const dynamicParams = true;
@@ -111,7 +112,7 @@ export default async function PostPage(
       </div>
 
       <script type="application/ld+json" suppressHydrationWarning
-        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        dangerouslySetInnerHTML={ldJson({
           '@context': 'https://schema.org',
           '@type': 'Article',
           headline: post.title,
@@ -119,7 +120,7 @@ export default async function PostPage(
           dateModified: post.updated_at,
           author: { '@type': 'Organization', name: site.legalName },
           publisher: { '@type': 'Organization', name: site.legalName },
-        }) }} />
+        })} />
 
       <style>{`
         .post-wrap { max-width: 860px; }

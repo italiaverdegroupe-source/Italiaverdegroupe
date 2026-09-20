@@ -70,6 +70,22 @@ function getPool(): Pool | null {
       ssl: sslFor(url),
       max: 5,
       idleTimeoutMillis: 30_000,
+      // Without these, an unreachable or wedged database does not fail — it
+      // HANGS, holding the request, the pool slot and eventually every slot,
+      // until the platform kills the container. A page that errors in ten
+      // seconds can show the branded error page and be retried; a page that
+      // never answers cannot.
+      connectionTimeoutMillis: 10_000,
+      statement_timeout: 15_000,
+      query_timeout: 15_000,
+    });
+
+    // A pooled connection dropped while idle — a database restart, an idle
+    // timeout at the far end — emits 'error' on the POOL, not on any query.
+    // With no listener Node treats it as an unhandled 'error' event and takes
+    // the whole process down, which turns a recoverable blip into an outage.
+    pool.on('error', (err) => {
+      console.error('[db] idle client error:', err.message);
     });
   }
   return pool;
@@ -102,7 +118,25 @@ CREATE INDEX IF NOT EXISTS leads_status_idx  ON leads (status);
 `;
 
 async function ensureSchema(p: Pool) {
-  if (!ready) ready = p.query(SCHEMA).then(() => undefined);
+  /**
+   * A FAILED bootstrap must not be cached.
+   *
+   * `ready` is a module-level promise, and every query awaits it. Caching the
+   * REJECTED promise meant one transient error — a statement timeout during a
+   * blip, a connection dropped while the database restarted — poisoned the
+   * process for as long as it lived: the pool recovered, the database answered
+   * direct queries fine, and every request through this module went on
+   * re-throwing the original error, because it was awaiting a promise that had
+   * already rejected. Nothing reset it, so the only cure was a redeploy.
+   *
+   * Clearing the slot on failure means the next request tries again.
+   */
+  if (!ready) {
+    ready = p.query(SCHEMA).then(() => undefined).catch((err) => {
+      ready = null;
+      throw err;
+    });
+  }
   return ready;
 }
 

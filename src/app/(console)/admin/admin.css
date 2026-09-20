@@ -46,10 +46,17 @@
 
 .adm-nav { flex: 1 1 auto; display: flex; flex-direction: column; gap: 14px; }
 .adm-navgroup ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+/* .38 of the sidebar's own off-white composites to #686861 over #14150F,
+   which is 3.27:1 — under AA, on 9.3px letterspaced capitals that are the one
+   thing telling you which group of destinations you are looking at. The alpha
+   is doing the hierarchy here, so the fix is to spend some of it rather than
+   to change the colour: .62 composites to #9E9C94 and measures 6.68:1, clear
+   of the 4.5:1 floor while still reading as quieter than the .74 the links
+   themselves are set in. */
 .adm-navtitle {
   margin: 0 0 6px; padding-inline-start: 10px;
   font-size: .58rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
-  color: rgb(242 239 230 / .38);
+  color: rgb(242 239 230 / .62);
 }
 .adm-nav a {
   display: flex; align-items: center; gap: 10px;
@@ -174,7 +181,20 @@
 .adm-cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); margin-bottom: 32px; }
 .adm-card { background: #fff; border: 1px solid #E4DFD2; border-radius: 6px; padding: 18px 20px; }
 .adm-card b { display: block; font-family: var(--font-fraunces), serif; font-size: 2rem; font-weight: 450; line-height: 1; letter-spacing: -.03em; }
-.adm-card span { display: block; margin-top: 6px; font-size: .76rem; letter-spacing: .09em; text-transform: uppercase; color: #8A8D7D; }
+/* Every muted label in this console was #8A8D7D, and #8A8D7D does not clear
+   AA: 3.39:1 on a white card, 3.22:1 on the table head's #FAF9F5, against the
+   4.5:1 WCAG 1.4.3 asks for. None of it is large text — the biggest of them is
+   14.5px regular — so there is no 3:1 exception to fall back on. It was the
+   single largest cluster of contrast failures we had, flagged by axe on all
+   fourteen console screens, and it was in exactly the text an operator reads
+   all day: every column header, every KPI label, every definition term.
+   The replacement is --fg-mute rather than another literal. The public site
+   hit this same wall and answered it by darkening --ink-400 to #686B5F (the
+   note above it in globals.css has the workings); that value measures 5.44:1
+   on white, 5.17:1 on #FAF9F5 and 4.90:1 on the console's own #F4F3EE, so it
+   clears AA on every surface this console puts it on. Naming the token here
+   means the console and the site move together the next time it moves. */
+.adm-card span { display: block; margin-top: 6px; font-size: .76rem; letter-spacing: .09em; text-transform: uppercase; color: var(--fg-mute); }
 
 /* overflow was `hidden`, which on a phone meant a nine-column table simply
    stopped at the edge of the screen and the rest of it could not be reached at
@@ -196,7 +216,7 @@
 table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 .adm-t th {
   text-align: left; padding: 11px 14px; font-size: .7rem; letter-spacing: .1em;
-  text-transform: uppercase; color: #8A8D7D; background: #FAF9F5; border-bottom: 1px solid #E4DFD2;
+  text-transform: uppercase; color: var(--fg-mute); background: #FAF9F5; border-bottom: 1px solid #E4DFD2;
   white-space: nowrap;
 }
 .adm-t td { padding: 12px 14px; border-bottom: 1px solid #F0EDE4; vertical-align: top; }
@@ -217,7 +237,7 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 .adm-t tbody tr:hover { background: #FBFAF6; }
 .adm-t a { color: inherit; font-weight: 500; }
 .adm-t .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.adm-empty { padding: 56px 20px; text-align: center; color: #8A8D7D; }
+.adm-empty { padding: 56px 20px; text-align: center; color: var(--fg-mute); }
 
 /* status pills */
 .pill {
@@ -572,15 +592,34 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 .adm-chip[data-on='true'] { background: #2E4420; color: #fff; border-color: #2E4420; }
 
 /* detail */
-.adm-two { display: grid; gap: 20px; align-items: start; }
+/* `.adm-two` had no column template below 1000px, and an implicit `auto` grid
+   column takes its floor from the min-content width of whatever sits in it.
+   What sits in it are unclassed wrapper divs, whose `min-width` is `auto`, and
+   inside those are `.adm-t` tables whose header cells and first column are
+   deliberately `white-space: nowrap` — see the notes on those two rules above;
+   a code must not break and a column header must not stack. So the min-content
+   width of the Totals panel is the full un-wrapped width of its widest row,
+   and the grid did as it was told and made the column 487px wide inside a
+   390px phone. /admin/quotes/QT-000001 measured a scrollWidth of 501px against
+   a 390px viewport, /admin/orders/… 760px, and because `body` carries
+   `overflow-x: hidden` the strip hanging off the right could not be swiped to
+   at all: totals were cut mid-figure and the right edge of "Stampa / salva in
+   PDF" was sheared off with no gesture that brought it back.
+   `minmax(0, 1fr)` is the answer rather than `min-width: 0` on the children,
+   because the children are unclassed and belong to six different page files.
+   The 0 floor gives the column permission to be narrower than its contents,
+   which is precisely what lets `.adm-panel`'s own `overflow-x: auto` do the
+   job it was written for and scroll each table inside its own panel. The
+   min-width:1000px rule on the next line still overrides this on a desk. */
+.adm-two { display: grid; gap: 20px; align-items: start; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 1000px) { .adm-two { grid-template-columns: minmax(0,1.3fr) minmax(320px,.8fr); } }
 .adm-dl { margin: 0; }
 .adm-dl > div { display: grid; grid-template-columns: 9.5rem 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid #F0EDE4; }
-.adm-dl dt { color: #8A8D7D; font-size: .82rem; }
+.adm-dl dt { color: var(--fg-mute); font-size: .82rem; }
 .adm-dl dd { margin: 0; }
 .adm-pad { padding: 20px; }
 .adm-note { padding: 14px 0; border-bottom: 1px solid #F0EDE4; }
-.adm-note-meta { font-size: .74rem; color: #8A8D7D; margin-bottom: 4px; }
+.adm-note-meta { font-size: .74rem; color: var(--fg-mute); margin-bottom: 4px; }
 
 /* alerts */
 .adm-badge {
@@ -599,8 +638,26 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 }
 
 /* ── charts ──────────────────────────────────────────────────── */
-.adm-grid-2 { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); margin-bottom: 14px; }
-.adm-grid-3 { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-bottom: 32px; }
+/* `repeat(auto-fit, minmax(340px, 1fr))` reads like "at least 340px, then
+   wrap", but that is not what it does. `auto-fit` only ever collapses tracks it
+   has no items for; it never shrinks a track below the minimum it was given.
+   Once the row is down to a single column there is nothing left to wrap, the
+   340px floor simply wins, and the track overflows whatever is holding it.
+   On /admin at 320px the `.adm-body` gutters leave a 292px column, the track
+   stayed 340px, and the dashboard measured 354px against a 320px screen. The
+   lost 34px is the right-hand end of the lead funnel and the last label on the
+   sparkline, and `body { overflow-x: hidden }` means no swipe reaches it — the
+   panel's own scroll only travels 18px, not far enough to bring the "won"
+   stage into view. It is not an iPhone-SE curiosity either: a 360px Android
+   still overflows its 332px column by 8px, so every width below 375px was
+   losing the headline visual on the console's landing screen.
+   `min(340px, 100%)` keeps the 340px preference wherever there is room for it
+   and collapses to the container's own width where there is not, which is what
+   the rule was always trying to say. `.adm-grid-3` fits at 320px today, but it
+   is the same construction with a smaller number and would fail the same way
+   one narrower breakpoint from here, so it gets the same guard. */
+.adm-grid-2 { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); margin-bottom: 14px; }
+.adm-grid-3 { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr)); margin-bottom: 32px; }
 .adm-sub-tight { margin-bottom: 14px; font-size: .82rem; }
 .adm-chart { margin: 0; }
 .adm-chart-empty {
@@ -720,13 +777,18 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 .adm-t-group th {
   padding-bottom: 2px; border-bottom: 0;
   font-size: .6rem; letter-spacing: .16em; text-transform: uppercase;
-  color: #8A8D7D; font-weight: 600; text-align: center;
+  color: var(--fg-mute); font-weight: 600; text-align: center;
 }
 .adm-t-group th:empty { border-bottom: 0; }
 .adm-t-group + tr th { border-top: 1px solid #EFECE3; }
 /* Zero of something you were hoping to sell should not read like any other
-   number on the row. */
-.adm-none { color: #9A9C90; font-weight: 400; }
+   number on the row. It was #9A9C90 — --ink-300, which is a rule and an icon
+   colour, not a text one: 2.79:1 on the white panel, the worst contrast in the
+   console. Quiet is the point, but a quantity is still a quantity and has to
+   be readable; --fg-mute is the quietest ink we have that a person can
+   actually read, at 5.44:1, and it still sits well back from the #14150F the
+   real numbers are set in. */
+.adm-none { color: var(--fg-mute); font-weight: 400; }
 
 /* ── a finger, in the console ──────────────────────────────────
    Measured at 390px: buttons 41px, filter chips 27–31px, filter inputs 30px.
@@ -740,6 +802,20 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
   .adm-btn, .adm-btn-sec, .adm-chip, .adm-who, .adm-out { min-height: 44px; }
   .adm-btn-sec, .adm-who, .adm-out { display: inline-flex; align-items: center; }
   .adm-chip { display: inline-flex; align-items: center; }
+  /* `.adm-nav a` was given its 46px by the max-width:900px block, and that
+     block is the phone drawer. On a tablet in landscape — 1024px, touch, which
+     is a realistic way to run this console — the sidebar renders as a sticky
+     232px column, the 900px block does not apply, and the thirteen primary
+     destinations fall back to the base rule at 31.8px with a single pixel of
+     gap between them. That is the most-used control in the whole console
+     sitting under the 44px floor that the account chip and the sign-out button
+     immediately below it already clear, and with a 1px gap a mis-aimed thumb
+     does not miss, it navigates somewhere else.
+     46px rather than 44px, deliberately: this rule and the drawer's have the
+     same specificity (a media query adds none) and this block comes later in
+     the file, so it wins wherever both match. Setting 44px here would have
+     quietly shrunk the phone drawer's rows to pay for the tablet. */
+  .adm-nav a { min-height: 46px; }
   .adm-field input, .adm-field select, .adm-field textarea,
   .adm input[type='text'], .adm input[type='search'], .adm input[type='email'],
   .adm input[type='number'], .adm input[type='date'], .adm input[type='password'],
@@ -793,16 +869,29 @@ table.adm-t { width: 100%; border-collapse: collapse; font-size: .86rem; }
 /* ── the console's language control ── */
 .adm-lang {
   display: flex; gap: 4px; padding: 10px 14px 0;
-  border-top: 1px solid var(--line-soft); margin-top: 8px;
+  border-top: 1px solid rgb(242 239 230 / .12); margin-top: 8px;
 }
+/* This control sits in the dark sidebar, but it was written with the roles
+   globals.css defines for the light side of the site, and on #14150F every one
+   of them is wrong. --fg-mute is the muted ink for text on travertine and
+   measures 3.37:1 here, under AA. :hover set --fg, which is #14150F — the
+   sidebar's own background — so pointing at a button very nearly erased its
+   label. The sand --line and --line-soft drew a bright box and a near-white
+   rule on a dark wall.
+   The sidebar already has a vocabulary for all of this, and the buttons speak
+   it now: the navigation links are rgb(242 239 230 / .74) and lift to #fff,
+   the sign-out button beside these is bordered rgb(242 239 230 / .2) and lifts
+   to .5, and .adm-me's divider is .12. Measured over #14150F, .74 is 9.07:1
+   and #fff is 18.36:1, so the resting state and the hover state both clear AA
+   with room to spare. */
 .adm-lang-b {
   flex: 1; min-height: 32px; padding: 0 6px;
-  border: 1px solid var(--line); border-radius: 4px;
+  border: 1px solid rgb(242 239 230 / .2); border-radius: 4px;
   background: transparent; cursor: pointer;
   font: inherit; font-size: 12px; font-weight: 600; letter-spacing: .04em;
-  color: var(--fg-mute);
+  color: rgb(242 239 230 / .74);
 }
-.adm-lang-b:hover { color: var(--fg); border-color: var(--fg-mute); }
+.adm-lang-b:hover { color: #fff; border-color: rgb(242 239 230 / .5); }
 .adm-lang-b[data-on='true'] {
   background: var(--olive-800); border-color: var(--olive-800); color: #FBF9F4;
 }

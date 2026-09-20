@@ -16,8 +16,26 @@ import Refusal from '@/components/admin/Refusal';
 export const dynamic = 'force-dynamic';
 
 const SEV: Severity[] = ['info', 'warning', 'urgent'];
+
+/**
+ * The colour of a severity pill, loudest first.
+ *
+ * This ramp used to run backwards. `urgent` was mapped to `pill-lost`, which
+ * is the palette's dead token — #F0EEEB on #6B6E60, grey on grey, the faintest
+ * pill in the console — while `warning` took the terracotta one. Since
+ * listAlerts sorts urgent to the top, the effect was a block of washed-out
+ * rows above a block of loud ones, and an operator scanning the page was
+ * pulled to the second-worst thing on it. The sidebar badge on the very same
+ * screen paints the urgent count in danger red, so the page disagreed with
+ * itself.
+ *
+ * Terracotta is the strongest token admin.css defines for a pill (the red
+ * #9B3A2B exists only as the sidebar badge background), so urgent takes it,
+ * warning steps down to amber and info keeps lavender: hot, warm, cool, in
+ * the order the reader should look.
+ */
 const pillFor = (s: string) =>
-  s === 'urgent' ? 'pill-lost' : s === 'warning' ? 'pill-negotiation' : 'pill-qualified';
+  s === 'urgent' ? 'pill-negotiation' : s === 'warning' ? 'pill-quoted' : 'pill-qualified';
 
 /**
  * The From address, for display only.

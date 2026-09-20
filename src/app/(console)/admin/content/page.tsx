@@ -25,13 +25,13 @@ const SEO_PATHS = ['/', '/catalog', '/collections', '/services', '/about', '/quo
 const FAQ_CATEGORIES = ['general', 'buying', 'delivery', 'planting', 'care', 'import', 'payment'];
 
 export default async function ContentPage({ searchParams }: {
-  searchParams: Promise<{ tab?: string; loc?: string; edit?: string; error?: string }>;
+  searchParams: Promise<{ tab?: string; loc?: string; edit?: string; confirm?: string; error?: string }>;
 }) {
   const user = await getSessionUser();
   if (!user) redirect('/admin/login');
   const t = adminUi(user.locale);
 
-  const { tab, loc, edit, error } = await searchParams;
+  const { tab, loc, edit, confirm, error } = await searchParams;
   const view = TABS.some(([k]) => k === tab) ? tab! : 'copy';
   const readOnly = user.role === 'viewer';
 
@@ -51,6 +51,32 @@ export default async function ContentPage({ searchParams }: {
   const editing = edit ? posts.find((p) => p.id === edit) : undefined;
 
   const groups = [...new Set((Object.keys(BLOCKS) as BlockKey[]).map((k) => BLOCKS[k].group))];
+
+  /**
+   * Whether the Delete button on a given row has been asked for twice.
+   *
+   * All three Delete buttons on this page used to be plain submits sitting in
+   * the same form as Save, one row apart from it, and they hard-delete: there
+   * is no `deleted_at` on faqs, testimonials or posts, so nothing goes to the
+   * bin and there is no Restore. A single mis-aimed click destroyed a journal
+   * article — the longest piece of writing anybody produces in this console —
+   * while a lead, which IS recoverable, gets a confirmation dialogue and a
+   * recycle bin from DeleteForm. The codebase already knew how to do this;
+   * this screen had been left behind.
+   *
+   * The confirmation is a round trip rather than DeleteForm's window.confirm()
+   * because this is a server component: an onClick handler cannot be attached
+   * from here, and lifting three forms out into client components to get one
+   * would be a great deal of machinery for a question. A link that comes back
+   * with the row's own Delete replaced by "this is permanent — yes or keep it"
+   * asks the same question, states what is lost instead of assuming the
+   * operator knows, needs no JavaScript, and can be walked away from.
+   *
+   * The cost is that the round trip re-reads the row, so anything typed into
+   * that form and not saved is dropped. On the form you are deleting, that is
+   * the point.
+   */
+  const asked = (id: string) => confirm === id;
 
   return (
     <>
@@ -259,12 +285,22 @@ export default async function ContentPage({ searchParams }: {
                 </div>
               </div>
               {!readOnly && (
-                <div style={{ display: 'flex', gap: 10 }}>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                   <button type="submit" className="adm-btn adm-save-faq">{f ? 'Save' : 'Add'}</button>
-                  {f && (
-                    <button type="submit" name="_delete" value="1" className="adm-btn-sec adm-del-faq">
-                      {t("Delete")}
-                    </button>
+                  {f && !asked(f.id) && (
+                    <Link className="adm-btn adm-btn-sec adm-del-faq"
+                          href={`/admin/content?tab=faq&confirm=${f.id}`}>{t("Delete")}</Link>
+                  )}
+                  {f && asked(f.id) && (
+                    <>
+                      <button type="submit" name="_delete" value="1" className="adm-btn-sec adm-del-faq">
+                        {t("Yes, delete this question")}
+                      </button>
+                      <Link className="adm-chip" href="/admin/content?tab=faq">{t("Keep it")}</Link>
+                      <span className="adm-sub" style={{ margin: 0, fontSize: 12 }}>
+                        {t("There is no bin for content. Once this is gone the only copy is last night's backup.")}
+                      </span>
+                    </>
                   )}
                 </div>
               )}
@@ -335,13 +371,25 @@ export default async function ContentPage({ searchParams }: {
                   </label>
                 </div>
               </div>
+              {/* Same two-step as the questions above, and for the same
+                  reason: this delete is permanent. */}
               {!readOnly && (
-                <div style={{ display: 'flex', gap: 10 }}>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                   <button type="submit" className="adm-btn adm-save-voice">{v ? 'Save' : 'Add'}</button>
-                  {v && (
-                    <button type="submit" name="_delete" value="1" className="adm-btn-sec adm-del-voice">
-                      {t("Delete")}
-                    </button>
+                  {v && !asked(v.id) && (
+                    <Link className="adm-btn adm-btn-sec adm-del-voice"
+                          href={`/admin/content?tab=voices&confirm=${v.id}`}>{t("Delete")}</Link>
+                  )}
+                  {v && asked(v.id) && (
+                    <>
+                      <button type="submit" name="_delete" value="1" className="adm-btn-sec adm-del-voice">
+                        {t("Yes, delete this testimonial")}
+                      </button>
+                      <Link className="adm-chip" href="/admin/content?tab=voices">{t("Keep it")}</Link>
+                      <span className="adm-sub" style={{ margin: 0, fontSize: 12 }}>
+                        {t("There is no bin for content. Once this is gone the only copy is last night's backup.")}
+                      </span>
+                    </>
                   )}
                 </div>
               )}
@@ -446,15 +494,32 @@ export default async function ContentPage({ searchParams }: {
                 </label>
               </div>
             </div>
+            {/* The article is the one this matters most for: it is the
+                longest thing anybody writes here, it is hard-deleted like the
+                rest, and the Delete button sits directly beside Save. */}
             {!readOnly && (
-              <div style={{ display: 'flex', gap: 10 }}>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                 <button type="submit" className="adm-btn adm-save-post">
                   {editing ? 'Save article' : 'Create article'}
                 </button>
-                {editing && (
-                  <button type="submit" name="_delete" value="1" className="adm-btn-sec adm-del-post">
+                {editing && !asked(editing.id) && (
+                  <Link className="adm-btn adm-btn-sec adm-del-post"
+                        href={`/admin/content?tab=journal&edit=${editing.id}&confirm=${editing.id}`}>
                     {t("Delete")}
-                  </button>
+                  </Link>
+                )}
+                {editing && asked(editing.id) && (
+                  <>
+                    <button type="submit" name="_delete" value="1" className="adm-btn-sec adm-del-post">
+                      {t("Yes, delete this article")}
+                    </button>
+                    <Link className="adm-chip" href={`/admin/content?tab=journal&edit=${editing.id}`}>
+                      {t("Keep it")}
+                    </Link>
+                    <span className="adm-sub" style={{ margin: 0, fontSize: 12 }}>
+                      {t("There is no bin for content. Once this is gone the only copy is last night's backup.")}
+                    </span>
+                  </>
                 )}
               </div>
             )}

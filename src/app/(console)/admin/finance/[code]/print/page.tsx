@@ -158,10 +158,20 @@ export default async function PrintInvoice(
             <span>{tr('Prices are exclusive of VAT where applicable.')}</span>
           </div>
         )}
-        {Number(inv.retention) > 0 && (
-          <div><span>{tr('Retention')}</span><b>− {money(inv.retention, cur)}</b></div>
-        )}
         <div className="sh-grand"><span>{tr('Total')}</span><b>{money(inv.total, cur)}</b></div>
+        {/* Stated, not subtracted. This line used to sit above the Total with
+            a minus sign in front of it while the Total ignored it entirely —
+            so the document showed a deduction, and then a figure that did not
+            reflect the deduction, and the customer was left to work out which
+            number to pay. The retention is withheld from THIS invoice's net
+            before VAT and released on its own document later; saying so is
+            what the line is for. */}
+        {Number(inv.retention) > 0 && (
+          <div className="sh-note-line">
+            <span>{tr('Retention of {amount} is withheld from this invoice and released separately.',
+                      { amount: money(inv.retention, cur) })}</span>
+          </div>
+        )}
         {/* What is actually still owed. An invoice reprinted after a part
             payment that still shows the full amount gets paid twice or not at
             all, and both are somebody's afternoon. */}

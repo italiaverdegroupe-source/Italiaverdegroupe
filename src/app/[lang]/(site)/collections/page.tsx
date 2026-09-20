@@ -6,6 +6,7 @@ import { getFamilies, getAllProducts } from '@/lib/products';
 import { site } from '@/lib/site';
 import { ui } from '@/lib/ui';
 import { familyName, familyBlurb, specimenCount } from '@/lib/product-copy';
+import { ldJson } from '@/lib/schema';
 
 export async function generateMetadata(
   { params }: { params: Promise<{ lang: Locale }> },
@@ -132,8 +133,7 @@ export default async function CollectionsPage(
           six unrelated pages that happen to link to each other. */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+        dangerouslySetInnerHTML={ldJson({
             '@context': 'https://schema.org',
             '@type': 'ItemList',
             name: 'Collections',
@@ -144,8 +144,7 @@ export default async function CollectionsPage(
               name: familyName(f.name, lang),
               url: `/collections/${f.slug}`,
             })),
-          }),
-        }}
+        })}
       />
 
       <style>{`

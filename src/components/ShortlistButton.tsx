@@ -2,6 +2,8 @@
 
 import { addToShortlist, removeFromShortlist, type ShortlistItem } from '@/lib/shortlist';
 import { useShortlist } from '@/lib/use-shortlist';
+import { useLocale } from '@/components/LocaleProvider';
+import { ui } from '@/lib/ui';
 
 /**
  * Add or remove one specimen.
@@ -18,6 +20,18 @@ export default function ShortlistButton({
   item: Omit<ShortlistItem, 'qty'>;
   compact?: boolean;
 }) {
+  // This is the most repeated piece of text on the site — sixty-eight cards on
+  // /catalog, and again on every collection, every emirate and the home grid —
+  // and it was written in English straight into the markup, title attribute
+  // included. It read "Add to list" on /ar and /it alike, which is the first
+  // thing anybody's eye lands on in a screenshot of the Arabic catalogue.
+  //
+  // Nothing about it needed inventing: 'cat.addToList' and 'cat.onList' have
+  // been sitting in all three dictionaries the whole time. The component is
+  // already a client component inside LocaleProvider, so it reads the locale
+  // the same way its neighbours ShortlistBar and QuoteForm do.
+  const locale = useLocale();
+  const t = ui(locale);
   const on = useShortlist().some((i) => i.ref === item.ref);
 
   const toggle = (e: React.MouseEvent) => {
@@ -35,34 +49,22 @@ export default function ShortlistButton({
       onClick={toggle}
       className={`sl-btn${compact ? ' sl-btn-compact' : ''}${on ? ' on' : ''}`}
       aria-pressed={on}
-      title={on ? 'Remove from your shortlist' : 'Add to your shortlist'}
+      // The tooltip says more than the label does — which list, and that
+      // pressing again takes the specimen off it — so it is its own sentence
+      // rather than a repeat of the button's two words.
+      title={on ? t('Remove from your shortlist') : t('Add to your shortlist')}
     >
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
            strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         {on ? <path d="M20 6 9 17l-5-5" /> : <path d="M12 5v14M5 12h14" />}
       </svg>
-      <span className="sl-btn-txt">{on ? 'On your list' : 'Add to list'}</span>
+      <span className="sl-btn-txt">{on ? t('cat.onList') : t('cat.addToList')}</span>
 
-      <style>{`
-        .sl-btn {
-          display: inline-flex; align-items: center; gap: 7px;
-          padding: .55em 1em; border-radius: 999px;
-          font: inherit; font-size: .82rem; font-weight: 500; cursor: pointer;
-          background: var(--bg); color: var(--olive-900);
-          border: 1px solid var(--line);
-          transition: border-color .15s ease, background .15s ease, color .15s ease;
-        }
-        .sl-btn:hover { border-color: var(--olive-700); color: var(--olive-700); }
-        .sl-btn.on {
-          background: var(--olive-700); color: #fff; border-color: var(--olive-700);
-        }
-        .sl-btn.on:hover { background: var(--olive-900); border-color: var(--olive-900); color: #fff; }
-        .sl-btn-compact { padding: .42em .8em; font-size: .76rem; }
-        /* 32px on a phone, on the one control that turns a browse into an
-           enquiry. */
-        @media (pointer: coarse) { .sl-btn, .sl-btn-compact { min-height: 44px; } }
-        @media (prefers-reduced-motion: reduce) { .sl-btn { transition: none; } }
-      `}</style>
+      {/* The CSS that used to be here now lives in src/app/globals.css. One
+          of these buttons is rendered per specimen card, so the <style>
+          element went out sixty-eight times on /catalog — 71 KB of identical
+          bytes, and sixty-eight more stylesheet objects for the browser to
+          hold. The rules never varied by item. See the note in globals.css. */}
     </button>
   );
 }

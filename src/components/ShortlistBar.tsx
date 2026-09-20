@@ -62,8 +62,19 @@ export default function ShortlistBar() {
         .slb strong { font-weight: 600; }
         .slb em { font-style: normal; opacity: .72; }
         .slb-go { opacity: .7; }
+        /* min-height, not just the tighter padding. Below 420px the padding
+           came down to 10px and the type to .8rem, which took the bar to
+           41px — measured at 320, 360, 375, 390 and 414 in all three
+           languages, and 41px in every one of them. This site holds itself
+           to a 44px floor for anything a finger has to find, and this bar is
+           the only route to /shortlist a phone has: the drawer carries no
+           link to it. Three pixels short on the one target with no
+           neighbours to fall back on is still three pixels short. */
         @media (max-width: 420px) {
-          .slb { padding: 10px 13px; gap: 8px; font-size: .8rem; inset-inline-start: 10px; bottom: 10px; }
+          .slb {
+            padding: 10px 13px; gap: 8px; font-size: .8rem; min-height: 44px;
+            inset-inline-start: 10px; bottom: 10px;
+          }
           .slb em { display: none; }
         }
         @media (prefers-reduced-motion: reduce) {

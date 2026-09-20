@@ -14,6 +14,24 @@ import Refusal from '@/components/admin/Refusal';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Money, grouped, with the fils kept.
+ *
+ * node-postgres hands a `numeric` column back as the string Postgres printed,
+ * and src/lib/db.ts installs no type parser, so an asking price arrived here
+ * as "185000.00" and this column printed it exactly that way — an unseparated
+ * six-figure number in a right-aligned price column, while the same specimen
+ * read "AED 185,000" on the reports page.
+ *
+ * Two decimals rather than the reports page's none: this sits beside the
+ * editable price field on the specimen itself, which shows the stored value
+ * to the fil, and a price list that silently rounds is worse than one that is
+ * hard to read.
+ */
+const aed = (v: string | number) =>
+  new Intl.NumberFormat('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    .format(Number(v));
+
 async function addSpecimen(formData: FormData) {
   'use server';
   await assertSameOrigin();
@@ -139,8 +157,8 @@ export default async function SpecimensPage({ searchParams }: { searchParams: Pr
                   <td>{s.location_name ?? '—'}</td>
                   <td className="num">{s.height_m ? `${s.height_m} m` : '—'}</td>
                   <td className="num">{s.trunk_girth_cm ? `${s.trunk_girth_cm} cm` : '—'}</td>
-                  <td className="num">{s.asking_price_aed ? `AED ${s.asking_price_aed}` : '—'}</td>
-                  <td className="num">{s.measured_at ? fmtDay(s.measured_at) : '—'}</td>
+                  <td className="num">{s.asking_price_aed ? `AED ${aed(s.asking_price_aed)}` : '—'}</td>
+                  <td className="num">{s.measured_at ? fmtDay(s.measured_at, user.locale) : '—'}</td>
                 </tr>
               ))}
             </tbody>

@@ -99,11 +99,22 @@ check('THE POINT: an untranslated block falls back to the ENGLISH ROW, not the c
       `${ar.title} | ${it.title}`);
 check('a translated block reaches its own language',
       ar.cta === 'استكشف أشجارنا', ar.cta);
+// The floor is PER LANGUAGE now, so "the compiled default" is no longer a
+// single English string. These two used to compare against BLOCKS[k].fallback
+// whatever language was being read — which is exactly the bug that shipped:
+// the Arabic and Italian copy existed in db/seed and nothing loaded it, so
+// every unstored block fell through to English and two thirds of the words on
+// /ar were Latin script. The fallback chain is now compiled translation, then
+// English, then the stored row on top of both.
+const floor = (key, locale) =>
+  C.BLOCK_TRANSLATIONS?.[locale]?.[key] ?? C.BLOCKS[key].fallback;
+
 check('and does not leak into the others',
-      en.cta === C.BLOCKS['home.hero.cta'].fallback
-      && it.cta === C.BLOCKS['home.hero.cta'].fallback, `${en.cta} | ${it.cta}`);
-check('a block stored in no language at all is still the compiled default',
-      ar.lede === C.BLOCKS['home.hero.lede'].fallback);
+      en.cta === floor('home.hero.cta', 'en')
+      && it.cta === floor('home.hero.cta', 'it'), `${en.cta} | ${it.cta}`);
+check('THE POINT: a block stored in no language at all falls back to the compiled copy FOR THAT LANGUAGE',
+      ar.lede === floor('home.hero.lede', 'ar') && ar.lede !== C.BLOCKS['home.hero.lede'].fallback,
+      ar.lede);
 
 // A language can go live before it is finished. That is the whole reason for
 // the fallback, so it is asserted rather than assumed.
