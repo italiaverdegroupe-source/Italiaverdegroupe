@@ -177,6 +177,11 @@ for (const loc of ['it', 'ar']) {
     // A brand name with the number beside it. 'WhatsApp {n}' in Italian is
     // 'WhatsApp {n}'; anything else would be a mistranslation.
     'WhatsApp {n}',
+    // The city on the sign-in screen's clock. Arabic has its own name for it
+    // and uses it; Italian does not — Dubai is Dubai. Leaving it out of this
+    // set would push somebody to invent an Italian spelling of a city that
+    // already has one.
+    'Dubai',
   ]);
   const same = A.ADMIN_KEYS.filter((k) => d[k] && d[k] === k && !SAME_ON_PURPOSE.has(k));
   check(`${loc}: no console string was left sitting in English`,

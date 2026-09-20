@@ -25,11 +25,14 @@
     "@types/pg": "8.11.10",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "d3-geo": "^3.1.1",
     "esbuild": "^0.28.2",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.5",
     "playwright": "^1.63.0",
     "pngjs": "^7.0.0",
-    "typescript": "5.7.3"
+    "topojson-client": "^3.1.0",
+    "typescript": "5.7.3",
+    "world-atlas": "^2.0.2"
   }
 }

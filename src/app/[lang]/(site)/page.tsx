@@ -195,10 +195,15 @@ export default async function HomePage(
 
           <div className="map-panel reveal">
             <RouteMap locale={lang} />
+            {/* The legend names the three routes rather than the two colours
+                it used to, because there are three of them now and a buyer's
+                first question about a tree is which way it travels. */}
             <ul className="legend">
+              <li><i className="sw sw-sea" />{t('map.bySea')}</li>
+              <li><i className="sw sw-air" />{t('map.byAir')}</li>
+              <li><i className="sw sw-land" />{t('map.overland')}</li>
               <li><i className="sw sw-it" />{t("Growing regions")}</li>
               <li><i className="sw sw-ae" />{t("Delivery market")}</li>
-              <li><i className="sw sw-rt" />{t("Sourcing route")}</li>
             </ul>
           </div>
 
@@ -746,7 +751,11 @@ export default async function HomePage(
         .sw { width: 22px; height: 9px; border-radius: 2px; display: inline-block; }
         .sw-it { background: #3C6033; }
         .sw-ae { background: #B8873C; }
-        .sw-rt { background: repeating-linear-gradient(90deg, var(--brass-500) 0 5px, transparent 5px 9px); height: 3px; }
+        /* The three route swatches carry the gradients off the map itself, so
+           the key and the line it explains are the same colour. */
+        .sw-sea  { background: linear-gradient(90deg, #4FA8A4, #6FAF86, #C9A04E); height: 3px; }
+        .sw-air  { background: linear-gradient(90deg, #C9B478, #C9A04E); height: 3px; }
+        .sw-land { background: linear-gradient(90deg, #C77A3E, #C9A04E); height: 3px; }
 
         .journey {
           display: grid; gap: clamp(24px, 3vw, 40px); list-style: none;
