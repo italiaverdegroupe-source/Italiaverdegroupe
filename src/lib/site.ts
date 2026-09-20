@@ -126,6 +126,7 @@ export const site = {
   facebook: '',
   youtube: '',
   tiktok: '',
+  x: '',
 
   projectTypes: [
     'Villa / Private Estate',

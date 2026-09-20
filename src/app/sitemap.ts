@@ -47,7 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
    * re-fetching, on a site whose catalogue genuinely does change.
    *
    * Each kind of page now carries a date somebody can point at:
-   *   · editable pages — when the copy or the settings behind them changed
+   *   · editable pages — when the copy or the page metadata changed
    *   · the catalogue — when products.json changed
    *   · the legal pages — the date printed on them
    *   · an article — the day it was published

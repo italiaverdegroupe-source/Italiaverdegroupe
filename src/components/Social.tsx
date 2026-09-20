@@ -15,7 +15,7 @@ import type { ReactElement } from 'react';
  */
 export type SocialLinks = {
   instagram?: string; linkedin?: string; facebook?: string;
-  youtube?: string; tiktok?: string;
+  youtube?: string; tiktok?: string; x?: string;
 };
 
 const MARKS: { key: keyof SocialLinks; name: string; path: ReactElement }[] = [
@@ -57,6 +57,24 @@ const MARKS: { key: keyof SocialLinks; name: string; path: ReactElement }[] = [
       <>
         <rect x="2.5" y="5.5" width="19" height="13" rx="4" />
         <path d="M10.4 9.6 15 12l-4.6 2.4z" />
+      </>
+    ),
+  },
+  {
+    // Drawn as the letter rather than the old bird. The account is called X,
+    // and a bird in 2026 dates the footer of a company that has just started.
+    //
+    // Named "X (Twitter)" rather than "X" because this string is the
+    // accessible name: a screen reader announcing a link as "X" gives a blind
+    // visitor one letter that is equally the word for close. The old name is
+    // still the one most people recognise, and it costs a sighted reader
+    // nothing — the mark next to it is the letter either way.
+    key: 'x', name: 'X (Twitter)',
+    path: (
+      <>
+        <rect x="3" y="3" width="18" height="18" rx="3" />
+        <path d="M8 8l8 8" />
+        <path d="M16 8l-8 8" />
       </>
     ),
   },

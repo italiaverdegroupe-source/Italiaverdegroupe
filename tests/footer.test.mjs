@@ -131,6 +131,45 @@ if (socials.length === 0) {
   check('and each is big enough to press', size >= 40, String(Math.round(size)));
 }
 
+// ── THE POINT: no public page may freeze the footer at build time ──
+//
+// The footer reads the company's contact details and social accounts out of
+// the settings table. The production image is built inside Docker with no
+// DATABASE_URL, so getSettings() catches the failure and hands back the
+// compiled defaults — in which every social link is an empty string. Any page
+// prerendered once and never re-rendered therefore ships with no social row
+// and keeps it for the life of the deployment.
+//
+// That is what happened: the accounts were saved and visible in the console,
+// absent from the footer on eight pages, and back the moment somebody saved
+// the settings screen again — because saving is what calls revalidatePath.
+//
+// Checked at the source rather than over HTTP, because over HTTP it only
+// shows up after a deploy against a populated database, which is exactly when
+// nobody is looking.
+{
+  const { readdirSync, statSync } = await import('node:fs');
+  const root = 'src/app/[lang]/(site)';
+  const pages = [];
+  (function walk(dir) {
+    for (const name of readdirSync(dir)) {
+      const full = `${dir}/${name}`;
+      if (statSync(full).isDirectory()) walk(full);
+      else if (name === 'page.tsx') pages.push(full);
+    }
+  })(root);
+
+  // The guarantee lives on the layout that renders the Footer, so it covers
+  // every page in the segment — including /shortlist, which is a client
+  // component and cannot carry the setting itself.
+  const layout = readFileSync('src/app/[lang]/layout.tsx', 'utf8');
+  const window = layout.match(/export const revalidate\s*=\s*(\d+)/)?.[1];
+  check('the layout that renders the footer can re-render, so it cannot go stale for good',
+    Boolean(window) && Number(window) > 0 && Number(window) <= 3600,
+    window ? `${window}s` : 'no revalidate on src/app/[lang]/layout.tsx');
+  check('and it covers every public page', pages.length > 0, `${pages.length} pages`);
+}
+
 await browser.close();
 console.log(failed ? `\n${failed} FAILED` : '\nall passed');
 process.exit(failed ? 1 : 0);

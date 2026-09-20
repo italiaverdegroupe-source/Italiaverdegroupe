@@ -424,11 +424,18 @@ export async function metadataFor(
  */
 export async function contentLastModified(): Promise<Date | null> {
   try {
+    // NOT settings. It was in here, and it made every settings save stamp all
+    // fifteen editable pages as modified a moment ago — because the footer is
+    // on all of them, so strictly the HTML did change. Strictly is not the
+    // question a crawler is asking. Changing the company's Instagram URL does
+    // not mean the Privacy Policy is worth re-reading, and a lastmod that
+    // jumps on fifteen pages every time somebody edits a phone number is the
+    // unreliable signal this function was written to stop sending. Copy and
+    // page metadata are what change a page; contact details are chrome.
     const rows = await query<{ at: string | null }>(
       `SELECT GREATEST(
                 (SELECT max(updated_at) FROM content_blocks),
-                (SELECT max(updated_at) FROM page_seo),
-                (SELECT max(updated_at) FROM settings)
+                (SELECT max(updated_at) FROM page_seo)
               )::text AS at`);
     const at = rows[0]?.at;
     return at ? new Date(at) : null;

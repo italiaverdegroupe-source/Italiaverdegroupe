@@ -89,6 +89,31 @@ for (const must of ['/admin', '/api/']) {
 }
 ok('robots.txt keeps crawlers out of the console and the API');
 
+// THE POINT: robots.txt and the sitemap must name the SAME SITE.
+//
+// The suite checked that robots.txt announced a sitemap and that the two did
+// not contradict each other about paths. Neither check looks at the HOST, and
+// that is the whole of how this shipped: robots.txt is the one file Next
+// prerenders and never revalidates, the production image is built inside
+// Docker where NEXT_PUBLIC_SITE_URL was not passed through, so the live
+// robots.txt sent crawlers to https://verdegarden.example/sitemap.xml — the
+// unset-value placeholder — while every page and the sitemap itself correctly
+// said verdegardenae.com. The first thing a crawler reads was the one thing
+// pointing at a domain that does not exist.
+//
+// Compared rather than hard-coded, so this keeps working if the domain ever
+// changes.
+const sitemapHost = new URL(robots.match(/Sitemap:\s*(\S+)/)?.[1] ?? 'https://unset.invalid').host;
+const locHosts = new Set([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).host));
+if (locHosts.size !== 1 || !locHosts.has(sitemapHost)) {
+  fail('robots.txt and the sitemap disagree about which site this is',
+       `robots says ${sitemapHost}, sitemap says ${[...locHosts].join(', ')}`);
+} else ok('robots.txt and the sitemap name the same host', sitemapHost);
+
+if (/\.example\b/.test(robots) || /\.example\b/.test(sitemap)) {
+  fail('an unset-value placeholder domain reached a crawler-facing file');
+} else ok('no placeholder domain in robots.txt or the sitemap');
+
 const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
 const disallowed = locs.filter((p) => p === '/shortlist' || p.startsWith('/admin'));
 if (disallowed.length) fail('sitemap lists a URL robots.txt blocks', disallowed.join(' '));

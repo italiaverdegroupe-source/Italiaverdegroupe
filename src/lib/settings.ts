@@ -64,6 +64,7 @@ export const EDITABLE = {
   facebook:         { label: 'Facebook link', type: 'url' },
   youtube:          { label: 'YouTube link', type: 'url' },
   tiktok:           { label: 'TikTok link', type: 'url' },
+  x:                { label: 'X (Twitter) link', type: 'url' },
   licenceNumber:    { label: 'Trade licence number', type: 'text' },
   // The half of the company's story that structured data cannot infer: it is
   // new here and not new in Italy. Left blank until the owner fills them in —

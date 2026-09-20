@@ -55,6 +55,34 @@ const plexArabic = IBM_Plex_Sans_Arabic({
   variable: '--font-arabic-body',
 });
 
+/**
+ * Every public page can re-render. Set here, once, rather than on each page.
+ *
+ * This layout renders the Header and the Footer, and the Footer reads the
+ * company's contact details and social accounts out of the settings table.
+ * The production image is built inside Docker WITH NO DATABASE, so during
+ * `next build` getSettings() catches the failure and returns the compiled
+ * defaults — in which every social link is an empty string. Any page
+ * prerendered once and never rendered again therefore ships with no social
+ * row and keeps it for the life of the deployment.
+ *
+ * Eleven pages already declared their own 300 and were fine. The eight that
+ * did not — the five legal documents, /collections, /legal and /shortlist —
+ * lost the company's accounts on every deploy and got them back only when
+ * somebody happened to save the settings screen, because saving is what calls
+ * revalidatePath. Reported as "the links are in the console but gone from the
+ * footer; I saved again and they came back".
+ *
+ * On the layout rather than on the pages for two reasons: it cannot be
+ * forgotten when a page is added, and /shortlist is a client component, where
+ * `export const revalidate` is not a segment setting at all — it is read as a
+ * client export and fails the build with "Invalid revalidate value".
+ *
+ * The effective window is the lowest in the segment, so a page that wants to
+ * be fresher can still say so.
+ */
+export const revalidate = 300;
+
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://verdegarden.example';
 
 export const viewport: Viewport = {

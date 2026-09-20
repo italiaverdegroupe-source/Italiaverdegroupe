@@ -65,7 +65,7 @@ export default async function SettingsPage() {
                   'consoleWelcome']],
     ['Contact',  ['phone', 'whatsapp', 'whatsappLabel', 'email']],
     ['Registered office', ['address', 'city', 'country']],
-    ['Social',   ['instagram', 'linkedin', 'facebook', 'youtube', 'tiktok']],
+    ['Social',   ['instagram', 'linkedin', 'facebook', 'youtube', 'tiktok', 'x']],
     ['Commerce', ['currency', 'quoteValidityDays', 'trn', 'vatEnabled', 'vatRate']],
     // The half of the company's story a search engine cannot infer: new in the
     // Emirates, not new in Italy. Added to the dictionary and to site.ts in one

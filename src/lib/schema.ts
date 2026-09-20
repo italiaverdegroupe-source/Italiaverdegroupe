@@ -24,7 +24,7 @@ const abs = (path: string) => `${base()}${path}`;
 
 /** Only the social accounts that have actually been filled in. */
 function sameAs(s: Settings): string[] {
-  return [s.instagram, s.linkedin, s.facebook, s.youtube, s.tiktok]
+  return [s.instagram, s.linkedin, s.facebook, s.youtube, s.tiktok, s.x]
     .map((v) => (v ?? '').trim())
     .filter(Boolean);
 }

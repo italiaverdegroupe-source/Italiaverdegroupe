@@ -729,6 +729,7 @@ export const ADMIN_EN = [
   "Facebook link",
   "YouTube link",
   "TikTok link",
+  "X (Twitter) link",
   "Trade licence number",
   "Founded (year, or yyyy-mm-dd)",
   "Founded in (city, country)",
@@ -2216,6 +2217,8 @@ const it: Partial<Record<AdminKey, string>> = {
     "Link YouTube",
   "TikTok link":
     "Link TikTok",
+  "X (Twitter) link":
+    "Link X (Twitter)",
   "Trade licence number":
     "Numero di licenza commerciale",
   "Founded (year, or yyyy-mm-dd)":
@@ -3776,6 +3779,8 @@ const ar: Partial<Record<AdminKey, string>> = {
     "رابط يوتيوب",
   "TikTok link":
     "رابط تيك توك",
+  "X (Twitter) link":
+    "رابط إكس (تويتر)",
   "Trade licence number":
     "رقم الرخصة التجارية",
   "Founded (year, or yyyy-mm-dd)":

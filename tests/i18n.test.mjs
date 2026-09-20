@@ -81,7 +81,11 @@ for (const loc of ['ar', 'it']) {
   // 'WhatsApp' and 'Privacy' are the same word in Italian, and 'Menu' is the
   // same in Italian too. Translating a brand name would be the bug.
   const SAME_IS_FINE = new Set(['nav.menu', 'legal.privacy', 'lang.label',
-    'legal.whatsapp']);
+    'legal.whatsapp',
+    // Suez is Suez in Italian. The canal has one name in both languages, and
+    // the map label naming it is a place, not a sentence. Arabic has its own
+    // name — السويس — and uses it, which is why only Italian lands here.
+    'map.suez']);
   const untouched = U.UI_KEYS.filter(
     (k) => dicts[loc][k] === enDict[k] && !SAME_IS_FINE.has(k));
   check(`${loc}: nothing was left sitting in English`,

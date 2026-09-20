@@ -9,6 +9,14 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# NEXT_PUBLIC_* is inlined by `next build`, so anything read at build time sees
+# whatever the BUILD environment had — and a Docker build sees nothing the
+# Dockerfile has not declared. Railway passes every service variable as a
+# build argument; without this line Docker discarded them all, and the
+# canonical URLs, the JSON-LD and robots.txt were built against the fallback
+# placeholder rather than the site's own domain.
+ARG NEXT_PUBLIC_SITE_URL
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 RUN npm run build
 
 FROM node:22-alpine AS runner
