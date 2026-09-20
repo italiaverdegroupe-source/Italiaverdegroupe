@@ -13,70 +13,67 @@ The software is finished around each of these. Nothing needs a developer; each
 is a field in the console or a variable on Railway, and each one is wired the
 moment it is filled.
 
-### a. A way to send email — **SMTP cannot work on this Railway plan**
+### a. A way to send email — **done, and proved**
 
-`SMTP_URL` and `MAIL_FROM` are set on the service, and mail still does not
-leave the building. This was not guessed: two messages were put on the real
-queue in production, the server's own drain loop tried to send them, and the
-queue recorded exactly why each one failed.
+Mail works. A message was put on the real queue in production, the server's
+own drain loop sent it, and it arrived in the inbox — not the spam folder —
+on the first attempt:
 
 ```
-connect ENETUNREACH 2607:f8b0:4023:c03::6c:465
-Connection timeout
+status:      sent
+attempts:    1
+status_note: Sent (01a0bc32-1365-7359-95a8-2ecab5a2be74)
 ```
 
-Both are Railway, not this application, and Railway's own account data
-confirms it:
+It goes over **Resend's HTTPS API**, not SMTP, and that was not a preference.
+Railway disables outbound SMTP below the Pro plan, so the Gmail SMTP URL that
+was tried first could not open a socket at all — one attempt died with
+`ENETUNREACH` on IPv6 (outbound IPv6 is off on this service) and the next hung
+until it timed out, because the packet is dropped at the platform's egress
+layer. Resend needs only HTTPS, which nothing blocks.
 
-- **The workspace is on the Hobby plan, and Railway disables outbound SMTP
-  below Pro.** Their documentation is explicit: *"SMTP is only available on
-  the Pro plan and above. Free, Trial, and Hobby plans must use transactional
-  email services with HTTPS APIs."* That is the connect timeout — the packet
-  is dropped at the egress layer, which is why it hangs rather than being
-  refused.
-- **Outbound IPv6 is off** (`ipv6EgressEnabled: false`), so the first attempt,
-  which resolved smtp.gmail.com to an IPv6 address, failed instantly with
-  `ENETUNREACH`. Turning it on would not help: the plan blocks the port on
-  either protocol.
-
-No Gmail app password, no port, and no change to this code can get around a
-block at the platform. There are two ways out.
-
-**Resend — recommended, free, and already supported by this application.**
-Nothing needs to be built: `sendMail()` uses the Resend HTTPS API whenever
-`RESEND_API_KEY` is set, and HTTPS is not blocked on any plan. Railway
-recommends it over SMTP even on Pro.
-
-1. Create an account at [resend.com](https://resend.com) — the free tier is
-   3,000 messages a month, 100 a day, which is far above anything this
-   business will send.
-2. Add `verdegardenae.com` as a domain and paste the DKIM/SPF records it gives
-   you into Cloudflare DNS. This is what lets the company send as itself; mail
-   from a verified domain also lands in inboxes rather than spam folders,
-   which Gmail SMTP would not have done.
-3. On the Railway service set:
+What is set on the Railway service:
 
 | Variable | Value |
 |---|---|
-| `RESEND_API_KEY` | the key Resend gives you |
-| `MAIL_FROM` | `no-reply@verdegardenae.com` — **it must be on the verified domain**; Resend will refuse a gmail.com sender, because nobody here owns gmail.com |
+| `RESEND_API_KEY` | the Resend key |
+| `MAIL_FROM` | an address on `verdegardenae.com` |
+| `MAIL_REPLY_TO` | `italiaverdegroupe@gmail.com`, so a reply reaches a mailbox that exists — the domain itself has no MX and receives nothing |
 
-4. **Delete `SMTP_URL`.** This one matters: `mailProvider()` prefers SMTP
-   whenever it is set, so leaving a dead `SMTP_URL` beside a working
-   `RESEND_API_KEY` keeps everything exactly as broken as it is now.
-5. Redeploy, then **Alerts → send a test message**. The queue records the
-   outcome either way — a provider id when it goes, the provider's own words
-   when it does not.
+`SMTP_URL` is **deleted**, and it must stay deleted: `mailProvider()` prefers
+SMTP whenever it is set, so putting it back would silently disable a working
+Resend key.
 
-**Or upgrade Railway to Pro** (~$20 a month) and the Gmail SMTP URL already
-set will start working after a redeploy. It costs money every month to make
-the weaker of the two options work, so it is only worth it if there is another
-reason to be on Pro.
+**The DNS, verified from outside Cloudflare rather than taken on trust:**
 
-Until one of these is done, enquiries are still captured — they go into the
-database, appear on **Leads**, and raise an alert on the **Alerts** screen —
-but nothing reaches an inbox, so unless somebody opens the console, nobody
-knows.
+```
+MX   send.verdegardenae.com              feedback.forge.rmta.net (10)
+TXT  send.verdegardenae.com              v=spf1 ip4:52.3.252.119 ip4:44.222.39.36
+                                         ip4:199.249.231.0/24 ~all
+TXT  resend._domainkey.verdegardenae.com p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQ… (218 chars)
+```
+
+**Why this domain is one to be careful with.** There is already a DMARC record
+on it, from GoDaddy, set to quarantine:
+
+```
+v=DMARC1; p=quarantine; adkim=r; aspf=r; rua=mailto:dmarc_rua@onsecureserver.net;
+```
+
+`p=quarantine` means anything claiming to be from this domain that fails DMARC
+goes to spam. The two records above are what stop that: the return path is
+`send.verdegardenae.com` and DKIM signs as `verdegardenae.com`, and with
+`aspf=r`/`adkim=r` — relaxed — both align with the parent domain, so DMARC
+passes. That is why a brand-new sending domain landed in an inbox.
+
+Two things follow, and both matter more than they look:
+
+- **Never add a second `_dmarc` record.** Resend may offer one. Two DMARC
+  records on the same name cancel each other out and the domain ends up with
+  no policy at all — worse than either record alone.
+- **Never remove the SPF or DKIM record** while that DMARC policy stands. The
+  day one of them goes, every notification this system sends goes to spam,
+  silently, and the queue will still say `sent`.
 
 ### b. A recipient on the alert rules — **done**
 
@@ -85,7 +82,7 @@ All 16 rules are active and every one now notifies
 **Alerts → the rules**; a rule can go to a person, a role or a different
 address.
 
-They will start arriving the moment (a) is done, and not before.
+They arrive — (a) is done and was tested end to end.
 
 ### c. The trade licence, the TRN and the registered address
 
