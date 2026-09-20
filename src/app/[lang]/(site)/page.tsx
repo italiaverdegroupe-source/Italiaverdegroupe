@@ -766,9 +766,12 @@ export default async function HomePage(
         .journey li { padding-top: 20px; border-top: 1px solid var(--olive-700); }
         .journey h3 { margin: .3rem 0 .35rem; font-size: 1.28rem; }
         .journey p { font-size: .9rem; color: var(--fg-soft); margin: 0; }
+        /* terra-700, not terra-500: at this size the text is "normal" under
+           WCAG, and terra-500 measures 3.72:1 on the page background where AA
+           needs 4.5. terra-700 measures 6.60:1 there, 6.94:1 on white. */
         .j-num {
           font-family: var(--font-display); font-size: .92rem;
-          color: var(--terra-500); letter-spacing: .06em;
+          color: var(--terra-700); letter-spacing: .06em;
         }
 
         /* ── spotlight ── */
@@ -873,7 +876,8 @@ export default async function HomePage(
         }
         .em-list li:last-child a { border-bottom: 1px solid var(--line-soft); }
         .em-list a:hover { color: var(--terra-700); padding-inline: .5rem; }
-        .em-n { font-family: var(--font-display); font-size: .86rem; color: var(--terra-500); }
+        /* terra-700 for the same AA reason as .j-num above. */
+        .em-n { font-family: var(--font-display); font-size: .86rem; color: var(--terra-700); }
         .em-name { font-size: 1.05rem; }
         .em-arrow { opacity: 0; transition: opacity .25s var(--ease), transform .25s var(--ease); transform: translateX(-6px); }
         .em-list a:hover .em-arrow { opacity: 1; transform: none; }

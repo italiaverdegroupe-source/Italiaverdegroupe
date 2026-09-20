@@ -270,7 +270,7 @@ export default async function PrintInvoice(
         .sh-meta  { margin: 0; font-size: 11px; color: #6B6E60; }
         .sh-label {
           margin: 0 0 3px; font-size: 9px; letter-spacing: .14em;
-          text-transform: uppercase; color: #8A8D7D;
+          text-transform: uppercase; color: #6B6E60;
         }
         .sh-strong { margin: 0 0 2px; font-weight: 600; }
         .sh-to { display: flex; gap: 40px; margin-bottom: 22px; }
@@ -279,7 +279,7 @@ export default async function PrintInvoice(
         .sh-t { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
         .sh-t th {
           text-align: left; font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
-          color: #8A8D7D; padding: 7px 8px; border-bottom: 1px solid #2E4420;
+          color: #6B6E60; padding: 7px 8px; border-bottom: 1px solid #2E4420;
         }
         .sh-t td { padding: 9px 8px; border-bottom: 1px solid #E9E4D7; vertical-align: top; }
         .sh-t .r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -300,7 +300,7 @@ export default async function PrintInvoice(
         .sh-foot {
           display: flex; justify-content: space-between;
           margin-top: 20px; padding-top: 10px; border-top: 1px solid #E9E4D7;
-          font-size: 9px; color: #8A8D7D;
+          font-size: 9px; color: #6B6E60;
         }
 
         .sheet[dir='rtl'] .sh-right { text-align: left; }

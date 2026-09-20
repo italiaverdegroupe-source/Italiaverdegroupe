@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useSyncExternalStore } from 'react';
 import {
   LOCALES, LOCALE_NAMES, LOCALE_SHORT, LOCALE_TAG, LOCALE_LABEL, localePath, splitLocale,
 } from '@/lib/i18n';
@@ -20,6 +20,21 @@ import {
  * it is never used to build an href at prerender time, which is the case that
  * would bake /en/ into the markup. See the note in LocaleProvider.
  */
+/**
+ * location.search, as an external store.
+ *
+ * Nothing changes it but a navigation. A push or replace re-renders this
+ * component through usePathname(), and useSyncExternalStore re-reads the
+ * snapshot on every render; popstate covers the back and forward buttons,
+ * which change the URL without React being told.
+ */
+function subscribeToLocation(onChange: () => void) {
+  window.addEventListener('popstate', onChange);
+  return () => window.removeEventListener('popstate', onChange);
+}
+const readQuery = () => window.location.search.replace(/^\?/, '');
+const noQuery = () => '';
+
 export default function LangSwitch({ id = 'lang' }: { id?: string }) {
   const pathname = usePathname();
   const { locale: current, path } = splitLocale(pathname);
@@ -44,14 +59,16 @@ export default function LangSwitch({ id = 'lang' }: { id?: string }) {
    * would work, but the fallback would be a hole where the language control
    * belongs, popping in after hydration on all 285 URLs.
    *
-   * An effect costs one render and nothing else. The first paint carries the
-   * plain path, which is exactly the href this had before and still works with
-   * JavaScript off; once hydrated the query is appended. The menu has to be
-   * opened before anything can be clicked, so in practice the query is always
-   * there by the time it matters.
+   * useSyncExternalStore is the hook for exactly this: a value that lives
+   * outside React, read during render, with a separate server snapshot so
+   * hydration cannot mismatch. The server snapshot is the empty string, so the
+   * first paint carries the plain path — the href this had before, and the one
+   * that still works with JavaScript off; the browser snapshot appends the
+   * query. Doing it with useState + useEffect also works, but it sets state
+   * synchronously inside an effect, which cascades a render and which the
+   * react-hooks lint rule rejects outright.
    */
-  const [qs, setQs] = useState('');
-  useEffect(() => { setQs(window.location.search.replace(/^\?/, '')); }, [pathname]);
+  const qs = useSyncExternalStore(subscribeToLocation, readQuery, noQuery);
   const keep = (href: string) => (qs ? `${href}?${qs}` : href);
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
