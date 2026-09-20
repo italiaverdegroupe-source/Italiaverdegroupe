@@ -108,25 +108,38 @@ without one, because charging VAT without registration is an offence. Until
 then every quotation says "exclusive of VAT where applicable", which is the
 correct thing for an unregistered company to say.
 
-### d. Reinstall the Railway GitHub App — **pushes are not deploying**
+### d. The Railway GitHub App — **done, auto-deploy is back on**
 
-This one is invisible until you look for it, and it is the reason to check it
-first. The Railway service watches
-`italiaverdegroupe-source/Italiaverdegroupe`, branch
-`claude/peaceful-feynman-ealwig`, but the **Railway GitHub App is no longer
-installed on the repository**, so the webhook that starts a build is not being
-delivered. Railway reports auto-deploy as disabled and refuses to enable it:
-*"this repository does not have a Railway GitHub App installation."*
+For a while this was the most dangerous item on the list, because its symptom
+was the absence of a symptom: the Railway GitHub App had been removed from the
+repository, so pushes produced no build, no failure and no queued job. A whole
+day of commits sat on GitHub with an older build serving the site and nothing
+anywhere saying so.
 
-The effect: a whole day of commits sat on GitHub with the live site still
-running an older build, with nothing failing and nothing to notice. It was
-found by comparing the deployed commit against the branch head, which is worth
-doing after any push until this is fixed.
+The app is installed again and auto-deploy is enabled:
 
-Install it at **[github.com/apps/railway](https://github.com/apps/railway)**,
-grant it this repository, then in Railway refresh the repositories and switch
-auto-deploy back on. Until then every release is a manual deploy from the
-Railway dashboard — pick the service, Deployments, and deploy the branch head.
+```
+reason:    NO_INSTALLATION   → gone
+canEnable: true
+enabled:   true
+```
+
+The repository's default branch is `claude/peaceful-feynman-ealwig` — the
+branch this project is developed on — so a push to it is what Railway builds.
+There is no `main` branch here, and that is deliberate rather than an
+oversight.
+
+**The check worth keeping anyway.** After a release, compare the deployed
+commit against the branch head. It takes ten seconds and it is the only thing
+that would have caught the silent failure above:
+
+- Railway → the `web` service → **Deployments**, and look at the commit on the
+  newest one.
+- It should equal `git rev-parse --short HEAD` on the branch.
+
+If they ever differ with no build in flight, the app has been removed again —
+check GitHub → **Settings → Applications → Installed GitHub Apps** and confirm
+**Railway** is still listed.
 
 ### e. Google Search Console
 
